@@ -17,7 +17,9 @@
     { id: 'societies', label: 'Societies', fields: ['title', 'slug', 'category', 'city', 'status'] },
     { id: 'chapters', label: 'Chapters', fields: ['title', 'slug', 'city', 'province', 'status'] },
     { id: 'lectures', label: 'Lectures', fields: ['title', 'slug', 'youtube_url', 'status'] },
-    { id: 'social_posts', label: 'Social posts', fields: ['title', 'slug', 'platform', 'status'] }
+    { id: 'social_posts', label: 'Social posts', fields: ['title', 'slug', 'platform', 'status'] },
+    { id: 'cabinets', label: 'Cabinets', fields: ['title', 'slug', 'parent_kind', 'seat_limit', 'status'] },
+    { id: 'certificates', label: 'Certificates', fields: ['title', 'slug', 'category', 'status'] }
   ];
 
   async function boot() {
@@ -126,9 +128,37 @@
       youtube_id: (form.querySelector('[name="youtube_id"]') || {}).value,
       platform: (form.querySelector('[name="platform"]') || {}).value,
       permalink: (form.querySelector('[name="permalink"]') || {}).value,
+      parent_kind: (form.querySelector('[name="parent_kind"]') || {}).value,
+      seat_limit: (form.querySelector('[name="seat_limit"]') || {}).value,
       status: form.querySelector('[name="status"]').value
     };
     Object.keys(payload).forEach(function (k) { if (payload[k] === undefined || payload[k] === '') delete payload[k]; });
+    if (table === 'cabinets') {
+      var limit = Number(payload.seat_limit || 10);
+      if (!limit || limit < 1) limit = 1;
+      if (limit > 10) limit = 10;
+      payload.seat_limit = limit;
+      var parentKind = payload.parent_kind;
+      var socSlug = (form.querySelector('[name="society_slug"]') || {}).value;
+      var chSlug = (form.querySelector('[name="chapter_slug"]') || {}).value;
+      if (parentKind === 'society' && socSlug) {
+        var s = await sb.from('societies').select('id').eq('slug', socSlug.trim()).maybeSingle();
+        payload.society_id = s.data && s.data.id;
+        delete payload.chapter_id;
+      }
+      if (parentKind === 'chapter' && chSlug) {
+        var c = await sb.from('chapters').select('id').eq('slug', chSlug.trim()).maybeSingle();
+        payload.chapter_id = c.data && c.data.id;
+        delete payload.society_id;
+      }
+    }
+    if (table === 'certificates') {
+      var code = ((form.querySelector('[name="module_code"]') || {}).value || '').trim();
+      if (code) {
+        var m = await sb.from('modules').select('id').eq('code', code).maybeSingle();
+        if (m.data) payload.module_id = m.data.id;
+      }
+    }
     if (table === 'people' && !payload.full_name) return;
     if (table !== 'people' && !payload.title) return;
     var res = await sb.from(table).insert(payload);

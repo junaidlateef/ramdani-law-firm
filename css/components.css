@@ -158,3 +158,14 @@ table.data th, table.data td {
 .lecture-player { margin-bottom: 1.5rem; }
 .video-frame { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 4px; background: #000; }
 .video-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.cabinet-list { margin-top: 1rem; display: grid; gap: 0.85rem; }
+.cabinet-card { border: 1px solid var(--line); border-radius: 4px; padding: 0.85rem; background: var(--paper); }
+.cabinet-card h4 { margin: 0 0 0.35rem; font-size: 1.05rem; }
+.seat-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.6rem; }
+.seat-chip {
+  border: 1px solid var(--line); border-radius: 999px; padding: 0.25rem 0.65rem;
+  font-size: 0.78rem; background: var(--card); color: var(--ink); min-height: 36px;
+}
+button.seat-chip { cursor: pointer; }
+.seat-chip.open { border-color: var(--ok, #2d5a3d); }
+.seat-chip.held, .seat-chip.closed { opacity: 0.7; cursor: default; }

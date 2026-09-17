@@ -74,6 +74,8 @@
       <button type="button" class="btn" data-table="chapters">Chapters</button>
       <button type="button" class="btn" data-table="lectures">Lectures</button>
       <button type="button" class="btn" data-table="social_posts">Social posts</button>
+      <button type="button" class="btn" data-table="cabinets">Cabinets</button>
+      <button type="button" class="btn" data-table="certificates">Certificates</button>
     </aside>
     <section class="admin-main">
       <h1 id="tableTitle">People</h1>
@@ -90,6 +92,17 @@
         </label>
         <label>Court / year / official URL <input name="court" placeholder="Court" /><input name="year" type="number" placeholder="Year" /><input name="official_url" placeholder="https:// official source" /><input name="jurisdiction" placeholder="Pakistan" /></label>
         <label>City / province / YouTube <input name="city" placeholder="City" /><input name="province" placeholder="Province" /><input name="youtube_url" placeholder="https://www.youtube.com/watch?v=" /><input name="youtube_id" placeholder="optional video id" /></label>
+        <label>Cabinet parent / seats
+          <select name="parent_kind">
+            <option value="">parent (cabinets)</option>
+            <option value="society">society</option>
+            <option value="chapter">chapter</option>
+          </select>
+          <input name="society_slug" placeholder="society slug" />
+          <input name="chapter_slug" placeholder="chapter slug" />
+          <input name="seat_limit" type="number" min="1" max="10" placeholder="seats 1–10" />
+        </label>
+        <label>Certificate module code <input name="module_code" placeholder="LLB-101" /></label>
         <label>Social platform / permalink
           <select name="platform">
             <option value="">platform</option>

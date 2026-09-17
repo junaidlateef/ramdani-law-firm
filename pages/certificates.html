@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Chapters — Ramdani Law Firm</title>
-  <meta name="description" content="Chapters — Ramdani Law Firm. Study outlines published by staff. Dera Ghazi Khan, Pakistan." />
+  <title>Certificates — Ramdani Law Firm</title>
+  <meta name="description" content="Certificates — Ramdani Law Firm. Study outlines published by staff. Dera Ghazi Khan, Pakistan." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;600;700&family=Inter:wght@400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet" />
@@ -13,11 +13,11 @@
   <link rel="stylesheet" href="/css/brand.css" />
   <link rel="stylesheet" href="/css/rtl.css" />
   <link rel="icon" type="image/png" href="/assets/ramdani-logo.png" />
-<link rel="canonical" href="https://ramdani-law-firm.vercel.app/pages/chapters.html" />
-<meta property="og:title" content="Chapters — Ramdani Law Firm" />
-<meta property="og:description" content="Chapters — Ramdani Law Firm. Study outlines published by staff. Dera Ghazi Khan, Pakistan." />
+<link rel="canonical" href="https://ramdani-law-firm.vercel.app/pages/certificates.html" />
+<meta property="og:title" content="Certificates — Ramdani Law Firm" />
+<meta property="og:description" content="Certificates — Ramdani Law Firm. Study outlines published by staff. Dera Ghazi Khan, Pakistan." />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://ramdani-law-firm.vercel.app/pages/chapters.html" />
+<meta property="og:url" content="https://ramdani-law-firm.vercel.app/pages/certificates.html" />
 <meta property="og:image" content="https://ramdani-law-firm.vercel.app/assets/ramdani-logo.png" />
 </head>
 <body>
@@ -47,32 +47,12 @@
   </header>
   <main id="main-content">
     <section class="section"><div class="wrap">
-      <h1 data-i18n="chapters_title"></h1>
-      <p class="lead" data-i18n="chapters_lead"></p>
-      <p class="note">Only cities the firm has published appear here. Cabinets under a chapter hold at most 10 published seats. Inquiry is not enrolment. Coordinates and invented coordinators are not shown.</p>
+      <h1 data-i18n="certificates_title"></h1>
+      <p class="lead" data-i18n="certificates_lead"></p>
+      <p class="note">Certificate listings are published by staff and may link to an LLB, LAT, GAT, Pakistan-law, or skills outline. Completing a quiz does not issue a certificate.</p>
+      <div id="filters" class="library-filters"></div>
       <div id="list" class="grid"></div>
     </div></section>
-  
-    <dialog class="inquiry-dialog" id="joinDialog">
-      <form class="form" id="joinForm">
-        <h2 id="joinTitle">Join inquiry</h2>
-        <p class="note" id="joinHint">Staff will reply. This does not create membership.</p>
-        <input type="hidden" name="kind" value="chapter" />
-        <input type="hidden" name="listing_slug" />
-        <input type="hidden" name="cabinet_id" />
-        <input type="hidden" name="seat_no" />
-        <input type="text" name="company_website" class="hidden" tabindex="-1" autocomplete="off" />
-        <label>Full name<input name="full_name" required /></label>
-        <label>Email<input name="email" type="email" required /></label>
-        <label>Message (optional)<textarea name="message" rows="4"></textarea></label>
-        <div class="hero-actions">
-          <button class="btn btn-primary" type="submit">Send inquiry</button>
-          <button class="btn" type="button" id="joinCancel">Cancel</button>
-        </div>
-        <p class="form-status"></p>
-      </form>
-    </dialog>
-
   </main>
   <footer class="site-footer">
     <div class="wrap">
@@ -96,7 +76,7 @@
   <script src="/js/education.js"></script>
   <script>
 document.addEventListener('DOMContentLoaded', function () {
-  if (window.ramdaniEducation) ramdaniEducation.renderChapters();
+  if (window.ramdaniEducation) ramdaniEducation.renderCertificates();
 });
 </script>
 </body>

@@ -49,7 +49,7 @@
     <section class="section"><div class="wrap">
       <h1 data-i18n="societies_title"></h1>
       <p class="lead" data-i18n="societies_lead"></p>
-      <p class="note">Only listings published by staff appear here. Joining is an inquiry, not automatic membership. This is not a university society federation.</p>
+      <p class="note">Only listings published by staff appear here. Cabinets hold at most 10 published seats. Choosing a seat sends an inquiry — it does not enrol you or issue a student card.</p>
       <div id="list" class="grid"></div>
     </div></section>
   
@@ -59,6 +59,8 @@
         <p class="note" id="joinHint">Staff will reply. This does not create membership.</p>
         <input type="hidden" name="kind" value="society" />
         <input type="hidden" name="listing_slug" />
+        <input type="hidden" name="cabinet_id" />
+        <input type="hidden" name="seat_no" />
         <input type="text" name="company_website" class="hidden" tabindex="-1" autocomplete="off" />
         <label>Full name<input name="full_name" required /></label>
         <label>Email<input name="email" type="email" required /></label>

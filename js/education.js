@@ -535,6 +535,19 @@
     } else {
       html += '<p class="empty">No verified case note is linked yet. Unverified citations are not shown.</p>';
     }
+    var certs = [];
+    var certRes = await sb.from('certificates').select('title,slug,summary,category').eq('status', 'published').eq('module_id', m.id);
+    certs = certRes.data || [];
+    html += '<h2>Linked certificates</h2>';
+    if (certs.length) {
+      html += certs.map(function (c) {
+        return '<article class="card"><p class="kicker">' + escape(catLabel(c.category)) + '</p><h3>' + escape(c.title) +
+          '</h3><p>' + escape(c.summary || '') + '</p><p class="note">Study outline only. Completing a quiz does not issue a certificate.</p>' +
+          '<a class="btn" href="/pages/certificates.html">All certificates</a></article>';
+      }).join('');
+    } else {
+      html += '<p class="empty">No certificate listing is linked to this module yet.</p>';
+    }
     document.getElementById('modBody').innerHTML = html;
     if (window.ramdaniSeo) {
       window.ramdaniSeo.setCourseSchema(m);
@@ -636,13 +649,22 @@
       var status = form.querySelector('.form-status');
       var hp = form.querySelector('[name="company_website"]');
       if (hp && hp.value) return;
+      var seatRaw = (form.querySelector('[name="seat_no"]') || {}).value;
+      var cabId = (form.querySelector('[name="cabinet_id"]') || {}).value || null;
       var payload = {
-        kind: kind,
+        kind: (form.querySelector('[name="kind"]') || {}).value || kind,
         listing_slug: (form.querySelector('[name="listing_slug"]') || {}).value || null,
+        cabinet_id: cabId ? cabId : null,
+        seat_no: seatRaw ? Number(seatRaw) : null,
         full_name: form.querySelector('[name="full_name"]').value.trim(),
         email: form.querySelector('[name="email"]').value.trim(),
         message: (form.querySelector('[name="message"]') || {}).value || null
       };
+      if (payload.kind === 'cabinet' && (!payload.cabinet_id || !payload.seat_no || payload.seat_no < 1 || payload.seat_no > 10)) {
+        status.className = 'form-status err';
+        status.textContent = 'Choose an open seat (1–10) before sending an inquiry.';
+        return;
+      }
       if (!payload.full_name || !payload.email) {
         status.className = 'form-status err';
         status.textContent = ramdaniT('form_err');
@@ -660,17 +682,85 @@
     if (cancel) cancel.addEventListener('click', function () { if (dialog && dialog.close) dialog.close(); });
   }
 
-  function openJoin(kind, slug, title) {
+  function openJoin(kind, slug, title, extra) {
+    extra = extra || {};
     var dialog = document.getElementById('joinDialog');
     var form = document.getElementById('joinForm');
     if (!dialog || !form) return;
     form.querySelector('[name="kind"]').value = kind;
     form.querySelector('[name="listing_slug"]').value = slug || '';
+    var cab = form.querySelector('[name="cabinet_id"]');
+    var seat = form.querySelector('[name="seat_no"]');
+    if (cab) cab.value = extra.cabinet_id || '';
+    if (seat) seat.value = extra.seat_no || '';
     var h = document.getElementById('joinTitle');
-    if (h) h.textContent = 'Inquiry — ' + (title || kind);
+    if (h) h.textContent = extra.seat_no ? ('Seat ' + extra.seat_no + ' — ' + (title || kind)) : ('Inquiry — ' + (title || kind));
     var hint = document.getElementById('joinHint');
-    if (hint) hint.textContent = 'Staff will reply. This does not create membership, a chapter, or a lawyer–client relationship.';
+    if (hint) hint.textContent = extra.seat_no
+      ? 'Inquiry for one published seat (1–10). Staff review it. This does not enrol you or issue a student card.'
+      : 'Staff will reply. This does not create membership, a chapter, or a lawyer–client relationship.';
     if (dialog.showModal) dialog.showModal();
+  }
+
+  async function cabinetsFor(kind, parentIds) {
+    if (!parentIds.length || !window.sb) return { byParent: {}, seatsByCab: {} };
+    var q = sb.from('cabinets').select('*').eq('status', 'published');
+    q = kind === 'society' ? q.in('society_id', parentIds) : q.in('chapter_id', parentIds);
+    var cabRes = await q.order('title');
+    var cabs = cabRes.data || [];
+    var ids = cabs.map(function (c) { return c.id; });
+    var seats = [];
+    if (ids.length) {
+      var sRes = await sb.from('cabinet_seats').select('id, cabinet_id, seat_no, label, status, note').in('cabinet_id', ids).order('seat_no');
+      seats = sRes.data || [];
+    }
+    var seatsByCab = {};
+    seats.forEach(function (s) {
+      (seatsByCab[s.cabinet_id] = seatsByCab[s.cabinet_id] || []).push(s);
+    });
+    var byParent = {};
+    cabs.forEach(function (c) {
+      var pid = kind === 'society' ? c.society_id : c.chapter_id;
+      (byParent[pid] = byParent[pid] || []).push(c);
+    });
+    return { byParent: byParent, seatsByCab: seatsByCab };
+  }
+
+  function paintCabinet(c, seatsByCab, parentSlug) {
+    var seats = (seatsByCab[c.id] || []).slice().sort(function (a, b) { return a.seat_no - b.seat_no; });
+    var limit = Math.min(10, Math.max(1, Number(c.seat_limit) || 10));
+    var map = {};
+    seats.forEach(function (s) { if (s.seat_no >= 1 && s.seat_no <= limit) map[s.seat_no] = s; });
+    var open = 0;
+    var chips = '';
+    for (var n = 1; n <= limit; n++) {
+      var s = map[n] || { seat_no: n, status: 'open' };
+      var st = s.status || 'open';
+      if (st === 'open') open += 1;
+      var cls = 'seat-chip ' + st;
+      var label = s.label ? (n + ' · ' + s.label) : String(n);
+      if (st === 'open') {
+        chips += '<button type="button" class="' + cls + '" data-cab="' + escape(c.id) + '" data-seat="' + n + '" data-title="' + escape(c.title) + '" data-parent="' + escape(parentSlug || '') + '">Seat ' + escape(label) + '</button>';
+      } else {
+        chips += '<span class="' + cls + '">Seat ' + escape(label) + ' · ' + escape(st) + '</span>';
+      }
+    }
+    return '<div class="cabinet-card"><h4>' + escape(c.title) + '</h4>' +
+      (c.summary ? '<p>' + escape(c.summary) + '</p>' : '') +
+      '<p class="note">' + open + ' of ' + limit + ' seats listed open for inquiry. Maximum 10 students per cabinet. Inquiry is not enrolment.</p>' +
+      '<div class="seat-row">' + chips + '</div></div>';
+  }
+
+  function bindSeatButtons(root, kind) {
+    if (!root) return;
+    root.querySelectorAll('[data-cab][data-seat]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        openJoin('cabinet', btn.getAttribute('data-parent') || '', btn.getAttribute('data-title'), {
+          cabinet_id: btn.getAttribute('data-cab'),
+          seat_no: Number(btn.getAttribute('data-seat'))
+        });
+      });
+    });
   }
 
   async function renderSocieties() {
@@ -679,16 +769,23 @@
     bindJoinForm('society');
     var rows = await listPublished('societies');
     if (!rows.length) return empty(el, 'societies_empty');
+    var pack = await cabinetsFor('society', rows.map(function (r) { return r.id; }));
     el.innerHTML = rows.map(function (r) {
       var meta = [r.category, r.city].filter(Boolean).join(' · ');
+      var cabs = pack.byParent[r.id] || [];
+      var cabHtml = cabs.length
+        ? '<div class="cabinet-list"><p class="kicker">Cabinets</p>' + cabs.map(function (c) { return paintCabinet(c, pack.seatsByCab, r.slug); }).join('') + '</div>'
+        : '<p class="empty">No cabinet is published under this society yet.</p>';
       return '<article class="card"><p class="kicker">' + escape(meta) + '</p><h3>' + escape(r.title) +
         '</h3><p>' + escape(r.summary || '') + '</p>' +
         (r.body ? '<p class="note">' + escape(r.body).slice(0, 360) + '</p>' : '') +
-        '<button type="button" class="btn" data-join="' + escape(r.slug) + '" data-title="' + escape(r.title) + '">Inquire to join</button></article>';
+        cabHtml +
+        '<button type="button" class="btn" data-join="' + escape(r.slug) + '" data-title="' + escape(r.title) + '">General inquiry</button></article>';
     }).join('');
     el.querySelectorAll('[data-join]').forEach(function (btn) {
       btn.addEventListener('click', function () { openJoin('society', btn.getAttribute('data-join'), btn.getAttribute('data-title')); });
     });
+    bindSeatButtons(el, 'society');
   }
 
   async function renderChapters() {
@@ -697,16 +794,23 @@
     bindJoinForm('chapter');
     var rows = await listPublished('chapters');
     if (!rows.length) return empty(el, 'chapters_empty');
+    var pack = await cabinetsFor('chapter', rows.map(function (r) { return r.id; }));
     el.innerHTML = rows.map(function (r) {
       var meta = [r.city, r.province].filter(Boolean).join(' · ');
+      var cabs = pack.byParent[r.id] || [];
+      var cabHtml = cabs.length
+        ? '<div class="cabinet-list"><p class="kicker">Cabinets</p>' + cabs.map(function (c) { return paintCabinet(c, pack.seatsByCab, r.slug); }).join('') + '</div>'
+        : '<p class="empty">No cabinet is published under this chapter yet.</p>';
       return '<article class="card"><p class="kicker">' + escape(meta) + '</p><h3>' + escape(r.title) +
         '</h3><p>' + escape(r.summary || '') + '</p>' +
         (r.body ? '<p class="note">' + escape(r.body).slice(0, 360) + '</p>' : '') +
-        '<button type="button" class="btn" data-join="' + escape(r.slug) + '" data-title="' + escape(r.title) + '">Inquire to join</button></article>';
+        cabHtml +
+        '<button type="button" class="btn" data-join="' + escape(r.slug) + '" data-title="' + escape(r.title) + '">General inquiry</button></article>';
     }).join('');
     el.querySelectorAll('[data-join]').forEach(function (btn) {
       btn.addEventListener('click', function () { openJoin('chapter', btn.getAttribute('data-join'), btn.getAttribute('data-title')); });
     });
+    bindSeatButtons(el, 'chapter');
   }
 
   async function renderLectures() {
@@ -757,8 +861,39 @@
     renderCase: renderCase,
     renderStatutes: renderStatutes,
     renderHome: renderHome,
+  async function renderCertificates() {
+    var el = document.getElementById('list');
+    var filters = document.getElementById('filters');
+    if (!el) return;
+    var rows = await listPublished('certificates');
+    function paint(shown) {
+      if (!shown.length) return empty(el, 'certificates_empty');
+      el.innerHTML = shown.map(function (r) {
+        var href = r.module_id ? '' : '';
+        return '<article class="card"><p class="kicker">' + escape(catLabel(r.category)) + '</p><h3>' + escape(r.title) +
+          '</h3><p>' + escape(r.summary || '') + '</p>' +
+          (r.body ? '<p class="note">' + escape(r.body).slice(0, 280) + '</p>' : '') +
+          '<p class="note">Linked to a published study outline when staff set a module. Not a university degree and not automatically issued.</p></article>';
+      }).join('');
+    }
+    if (filters) {
+      var cats = ['all', 'llb', 'lat', 'gat', 'pakistan_law', 'skills'];
+      filters.innerHTML = cats.map(function (c) {
+        return '<button type="button" class="btn" data-cat="' + c + '">' + (c === 'all' ? 'All' : catLabel(c)) + '</button>';
+      }).join('');
+      filters.querySelectorAll('[data-cat]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var cat = btn.getAttribute('data-cat');
+          paint(cat === 'all' ? rows : rows.filter(function (r) { return r.category === cat; }));
+        });
+      });
+    }
+    paint(rows);
+  }
+
     renderSocieties: renderSocieties,
     renderChapters: renderChapters,
-    renderLectures: renderLectures
+    renderLectures: renderLectures,
+    renderCertificates: renderCertificates
   };
 })();
