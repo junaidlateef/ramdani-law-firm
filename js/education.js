@@ -169,7 +169,7 @@
           '<span class="opt-tick" aria-hidden="true">✓</span></button>';
       }).join('');
       return '<fieldset class="card mcq" data-id="' + q.id + '"><legend class="mcq-head"><span class="mcq-num">' + (i + 1) + '</span><span class="mcq-q">' + escape(q.prompt) + '</span></legend><div class="mcq-options">' + opts + '</div><div class="mcq-explanation"></div></fieldset>';
-    }).join('') + '<label>Email (optional, for staff follow-up)<input type="email" name="email" /></label><div class="quiz-footer"><p class="form-status" id="quizScore">Not submitted</p><button class="btn btn-primary" type="submit">Submit</button></div>';
+    }).join('') + '<label>Email (optional, for staff follow-up)<input type="email" name="email" /></label><div class="quiz-footer"><p class="form-status" id="quizScore">' + escape(window.ramdaniT ? ramdaniT('quiz_not_submitted') : 'Not submitted') + '</p><button class="btn btn-primary" type="submit">' + escape(window.ramdaniT ? ramdaniT('quiz_submit') : 'Submit') + '</button></div>';
     form.querySelectorAll('.mcq-opt').forEach(function (btn) {
       btn.addEventListener('click', function () {
         if (form.dataset.submitted === '1') return;

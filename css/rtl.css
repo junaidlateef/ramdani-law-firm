@@ -1,0 +1,45 @@
+/* RTL / Urdu — existing layout classes only. No invented marketing chrome. */
+html[dir="rtl"] {
+  font-family: "Noto Nastaliq Urdu", "Noto Naskh Arabic", Inter, sans-serif;
+}
+html[dir="rtl"] body {
+  font-family: "Noto Nastaliq Urdu", "Noto Naskh Arabic", var(--sans);
+}
+html[dir="rtl"] h1,
+html[dir="rtl"] h2,
+html[dir="rtl"] h3,
+html[dir="rtl"] .brand {
+  font-family: "Noto Nastaliq Urdu", "Cormorant Garamond", serif;
+  line-height: 1.55;
+}
+html[dir="rtl"] .nav a,
+html[dir="rtl"] .footer-links a,
+html[dir="rtl"] .footer-grid p,
+html[dir="rtl"] .mcq-head,
+html[dir="rtl"] .mcq-opt,
+html[dir="rtl"] .sem-card,
+html[dir="rtl"] .book-info,
+html[dir="rtl"] .internship-card,
+html[dir="rtl"] table.data th,
+html[dir="rtl"] table.data td {
+  text-align: start;
+}
+html[dir="rtl"] .mcq-opt {
+  direction: rtl;
+}
+html[dir="rtl"] .mcq-explanation {
+  border-inline-start: 3px solid var(--gold, var(--accent));
+}
+html[dir="rtl"] .hero-actions,
+html[dir="rtl"] .header-controls,
+html[dir="rtl"] .internship-foot,
+html[dir="rtl"] .quiz-footer,
+html[dir="rtl"] .library-filters,
+html[dir="rtl"] .footer-bottom {
+  flex-direction: row-reverse;
+}
+html[dir="rtl"] .form label,
+html[dir="rtl"] .note,
+html[dir="rtl"] .lead {
+  text-align: start;
+}

@@ -80,6 +80,18 @@
       form_ok: 'Thank you. Your message has been received.',
       form_err: 'Could not send. Please try again or use another contact method.',
       footer_note: 'Public website only. Private client and case files are not stored on these pages.',
+      cta_practice: 'Practice areas',
+      cta_curriculum: 'Browse curriculum',
+      home_curriculum_kicker: 'LLB curriculum',
+      home_curriculum_title: 'Semester outlines',
+      home_curriculum_lead: 'Published study maps only. Counts come from the live catalogue — not marketing estimates. Case notes stay hidden until staff verify a citation.',
+      search_placeholder: 'Search title or author',
+      library_filter_all: 'All listings',
+      library_filter_free: 'Free listings',
+      library_filter_paid: 'Paid — inquiry only',
+      quiz_submit: 'Submit',
+      quiz_not_submitted: 'Not submitted',
+      intern_apply_note: 'No login is required. Do not attach privileged client files. A CV link must be HTTPS.',
       lang_en: 'EN',
       lang_ur: '\u0627\u0631\u062f\u0648'
     },
@@ -164,6 +176,18 @@
       form_ok: '\u0634\u06a9\u0631\u06cc\u06c1\u06d4 \u0622\u067e \u06a9\u0627 \u067e\u06cc\u063a\u0627\u0645 \u0645\u0648\u0635\u0648\u0644 \u06c1\u0648 \u06af\u06cc\u0627\u06d4',
       form_err: '\u0628\u06be\u06cc\u062c\u0627 \u0646\u06c1\u06cc\u06ba \u062c\u0627 \u0633\u06a9\u0627\u06d4 \u062f\u0648\u0628\u0627\u0631\u06c1 \u06a9\u0648\u0634\u0634 \u06a9\u0631\u06cc\u06ba\u06d4',
       footer_note: '\u0635\u0631\u0641 \u0639\u0648\u0627\u0645\u06cc \u0648\u06cc\u0628 \u0633\u0627\u0626\u0679\u06d4',
+      cta_practice: '\u0639\u0645\u0644\u06cc \u0634\u0639\u0628\u06d2',
+      cta_curriculum: '\u0646\u0635\u0627\u0628 \u062f\u06cc\u06a9\u06be\u06cc\u06ba',
+      home_curriculum_kicker: 'LLB \u0646\u0635\u0627\u0628',
+      home_curriculum_title: '\u0633\u0645\u0633\u0679\u0631 \u0627\u0626\u0648\u0679\u0644\u0627\u0626\u0646\u0632',
+      home_curriculum_lead: '\u0635\u0631\u0641 \u0634\u0627\u0626\u0639 \u0634\u062f\u06c1 \u0645\u0637\u0627\u0644\u0639\u06c1 \u0646\u0642\u0634\u06d2\u06d4 \u0634\u0645\u0627\u0631\u06d2 \u0632\u0646\u062f\u06c1 \u06a9\u06cc\u0679\u0627\u0644\u0627\u06af \u0633\u06d2 \u0622\u062a\u06d2 \u06c1\u06cc\u06ba \u2014 \u0645\u0627\u0631\u06a9\u06cc\u0679\u0646\u06af \u0627\u0646\u062f\u0627\u0632\u06d2 \u0646\u06c1\u06cc\u06ba\u06d4 \u06a9\u06cc\u0633 \u0646\u0648\u0679\u0633 \u062a\u0628 \u062a\u06a9 \u0686\u06be\u067e\u06d2 \u0631\u06c1\u062a\u06d2 \u06c1\u06cc\u06ba \u062c\u0628 \u062a\u06a9 \u0639\u0645\u0644\u06c1 \u062d\u0648\u0627\u0644\u06c1 \u062a\u0635\u062f\u06cc\u0642 \u0646\u06c1 \u06a9\u0631\u06d2\u06d4',
+      search_placeholder: '\u0639\u0646\u0648\u0627\u0646 \u06cc\u0627 \u0645\u0635\u0646\u0641 \u062f\u06be\u0648\u0646\u0688\u06cc\u06ba',
+      library_filter_all: '\u062a\u0645\u0627\u0645 \u0641\u06c1\u0631\u0633\u062a\u06cc\u06ba',
+      library_filter_free: '\u0645\u0641\u062a \u0641\u06c1\u0631\u0633\u062a\u06cc\u06ba',
+      library_filter_paid: '\u0645\u0639\u0627\u0648\u0636 \u2014 \u0635\u0631\u0641 \u062f\u0631\u062e\u0648\u0627\u0633\u062a',
+      quiz_submit: '\u062c\u0645\u0639 \u06a9\u0631\u06cc\u06ba',
+      quiz_not_submitted: '\u062c\u0645\u0639 \u0646\u06c1\u06cc\u06ba \u06c1\u0648\u0627',
+      intern_apply_note: '\u0644\u0627\u06af \u0627\u0646 \u0636\u0631\u0648\u0631\u06cc \u0646\u06c1\u06cc\u06ba\u06d4 \u0645\u062d\u0641\u0648\u0638 \u06a9\u0644\u0627\u0626\u0646\u0679 \u0641\u0627\u0626\u0644\u06cc\u06ba \u0645\u062a\u0639\u0644\u0642 \u0646\u06c1 \u06a9\u0631\u06cc\u06ba\u06d4 CV \u0644\u0646\u06a9 HTTPS \u06c1\u0648\u0646\u0627 \u0686\u0627\u06c1\u06cc\u06d2\u06d4',
       lang_en: 'EN',
       lang_ur: '\u0627\u0631\u062f\u0648'
     }
@@ -185,6 +209,10 @@
     document.querySelectorAll('[data-i18n]').forEach(function (el) {
       var key = el.getAttribute('data-i18n');
       if (t[key]) el.textContent = t[key];
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+      var key = el.getAttribute('data-i18n-placeholder');
+      if (t[key]) el.setAttribute('placeholder', t[key]);
     });
     try { localStorage.setItem('ramdani_lang', lang); } catch (e) {}
     document.querySelectorAll('[data-lang-btn]').forEach(function (btn) {

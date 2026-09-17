@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="/css/style.css" />
   <link rel="stylesheet" href="/css/components.css" />
   <link rel="stylesheet" href="/css/brand.css" />
+  <link rel="stylesheet" href="/css/rtl.css" />
   <link rel="icon" type="image/png" href="/assets/ramdani-logo.png" />
 <link rel="canonical" href="https://ramdani-law-firm.vercel.app/pages/library.html" />
 <meta property="og:title" content="Library — Ramdani Law Firm" />
@@ -51,12 +52,12 @@
       <p class="note">Staff-published listings only. Copyrighted books are not hosted as PDFs. Paid titles are inquiry-only — this website does not process JazzCash, EasyPaisa, Stripe, or card payments.</p>
       <div class="library-filters" id="libraryFilters">
         <label class="sr-only" for="librarySearch">Search titles</label>
-        <input type="search" id="librarySearch" placeholder="Search title or author" />
+        <input type="search" id="librarySearch" data-i18n-placeholder="search_placeholder" placeholder="Search title or author" />
         <label class="sr-only" for="libraryAccess">Access</label>
         <select id="libraryAccess">
-          <option value="">All listings</option>
-          <option value="free">Free listings</option>
-          <option value="paid">Paid — inquiry only</option>
+          <option value="" data-i18n="library_filter_all">All listings</option>
+          <option value="free" data-i18n="library_filter_free">Free listings</option>
+          <option value="paid" data-i18n="library_filter_paid">Paid — inquiry only</option>
         </select>
       </div>
       <div id="list" class="library-grid"></div>

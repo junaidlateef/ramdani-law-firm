@@ -5,6 +5,12 @@
     seoTag.src = '/js/seo.js';
     document.head.appendChild(seoTag);
   }
+  if (!document.querySelector('link[href="/css/rtl.css"]')) {
+    var rtl = document.createElement('link');
+    rtl.rel = 'stylesheet';
+    rtl.href = '/css/rtl.css';
+    document.head.appendChild(rtl);
+  }
   var site = window.ramdaniSite;
   var escape = function (value) { var el = document.createElement('span'); el.textContent = value; return el.innerHTML; };
   var path = location.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/';
