@@ -142,3 +142,16 @@ table.data th, table.data td {
 .pagination button.active { background: var(--navy); color: #fff; border-color: var(--navy); }
 .inquiry-dialog { border: 1px solid var(--line); border-radius: 6px; padding: 0; max-width: 28rem; width: calc(100% - 2rem); }
 .inquiry-dialog .form { margin: 0; max-width: none; }
+
+.internship-list { display: grid; gap: 1rem; }
+.internship-card {
+  background: var(--card); border: 1px solid var(--line); border-radius: 4px; padding: 1.25rem;
+}
+.internship-head { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
+.internship-meta { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.45rem; }
+.internship-meta span {
+  border: 1px solid var(--line); border-radius: 999px; padding: 0.15rem 0.55rem;
+  font-size: 0.75rem; color: var(--muted);
+}
+.internship-foot { display: flex; justify-content: space-between; gap: 1rem; align-items: center; flex-wrap: wrap; margin-top: 0.85rem; }
+#internListing { margin-bottom: 1.25rem; }

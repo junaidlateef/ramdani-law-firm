@@ -22,16 +22,36 @@
     return res.data || [];
   }
 
+  function formatDate(value) {
+    if (!value) return '';
+    var d = new Date(value);
+    if (isNaN(d.getTime())) return String(value);
+    return d.toLocaleDateString('en-PK', { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  function modeLabel(mode) {
+    return ({ onsite: 'On-site', remote: 'Remote', hybrid: 'Hybrid' }[mode] || mode || '');
+  }
+
   async function renderInternships() {
     var el = document.getElementById('list');
     var rows = await listPublished('internships');
     if (!el) return;
     if (!rows.length) return empty(el, 'internships_empty');
     el.innerHTML = rows.map(function (r) {
-      var meta = [r.location, r.mode, r.duration].filter(Boolean).join(' · ');
-      return '<article class="card"><h3>' + escape(r.title) + '</h3><p>' + escape(r.summary || '') +
-        '</p><p class="note">' + escape(meta) + '</p><a class="btn btn-primary" href="/pages/internship-apply.html?slug=' +
-        encodeURIComponent(r.slug) + '">Apply</a></article>';
+      var chips = [modeLabel(r.mode), r.location, r.duration].filter(Boolean).map(function (c) {
+        return '<span>' + escape(c) + '</span>';
+      }).join('');
+      var deadline = r.deadline ? ('Deadline: ' + formatDate(r.deadline)) : 'Deadline: rolling, if published';
+      var stipend = r.stipend_note || 'Stipend: not stated';
+      var body = r.body ? '<p>' + escape(r.body).slice(0, 420) + '</p>' : '';
+      return '<article class="internship-card">' +
+        '<div class="internship-head"><div><h3>' + escape(r.title) + '</h3>' +
+        '<div class="internship-meta">' + chips + '</div></div></div>' +
+        '<p>' + escape(r.summary || '') + '</p>' + body +
+        '<div class="internship-foot"><p class="note">' + escape(stipend) + ' · ' + escape(deadline) +
+        '</p><a class="btn btn-primary" href="/pages/internship-apply.html?slug=' +
+        encodeURIComponent(r.slug) + '">Apply</a></div></article>';
     }).join('');
   }
 
@@ -41,6 +61,18 @@
     var slug = qs('slug');
     var slugInput = form.querySelector('[name="internship_slug"]');
     if (slugInput && slug) slugInput.value = slug;
+    var listing = document.getElementById('internListing');
+    if (slug && window.sb) {
+      var found = await sb.from('internships').select('title, summary, location, mode, duration, stipend_note, deadline, status').eq('slug', slug).eq('status', 'published').maybeSingle();
+      if (found.data && listing) {
+        listing.hidden = false;
+        listing.innerHTML = '<h2>' + escape(found.data.title) + '</h2><p>' + escape(found.data.summary || '') +
+          '</p><p class="note">' + escape([found.data.location, modeLabel(found.data.mode), found.data.duration, found.data.stipend_note, found.data.deadline ? ('Deadline ' + formatDate(found.data.deadline)) : ''].filter(Boolean).join(' · ')) + '</p>';
+      } else if (listing && slug) {
+        listing.hidden = false;
+        listing.innerHTML = '<p class="empty">This listing is not published. You can still send a general training inquiry below.</p>';
+      }
+    }
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
       var status = form.querySelector('.form-status');
@@ -51,14 +83,27 @@
         var found = await sb.from('internships').select('id').eq('slug', slug).eq('status', 'published').maybeSingle();
         internId = found.data && found.data.id;
       }
+      var educationBits = [
+        (form.querySelector('[name="university"]') || {}).value,
+        (form.querySelector('[name="degree"]') || {}).value,
+        (form.querySelector('[name="semester"]') || {}).value,
+        (form.querySelector('[name="education"]') || {}).value
+      ].filter(function (v) { return v && String(v).trim(); }).map(function (v) { return String(v).trim(); });
+      var cv = ((form.querySelector('[name="cv_url"]') || {}).value || '').trim();
+      if (cv) {
+        try {
+          var u = new URL(cv);
+          if (u.protocol !== 'https:') cv = '';
+        } catch (_) { cv = ''; }
+      }
       var payload = {
         internship_id: internId,
         full_name: form.querySelector('[name="full_name"]').value.trim(),
         email: form.querySelector('[name="email"]').value.trim(),
         phone: (form.querySelector('[name="phone"]') || {}).value || null,
-        education: (form.querySelector('[name="education"]') || {}).value || null,
+        education: educationBits.length ? educationBits.join(' · ') : null,
         cover_letter: form.querySelector('[name="cover_letter"]').value.trim(),
-        cv_url: (form.querySelector('[name="cv_url"]') || {}).value || null
+        cv_url: cv || null
       };
       if (!payload.full_name || !payload.email || !payload.cover_letter) {
         status.className = 'form-status err';

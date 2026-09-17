@@ -12,11 +12,11 @@
   <link rel="stylesheet" href="/css/components.css" />
   <link rel="stylesheet" href="/css/brand.css" />
   <link rel="icon" type="image/png" href="/assets/ramdani-logo.png" />
-<link rel="canonical" href="https://ramdani-law-firm.vercel.app/pages/internship-apply" />
+<link rel="canonical" href="https://ramdani-law-firm.vercel.app/pages/internship-apply.html" />
 <meta property="og:title" content="Internship application — Ramdani Law Firm" />
 <meta property="og:description" content="Internship application — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan." />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://ramdani-law-firm.vercel.app/pages/internship-apply" />
+<meta property="og:url" content="https://ramdani-law-firm.vercel.app/pages/internship-apply.html" />
 <meta property="og:image" content="https://ramdani-law-firm.vercel.app/assets/ramdani-logo.png" />
 </head>
 <body>
@@ -48,21 +48,19 @@
     <section class="section"><div class="wrap">
       <h1 data-i18n="intern_apply_title"></h1>
       <p class="note" data-i18n="consult_note"></p>
+      <p class="note">No login is required. Do not attach privileged client files. A CV link must be HTTPS. Staff will reply using the email you give.</p>
+      <div id="internListing" class="card" hidden></div>
       <form class="form" id="internApplyForm">
         <input type="text" name="company_website" class="hidden" tabindex="-1" autocomplete="off" />
         <label><span data-i18n="form_name"></span><input name="full_name" required /></label>
         <label><span data-i18n="form_email"></span><input name="email" type="email" required /></label>
         <label><span data-i18n="form_phone"></span><input name="phone" /></label>
-        <label><span data-i18n="form_subject"></span><input name="subject" /></label>
-        <label><span data-i18n="form_preferred"></span>
-          <select name="preferred_contact">
-            <option value="email">Email</option>
-            <option value="phone">Phone</option>
-          </select>
-        </label>
-        <label>Education / current studies <textarea name="education" rows="3"></textarea></label>
+        <label>University / college <input name="university" /></label>
+        <label>Degree <input name="degree" placeholder="LLB or current programme" /></label>
+        <label>Semester / year <input name="semester" /></label>
+        <label>Education notes <textarea name="education" rows="3"></textarea></label>
         <label>Cover letter <textarea name="cover_letter" rows="6" required></textarea></label>
-        <label>CV / portfolio URL <input name="cv_url" type="url" placeholder="https://" /></label>
+        <label>CV / portfolio URL (https only) <input name="cv_url" type="url" placeholder="https://" /></label>
         <input type="hidden" name="internship_slug" />
         <button class="btn btn-primary" type="submit" data-i18n="form_send"></button>
         <p class="form-status"></p>
@@ -81,6 +79,7 @@
   <script src="/js/config.js"></script>
   <script src="/js/supabase-client.js"></script>
   <script src="/js/site-config.js"></script>
+  <script src="/js/seo.js"></script>
   <script src="/js/brand.js"></script>
   <script src="/js/i18n.js"></script>
   <script src="/js/api.js"></script>

@@ -84,6 +84,16 @@
           </select>
         </label>
         <label>Court / year / official URL <input name="court" placeholder="Court" /><input name="year" type="number" placeholder="Year" /><input name="official_url" placeholder="https:// official source" /><input name="jurisdiction" placeholder="Pakistan" /></label>
+        <label>Internship location / duration / stipend <input name="location" placeholder="Location" /><input name="duration" placeholder="Duration" /><input name="stipend_note" placeholder="Stipend note" /></label>
+        <label>Mode / deadline
+          <select name="mode">
+            <option value="">Mode (internships)</option>
+            <option value="onsite">onsite</option>
+            <option value="remote">remote</option>
+            <option value="hybrid">hybrid</option>
+          </select>
+          <input name="deadline" type="date" />
+        </label>
         <label>Summary / short bio <textarea name="summary" rows="3"></textarea><textarea name="short_bio" rows="3" placeholder="Short bio (people)"></textarea></label>
         <label>Status
           <select name="status">
@@ -108,12 +118,21 @@
           <tbody id="inqBody"></tbody>
         </table>
       </div>
+      <h2>Internship applications</h2>
+      <p class="note">Public apply form submissions. Status changes are staff-only and are not shown on the public site.</p>
+      <div class="table-wrap">
+        <table class="data">
+          <thead><tr><th>Listing</th><th>Name</th><th>Email</th><th>Education</th><th>Status</th></tr></thead>
+          <tbody id="internAppBody"></tbody>
+        </table>
+      </div>
     </section>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/js/config.js"></script>
   <script src="/js/supabase-client.js"></script>
   <script src="/js/site-config.js"></script>
+  <script src="/js/seo.js"></script>
   <script src="/js/brand.js"></script>
   <script src="/js/i18n.js"></script>
   <script src="/js/api.js"></script>

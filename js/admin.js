@@ -27,6 +27,7 @@
       document.getElementById('staffName').textContent = profile.full_name || profile.role;
       await loadTable('people');
       await loadInquiries();
+      await loadInternshipApps();
     } catch (e) {
       login.classList.remove('hidden');
       app.classList.add('hidden');
@@ -108,6 +109,11 @@
       summary: (form.querySelector('[name="summary"]') || {}).value,
       short_bio: (form.querySelector('[name="short_bio"]') || {}).value,
       role_title: (form.querySelector('[name="role_title"]') || {}).value,
+      location: (form.querySelector('[name="location"]') || {}).value,
+      mode: (form.querySelector('[name="mode"]') || {}).value,
+      duration: (form.querySelector('[name="duration"]') || {}).value,
+      stipend_note: (form.querySelector('[name="stipend_note"]') || {}).value,
+      deadline: (form.querySelector('[name="deadline"]') || {}).value,
       status: form.querySelector('[name="status"]').value
     };
     Object.keys(payload).forEach(function (k) { if (payload[k] === undefined || payload[k] === '') delete payload[k]; });
@@ -125,6 +131,27 @@
     document.getElementById('inqBody').innerHTML = rows.map(function (r) {
       return '<tr><td>' + ramdaniUi.escape(r.kind) + '</td><td>' + ramdaniUi.escape(r.full_name) + '</td><td>' + ramdaniUi.escape(r.email) + '</td><td>' + ramdaniUi.escape(r.subject) + '</td><td>' + ramdaniUi.escape(r.status) + '</td></tr>';
     }).join('') || '<tr><td colspan="5">No inquiries.</td></tr>';
+  }
+
+  async function loadInternshipApps() {
+    var body = document.getElementById('internAppBody');
+    if (!body) return;
+    var res = await sb.from('internship_applications').select('id, full_name, email, phone, education, status, created_at, internships(title)').order('created_at', { ascending: false }).limit(50);
+    var rows = res.data || [];
+    body.innerHTML = rows.map(function (r) {
+      var listing = r.internships && r.internships.title ? r.internships.title : 'General';
+      return '<tr><td>' + ramdaniUi.escape(listing) + '</td><td>' + ramdaniUi.escape(r.full_name) +
+        '</td><td>' + ramdaniUi.escape(r.email) + '</td><td>' + ramdaniUi.escape(r.education) +
+        '</td><td><select data-app="' + ramdaniUi.escape(r.id) + '">' +
+        ['new','reviewed','shortlisted','closed'].map(function (s) {
+          return '<option value="' + s + '"' + (r.status === s ? ' selected' : '') + '>' + s + '</option>';
+        }).join('') + '</select></td></tr>';
+    }).join('') || '<tr><td colspan="5">No applications.</td></tr>';
+    body.querySelectorAll('[data-app]').forEach(function (sel) {
+      sel.addEventListener('change', async function () {
+        await sb.from('internship_applications').update({ status: sel.value }).eq('id', sel.getAttribute('data-app'));
+      });
+    });
   }
 
   document.addEventListener('DOMContentLoaded', boot);
