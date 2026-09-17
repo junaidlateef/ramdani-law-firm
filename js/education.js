@@ -96,6 +96,17 @@
     }
     document.getElementById('quizTitle').textContent = quiz.title;
     document.getElementById('quizSummary').textContent = quiz.summary || '';
+    if (window.ramdaniSeo) {
+      var qTitle = quiz.title + ' — Ramdani Law Firm';
+      window.ramdaniSeo.setTitle(qTitle);
+      window.ramdaniSeo.setDescription((quiz.summary || 'Optional staff-published practice quiz. Not an official LAT/GAT paper.').slice(0, 160));
+      window.ramdaniSeo.setCanonical(window.ramdaniSeo.origin + '/pages/quiz.html?slug=' + encodeURIComponent(quiz.slug));
+      window.ramdaniSeo.setBreadcrumb([
+        { name: 'Home', url: window.ramdaniSeo.origin + '/' },
+        { name: 'LAT / GAT', url: window.ramdaniSeo.origin + '/pages/quizzes.html' },
+        { name: quiz.title, url: window.ramdaniSeo.origin + '/pages/quiz.html?slug=' + encodeURIComponent(quiz.slug) }
+      ]);
+    }
     var qRes = await sb.from('quiz_questions_public').select('id, prompt, choices, sort_order').eq('quiz_id', quiz.id).order('sort_order');
     var questions = qRes.data || [];
     if (!questions.length) {
@@ -242,6 +253,7 @@
     el.innerHTML = items.map(function (it) {
       return '<details class="card"><summary><strong>' + escape(it[0]) + '</strong></summary><p>' + escape(it[1]) + '</p></details>';
     }).join('');
+    if (window.ramdaniSeo) window.ramdaniSeo.setFAQSchema(items);
   }
 
   function catLabel(c) {
@@ -344,6 +356,14 @@
       html += '<p class="empty">No verified case note is linked yet. Unverified citations are not shown.</p>';
     }
     document.getElementById('modBody').innerHTML = html;
+    if (window.ramdaniSeo) {
+      window.ramdaniSeo.setCourseSchema(m);
+      window.ramdaniSeo.setBreadcrumb([
+        { name: 'Home', url: window.ramdaniSeo.origin + '/' },
+        { name: 'Study modules', url: window.ramdaniSeo.origin + '/pages/modules.html' },
+        { name: m.title, url: window.ramdaniSeo.origin + '/pages/module.html?slug=' + encodeURIComponent(m.slug) }
+      ]);
+    }
   }
 
   async function renderCases() {
@@ -381,6 +401,16 @@
       if (!b[1]) return '';
       return '<h2>' + escape(b[0]) + '</h2><p>' + escape(b[1]) + '</p>';
     }).join('') + (c.source_url ? '<p><a href="' + escape(c.source_url) + '" rel="noopener noreferrer">Source</a></p>' : '');
+    if (window.ramdaniSeo) {
+      window.ramdaniSeo.setTitle(c.title + ' — Ramdani Law Firm');
+      window.ramdaniSeo.setDescription((c.citation || c.facts || 'Verified case note.').toString().slice(0, 160));
+      window.ramdaniSeo.setCanonical(window.ramdaniSeo.origin + '/pages/case.html?slug=' + encodeURIComponent(c.slug));
+      window.ramdaniSeo.setBreadcrumb([
+        { name: 'Home', url: window.ramdaniSeo.origin + '/' },
+        { name: 'Case notes', url: window.ramdaniSeo.origin + '/pages/cases.html' },
+        { name: c.title, url: window.ramdaniSeo.origin + '/pages/case.html?slug=' + encodeURIComponent(c.slug) }
+      ]);
+    }
   }
 
   async function renderStatutes() {

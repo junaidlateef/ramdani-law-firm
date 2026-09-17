@@ -1,5 +1,10 @@
 (function () {
   'use strict';
+  if (!window.ramdaniSeo) {
+    var seoTag = document.createElement('script');
+    seoTag.src = '/js/seo.js';
+    document.head.appendChild(seoTag);
+  }
   var site = window.ramdaniSite;
   var escape = function (value) { var el = document.createElement('span'); el.textContent = value; return el.innerHTML; };
   var path = location.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/';
