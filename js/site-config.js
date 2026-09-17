@@ -8,6 +8,8 @@ window.ramdaniSite = Object.freeze({
     ['/pages/services.html', 'nav_services', 'Legal Services'], ['/pages/matters.html', 'nav_matters', 'Representative Matters'],
     ['/pages/insights.html', 'nav_insights', 'Insights'], ['/pages/news.html', 'nav_news', 'News'],
     ['/pages/resources.html', 'nav_resources', 'Resources'], ['/pages/careers.html', 'nav_careers', 'Careers'],
+    ['/pages/internships.html', 'nav_internships', 'Internships'], ['/pages/quizzes.html', 'nav_quizzes', 'LAT / GAT'],
+    ['/pages/library.html', 'nav_library', 'Library'], ['/pages/faq.html', 'nav_faq', 'FAQ'],
     ['/pages/contact.html', 'nav_contact', 'Contact']
   ]
 });

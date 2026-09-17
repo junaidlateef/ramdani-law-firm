@@ -5,4 +5,4 @@ Disallow: /docs/
 Disallow: /config/
 Disallow: /tests/
 
-# Sitemap: add https://ramdani-law-firm.vercel.app/sitemap.xml when a sitemap exists.
+Sitemap: https://ramdani-law-firm.vercel.app/sitemap.xml
