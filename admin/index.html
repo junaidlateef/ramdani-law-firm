@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Staff — Ramdani Law Firm</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;600;700&family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+</head>
+<body>
+  <div id="loginPanel" class="auth-box">
+    <h1>Staff sign in</h1>
+    <p class="note">CMS access is granted only after an administrator sets your profile role to editor or admin. OAuth secrets stay in the Supabase dashboard, not in this site.</p>
+    <form id="passwordForm" class="form">
+      <label>Email <input id="email" type="email" required /></label>
+      <label>Password <input id="password" type="password" required minlength="8" /></label>
+      <button class="btn btn-primary" type="submit">Sign in</button>
+    </form>
+    <div class="auth-actions">
+      <button type="button" class="btn" data-oauth="google">Continue with Google</button>
+      <button type="button" class="btn" data-oauth="facebook">Continue with Facebook</button>
+      <button type="button" class="btn" data-oauth="github">Continue with GitHub</button>
+    </div>
+    <form id="signupForm" class="form" style="margin-top:1.5rem">
+      <h2>Create staff account</h2>
+      <label>Full name <input id="suName" required /></label>
+      <label>Email <input id="suEmail" type="email" required /></label>
+      <label>Password <input id="suPassword" type="password" required minlength="8" /></label>
+      <button class="btn" type="submit">Sign up</button>
+    </form>
+    <form id="forgotForm" class="form" style="margin-top:1.5rem">
+      <h2>Reset password</h2>
+      <label>Email <input id="forgotEmail" type="email" required /></label>
+      <button class="btn" type="submit">Send reset link</button>
+    </form>
+    <p id="authError" class="form-status err"></p>
+    <p><a href="/">Back to public site</a></p>
+  </div>
+
+  <div id="adminApp" class="admin-shell hidden">
+    <aside class="admin-nav">
+      <p id="staffName"></p>
+      <button type="button" class="btn" id="signOutBtn">Sign out</button>
+      <hr />
+      <button type="button" class="btn" data-table="people">People</button>
+      <button type="button" class="btn" data-table="practice_areas">Practice areas</button>
+      <button type="button" class="btn" data-table="services">Services</button>
+      <button type="button" class="btn" data-table="matters">Matters</button>
+      <button type="button" class="btn" data-table="articles">Insights</button>
+      <button type="button" class="btn" data-table="news">News</button>
+      <button type="button" class="btn" data-table="resources">Resources</button>
+      <button type="button" class="btn" data-table="careers">Careers</button>
+    </aside>
+    <section class="admin-main">
+      <h1 id="tableTitle">People</h1>
+      <form id="createForm" class="form" data-table="people">
+        <label>Title / name <input name="title" /><input name="full_name" placeholder="Full name (people)" /></label>
+        <label>Slug <input name="slug" required /></label>
+        <label>Role title <input name="role_title" /></label>
+        <label>Summary / short bio <textarea name="summary" rows="3"></textarea><textarea name="short_bio" rows="3" placeholder="Short bio (people)"></textarea></label>
+        <label>Status
+          <select name="status">
+            <option value="draft">draft</option>
+            <option value="published">published</option>
+            <option value="archived">archived</option>
+          </select>
+        </label>
+        <button class="btn btn-primary" type="submit">Save</button>
+        <p id="saveNote" class="form-status"></p>
+      </form>
+      <div class="table-wrap">
+        <table class="data">
+          <thead id="dataHead"></thead>
+          <tbody id="dataBody"></tbody>
+        </table>
+      </div>
+      <h2>Inquiries</h2>
+      <div class="table-wrap">
+        <table class="data">
+          <thead><tr><th>Kind</th><th>Name</th><th>Email</th><th>Subject</th><th>Status</th></tr></thead>
+          <tbody id="inqBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/config.js"></script>
+  <script src="/js/supabase-client.js"></script>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/components.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+(function () {
+  var TABLES = [
+    { id: 'people', label: 'People', fields: ['full_name', 'slug', 'role_title', 'short_bio', 'status'] },
+    { id: 'practice_areas', label: 'Practice areas', fields: ['title', 'slug', 'summary', 'status'] },
+    { id: 'services', label: 'Services', fields: ['title', 'slug', 'summary', 'status'] },
+    { id: 'matters', label: 'Matters', fields: ['title', 'slug', 'summary', 'status'] },
+    { id: 'articles', label: 'Insights', fields: ['title', 'slug', 'summary', 'status'] },
+    { id: 'news', label: 'News', fields: ['title', 'slug', 'summary', 'status'] },
+    { id: 'resources', label: 'Resources', fields: ['title', 'slug', 'summary', 'status'] },
+    { id: 'careers', label: 'Careers', fields: ['title', 'slug', 'summary', 'status'] }
+  ];
+
+  async function boot() {
+    var login = document.getElementById('loginPanel');
+    var app = document.getElementById('adminApp');
+    var err = document.getElementById('authError');
+    try {
+      var profile = await ramdaniAuth.requireStaff();
+      login.classList.add('hidden');
+      app.classList.remove('hidden');
+      document.getElementById('staffName').textContent = profile.full_name || profile.role;
+      await loadTable('people');
+      await loadInquiries();
+    } catch (e) {
+      login.classList.remove('hidden');
+      app.classList.add('hidden');
+    }
+
+    document.getElementById('passwordForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      err.textContent = '';
+      var email = document.getElementById('email').value.trim();
+      var password = document.getElementById('password').value;
+      var res = await ramdaniAuth.signInPassword(email, password);
+      if (res.error) { err.textContent = res.error.message; return; }
+      location.reload();
+    });
+
+    document.getElementById('signupForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      err.textContent = '';
+      var email = document.getElementById('suEmail').value.trim();
+      var password = document.getElementById('suPassword').value;
+      var name = document.getElementById('suName').value.trim();
+      var res = await ramdaniAuth.signUpPassword(email, password, name);
+      if (res.error) { err.textContent = res.error.message; return; }
+      err.textContent = 'Account created. An administrator must set your role to editor or admin before CMS access is granted.';
+    });
+
+    document.getElementById('forgotForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var email = document.getElementById('forgotEmail').value.trim();
+      var res = await ramdaniAuth.resetPassword(email);
+      err.textContent = res.error ? res.error.message : 'If the email exists, a reset link was sent.';
+    });
+
+    document.querySelectorAll('[data-oauth]').forEach(function (btn) {
+      btn.addEventListener('click', function () { ramdaniAuth.social(btn.getAttribute('data-oauth')); });
+    });
+
+    var out = document.getElementById('signOutBtn');
+    if (out) out.addEventListener('click', async function () { await ramdaniAuth.signOut(); location.reload(); });
+
+    document.querySelectorAll('[data-table]').forEach(function (btn) {
+      btn.addEventListener('click', function () { loadTable(btn.getAttribute('data-table')); });
+    });
+
+    document.getElementById('createForm').addEventListener('submit', saveRow);
+  }
+
+  async function loadTable(name) {
+    var meta = TABLES.find(function (t) { return t.id === name; });
+    if (!meta) return;
+    document.getElementById('tableTitle').textContent = meta.label;
+    document.getElementById('createForm').dataset.table = name;
+    var res = await sb.from(name).select('*').order('updated_at', { ascending: false });
+    var rows = res.data || [];
+    var head = '<tr>' + meta.fields.map(function (f) { return '<th>' + ramdaniUi.escape(f) + '</th>'; }).join('') + '<th></th></tr>';
+    var body = rows.map(function (row) {
+      return '<tr>' + meta.fields.map(function (f) {
+        return '<td>' + ramdaniUi.escape(row[f]) + '</td>';
+      }).join('') + '<td><button type="button" data-del="' + ramdaniUi.escape(row.id) + '">Delete</button></td></tr>';
+    }).join('');
+    document.getElementById('dataHead').innerHTML = head;
+    document.getElementById('dataBody').innerHTML = body || '<tr><td colspan="8">No rows yet.</td></tr>';
+    document.querySelectorAll('[data-del]').forEach(function (btn) {
+      btn.addEventListener('click', async function () {
+        await sb.from(name).delete().eq('id', btn.getAttribute('data-del'));
+        loadTable(name);
+      });
+    });
+  }
+
+  async function saveRow(e) {
+    e.preventDefault();
+    var form = e.target;
+    var table = form.dataset.table;
+    var payload = {
+      title: (form.querySelector('[name="title"]') || {}).value,
+      full_name: (form.querySelector('[name="full_name"]') || {}).value,
+      slug: form.querySelector('[name="slug"]').value.trim(),
+      summary: (form.querySelector('[name="summary"]') || {}).value,
+      short_bio: (form.querySelector('[name="short_bio"]') || {}).value,
+      role_title: (form.querySelector('[name="role_title"]') || {}).value,
+      status: form.querySelector('[name="status"]').value
+    };
+    Object.keys(payload).forEach(function (k) { if (payload[k] === undefined || payload[k] === '') delete payload[k]; });
+    if (table === 'people' && !payload.full_name) return;
+    if (table !== 'people' && !payload.title) return;
+    var res = await sb.from(table).insert(payload);
+    var note = document.getElementById('saveNote');
+    note.textContent = res.error ? res.error.message : 'Saved.';
+    if (!res.error) { form.reset(); loadTable(table); }
+  }
+
+  async function loadInquiries() {
+    var res = await sb.from('inquiries').select('id, kind, full_name, email, subject, status, created_at').order('created_at', { ascending: false }).limit(50);
+    var rows = res.data || [];
+    document.getElementById('inqBody').innerHTML = rows.map(function (r) {
+      return '<tr><td>' + ramdaniUi.escape(r.kind) + '</td><td>' + ramdaniUi.escape(r.full_name) + '</td><td>' + ramdaniUi.escape(r.email) + '</td><td>' + ramdaniUi.escape(r.subject) + '</td><td>' + ramdaniUi.escape(r.status) + '</td></tr>';
+    }).join('') || '<tr><td colspan="5">No inquiries.</td></tr>';
+  }
+
+  document.addEventListener('DOMContentLoaded', boot);
+})();
