@@ -11,7 +11,7 @@ window.ramdaniUi = {
     return '<article class="card"><h3>' + link + '</h3><p>' + summary + '</p></article>';
   },
   empty: function (key) {
-    return '<p class="empty">' + this.escape(window.ramdaniT ? ramdaniT(key) : 'Nothing published yet.') + '</p>';
+    return '<p class="empty" data-i18n="' + this.escape(key) + '">' + this.escape(window.ramdaniT ? ramdaniT(key) : 'Nothing published yet.') + '</p>';
   },
   renderList: function (el, rows, emptyKey, hrefFn) {
     if (!el) return;

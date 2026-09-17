@@ -1,19 +1,6 @@
 (function () {
   window.ramdaniNav = function (current) {
-    var items = [
-      ['/', 'nav_home'],
-      ['/pages/about.html', 'nav_about'],
-      ['/pages/people.html', 'nav_people'],
-      ['/pages/practice-areas.html', 'nav_practice'],
-      ['/pages/services.html', 'nav_services'],
-      ['/pages/matters.html', 'nav_matters'],
-      ['/pages/insights.html', 'nav_insights'],
-      ['/pages/news.html', 'nav_news'],
-      ['/pages/resources.html', 'nav_resources'],
-      ['/pages/careers.html', 'nav_careers'],
-      ['/pages/contact.html', 'nav_contact'],
-      ['/pages/consultation.html', 'nav_consult']
-    ];
+    var items = window.ramdaniSite.navigation.concat([['/pages/consultation.html', 'nav_consult']]);
     return items.map(function (it) {
       var cur = it[0] === current ? ' aria-current="page"' : '';
       return '<a href="' + it[0] + '"' + cur + ' data-i18n="' + it[1] + '"></a>';
