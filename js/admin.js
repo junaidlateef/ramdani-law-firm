@@ -10,7 +10,10 @@
     { id: 'careers', label: 'Careers', fields: ['title', 'slug', 'summary', 'status'] },
     { id: 'internships', label: 'Internships', fields: ['title', 'slug', 'summary', 'status'] },
     { id: 'quizzes', label: 'Quizzes', fields: ['title', 'slug', 'summary', 'status'] },
-    { id: 'books', label: 'Library', fields: ['title', 'slug', 'summary', 'status'] }
+    { id: 'books', label: 'Library', fields: ['title', 'slug', 'summary', 'status'] },
+    { id: 'modules', label: 'Modules', fields: ['title', 'slug', 'code', 'category', 'status'] },
+    { id: 'cases', label: 'Case notes', fields: ['title', 'slug', 'citation', 'citation_status', 'status'] },
+    { id: 'statutes', label: 'Statutes', fields: ['title', 'slug', 'year', 'status'] }
   ];
 
   async function boot() {

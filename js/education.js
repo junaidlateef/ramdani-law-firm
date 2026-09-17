@@ -155,8 +155,164 @@
       ['How do internships work?', 'Published listings appear on the Internships page. Applications go to staff for review. There is no automatic selection.'],
       ['Are books sold on this site?', 'Free titles may be listed with a link. Paid titles are inquiry-only. Card checkout is not enabled.']
     ];
+    items.push(['Are study modules a complete LLB course?', 'No. They are a public study map. Staff add topics, quizzes, and verified case notes over time.']);
+    items.push(['Are case citations guaranteed accurate?', 'Only notes marked verified by staff are public. Unverified citations are hidden.']);
+    items.push(['Do you host copyrighted law books as PDFs?', 'No. Library and statute pages list titles and official links. Paid or copyrighted books are inquiry-only.']);
     el.innerHTML = items.map(function (it) {
       return '<details class="card"><summary><strong>' + escape(it[0]) + '</strong></summary><p>' + escape(it[1]) + '</p></details>';
+    }).join('');
+  }
+
+  function catLabel(c) {
+    return ({ llb: 'LLB', lat: 'LAT', gat: 'GAT', pakistan_law: 'Pakistan law', skills: 'Skills' }[c] || c || '');
+  }
+
+  async function renderModules() {
+    var el = document.getElementById('list');
+    var filters = document.getElementById('filters');
+    var rows = await listPublished('modules');
+    if (filters) {
+      var cats = ['all', 'llb', 'lat', 'gat', 'pakistan_law', 'skills'];
+      filters.innerHTML = cats.map(function (c) {
+        return '<button type="button" class="btn" data-cat="' + c + '">' + (c === 'all' ? 'All' : catLabel(c)) + '</button>';
+      }).join('');
+      filters.querySelectorAll('[data-cat]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var cat = btn.getAttribute('data-cat');
+          var shown = cat === 'all' ? rows : rows.filter(function (r) { return r.category === cat; });
+          paintModules(el, shown);
+        });
+      });
+    }
+    paintModules(el, rows);
+  }
+
+  function paintModules(el, rows) {
+    if (!el) return;
+    if (!rows.length) return empty(el, 'modules_empty');
+    el.innerHTML = rows.map(function (r) {
+      var meta = [r.code, catLabel(r.category), r.semester ? ('Semester ' + r.semester) : ''].filter(Boolean).join(' · ');
+      return '<article class="card"><p class="kicker">' + escape(meta) + '</p><h3>' + escape(r.title) +
+        '</h3><p>' + escape(r.summary || '') + '</p><a class="btn btn-primary" href="/pages/module.html?slug=' +
+        encodeURIComponent(r.slug) + '">Open outline</a></article>';
+    }).join('');
+  }
+
+  function listItems(val) {
+    if (Array.isArray(val)) return val;
+    if (typeof val === 'string' && val.trim()) {
+      try { var p = JSON.parse(val); if (Array.isArray(p)) return p; } catch (e) {}
+    }
+    return [];
+  }
+
+  async function renderModule() {
+    var slug = qs('slug');
+    if (!slug || !window.sb) return;
+    var res = await sb.from('modules').select('*').eq('slug', slug).eq('status', 'published').maybeSingle();
+    var m = res.data;
+    if (!m) {
+      document.getElementById('modTitle').textContent = 'Module not available';
+      return;
+    }
+    document.getElementById('modTitle').textContent = m.title;
+    document.getElementById('modSummary').textContent = m.summary || '';
+    var outcomes = listItems(m.learning_outcomes);
+    var topics = listItems(m.topics);
+    var readings = listItems(m.readings);
+    var quizzes = [];
+    var cases = [];
+    var qRes = await sb.from('quizzes').select('title,slug,summary,category').eq('status', 'published').eq('module_id', m.id);
+    quizzes = qRes.data || [];
+    var cRes = await sb.from('cases').select('title,slug,citation,court,year').eq('status', 'published').eq('citation_status', 'verified').eq('module_id', m.id);
+    cases = cRes.data || [];
+    var html = '';
+    html += '<p class="note">' + escape([m.code, catLabel(m.category), m.semester ? ('Semester ' + m.semester) : '', m.credit_hours ? (m.credit_hours + ' credit hours') : ''].filter(Boolean).join(' · ')) + '</p>';
+    if (m.description) html += '<p>' + escape(m.description) + '</p>';
+    if (outcomes.length) {
+      html += '<h2>Learning outcomes</h2><ul>' + outcomes.map(function (o) { return '<li>' + escape(typeof o === 'string' ? o : (o.text || JSON.stringify(o))) + '</li>'; }).join('') + '</ul>';
+    }
+    if (topics.length) {
+      html += '<h2>Topics</h2><ol>' + topics.map(function (o) { return '<li>' + escape(typeof o === 'string' ? o : (o.title || JSON.stringify(o))) + '</li>'; }).join('') + '</ol>';
+    } else {
+      html += '<p class="empty">Topic list will appear when staff publish it.</p>';
+    }
+    if (readings.length) {
+      html += '<h2>Recommended readings</h2><ul>' + readings.map(function (o) {
+        var label = typeof o === 'string' ? o : (o.title || o.name || '');
+        var extra = typeof o === 'object' && o && o.author ? (' — ' + o.author) : '';
+        return '<li>' + escape(label + extra) + '</li>';
+      }).join('') + '</ul>';
+    }
+    html += '<h2>Practice quizzes</h2>';
+    if (quizzes.length) {
+      html += quizzes.map(function (q) {
+        return '<article class="card"><h3>' + escape(q.title) + '</h3><p>' + escape(q.summary || '') +
+          '</p><a class="btn" href="/pages/quiz.html?slug=' + encodeURIComponent(q.slug) + '">Start</a></article>';
+      }).join('');
+    } else {
+      html += '<p class="empty">No practice quiz is linked to this module yet.</p>';
+    }
+    html += '<h2>Verified case notes</h2>';
+    if (cases.length) {
+      html += cases.map(function (c) {
+        return '<article class="card"><h3>' + escape(c.title) + '</h3><p class="note">' + escape([c.citation, c.court, c.year].filter(Boolean).join(' · ')) +
+          '</p><a class="btn" href="/pages/case.html?slug=' + encodeURIComponent(c.slug) + '">Read note</a></article>';
+      }).join('');
+    } else {
+      html += '<p class="empty">No verified case note is linked yet. Unverified citations are not shown.</p>';
+    }
+    document.getElementById('modBody').innerHTML = html;
+  }
+
+  async function renderCases() {
+    var el = document.getElementById('list');
+    if (!window.sb) return empty(el, 'cases_empty');
+    var res = await sb.from('cases').select('title,slug,citation,court,year').eq('status', 'published').eq('citation_status', 'verified').order('year', { ascending: false });
+    var rows = res.data || [];
+    if (!rows.length) return empty(el, 'cases_empty');
+    el.innerHTML = rows.map(function (r) {
+      return '<article class="card"><p class="kicker">' + escape([r.citation, r.court, r.year].filter(Boolean).join(' · ')) +
+        '</p><h3>' + escape(r.title) + '</h3><a class="btn btn-primary" href="/pages/case.html?slug=' +
+        encodeURIComponent(r.slug) + '">Read note</a></article>';
+    }).join('');
+  }
+
+  async function renderCase() {
+    var slug = qs('slug');
+    var el = document.getElementById('caseBody');
+    if (!el || !slug || !window.sb) return;
+    var res = await sb.from('cases').select('*').eq('slug', slug).eq('status', 'published').eq('citation_status', 'verified').maybeSingle();
+    var c = res.data;
+    if (!c) { el.innerHTML = '<p class="empty">This case note is not available.</p>'; return; }
+    var bits = [
+      ['Citation', c.citation],
+      ['Court', c.court],
+      ['Year', c.year],
+      ['Bench', c.bench],
+      ['Facts', c.facts],
+      ['Issues', c.issues],
+      ['Decision', c.decision],
+      ['Ratio decidendi', c.ratio],
+      ['Relevance', c.relevance]
+    ];
+    el.innerHTML = '<h1>' + escape(c.title) + '</h1>' + bits.map(function (b) {
+      if (!b[1]) return '';
+      return '<h2>' + escape(b[0]) + '</h2><p>' + escape(b[1]) + '</p>';
+    }).join('') + (c.source_url ? '<p><a href="' + escape(c.source_url) + '" rel="noopener noreferrer">Source</a></p>' : '');
+  }
+
+  async function renderStatutes() {
+    var el = document.getElementById('list');
+    var rows = await listPublished('statutes');
+    if (!el) return;
+    if (!rows.length) return empty(el, 'statutes_empty');
+    el.innerHTML = rows.map(function (r) {
+      var action = r.official_url
+        ? '<a class="btn btn-primary" href="' + escape(r.official_url) + '" rel="noopener noreferrer">Official source</a>'
+        : '<p class="note">Ask staff to add an official source link. Full unofficial PDFs are not hosted here.</p>';
+      return '<article class="card"><p class="kicker">' + escape([r.jurisdiction, r.year].filter(Boolean).join(' · ')) +
+        '</p><h3>' + escape(r.title) + '</h3><p>' + escape(r.summary || '') + '</p>' + action + '</article>';
     }).join('');
   }
 
@@ -166,6 +322,11 @@
     renderQuizzes: renderQuizzes,
     renderQuiz: renderQuiz,
     renderLibrary: renderLibrary,
-    renderFaq: renderFaq
+    renderFaq: renderFaq,
+    renderModules: renderModules,
+    renderModule: renderModule,
+    renderCases: renderCases,
+    renderCase: renderCase,
+    renderStatutes: renderStatutes
   };
 })();

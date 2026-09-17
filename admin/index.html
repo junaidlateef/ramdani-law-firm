@@ -66,6 +66,9 @@
       <button type="button" class="btn" data-table="internships">Internships</button>
       <button type="button" class="btn" data-table="quizzes">Quizzes</button>
       <button type="button" class="btn" data-table="books">Library</button>
+      <button type="button" class="btn" data-table="modules">Modules</button>
+      <button type="button" class="btn" data-table="cases">Case notes</button>
+      <button type="button" class="btn" data-table="statutes">Statutes</button>
     </aside>
     <section class="admin-main">
       <h1 id="tableTitle">People</h1>
@@ -73,6 +76,14 @@
         <label>Title / name <input name="title" /><input name="full_name" placeholder="Full name (people)" /></label>
         <label>Slug <input name="slug" required /></label>
         <label>Role title <input name="role_title" /></label>
+        <label>Code / category <input name="code" placeholder="LLB-101" /><input name="category" placeholder="llb | lat | gat | pakistan_law | skills" /></label>
+        <label>Citation (cases) <input name="citation" placeholder="Only publish if verified" />
+          <select name="citation_status">
+            <option value="unverified">unverified — stays hidden</option>
+            <option value="verified">verified — may be public</option>
+          </select>
+        </label>
+        <label>Court / year / official URL <input name="court" placeholder="Court" /><input name="year" type="number" placeholder="Year" /><input name="official_url" placeholder="https:// official source" /><input name="jurisdiction" placeholder="Pakistan" /></label>
         <label>Summary / short bio <textarea name="summary" rows="3"></textarea><textarea name="short_bio" rows="3" placeholder="Short bio (people)"></textarea></label>
         <label>Status
           <select name="status">
