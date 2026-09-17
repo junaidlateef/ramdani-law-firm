@@ -5,4 +5,4 @@ Disallow: /docs/
 Disallow: /config/
 Disallow: /tests/
 
-# Add Sitemap: https://YOUR-DOMAIN/sitemap.xml after the production domain exists.
+# Sitemap: add https://ramdani-law-firm.vercel.app/sitemap.xml when a sitemap exists.

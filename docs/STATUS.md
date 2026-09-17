@@ -1,7 +1,8 @@
 # STATUS — Ramdani Law Firm
 
 Last verified: 2026-09-17  
-Repo: `junaidlateef/ramdani-law-firm` (`main` @ `5b3fdd97`)  
+Repo: `junaidlateef/ramdani-law-firm` (`main` @ `14f8816c`)  
+Production: https://ramdani-law-firm.vercel.app/ (HTTP 200, Vercel SUCCESS)  
 Database: Supabase project `ramdani-law-firm` (`glyynqeksiqrssrvshba`) only  
 Not used: `shaoorplatform`, Supabase `aerbvhslbdstmmrbvwvo`
 
@@ -22,12 +23,12 @@ This is the **public website + staff CMS**. A private client/case system is **ou
 | RLS: published-only public reads; anon cannot write people; anon cannot read inquiries/profiles; anon can insert inquiries | Done (API-tested) |
 | Docs: PROJECT, ARCHITECTURE, DATABASE, SECURITY, DEPLOYMENT, TESTING | Done |
 | Isolation from other products | Done |
+| Vercel production | Done — https://ramdani-law-firm.vercel.app/ |
 
 ## Not done (blocked on you)
 
 | Item | Why |
 |---|---|
-| Vercel production URL | Vercel is not a connected app here. Connect **this** repo only. |
 | First admin user | Sign up at `/admin/`, then promote in SQL on `glyynqeksiqrssrvshba` |
 | OAuth secrets / provider enablement | Dashboard of the Ramdani project, not frontend |
 | Domain, professional email, office address | Not provided |
