@@ -9,7 +9,8 @@ window.ramdaniSite = Object.freeze({
     ['/pages/insights.html', 'nav_insights', 'Insights'], ['/pages/news.html', 'nav_news', 'News'],
     ['/pages/resources.html', 'nav_resources', 'Resources'], ['/pages/careers.html', 'nav_careers', 'Careers'],
     ['/pages/internships.html', 'nav_internships', 'Internships'], ['/pages/quizzes.html', 'nav_quizzes', 'LAT / GAT'],
-    ['/pages/library.html', 'nav_library', 'Library'], ['/pages/faq.html', 'nav_faq', 'FAQ'],
+    ['/pages/modules.html', 'nav_modules', 'Study modules'], ['/pages/cases.html', 'nav_cases', 'Case notes'],
+    ['/pages/statutes.html', 'nav_statutes', 'Pakistan laws'], ['/pages/library.html', 'nav_library', 'Library'], ['/pages/faq.html', 'nav_faq', 'FAQ'],
     ['/pages/contact.html', 'nav_contact', 'Contact']
   ]
 });
