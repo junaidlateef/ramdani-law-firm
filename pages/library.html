@@ -12,11 +12,11 @@
   <link rel="stylesheet" href="/css/components.css" />
   <link rel="stylesheet" href="/css/brand.css" />
   <link rel="icon" type="image/png" href="/assets/ramdani-logo.png" />
-<link rel="canonical" href="https://ramdani-law-firm.vercel.app/pages/library" />
+<link rel="canonical" href="https://ramdani-law-firm.vercel.app/pages/library.html" />
 <meta property="og:title" content="Library — Ramdani Law Firm" />
 <meta property="og:description" content="Library — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan." />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://ramdani-law-firm.vercel.app/pages/library" />
+<meta property="og:url" content="https://ramdani-law-firm.vercel.app/pages/library.html" />
 <meta property="og:image" content="https://ramdani-law-firm.vercel.app/assets/ramdani-logo.png" />
 </head>
 <body>
@@ -48,9 +48,36 @@
     <section class="section"><div class="wrap">
       <h1 data-i18n="library_title"></h1>
       <p class="lead" data-i18n="library_lead"></p>
-      <p class="note">Paid titles are listed for inquiry only. No checkout or card payments are processed on this website.</p>
-      <div id="list" class="grid"></div>
+      <p class="note">Staff-published listings only. Copyrighted books are not hosted as PDFs. Paid titles are inquiry-only — this website does not process JazzCash, EasyPaisa, Stripe, or card payments.</p>
+      <div class="library-filters" id="libraryFilters">
+        <label class="sr-only" for="librarySearch">Search titles</label>
+        <input type="search" id="librarySearch" placeholder="Search title or author" />
+        <label class="sr-only" for="libraryAccess">Access</label>
+        <select id="libraryAccess">
+          <option value="">All listings</option>
+          <option value="free">Free listings</option>
+          <option value="paid">Paid — inquiry only</option>
+        </select>
+      </div>
+      <div id="list" class="library-grid"></div>
+      <div class="pagination" id="libraryPager"></div>
     </div></section>
+    <dialog class="inquiry-dialog" id="bookInquiry">
+      <form class="form" id="bookInquiryForm">
+        <h2 id="bookInquiryTitle">Title inquiry</h2>
+        <p class="note" id="bookInquiryHint"></p>
+        <input type="hidden" name="kind" value="purchase_inquiry" />
+        <input type="text" name="company_website" class="hidden" tabindex="-1" autocomplete="off" />
+        <label>Full name<input name="full_name" required /></label>
+        <label>Email<input name="email" type="email" required /></label>
+        <label>Message (optional, no privileged documents)<textarea name="message" rows="4"></textarea></label>
+        <div class="hero-actions">
+          <button class="btn btn-primary" type="submit">Send inquiry</button>
+          <button class="btn" type="button" id="bookInquiryCancel">Cancel</button>
+        </div>
+        <p class="form-status"></p>
+      </form>
+    </dialog>
   </main>
   <footer class="site-footer">
     <div class="wrap">
@@ -64,6 +91,7 @@
   <script src="/js/config.js"></script>
   <script src="/js/supabase-client.js"></script>
   <script src="/js/site-config.js"></script>
+  <script src="/js/seo.js"></script>
   <script src="/js/brand.js"></script>
   <script src="/js/i18n.js"></script>
   <script src="/js/api.js"></script>

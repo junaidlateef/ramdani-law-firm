@@ -102,3 +102,43 @@ table.data th, table.data td {
 .mcq-explanation { display: none; margin-top: 0.6rem; color: var(--muted); font-size: 0.92rem; }
 .mcq.revealed .mcq-explanation { display: block; }
 .quiz-footer { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-top: 1rem; }
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+.library-filters { display: flex; gap: 0.75rem; flex-wrap: wrap; margin: 1.25rem 0 1.5rem; }
+.library-filters input, .library-filters select {
+  padding: 0.65rem 0.8rem; border: 1px solid var(--line); border-radius: 3px;
+  background: var(--card); color: var(--ink); font: inherit; min-height: 44px;
+}
+.library-filters input { flex: 1; min-width: 16rem; }
+.library-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+  gap: 1.25rem;
+}
+.book-card {
+  background: var(--card); border: 1px solid var(--line); border-radius: 4px; overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.book-cover {
+  position: relative; aspect-ratio: 3/4; background: var(--paper);
+  display: grid; place-items: center; overflow: hidden;
+}
+.book-cover img, .book-cover-img { width: 100%; height: 100%; max-width: 100%; object-fit: cover; }
+.book-cover-fallback { font-family: var(--serif); font-size: 3.5rem; color: var(--gold); }
+.book-badge {
+  position: absolute; top: 0.6rem; inset-inline-end: 0.6rem;
+  padding: 0.2rem 0.55rem; border-radius: 999px; font-size: 0.7rem; font-weight: 700;
+  background: var(--card); border: 1px solid var(--line); color: var(--ink);
+}
+.book-badge.paid { background: var(--navy); color: #fff; border-color: var(--navy); }
+.book-info { padding: 1rem; display: grid; gap: 0.45rem; }
+.book-info h3 { font-size: 1.05rem; margin: 0; }
+.book-author { font-size: 0.82rem; color: var(--muted); margin: 0; }
+.pagination { display: flex; justify-content: center; gap: 0.4rem; margin-top: 1.75rem; flex-wrap: wrap; }
+.pagination button {
+  min-width: 2.4rem; min-height: 2.4rem; border-radius: 3px;
+  background: var(--card); border: 1px solid var(--line); color: var(--ink); font-weight: 600; cursor: pointer;
+}
+.pagination button.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+.inquiry-dialog { border: 1px solid var(--line); border-radius: 6px; padding: 0; max-width: 28rem; width: calc(100% - 2rem); }
+.inquiry-dialog .form { margin: 0; max-width: none; }

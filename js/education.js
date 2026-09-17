@@ -212,19 +212,154 @@
     }).join('');
   }
 
+  function safeHttpUrl(value) {
+    if (!value) return '';
+    try {
+      var u = new URL(value, location.origin);
+      if (u.protocol !== 'https:' && u.protocol !== 'http:') return '';
+      return u.href;
+    } catch (_) { return ''; }
+  }
+
   async function renderLibrary() {
     var el = document.getElementById('list');
-    var rows = await listPublished('books');
+    var filters = document.getElementById('libraryFilters');
+    var pager = document.getElementById('libraryPager');
     if (!el) return;
-    if (!rows.length) return empty(el, 'library_empty');
-    el.innerHTML = rows.map(function (r) {
-      var access = r.access === 'paid' ? 'Paid — inquiry only' : 'Free listing';
-      var action = r.access === 'free' && r.file_url
-        ? '<a class="btn btn-primary" href="' + escape(r.file_url) + '" rel="noopener noreferrer">Open listing</a>'
-        : '<a class="btn" href="/pages/contact.html">Inquire</a>';
-      return '<article class="card"><p class="kicker">' + escape(access) + '</p><h3>' + escape(r.title) +
-        '</h3><p>' + escape(r.summary || '') + '</p><p class="note">' + escape(r.author || '') + '</p>' + action + '</article>';
-    }).join('');
+    var rows = await listPublished('books');
+    var pageSize = 12;
+    var page = 1;
+    var dialog = document.getElementById('bookInquiry');
+    var form = document.getElementById('bookInquiryForm');
+    var activeBook = null;
+
+    function closeInquiry() {
+      if (dialog && dialog.close) dialog.close();
+      else if (dialog) dialog.hidden = true;
+      activeBook = null;
+    }
+
+    function openInquiry(book) {
+      activeBook = book;
+      var title = document.getElementById('bookInquiryTitle');
+      if (title) title.textContent = book.access === 'paid' ? 'Inquiry for a paid title' : 'Request this listing';
+      var hint = document.getElementById('bookInquiryHint');
+      if (hint) hint.textContent = (book.title || '') + ' — staff will reply. This is not checkout and not a download of a copyrighted PDF.';
+      var kind = form && form.querySelector('[name="kind"]');
+      if (kind) kind.value = book.access === 'paid' ? 'purchase_inquiry' : 'download';
+      if (form) {
+        form.reset();
+        if (kind) kind.value = book.access === 'paid' ? 'purchase_inquiry' : 'download';
+        var status = form.querySelector('.form-status');
+        if (status) { status.className = 'form-status'; status.textContent = ''; }
+      }
+      if (dialog && dialog.showModal) dialog.showModal();
+      else if (dialog) dialog.hidden = false;
+    }
+
+    if (form && !form.dataset.bound) {
+      form.dataset.bound = '1';
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var status = form.querySelector('.form-status');
+        var hp = form.querySelector('[name="company_website"]');
+        if (hp && hp.value) return;
+        var payload = {
+          book_id: activeBook && activeBook.id ? activeBook.id : null,
+          kind: (form.querySelector('[name="kind"]') || {}).value || 'purchase_inquiry',
+          full_name: form.querySelector('[name="full_name"]').value.trim(),
+          email: form.querySelector('[name="email"]').value.trim(),
+          message: (form.querySelector('[name="message"]') || {}).value || null
+        };
+        if (!payload.full_name || !payload.email) {
+          status.className = 'form-status err';
+          status.textContent = ramdaniT('form_err');
+          return;
+        }
+        var res = await sb.from('book_requests').insert(payload);
+        status.className = res.error ? 'form-status err' : 'form-status ok';
+        status.textContent = res.error ? ramdaniT('form_err') : ramdaniT('form_ok');
+        if (!res.error) {
+          form.reset();
+          setTimeout(closeInquiry, 900);
+        }
+      });
+      var cancel = document.getElementById('bookInquiryCancel');
+      if (cancel) cancel.addEventListener('click', closeInquiry);
+    }
+
+    function filtered() {
+      var q = ((document.getElementById('librarySearch') || {}).value || '').trim().toLowerCase();
+      var access = ((document.getElementById('libraryAccess') || {}).value || '');
+      return rows.filter(function (r) {
+        if (access && r.access !== access) return false;
+        if (!q) return true;
+        var hay = [r.title, r.author, r.summary, r.language, r.price_note].join(' ').toLowerCase();
+        return hay.indexOf(q) !== -1;
+      });
+    }
+
+    function paint() {
+      var shown = filtered();
+      var pages = Math.max(1, Math.ceil(shown.length / pageSize));
+      if (page > pages) page = pages;
+      var slice = shown.slice((page - 1) * pageSize, page * pageSize);
+      if (!shown.length) {
+        empty(el, 'library_empty');
+        if (pager) pager.innerHTML = '';
+        return;
+      }
+      el.innerHTML = slice.map(function (r) {
+        var paid = r.access === 'paid';
+        var badge = paid ? 'Paid — inquiry only' : 'Free listing';
+        var cover = safeHttpUrl(r.cover_url);
+        var file = safeHttpUrl(r.file_url);
+        var media = cover
+          ? '<img class="book-cover-img" src="' + escape(cover) + '" alt="" />'
+          : '<div class="book-cover-fallback" aria-hidden="true">' + escape((r.title || '?').charAt(0)) + '</div>';
+        var action;
+        if (!paid && file) {
+          action = '<a class="btn btn-primary" href="' + escape(file) + '" rel="noopener noreferrer">Open listing</a>';
+        } else {
+          action = '<button type="button" class="btn' + (paid ? '' : ' btn-primary') + '" data-inquire="' + escape(r.id) + '">' + (paid ? 'Inquire' : 'Request listing') + '</button>';
+        }
+        var meta = [r.author, r.language, r.price_note].filter(Boolean).join(' · ');
+        return '<article class="book-card" data-id="' + escape(r.id) + '">' +
+          '<div class="book-cover"><span class="book-badge ' + (paid ? 'paid' : 'free') + '">' + escape(badge) + '</span>' + media + '</div>' +
+          '<div class="book-info"><h3>' + escape(r.title) + '</h3>' +
+          (r.summary ? '<p>' + escape(r.summary) + '</p>' : '') +
+          (meta ? '<p class="book-author">' + escape(meta) + '</p>' : '') +
+          action + '</div></article>';
+      }).join('');
+      el.querySelectorAll('[data-inquire]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var id = btn.getAttribute('data-inquire');
+          var book = rows.filter(function (r) { return r.id === id; })[0];
+          if (book) openInquiry(book);
+        });
+      });
+      if (pager) {
+        if (pages <= 1) { pager.innerHTML = ''; return; }
+        pager.innerHTML = Array.from({ length: pages }, function (_, i) {
+          var n = i + 1;
+          return '<button type="button" class="' + (n === page ? 'active' : '') + '" data-page="' + n + '">' + n + '</button>';
+        }).join('');
+        pager.querySelectorAll('[data-page]').forEach(function (btn) {
+          btn.addEventListener('click', function () { page = Number(btn.getAttribute('data-page')); paint(); });
+        });
+      }
+    }
+
+    if (filters && !filters.dataset.bound) {
+      filters.dataset.bound = '1';
+      ['librarySearch', 'libraryAccess'].forEach(function (id) {
+        var node = document.getElementById(id);
+        if (!node) return;
+        node.addEventListener('input', function () { page = 1; paint(); });
+        node.addEventListener('change', function () { page = 1; paint(); });
+      });
+    }
+    paint();
   }
 
   function renderFaq() {
