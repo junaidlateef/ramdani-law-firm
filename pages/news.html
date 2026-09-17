@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>News — Ramdani Law Firm</title>
+  <meta name="description" content="Ramdani Law Firm, Dera Ghazi Khan. Public information and consultation requests for legal services across Pakistan." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;600;700&family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="/">Ramdani Law Firm</a>
+      <nav class="nav" aria-label="Primary"><a href="/" data-i18n="nav_home"></a>
+        <a href="/pages/about.html" data-i18n="nav_about"></a>
+        <a href="/pages/people.html" data-i18n="nav_people"></a>
+        <a href="/pages/practice-areas.html" data-i18n="nav_practice"></a>
+        <a href="/pages/services.html" data-i18n="nav_services"></a>
+        <a href="/pages/matters.html" data-i18n="nav_matters"></a>
+        <a href="/pages/insights.html" data-i18n="nav_insights"></a>
+        <a href="/pages/news.html" aria-current="page" data-i18n="nav_news"></a>
+        <a href="/pages/resources.html" data-i18n="nav_resources"></a>
+        <a href="/pages/careers.html" data-i18n="nav_careers"></a>
+        <a href="/pages/contact.html" data-i18n="nav_contact"></a>
+        <a href="/pages/consultation.html" data-i18n="nav_consult"></a>
+        <a href="/admin/" data-i18n="nav_admin"></a></nav>
+      <div class="lang-switch">
+        <button type="button" data-lang-btn="en" data-i18n="lang_en">EN</button>
+        <button type="button" data-lang-btn="ur" data-i18n="lang_ur">اردو</button>
+        <button type="button" class="theme-btn" id="themeBtn" aria-label="Theme">Theme</button>
+      </div>
+    </div>
+  </header>
+  <main>
+    <section class="section"><div class="wrap">
+      <h1 data-i18n="news_title"></h1>
+      <div id="list" class="grid"></div>
+    </div></section>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p data-i18n="footer_note"></p>
+      <p>Dera Ghazi Khan, Pakistan</p>
+      <div class="social-slots" aria-label="Social profiles">
+        <a href="#" data-missing="true">Instagram</a>
+        <a href="#" data-missing="true">Facebook</a>
+        <a href="#" data-missing="true">LinkedIn</a>
+        <a href="#" data-missing="true">TikTok</a>
+        <a href="#" data-missing="true">X</a>
+      </div>
+    </div>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/config.js"></script>
+  <script src="/js/supabase-client.js"></script>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/components.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+document.addEventListener('DOMContentLoaded', async function () {
+  var rows = await ramdaniApi.listPublished('news', null);
+  ramdaniUi.renderList(document.getElementById('list'), rows, 'news_empty');
+});
+</script>
+</body>
+</html>
