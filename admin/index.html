@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="/css/style.css" />
   <link rel="stylesheet" href="/css/components.css" />
   <link rel="stylesheet" href="/css/brand.css" />
+  <link rel="stylesheet" href="/css/rtl.css" />
   <link rel="icon" type="image/png" href="/assets/ramdani-logo.png" />
 <meta name="description" content="Staff — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan." />
 <link rel="canonical" href="https://ramdani-law-firm.vercel.app/admin/" />
@@ -69,6 +70,10 @@
       <button type="button" class="btn" data-table="modules">Modules</button>
       <button type="button" class="btn" data-table="cases">Case notes</button>
       <button type="button" class="btn" data-table="statutes">Statutes</button>
+      <button type="button" class="btn" data-table="societies">Societies</button>
+      <button type="button" class="btn" data-table="chapters">Chapters</button>
+      <button type="button" class="btn" data-table="lectures">Lectures</button>
+      <button type="button" class="btn" data-table="social_posts">Social posts</button>
     </aside>
     <section class="admin-main">
       <h1 id="tableTitle">People</h1>
@@ -84,6 +89,19 @@
           </select>
         </label>
         <label>Court / year / official URL <input name="court" placeholder="Court" /><input name="year" type="number" placeholder="Year" /><input name="official_url" placeholder="https:// official source" /><input name="jurisdiction" placeholder="Pakistan" /></label>
+        <label>City / province / YouTube <input name="city" placeholder="City" /><input name="province" placeholder="Province" /><input name="youtube_url" placeholder="https://www.youtube.com/watch?v=" /><input name="youtube_id" placeholder="optional video id" /></label>
+        <label>Social platform / permalink
+          <select name="platform">
+            <option value="">platform</option>
+            <option value="facebook">facebook</option>
+            <option value="instagram">instagram</option>
+            <option value="linkedin">linkedin</option>
+            <option value="youtube">youtube</option>
+            <option value="tiktok">tiktok</option>
+            <option value="x">x</option>
+          </select>
+          <input name="permalink" placeholder="https:// public post" />
+        </label>
         <label>Internship location / duration / stipend <input name="location" placeholder="Location" /><input name="duration" placeholder="Duration" /><input name="stipend_note" placeholder="Stipend note" /></label>
         <label>Mode / deadline
           <select name="mode">
@@ -124,6 +142,14 @@
         <table class="data">
           <thead><tr><th>Listing</th><th>Name</th><th>Email</th><th>Education</th><th>Status</th></tr></thead>
           <tbody id="internAppBody"></tbody>
+        </table>
+      </div>
+      <h2>Society / chapter inquiries</h2>
+      <p class="note">Public join forms. These are inquiries, not memberships.</p>
+      <div class="table-wrap">
+        <table class="data">
+          <thead><tr><th>Kind</th><th>Listing</th><th>Name</th><th>Email</th><th>Message</th></tr></thead>
+          <tbody id="joinReqBody"></tbody>
         </table>
       </div>
     </section>

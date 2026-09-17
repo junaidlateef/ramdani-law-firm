@@ -13,7 +13,11 @@
     { id: 'books', label: 'Library', fields: ['title', 'slug', 'summary', 'status'] },
     { id: 'modules', label: 'Modules', fields: ['title', 'slug', 'code', 'category', 'status'] },
     { id: 'cases', label: 'Case notes', fields: ['title', 'slug', 'citation', 'citation_status', 'status'] },
-    { id: 'statutes', label: 'Statutes', fields: ['title', 'slug', 'year', 'status'] }
+    { id: 'statutes', label: 'Statutes', fields: ['title', 'slug', 'year', 'status'] },
+    { id: 'societies', label: 'Societies', fields: ['title', 'slug', 'category', 'city', 'status'] },
+    { id: 'chapters', label: 'Chapters', fields: ['title', 'slug', 'city', 'province', 'status'] },
+    { id: 'lectures', label: 'Lectures', fields: ['title', 'slug', 'youtube_url', 'status'] },
+    { id: 'social_posts', label: 'Social posts', fields: ['title', 'slug', 'platform', 'status'] }
   ];
 
   async function boot() {
@@ -28,6 +32,7 @@
       await loadTable('people');
       await loadInquiries();
       await loadInternshipApps();
+      await loadJoinRequests();
     } catch (e) {
       login.classList.remove('hidden');
       app.classList.add('hidden');
@@ -114,6 +119,13 @@
       duration: (form.querySelector('[name="duration"]') || {}).value,
       stipend_note: (form.querySelector('[name="stipend_note"]') || {}).value,
       deadline: (form.querySelector('[name="deadline"]') || {}).value,
+      category: (form.querySelector('[name="category"]') || {}).value,
+      city: (form.querySelector('[name="city"]') || {}).value,
+      province: (form.querySelector('[name="province"]') || {}).value,
+      youtube_url: (form.querySelector('[name="youtube_url"]') || {}).value,
+      youtube_id: (form.querySelector('[name="youtube_id"]') || {}).value,
+      platform: (form.querySelector('[name="platform"]') || {}).value,
+      permalink: (form.querySelector('[name="permalink"]') || {}).value,
       status: form.querySelector('[name="status"]').value
     };
     Object.keys(payload).forEach(function (k) { if (payload[k] === undefined || payload[k] === '') delete payload[k]; });
@@ -152,6 +164,16 @@
         await sb.from('internship_applications').update({ status: sel.value }).eq('id', sel.getAttribute('data-app'));
       });
     });
+  }
+
+  async function loadJoinRequests() {
+    var body = document.getElementById('joinReqBody');
+    if (!body) return;
+    var res = await sb.from('join_requests').select('id, kind, listing_slug, full_name, email, message, created_at').order('created_at', { ascending: false }).limit(50);
+    var rows = res.data || [];
+    body.innerHTML = rows.map(function (r) {
+      return '<tr><td>' + ramdaniUi.escape(r.kind) + '</td><td>' + ramdaniUi.escape(r.listing_slug) + '</td><td>' + ramdaniUi.escape(r.full_name) + '</td><td>' + ramdaniUi.escape(r.email) + '</td><td>' + ramdaniUi.escape(r.message) + '</td></tr>';
+    }).join('') || '<tr><td colspan="5">No join inquiries.</td></tr>';
   }
 
   document.addEventListener('DOMContentLoaded', boot);

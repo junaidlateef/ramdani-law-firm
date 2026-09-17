@@ -607,6 +607,143 @@
     }).join('');
   }
 
+
+  function youtubeIdFrom(url) {
+    if (!url) return '';
+    try {
+      var u = new URL(url);
+      if (u.protocol !== 'https:') return '';
+      var host = u.hostname.replace(/^www\./, '');
+      if (host === 'youtu.be') return (u.pathname.split('/')[1] || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 11);
+      if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'youtube-nocookie.com') {
+        if (u.searchParams.get('v')) return u.searchParams.get('v').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 11);
+        var parts = u.pathname.split('/').filter(Boolean);
+        if ((parts[0] === 'embed' || parts[0] === 'shorts' || parts[0] === 'live') && parts[1]) {
+          return parts[1].replace(/[^A-Za-z0-9_-]/g, '').slice(0, 11);
+        }
+      }
+    } catch (_) {}
+    return '';
+  }
+
+  function bindJoinForm(kind) {
+    var form = document.getElementById('joinForm');
+    var dialog = document.getElementById('joinDialog');
+    if (!form || form.dataset.bound) return;
+    form.dataset.bound = '1';
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var status = form.querySelector('.form-status');
+      var hp = form.querySelector('[name="company_website"]');
+      if (hp && hp.value) return;
+      var payload = {
+        kind: kind,
+        listing_slug: (form.querySelector('[name="listing_slug"]') || {}).value || null,
+        full_name: form.querySelector('[name="full_name"]').value.trim(),
+        email: form.querySelector('[name="email"]').value.trim(),
+        message: (form.querySelector('[name="message"]') || {}).value || null
+      };
+      if (!payload.full_name || !payload.email) {
+        status.className = 'form-status err';
+        status.textContent = ramdaniT('form_err');
+        return;
+      }
+      var res = await sb.from('join_requests').insert(payload);
+      status.className = res.error ? 'form-status err' : 'form-status ok';
+      status.textContent = res.error ? ramdaniT('form_err') : ramdaniT('form_ok');
+      if (!res.error) {
+        form.reset();
+        setTimeout(function () { if (dialog && dialog.close) dialog.close(); }, 900);
+      }
+    });
+    var cancel = document.getElementById('joinCancel');
+    if (cancel) cancel.addEventListener('click', function () { if (dialog && dialog.close) dialog.close(); });
+  }
+
+  function openJoin(kind, slug, title) {
+    var dialog = document.getElementById('joinDialog');
+    var form = document.getElementById('joinForm');
+    if (!dialog || !form) return;
+    form.querySelector('[name="kind"]').value = kind;
+    form.querySelector('[name="listing_slug"]').value = slug || '';
+    var h = document.getElementById('joinTitle');
+    if (h) h.textContent = 'Inquiry — ' + (title || kind);
+    var hint = document.getElementById('joinHint');
+    if (hint) hint.textContent = 'Staff will reply. This does not create membership, a chapter, or a lawyer–client relationship.';
+    if (dialog.showModal) dialog.showModal();
+  }
+
+  async function renderSocieties() {
+    var el = document.getElementById('list');
+    if (!el) return;
+    bindJoinForm('society');
+    var rows = await listPublished('societies');
+    if (!rows.length) return empty(el, 'societies_empty');
+    el.innerHTML = rows.map(function (r) {
+      var meta = [r.category, r.city].filter(Boolean).join(' · ');
+      return '<article class="card"><p class="kicker">' + escape(meta) + '</p><h3>' + escape(r.title) +
+        '</h3><p>' + escape(r.summary || '') + '</p>' +
+        (r.body ? '<p class="note">' + escape(r.body).slice(0, 360) + '</p>' : '') +
+        '<button type="button" class="btn" data-join="' + escape(r.slug) + '" data-title="' + escape(r.title) + '">Inquire to join</button></article>';
+    }).join('');
+    el.querySelectorAll('[data-join]').forEach(function (btn) {
+      btn.addEventListener('click', function () { openJoin('society', btn.getAttribute('data-join'), btn.getAttribute('data-title')); });
+    });
+  }
+
+  async function renderChapters() {
+    var el = document.getElementById('list');
+    if (!el) return;
+    bindJoinForm('chapter');
+    var rows = await listPublished('chapters');
+    if (!rows.length) return empty(el, 'chapters_empty');
+    el.innerHTML = rows.map(function (r) {
+      var meta = [r.city, r.province].filter(Boolean).join(' · ');
+      return '<article class="card"><p class="kicker">' + escape(meta) + '</p><h3>' + escape(r.title) +
+        '</h3><p>' + escape(r.summary || '') + '</p>' +
+        (r.body ? '<p class="note">' + escape(r.body).slice(0, 360) + '</p>' : '') +
+        '<button type="button" class="btn" data-join="' + escape(r.slug) + '" data-title="' + escape(r.title) + '">Inquire to join</button></article>';
+    }).join('');
+    el.querySelectorAll('[data-join]').forEach(function (btn) {
+      btn.addEventListener('click', function () { openJoin('chapter', btn.getAttribute('data-join'), btn.getAttribute('data-title')); });
+    });
+  }
+
+  async function renderLectures() {
+    var el = document.getElementById('list');
+    var player = document.getElementById('lecturePlayer');
+    if (!el) return;
+    var rows = await listPublished('lectures');
+    if (!rows.length) return empty(el, 'learning_empty');
+    function play(row) {
+      var id = row.youtube_id || youtubeIdFrom(row.youtube_url);
+      if (!player) return;
+      if (!id) {
+        player.hidden = false;
+        player.innerHTML = '<p class="empty">No public YouTube ID is published for this lecture yet.</p>';
+        return;
+      }
+      player.hidden = false;
+      player.innerHTML = '<p class="kicker">' + escape(row.title) + '</p><div class="video-frame"><iframe title="' + escape(row.title) +
+        '" src="https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id) +
+        '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>';
+      player.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    el.innerHTML = rows.map(function (r) {
+      var id = r.youtube_id || youtubeIdFrom(r.youtube_url);
+      return '<article class="card"><h3>' + escape(r.title) + '</h3><p>' + escape(r.summary || '') +
+        '</p><button type="button" class="btn btn-primary" data-play="' + escape(r.slug) + '"' + (id ? '' : ' disabled') + '>' +
+        (id ? 'Watch' : 'No video yet') + '</button></article>';
+    }).join('');
+    el.querySelectorAll('[data-play]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var slug = btn.getAttribute('data-play');
+        var row = rows.filter(function (r) { return r.slug === slug; })[0];
+        if (row) play(row);
+      });
+    });
+  }
+
   window.ramdaniEducation = {
     renderInternships: renderInternships,
     bindInternshipApply: bindInternshipApply,
@@ -619,6 +756,9 @@
     renderCases: renderCases,
     renderCase: renderCase,
     renderStatutes: renderStatutes,
-    renderHome: renderHome
+    renderHome: renderHome,
+    renderSocieties: renderSocieties,
+    renderChapters: renderChapters,
+    renderLectures: renderLectures
   };
 })();
