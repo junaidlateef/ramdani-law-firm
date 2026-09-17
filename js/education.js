@@ -102,32 +102,103 @@
       form.innerHTML = '<p class="empty">No questions published yet.</p>';
       return;
     }
+    var letters = ['A', 'B', 'C', 'D'];
+    form.classList.add('quiz-compact');
     form.innerHTML = questions.map(function (q, i) {
       var choices = Array.isArray(q.choices) ? q.choices : [];
       var opts = choices.map(function (c, idx) {
-        return '<label><input type="radio" name="' + q.id + '" value="' + idx + '" required /> ' + escape(c) + '</label>';
+        return '<button type="button" class="mcq-opt" data-q="' + q.id + '" data-idx="' + idx + '">' +
+          '<span class="opt-label">' + letters[idx] + '</span>' +
+          '<span class="opt-text">' + escape(c) + '</span>' +
+          '<span class="opt-tick" aria-hidden="true">✓</span></button>';
       }).join('');
-      return '<fieldset class="card"><legend>' + (i + 1) + '. ' + escape(q.prompt) + '</legend>' + opts + '</fieldset>';
-    }).join('') + '<label>Email (optional, for staff follow-up)<input type="email" name="email" /></label><button class="btn btn-primary" type="submit">Submit</button><p class="form-status"></p>';
+      return '<fieldset class="card mcq" data-id="' + q.id + '"><legend class="mcq-head"><span class="mcq-num">' + (i + 1) + '</span><span class="mcq-q">' + escape(q.prompt) + '</span></legend><div class="mcq-options">' + opts + '</div><div class="mcq-explanation"></div></fieldset>';
+    }).join('') + '<label>Email (optional, for staff follow-up)<input type="email" name="email" /></label><div class="quiz-footer"><p class="form-status" id="quizScore">Not submitted</p><button class="btn btn-primary" type="submit">Submit</button></div>';
+    form.querySelectorAll('.mcq-opt').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (form.dataset.submitted === '1') return;
+        var qid = btn.getAttribute('data-q');
+        form.querySelectorAll('.mcq-opt[data-q="' + qid + '"]').forEach(function (b) { b.classList.remove('selected'); });
+        btn.classList.add('selected');
+      });
+    });
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
+      if (form.dataset.submitted === '1') return;
       var answers = {};
+      var missing = false;
       questions.forEach(function (q) {
-        var sel = form.querySelector('input[name="' + q.id + '"]:checked');
-        if (sel) answers[q.id] = Number(sel.value);
+        var sel = form.querySelector('.mcq-opt.selected[data-q="' + q.id + '"]');
+        if (!sel) missing = true;
+        else answers[q.id] = Number(sel.getAttribute('data-idx'));
       });
+      var status = form.querySelector('#quizScore');
+      if (missing) {
+        status.className = 'form-status err';
+        status.textContent = 'Answer every question before submitting.';
+        return;
+      }
       var email = (form.querySelector('[name="email"]') || {}).value || null;
       var res = await sb.rpc('submit_ramdani_quiz', { p_quiz_id: quiz.id, p_answers: answers, p_email: email });
       var box = document.getElementById('quizResult');
       if (res.error) {
-        box.hidden = false;
-        box.textContent = res.error.message;
+        if (box) { box.hidden = false; box.textContent = res.error.message; }
+        status.className = 'form-status err';
+        status.textContent = res.error.message;
         return;
       }
       var data = res.data || {};
-      box.hidden = false;
-      box.innerHTML = '<h2>Score: ' + escape(data.score) + ' / ' + escape(data.total) + '</h2>';
+      form.dataset.submitted = '1';
+      var byId = {};
+      (data.explanations || []).forEach(function (ex) { byId[ex.id] = ex; });
+      questions.forEach(function (q) {
+        var ex = byId[q.id] || {};
+        var field = form.querySelector('.mcq[data-id="' + q.id + '"]');
+        if (!field) return;
+        field.classList.add('revealed');
+        field.querySelectorAll('.mcq-opt').forEach(function (btn) {
+          var idx = Number(btn.getAttribute('data-idx'));
+          if (ex.correct != null && idx === Number(ex.correct)) btn.classList.add('correct-answer');
+          else if (idx === answers[q.id]) btn.classList.add('wrong-answer');
+        });
+        var expl = field.querySelector('.mcq-explanation');
+        if (expl && ex.explanation) expl.textContent = ex.explanation;
+      });
+      status.className = 'form-status ok';
+      status.innerHTML = 'Score: <strong>' + escape(data.score) + '</strong> / ' + escape(data.total);
+      if (box) {
+        box.hidden = false;
+        box.innerHTML = '<h2>Score: ' + escape(data.score) + ' / ' + escape(data.total) + '</h2>';
+      }
+      var submitBtn = form.querySelector('[type="submit"]');
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Submitted'; }
     });
+  }
+
+  async function renderHome() {
+    var grid = document.getElementById('semesterGrid');
+    var stats = document.getElementById('heroStats');
+    var modules = await listPublished('modules');
+    var quizzes = await listPublished('quizzes');
+    if (stats) {
+      var sems = {};
+      modules.forEach(function (m) { if (m.semester) sems[m.semester] = true; });
+      stats.innerHTML =
+        '<div><strong>' + modules.length + '</strong><span>Published modules</span></div>' +
+        '<div><strong>' + Object.keys(sems).length + '</strong><span>Semesters with outlines</span></div>' +
+        '<div><strong>' + quizzes.length + '</strong><span>Practice quizzes</span></div>';
+    }
+    if (!grid) return;
+    var bySem = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [] };
+    modules.forEach(function (m) {
+      if (bySem[m.semester]) bySem[m.semester].push(m);
+    });
+    grid.innerHTML = [1,2,3,4,5,6,7,8].map(function (n) {
+      var rows = bySem[n];
+      var codes = rows.slice(0, 3).map(function (r) { return '<span>' + escape(r.code || '') + '</span>'; }).join('');
+      var extra = rows.length > 3 ? '<span>+' + (rows.length - 3) + '</span>' : '';
+      return '<article class="sem-card"><a href="/pages/modules.html"><div class="sem-card-num">0' + n + '</div><h3>Semester ' + n + '</h3><p>' + rows.length + ' published outlines</p><div class="sem-modules">' + codes + extra + '</div></a></article>';
+    }).join('');
   }
 
   async function renderLibrary() {
@@ -337,6 +408,7 @@
     renderModule: renderModule,
     renderCases: renderCases,
     renderCase: renderCase,
-    renderStatutes: renderStatutes
+    renderStatutes: renderStatutes,
+    renderHome: renderHome
   };
 })();

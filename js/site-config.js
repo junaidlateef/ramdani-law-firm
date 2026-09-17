@@ -2,6 +2,15 @@ window.ramdaniSite = Object.freeze({
   name: 'Ramdani Law Firm', tagline: 'Law. Strategy. Results.',
   location: 'Dera Ghazi Khan, Pakistan', logo: '/assets/ramdani-logo.png',
   socialLinks: { instagram: null, facebook: null, linkedin: null, tiktok: null, x: null },
+  primaryNavigation: [
+    ['/', 'nav_home', 'Home'],
+    ['/pages/news.html', 'nav_news', 'News'],
+    ['/pages/careers.html', 'nav_careers', 'Careers'],
+    ['/pages/quizzes.html', 'nav_quizzes', 'Study LAT/GAT'],
+    ['/pages/library.html', 'nav_library', 'Library'],
+    ['/pages/internships.html', 'nav_internships', 'Internships'],
+    ['/pages/practice-areas.html', 'nav_practice', 'Practice Areas']
+  ],
   navigation: [
     ['/', 'nav_home', 'Home'], ['/pages/about.html', 'nav_about', 'About'],
     ['/pages/people.html', 'nav_people', 'People'], ['/pages/practice-areas.html', 'nav_practice', 'Practice Areas'],

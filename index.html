@@ -54,13 +54,18 @@
         <p class="lead" data-i18n="hero_sub"></p>
         <div class="hero-actions">
           <a class="btn btn-primary" href="/pages/consultation.html" data-i18n="cta_consult"></a>
-          <a class="btn" href="/pages/people.html" data-i18n="cta_people"></a>
-          <a class="btn" href="/pages/internships.html">Internships</a>
-          <a class="btn" href="/pages/quizzes.html">LAT / GAT</a>
-          <a class="btn" href="/pages/modules.html">Study modules</a>
-          <a class="btn" href="/pages/cases.html">Case notes</a>
-          <a class="btn" href="/pages/library.html">Library</a>
+          <a class="btn" href="/pages/practice-areas.html">Practice areas</a>
+          <a class="btn" href="/pages/modules.html">Browse curriculum</a>
         </div>
+        <div class="hero-stats" id="heroStats"></div>
+      </div>
+    </section>
+    <section class="section" id="semesters">
+      <div class="wrap">
+        <p class="kicker">LLB curriculum</p>
+        <h2>Semester outlines</h2>
+        <p class="lead">Published study maps only. Counts come from the live catalogue — not marketing estimates. Case notes stay hidden until staff verify a citation.</p>
+        <div class="semester-grid" id="semesterGrid"></div>
       </div>
     </section>
     <section class="section">
@@ -88,8 +93,10 @@
   <script src="/js/components.js"></script>
   <script src="/js/auth.js"></script>
   <script src="/js/app.js"></script>
+  <script src="/js/education.js"></script>
   <script>
 document.addEventListener('DOMContentLoaded', async function () {
+  if (window.ramdaniEducation) ramdaniEducation.renderHome();
   var rows = await ramdaniApi.listPublished('practice_areas', 'sort_order');
   ramdaniUi.renderList(document.getElementById('homePractice'), rows, 'practice_empty', function (r) { return '/pages/practice-areas.html'; });
 });
