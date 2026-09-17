@@ -17,12 +17,13 @@ window.ramdaniAuth = {
       errorCode: q.get('error_code') || h.get('error_code'),
       type: q.get('type') || h.get('type'),
       code: q.get('code'),
+      tokenHash: q.get('token_hash') || h.get('token_hash'),
       accessToken: h.get('access_token')
     };
   },
   isRecoveryCallback: function () {
     var p = this.authCallbackParams();
-    return !!(p.type === 'recovery' || p.code || p.accessToken || p.error);
+    return !!(p.type === 'recovery' || p.code || p.tokenHash || p.accessToken || p.error);
   },
   recoveryErrorMessage: function (p) {
     p = p || this.authCallbackParams();
@@ -69,53 +70,69 @@ window.ramdaniAuth = {
     var p = this.authCallbackParams();
     var urlErr = this.recoveryErrorMessage(p);
     if (urlErr) return { session: null, error: urlErr };
-    var hasCallback = !!(p.type === 'recovery' || p.code || p.accessToken);
+    var hasCallback = !!(p.type === 'recovery' || p.code || p.tokenHash || p.accessToken);
+
+    function cleanUrl() {
+      try { history.replaceState({}, '', '/reset-password'); } catch (e) {}
+    }
+
+    async function currentSession() {
+      var res = await sb.auth.getSession();
+      return res.data && res.data.session;
+    }
+
+    var session = await currentSession();
+    if (session) {
+      cleanUrl();
+      return { session: session, error: null };
+    }
+
+    if (hasCallback) {
+      session = await new Promise(function (resolve) {
+        var done = false;
+        var finish = function (sess) {
+          if (done) return;
+          done = true;
+          resolve(sess || null);
+        };
+        var timer = setTimeout(function () { currentSession().then(finish); }, 1500);
+        var sub = sb.auth.onAuthStateChange(function (event, sess) {
+          if (event === 'PASSWORD_RECOVERY' || event === 'INITIAL_SESSION' || (event === 'SIGNED_IN' && sess)) {
+            if (!sess) return;
+            clearTimeout(timer);
+            if (sub && sub.data && sub.data.subscription) sub.data.subscription.unsubscribe();
+            finish(sess);
+          }
+        });
+      });
+      if (session) {
+        cleanUrl();
+        return { session: session, error: null };
+      }
+    }
+
+    if (p.tokenHash) {
+      var verified = await sb.auth.verifyOtp({ type: 'recovery', token_hash: p.tokenHash });
+      if (verified.error) return { session: null, error: verified.error.message };
+      cleanUrl();
+      return { session: verified.data && verified.data.session, error: null };
+    }
 
     if (p.code) {
       var exchanged = await sb.auth.exchangeCodeForSession(p.code);
-      if (exchanged.error) return { session: null, error: exchanged.error.message };
-      try { history.replaceState({}, '', '/reset-password'); } catch (e) {}
+      if (exchanged.error) {
+        session = await currentSession();
+        if (session) {
+          cleanUrl();
+          return { session: session, error: null };
+        }
+        return { session: null, error: exchanged.error.message };
+      }
+      cleanUrl();
       return { session: exchanged.data && exchanged.data.session, error: null };
     }
 
-    var existing = await sb.auth.getSession();
-    if (existing.data && existing.data.session && (hasCallback || p.type === 'recovery')) {
-      try { history.replaceState({}, '', '/reset-password'); } catch (e) {}
-      return { session: existing.data.session, error: null };
-    }
-
-    if (!hasCallback) {
-      if (existing.data && existing.data.session) {
-        try { history.replaceState({}, '', '/reset-password'); } catch (e) {}
-        return { session: existing.data.session, error: null };
-      }
-      return { session: null, error: 'Open this page from the reset link in your email, or request a new link from Staff sign in.' };
-    }
-
-    return await new Promise(function (resolve) {
-      var done = false;
-      var finish = function (session, error) {
-        if (done) return;
-        done = true;
-        if (session) {
-          try { history.replaceState({}, '', '/reset-password'); } catch (e) {}
-        }
-        resolve({ session: session || null, error: error || null });
-      };
-      var timer = setTimeout(function () {
-        sb.auth.getSession().then(function (res) {
-          var session = res.data && res.data.session;
-          finish(session, session ? null : 'This reset link is invalid or has expired. Request a new one from Staff sign in.');
-        });
-      }, 1600);
-      var sub = sb.auth.onAuthStateChange(function (event, session) {
-        if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
-          clearTimeout(timer);
-          if (sub && sub.data && sub.data.subscription) sub.data.subscription.unsubscribe();
-          finish(session, null);
-        }
-      });
-    });
+    return { session: null, error: 'Open this page from the reset link in your email, or request a new link from Staff sign in.' };
   },
   async signOut() {
     return sb.auth.signOut();
