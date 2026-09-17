@@ -20,19 +20,6 @@ window.ramdaniAuth = {
   async signInPassword(email, password) {
     return sb.auth.signInWithPassword({ email: email, password: password });
   },
-  async signUpPassword(email, password, fullName) {
-    return sb.auth.signUp({
-      email: email,
-      password: password,
-      options: { data: { full_name: fullName || '' } }
-    });
-  },
-  async social(provider) {
-    return sb.auth.signInWithOAuth({
-      provider: provider,
-      options: { redirectTo: window.location.origin + '/admin/' }
-    });
-  },
   async resetPassword(email) {
     return sb.auth.resetPasswordForEmail(email, {
       redirectTo: window.location.origin + '/admin/'

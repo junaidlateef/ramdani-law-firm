@@ -12,10 +12,10 @@
   <link rel="stylesheet" href="/css/brand.css" />
   <link rel="stylesheet" href="/css/rtl.css" />
   <link rel="icon" type="image/png" href="/assets/ramdani-logo.png" />
-<meta name="description" content="Staff — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan." />
+<meta name="description" content="Staff sign in for Ramdani Law Firm." />
 <link rel="canonical" href="https://ramdani-law-firm.vercel.app/admin/" />
 <meta property="og:title" content="Staff — Ramdani Law Firm" />
-<meta property="og:description" content="Staff — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan." />
+<meta property="og:description" content="Staff sign in for Ramdani Law Firm." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://ramdani-law-firm.vercel.app/admin/" />
 <meta property="og:image" content="https://ramdani-law-firm.vercel.app/assets/ramdani-logo.png" />
@@ -24,27 +24,15 @@
 <body>
   <div id="loginPanel" class="auth-box">
     <h1>Staff sign in</h1>
-    <p class="note">CMS access is granted only after an administrator sets your profile role to editor or admin. OAuth secrets stay in the Supabase dashboard, not in this site.</p>
+    <p class="note">Authorised staff only. Accounts are created by the firm, not from this page.</p>
     <form id="passwordForm" class="form">
-      <label>Email <input id="email" type="email" required /></label>
-      <label>Password <input id="password" type="password" required minlength="8" /></label>
+      <label>Email <input id="email" type="email" required autocomplete="username" /></label>
+      <label>Password <input id="password" type="password" required minlength="8" autocomplete="current-password" /></label>
       <button class="btn btn-primary" type="submit">Sign in</button>
-    </form>
-    <div class="auth-actions">
-      <button type="button" class="btn" data-oauth="google">Continue with Google</button>
-      <button type="button" class="btn" data-oauth="facebook">Continue with Facebook</button>
-      <button type="button" class="btn" data-oauth="github">Continue with GitHub</button>
-    </div>
-    <form id="signupForm" class="form" style="margin-top:1.5rem">
-      <h2>Create staff account</h2>
-      <label>Full name <input id="suName" required /></label>
-      <label>Email <input id="suEmail" type="email" required /></label>
-      <label>Password <input id="suPassword" type="password" required minlength="8" /></label>
-      <button class="btn" type="submit">Sign up</button>
     </form>
     <form id="forgotForm" class="form" style="margin-top:1.5rem">
       <h2>Reset password</h2>
-      <label>Email <input id="forgotEmail" type="email" required /></label>
+      <label>Email <input id="forgotEmail" type="email" required autocomplete="username" /></label>
       <button class="btn" type="submit">Send reset link</button>
     </form>
     <p id="authError" class="form-status err"></p>

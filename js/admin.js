@@ -50,16 +50,6 @@
       location.reload();
     });
 
-    document.getElementById('signupForm').addEventListener('submit', async function (e) {
-      e.preventDefault();
-      err.textContent = '';
-      var email = document.getElementById('suEmail').value.trim();
-      var password = document.getElementById('suPassword').value;
-      var name = document.getElementById('suName').value.trim();
-      var res = await ramdaniAuth.signUpPassword(email, password, name);
-      if (res.error) { err.textContent = res.error.message; return; }
-      err.textContent = 'Account created. An administrator must set your role to editor or admin before CMS access is granted.';
-    });
 
     document.getElementById('forgotForm').addEventListener('submit', async function (e) {
       e.preventDefault();
@@ -68,9 +58,6 @@
       err.textContent = res.error ? res.error.message : 'If the email exists, a reset link was sent.';
     });
 
-    document.querySelectorAll('[data-oauth]').forEach(function (btn) {
-      btn.addEventListener('click', function () { ramdaniAuth.social(btn.getAttribute('data-oauth')); });
-    });
 
     var out = document.getElementById('signOutBtn');
     if (out) out.addEventListener('click', async function () { await ramdaniAuth.signOut(); location.reload(); });
