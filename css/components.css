@@ -1,0 +1,35 @@
+.admin-shell { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+.admin-nav {
+  border-right: 1px solid var(--line);
+  background: var(--white);
+  padding: 1.25rem;
+}
+.admin-nav a { display: block; padding: 0.4rem 0; color: var(--ink); }
+.admin-main { padding: 1.5rem; }
+.table-wrap { overflow-x: auto; }
+table.data {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card);
+}
+table.data th, table.data td {
+  border-bottom: 1px solid var(--line);
+  text-align: start;
+  padding: 0.55rem 0.4rem;
+  font-size: 0.92rem;
+}
+.auth-box {
+  max-width: 28rem;
+  margin: 4rem auto;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 1.5rem;
+}
+.auth-actions { display: grid; gap: 0.5rem; margin-top: 1rem; }
+.hidden { display: none !important; }
+
+@media (max-width: 800px) {
+  .admin-shell { grid-template-columns: 1fr; }
+  .admin-nav { border-right: 0; border-bottom: 1px solid var(--line); }
+}
