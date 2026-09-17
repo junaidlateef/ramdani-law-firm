@@ -23,6 +23,10 @@
   ];
 
   async function boot() {
+    if (window.ramdaniAuth && ramdaniAuth.isRecoveryCallback()) {
+      location.replace('/reset-password' + (location.search || '') + (location.hash || ''));
+      return;
+    }
     var login = document.getElementById('loginPanel');
     var app = document.getElementById('adminApp');
     var err = document.getElementById('authError');
