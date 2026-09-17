@@ -37,6 +37,7 @@
       people_empty: 'Advocate profiles will appear here once published by the firm.',
       practice_title: 'Practice areas',
       practice_empty: 'Practice areas will appear here once published.',
+      practice_lead: 'Staff-published outlines of the kinds of work described on this site. Not legal advice and not a retainer.',
       services_title: 'Legal services',
       services_empty: 'Services will appear here once published.',
       matters_title: 'Representative matters',

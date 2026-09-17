@@ -848,19 +848,6 @@
     });
   }
 
-  window.ramdaniEducation = {
-    renderInternships: renderInternships,
-    bindInternshipApply: bindInternshipApply,
-    renderQuizzes: renderQuizzes,
-    renderQuiz: renderQuiz,
-    renderLibrary: renderLibrary,
-    renderFaq: renderFaq,
-    renderModules: renderModules,
-    renderModule: renderModule,
-    renderCases: renderCases,
-    renderCase: renderCase,
-    renderStatutes: renderStatutes,
-    renderHome: renderHome,
   async function renderCertificates() {
     var el = document.getElementById('list');
     var filters = document.getElementById('filters');
@@ -891,9 +878,112 @@
     paint(rows);
   }
 
+  async function renderPracticeAreas() {
+    var el = document.getElementById('list');
+    if (!el) return;
+    var rows = await listPublished('practice_areas');
+    rows.sort(function (a, b) { return (a.sort_order || 0) - (b.sort_order || 0); });
+    if (!rows.length) return empty(el, 'practice_empty');
+    el.innerHTML = rows.map(function (r) {
+      return '<article class="card"><p class="kicker">Practice outline</p><h3>' + escape(r.title) +
+        '</h3><p>' + escape(r.summary || '') + '</p>' +
+        '<a class="btn btn-primary" href="/pages/practice-area.html?slug=' + encodeURIComponent(r.slug) + '">Read outline</a></article>';
+    }).join('');
+  }
+
+  function listBlock(title, items, pick) {
+    if (!items || !items.length) return '';
+    return '<h2>' + escape(title) + '</h2><ul>' + items.map(function (it) {
+      return '<li>' + pick(it) + '</li>';
+    }).join('') + '</ul>';
+  }
+
+  async function renderPracticeArea() {
+    var slug = qs('slug');
+    var el = document.getElementById('areaBody');
+    if (!el) return;
+    if (!slug || !window.sb) {
+      el.innerHTML = '<p class="empty">Choose a published practice outline from the list.</p>';
+      return;
+    }
+    var res = await sb.from('practice_areas').select('*').eq('slug', slug).eq('status', 'published').maybeSingle();
+    var a = res.data;
+    if (!a) {
+      el.innerHTML = '<p class="empty">This practice outline is not published.</p>';
+      return;
+    }
+    var titleEl = document.getElementById('areaTitle');
+    var sumEl = document.getElementById('areaSummary');
+    if (titleEl) titleEl.textContent = a.title;
+    if (sumEl) sumEl.textContent = a.summary || '';
+    var html = '';
+    html += '<p class="note">Public study outline only. This page is not legal advice, not a retainer, and not a guarantee of result. A professional relationship starts only if the firm confirms an engagement in writing.</p>';
+    if (a.overview) html += '<h2>Overview</h2><p>' + escape(a.overview) + '</p>';
+    if (a.body) html += '<h2>Description</h2><p>' + escape(a.body) + '</p>';
+    if (a.approach) html += '<h2>Approach</h2><p>' + escape(a.approach) + '</p>';
+    html += listBlock('Services described', a.services, function (s) {
+      return '<strong>' + escape(s.title || '') + '</strong>' + (s.description ? ' — ' + escape(s.description) : '');
+    });
+    html += listBlock('Related topics', a.sub_areas, function (s) {
+      return '<strong>' + escape(s.title || '') + '</strong>' + (s.description ? ' — ' + escape(s.description) : '');
+    });
+    html += listBlock('Statutes often cited in this outline', a.relevant_laws, function (s) {
+      return escape([s.name, s.year].filter(Boolean).join(' · '));
+    });
+    if (a.process && a.process.length) {
+      html += '<h2>Typical process (outline)</h2><ol>' + a.process.map(function (s) {
+        return '<li><strong>' + escape(s.title || '') + '</strong>' + (s.description ? ' — ' + escape(s.description) : '') + '</li>';
+      }).join('') + '</ol>';
+    }
+    if (a.faqs && a.faqs.length) {
+      html += '<h2>Questions about this outline</h2>' + a.faqs.map(function (f) {
+        return '<details class="card"><summary><strong>' + escape(f.question || '') + '</strong></summary><p>' + escape(f.answer || '') + '</p></details>';
+      }).join('');
+    }
+    html += '<p><a class="btn btn-primary" href="/pages/consultation.html">Request a consultation</a> <a class="btn" href="/pages/practice-areas.html">All practice outlines</a></p>';
+    el.innerHTML = html;
+    if (window.ramdaniSeo) {
+      var desc = (a.summary || a.overview || 'Published practice outline. Not legal advice.').slice(0, 160);
+      window.ramdaniSeo.setTitle(a.title + ' — Ramdani Law Firm');
+      window.ramdaniSeo.setDescription(desc);
+      window.ramdaniSeo.setCanonical(window.ramdaniSeo.origin + '/pages/practice-area.html?slug=' + encodeURIComponent(a.slug));
+      window.ramdaniSeo.setBreadcrumb([
+        { name: 'Home', url: window.ramdaniSeo.origin + '/' },
+        { name: 'Practice areas', url: window.ramdaniSeo.origin + '/pages/practice-areas.html' },
+        { name: a.title, url: window.ramdaniSeo.origin + '/pages/practice-area.html?slug=' + encodeURIComponent(a.slug) }
+      ]);
+      if (a.faqs && a.faqs.length) {
+        window.ramdaniSeo.setFAQSchema(a.faqs.map(function (f) { return [f.question, f.answer]; }));
+      }
+      window.ramdaniSeo.injectJSONLD('schema-practice', {
+        '@context': 'https://schema.org',
+        '@type': 'Service',
+        name: a.title,
+        description: desc,
+        provider: { '@type': 'LegalService', name: 'Ramdani Law Firm', url: window.ramdaniSeo.origin + '/' },
+        areaServed: { '@type': 'Country', name: 'Pakistan' }
+      });
+    }
+  }
+
+  window.ramdaniEducation = {
+    renderInternships: renderInternships,
+    bindInternshipApply: bindInternshipApply,
+    renderQuizzes: renderQuizzes,
+    renderQuiz: renderQuiz,
+    renderLibrary: renderLibrary,
+    renderFaq: renderFaq,
+    renderModules: renderModules,
+    renderModule: renderModule,
+    renderCases: renderCases,
+    renderCase: renderCase,
+    renderStatutes: renderStatutes,
+    renderHome: renderHome,
     renderSocieties: renderSocieties,
     renderChapters: renderChapters,
     renderLectures: renderLectures,
-    renderCertificates: renderCertificates
+    renderCertificates: renderCertificates,
+    renderPracticeAreas: renderPracticeAreas,
+    renderPracticeArea: renderPracticeArea
   };
 })();

@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Practice areas — Ramdani Law Firm</title>
-  <meta name="description" content="Practice areas — Ramdani Law Firm. Study outlines published by staff. Dera Ghazi Khan, Pakistan." />
+  <title>Practice outline — Ramdani Law Firm</title>
+  <meta name="description" content="Practice outline — Ramdani Law Firm. Study outlines published by staff. Dera Ghazi Khan, Pakistan." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;600;700&family=Inter:wght@400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap" rel="stylesheet" />
@@ -13,11 +13,11 @@
   <link rel="stylesheet" href="/css/brand.css" />
   <link rel="stylesheet" href="/css/rtl.css" />
   <link rel="icon" type="image/png" href="/assets/ramdani-logo.png" />
-<link rel="canonical" href="https://ramdani-law-firm.vercel.app/pages/practice-areas.html" />
-<meta property="og:title" content="Practice areas — Ramdani Law Firm" />
-<meta property="og:description" content="Practice areas — Ramdani Law Firm. Study outlines published by staff. Dera Ghazi Khan, Pakistan." />
+<link rel="canonical" href="https://ramdani-law-firm.vercel.app/pages/practice-area.html" />
+<meta property="og:title" content="Practice outline — Ramdani Law Firm" />
+<meta property="og:description" content="Practice outline — Ramdani Law Firm. Study outlines published by staff. Dera Ghazi Khan, Pakistan." />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://ramdani-law-firm.vercel.app/pages/practice-areas.html" />
+<meta property="og:url" content="https://ramdani-law-firm.vercel.app/pages/practice-area.html" />
 <meta property="og:image" content="https://ramdani-law-firm.vercel.app/assets/ramdani-logo.png" />
 </head>
 <body>
@@ -47,10 +47,10 @@
   </header>
   <main id="main-content">
     <section class="section"><div class="wrap">
-      <h1 data-i18n="practice_title"></h1>
-      <p class="lead" data-i18n="practice_lead"></p>
-      <p class="note">Staff-published outlines of the kinds of work the firm describes. Not legal advice, not a retainer, and not a guarantee of result. Team photos and case outcomes appear only if staff publish them.</p>
-      <div id="list" class="grid"></div>
+      <p><a href="/pages/practice-areas.html">All practice outlines</a></p>
+      <h1 id="areaTitle">Practice outline</h1>
+      <p class="lead" id="areaSummary"></p>
+      <div id="areaBody"></div>
     </div></section>
   </main>
   <footer class="site-footer">
@@ -75,7 +75,7 @@
   <script src="/js/education.js"></script>
   <script>
 document.addEventListener('DOMContentLoaded', function () {
-  if (window.ramdaniEducation) ramdaniEducation.renderPracticeAreas();
+  if (window.ramdaniEducation) ramdaniEducation.renderPracticeArea();
 });
 </script>
 </body>
