@@ -149,12 +149,22 @@
     var el = document.getElementById('faqList');
     if (!el) return;
     var items = [
-      ['Does this website create a lawyer–client relationship?', 'No. Public pages and forms are informational. A professional relationship starts only if the firm confirms an engagement.'],
-      ['Can I send confidential case documents here?', 'No. Do not upload privileged files to public forms. Use a channel the firm confirms after contact.'],
+      ['Does this website create a lawyer–client relationship?', 'No. Public pages and forms are informational. A professional relationship starts only if the firm confirms an engagement in writing.'],
+      ['Can I send confidential case documents here?', 'No. Do not upload privileged files or sensitive case facts to public forms. Use a channel the firm confirms after first contact.'],
+      ['Where is the firm based?', 'Dera Ghazi Khan, Punjab, Pakistan. A street address, phone, and email will appear when the firm publishes them. Until then, use the contact form.'],
+      ['Do you guarantee case results?', 'No. This site does not publish win rates, fake reviews, or guaranteed outcomes.'],
+      ['How do I request a consultation?', 'Use the consultation or contact form with your name, email, a short subject, and a non-privileged summary. Staff will reply using the details you give.'],
+      ['What is civil law work on this site?', 'A published outline of civil disputes and procedure (CPC and related statutes). It is not a filing and not advice on your facts.'],
+      ['Will you take every criminal matter?', 'No. Criminal instructions are accepted only after conflict checks and a confirmed engagement. Public forms are not a retainer.'],
+      ['Do you handle family cases?', 'Family-law outlines refer to MFLO and family-court procedure. Whether the firm can act in a particular matter is confirmed only in writing.'],
+      ['Can I upload property documents on the website?', 'No. Title deeds and mutation papers should wait until the firm asks for them on a confirmed channel.'],
       ['Are LAT/GAT quizzes official papers?', 'No. They are optional practice materials published by staff. They are not affiliated with any testing authority.'],
-      ['How do internships work?', 'Published listings appear on the Internships page. Applications go to staff for review. There is no automatic selection.'],
-      ['Are books sold on this site?', 'Free titles may be listed with a link. Paid titles are inquiry-only. Card checkout is not enabled.']
-    ];
+      ['Are case citations on the study pages verified?', 'Only notes marked verified by staff are public. Unverified or generated citations stay hidden.'],
+      ['Do you sell law books or take card payments here?', 'No. Paid titles are inquiry-only. This website does not process checkout or card payments.'],
+      ['How do internships work?', 'Published listings appear on the Internships page. Applications go to staff for review. There is no automatic selection and no fake placements.'],
+      ['Is the study-module catalogue a university degree?', 'No. It is a public study map. Staff add topics, quizzes, and verified case notes over time.'],
+      ['In which languages is the site available?', 'Public pages support English and Urdu. Advocate language skills are listed only on published profiles.']
+    ]
     items.push(['Are study modules a complete LLB course?', 'No. They are a public study map. Staff add topics, quizzes, and verified case notes over time.']);
     items.push(['Are case citations guaranteed accurate?', 'Only notes marked verified by staff are public. Unverified citations are hidden.']);
     items.push(['Do you host copyrighted law books as PDFs?', 'No. Library and statute pages list titles and official links. Paid or copyrighted books are inquiry-only.']);

@@ -34,7 +34,7 @@
         <a href="/pages/news.html" data-i18n="nav_news"></a>
         <a href="/pages/resources.html" data-i18n="nav_resources"></a>
         <a href="/pages/careers.html" data-i18n="nav_careers"></a>
-        <a href="/pages/contact.html" aria-current="page" data-i18n="nav_contact"></a>
+        <a href="/pages/contact.html" data-i18n="nav_contact"></a>
         <a href="/pages/consultation.html" data-i18n="nav_consult"></a>
         <a href="/admin/" data-i18n="nav_admin"></a></nav>
       <div class="lang-switch">
@@ -48,6 +48,8 @@
     <section class="section"><div class="wrap">
       <h1 data-i18n="contact_title"></h1>
       <p class="note" data-i18n="consult_note"></p>
+      <p>Dera Ghazi Khan, Punjab, Pakistan. Street address, phone, WhatsApp, and email will appear when the firm publishes them. Until then, use this form.</p>
+      <p class="note">Office hours, map embed, and a postal code are placeholders until staff confirm them. This form does not create a lawyer–client relationship.</p>
       <form class="form" id="contactForm">
         <input type="text" name="company_website" class="hidden" tabindex="-1" autocomplete="off" />
         <label><span data-i18n="form_name"></span><input name="full_name" required /></label>
@@ -61,6 +63,7 @@
           </select>
         </label>
         <label><span data-i18n="form_message"></span><textarea name="message" rows="6" required></textarea></label>
+        <label><input type="checkbox" name="consent" required /> I understand this form does not create a lawyer–client relationship and I will not attach privileged documents.</label>
         <button class="btn btn-primary" type="submit" data-i18n="form_send"></button>
         <p class="form-status"></p>
       </form>
@@ -84,6 +87,9 @@
   <script src="/js/components.js"></script>
   <script src="/js/auth.js"></script>
   <script src="/js/app.js"></script>
-  <script>document.addEventListener("DOMContentLoaded", function(){ ramdaniBindInquiry("contactForm","contact"); });</script>
+  <script>
+document.addEventListener("DOMContentLoaded", function(){ ramdaniBindInquiry("contactForm","contact"); });
+</script>
+
 </body>
 </html>
