@@ -7,7 +7,10 @@
     { id: 'articles', label: 'Insights', fields: ['title', 'slug', 'summary', 'status'] },
     { id: 'news', label: 'News', fields: ['title', 'slug', 'summary', 'status'] },
     { id: 'resources', label: 'Resources', fields: ['title', 'slug', 'summary', 'status'] },
-    { id: 'careers', label: 'Careers', fields: ['title', 'slug', 'summary', 'status'] }
+    { id: 'careers', label: 'Careers', fields: ['title', 'slug', 'summary', 'status'] },
+    { id: 'internships', label: 'Internships', fields: ['title', 'slug', 'summary', 'status'] },
+    { id: 'quizzes', label: 'Quizzes', fields: ['title', 'slug', 'summary', 'status'] },
+    { id: 'books', label: 'Library', fields: ['title', 'slug', 'summary', 'status'] }
   ];
 
   async function boot() {
