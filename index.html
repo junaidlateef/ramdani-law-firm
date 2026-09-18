@@ -558,6 +558,8 @@ html[dir="rtl"] .lead {
         <div class="admin-nav-group">
           <div class="admin-nav-group-title">Branding</div>
           <button type="button" data-table="__orgsettings">Organization settings</button>
+          <button type="button" data-table="__brandinglogo">Logo &amp; colors</button>
+          <button type="button" data-table="__brandingtype">Typography</button>
         </div>
         <button type="button" class="btn signout" id="signOutBtn">Sign out</button>
       </aside>
@@ -653,6 +655,48 @@ html[dir="rtl"] .lead {
               <label class="field-full"><span>Vision</span><textarea name="vision" rows="3"></textarea></label>
               <label class="field-full"><span>Values (comma-separated)</span><input name="values_csv" placeholder="Accuracy, Confidentiality, Integrity" /></label>
               <div class="form-actions"><button class="btn btn-primary" type="submit">Save changes</button><p id="orgSettingsNote" class="form-status"></p></div>
+            </form>
+          </div>
+
+          <div id="brandingLogoPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Logo &amp; colors</h2><p class="note">Logo URLs and brand colors. Publish to make this the live brand shown on the public site.</p></div></div>
+            <form id="brandingLogoForm" class="form admin-form">
+              <label><span>Status</span><select name="status"><option value="draft">Draft</option><option value="published">Published</option></select></label>
+              <label class="field-full"><span>Primary logo URL</span><input name="logo_primary_url" /></label>
+              <label><span>Light logo URL</span><input name="logo_light_url" /></label>
+              <label><span>Dark logo URL</span><input name="logo_dark_url" /></label>
+              <label><span>Mobile logo URL</span><input name="logo_mobile_url" /></label>
+              <label><span>Favicon URL</span><input name="favicon_url" /></label>
+              <label><span>Social share image URL</span><input name="social_share_image_url" /></label>
+              <label><span>Certificate logo URL</span><input name="certificate_logo_url" /></label>
+              <label><span>Education logo URL</span><input name="education_logo_url" /></label>
+              <label><span>Primary color</span><input name="color_primary" type="color" /></label>
+              <label><span>Secondary color</span><input name="color_secondary" type="color" /></label>
+              <label><span>Accent color</span><input name="color_accent" type="color" /></label>
+              <label><span>Background color</span><input name="color_background" type="color" /></label>
+              <label><span>Surface color</span><input name="color_surface" type="color" /></label>
+              <label><span>Text color</span><input name="color_text" type="color" /></label>
+              <label><span>Muted text color</span><input name="color_text_muted" type="color" /></label>
+              <label><span>Border color</span><input name="color_border" type="color" /></label>
+              <label><span>Success color</span><input name="color_success" type="color" /></label>
+              <label><span>Warning color</span><input name="color_warning" type="color" /></label>
+              <label><span>Error color</span><input name="color_error" type="color" /></label>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Save changes</button><p id="brandingLogoNote" class="form-status"></p></div>
+            </form>
+          </div>
+
+          <div id="brandingTypePanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Typography</h2><p class="note">Fonts and type scale, shared with the Logo &amp; colors record.</p></div></div>
+            <form id="brandingTypeForm" class="form admin-form">
+              <label><span>Status</span><select name="status"><option value="draft">Draft</option><option value="published">Published</option></select></label>
+              <label><span>Heading font</span><input name="font_heading" placeholder="e.g. Playfair Display" /></label>
+              <label><span>Body font</span><input name="font_body" placeholder="e.g. Inter" /></label>
+              <label><span>Urdu font</span><input name="font_urdu" placeholder="e.g. Noto Nastaliq Urdu" /></label>
+              <label><span>Font scale</span><input name="font_scale" type="number" step="0.05" min="0.5" max="2" /></label>
+              <label><span>Heading weight</span><input name="font_weight_heading" placeholder="e.g. 700" /></label>
+              <label><span>Body weight</span><input name="font_weight_body" placeholder="e.g. 400" /></label>
+              <label><span>Button font</span><input name="font_button" /></label>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Save changes</button><p id="brandingTypeNote" class="form-status"></p></div>
             </form>
           </div>
         </main>
@@ -3494,6 +3538,8 @@ window.ramdaniAuth = {
     document.getElementById('cancelEditBtn').addEventListener('click', resetEditor);
     document.getElementById('createForm').addEventListener('submit', saveRow);
     document.getElementById('orgSettingsForm').addEventListener('submit', saveOrgSettings);
+    document.getElementById('brandingLogoForm').addEventListener('submit', saveBrandingLogo);
+    document.getElementById('brandingTypeForm').addEventListener('submit', saveBrandingType);
   }
 
   var allStudents = [];
@@ -3618,11 +3664,84 @@ window.ramdaniAuth = {
     note.textContent = 'Saved.';
   }
 
+  var brandingId = null;
+  var brandingRow = null;
+
+  function fillBrandingForm(formId) {
+    var form = document.getElementById(formId);
+    if (!brandingRow) return;
+    Object.keys(brandingRow).forEach(function (k) {
+      var el = form.querySelector('[name="' + k + '"]');
+      if (el) el.value = brandingRow[k] == null ? '' : brandingRow[k];
+    });
+  }
+
+  async function loadBranding(formId, noteId) {
+    var note = document.getElementById(noteId);
+    note.className = 'form-status';
+    var res = await sb.from('branding_settings').select('*').order('updated_at', { ascending: false }).limit(1).maybeSingle();
+    if (res.error) {
+      note.className = 'form-status err';
+      note.textContent = 'Could not load branding — has the branding_settings table been created yet? (' + res.error.message + ')';
+      return;
+    }
+    brandingRow = res.data;
+    brandingId = brandingRow ? brandingRow.id : null;
+    if (brandingRow) {
+      fillBrandingForm(formId);
+      note.textContent = '';
+    } else {
+      note.textContent = 'No branding saved yet — fill in the form and save to create the first record.';
+    }
+  }
+
+  async function saveBranding(e, fields) {
+    e.preventDefault();
+    var form = e.target;
+    var note = form.querySelector('.form-status');
+    note.className = 'form-status';
+    note.textContent = 'Saving…';
+    var fd = new FormData(form);
+    var payload = {};
+    fields.forEach(function (f) {
+      var v = fd.get(f);
+      if (f === 'font_scale') { payload[f] = v ? Number(v) : null; return; }
+      payload[f] = v || null;
+    });
+    var res;
+    if (brandingId) {
+      res = await sb.from('branding_settings').update(payload).eq('id', brandingId).select().single();
+    } else {
+      res = await sb.from('branding_settings').insert(payload).select().single();
+    }
+    if (res.error) {
+      note.className = 'form-status err';
+      note.textContent = res.error.message;
+      return;
+    }
+    brandingRow = res.data;
+    brandingId = brandingRow.id;
+    note.className = 'form-status ok';
+    note.textContent = 'Saved.';
+  }
+
+  function saveBrandingLogo(e) {
+    return saveBranding(e, ['status','logo_primary_url','logo_light_url','logo_dark_url','logo_mobile_url',
+      'favicon_url','social_share_image_url','certificate_logo_url','education_logo_url',
+      'color_primary','color_secondary','color_accent','color_background','color_surface',
+      'color_text','color_text_muted','color_border','color_success','color_warning','color_error']);
+  }
+
+  function saveBrandingType(e) {
+    return saveBranding(e, ['status','font_heading','font_body','font_urdu','font_scale',
+      'font_weight_heading','font_weight_body','font_button']);
+  }
+
   var currentRows = [];
   var editingId = null;
 
   function showAdminView(view) {
-    var panels = ['dashboardPanel','studentsPanel','adminsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','orgSettingsPanel'];
+    var panels = ['dashboardPanel','studentsPanel','adminsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','orgSettingsPanel','brandingLogoPanel','brandingTypePanel'];
     panels.forEach(function(id){ var el=document.getElementById(id); if(el){ el.hidden=true; el.classList.remove('is-active'); }});
     document.querySelectorAll('.admin-nav [data-table]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-table')===view); });
     document.getElementById('adminApp').classList.remove('nav-open');
@@ -3633,6 +3752,8 @@ window.ramdaniAuth = {
     if(view==='__applications') { activate('applicationsPanel','Internship applications'); loadInternshipApps(); return; }
     if(view==='__joinrequests') { activate('joinrequestsPanel','Society / chapter requests'); loadJoinRequests(); return; }
     if(view==='__orgsettings') { activate('orgSettingsPanel','Organization settings'); loadOrgSettings(); return; }
+    if(view==='__brandinglogo') { activate('brandingLogoPanel','Logo & colors'); loadBranding('brandingLogoForm','brandingLogoNote'); return; }
+    if(view==='__brandingtype') { activate('brandingTypePanel','Typography'); loadBranding('brandingTypeForm','brandingTypeNote'); return; }
     activate('contentPanel', (TABLES.find(function(t){return t.id===view;})||{}).label || 'Content');
     loadTable(view);
   }
