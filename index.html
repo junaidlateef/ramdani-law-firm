@@ -560,6 +560,16 @@ html[dir="rtl"] .lead {
           <button type="button" data-table="__orgsettings">Organization settings</button>
           <button type="button" data-table="__brandinglogo">Logo &amp; colors</button>
           <button type="button" data-table="__brandingtype">Typography</button>
+          <button type="button" data-table="__contactinfo">Contact info</button>
+          <button type="button" data-table="__seosettings">SEO settings</button>
+          <button type="button" data-table="__systemsettings">System settings</button>
+          <button type="button" data-table="__disclaimers">Disclaimers</button>
+          <button type="button" data-table="__homepagesections">Homepage sections</button>
+          <button type="button" data-table="__navigation">Navigation</button>
+          <button type="button" data-table="__certtemplates">Certificate templates</button>
+          <button type="button" data-table="__certissuances">Certificate issuances</button>
+          <button type="button" data-table="__seooverrides">SEO overrides</button>
+          <button type="button" data-table="__notifications">Notifications</button>
         </div>
         <button type="button" class="btn signout" id="signOutBtn">Sign out</button>
       </aside>
@@ -698,6 +708,159 @@ html[dir="rtl"] .lead {
               <label><span>Button font</span><input name="font_button" /></label>
               <div class="form-actions"><button class="btn btn-primary" type="submit">Save changes</button><p id="brandingTypeNote" class="form-status"></p></div>
             </form>
+          </div>
+
+          <div id="contactInfoPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Contact info</h2><p class="note">Public contact details shown on the site (footer, contact page, structured data).</p></div></div>
+            <form id="contactInfoForm" class="form admin-form">
+              <label><span>Official email</span><input name="official_email" type="email" /></label>
+              <label><span>Inquiry email</span><input name="inquiry_email" type="email" /></label>
+              <label><span>Consultation email</span><input name="consultation_email" type="email" /></label>
+              <label><span>Phone</span><input name="phone" /></label>
+              <label><span>WhatsApp</span><input name="whatsapp" /></label>
+              <label class="field-full"><span>Office address</span><input name="office_address" /></label>
+              <label><span>City</span><input name="city" /></label>
+              <label><span>Province</span><input name="province" /></label>
+              <label><span>Country</span><input name="country" placeholder="Pakistan" /></label>
+              <label class="field-full"><span>Map URL</span><input name="map_url" /></label>
+              <label class="field-full"><span>Office hours (JSON)</span><textarea name="office_hours" rows="4" placeholder='[{"day":"Mon-Fri","hours":"9am-5pm"}]'></textarea></label>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Save changes</button><p id="contactInfoNote" class="form-status"></p></div>
+            </form>
+          </div>
+
+          <div id="seoSettingsPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>SEO settings</h2><p class="note">Site-wide search and social metadata defaults.</p></div></div>
+            <form id="seoSettingsForm" class="form admin-form">
+              <label class="field-full"><span>Site title</span><input name="site_title" /></label>
+              <label class="field-full"><span>Default meta description</span><textarea name="default_meta_desc" rows="3"></textarea></label>
+              <label><span>Favicon URL</span><input name="favicon_url" /></label>
+              <label><span>OG image URL</span><input name="og_image_url" /></label>
+              <label><span>Robots directive</span><input name="robots_directive" placeholder="index, follow" /></label>
+              <label><span>Canonical base URL</span><input name="canonical_base_url" /></label>
+              <label class="field-full"><span>Structured data (JSON-LD)</span><textarea name="structured_data" rows="5" placeholder='{"@context":"https://schema.org", ...}'></textarea></label>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Save changes</button><p id="seoSettingsNote" class="form-status"></p></div>
+            </form>
+          </div>
+
+          <div id="systemSettingsPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>System settings</h2><p class="note">Operational and behavior settings. Staff-only — not shown on the public site.</p></div></div>
+            <form id="systemSettingsForm" class="form admin-form">
+              <label><span>Default language</span><select name="default_language"><option value="en">English</option><option value="ur">Urdu</option></select></label>
+              <label><span>Default theme</span><select name="default_theme"><option value="light">Light</option><option value="dark">Dark</option></select></label>
+              <label><span>Maintenance mode</span><select name="maintenance_mode"><option value="false">Off</option><option value="true">On</option></select></label>
+              <label><span>Default pagination</span><input name="default_pagination" type="number" min="1" /></label>
+              <label><span>Date format</span><input name="date_format" placeholder="DD-MM-YYYY" /></label>
+              <label><span>Timezone</span><input name="timezone" placeholder="Asia/Karachi" /></label>
+              <label class="field-full"><span>Behavior flags (JSON)</span><textarea name="flags" rows="4" placeholder='{"flag_name": true}'></textarea></label>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Save changes</button><p id="systemSettingsNote" class="form-status"></p></div>
+            </form>
+          </div>
+
+          <div id="disclaimersPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Disclaimers</h2><p class="note">Legal disclaimers keyed by usage location (general, educational, case study, consultation, certificate, privacy, terms, cookie). Each key is unique — saving with an existing key updates it.</p></div></div>
+            <form id="disclaimerForm" class="form admin-form">
+              <label><span>Disclaimer key</span><input name="disclaimer_key" required placeholder="general / educational / case_study / consultation / certificate / privacy / terms / cookie" /></label>
+              <label><span>Title</span><input name="title" /></label>
+              <label><span>Enabled</span><select name="is_enabled"><option value="true">Enabled</option><option value="false">Disabled</option></select></label>
+              <label class="field-full"><span>Body</span><textarea name="body" rows="5"></textarea></label>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Save disclaimer</button><button class="btn" id="cancelDisclaimerEditBtn" type="button" hidden>Cancel edit</button><p id="disclaimerNote" class="form-status"></p></div>
+            </form>
+            <div style="height:1rem"></div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Key</th><th>Title</th><th>Enabled</th><th>Actions</th></tr></thead><tbody id="disclaimersBody"></tbody></table></div>
+          </div>
+
+          <div id="homepageSectionsPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Homepage sections</h2><p class="note">Content blocks shown on the homepage (hero, introduction, practice areas, services, people, education, insights, news, resources, careers, CTA, footer). Each key is unique — saving with an existing key updates it.</p></div></div>
+            <form id="homepageSectionForm" class="form admin-form">
+              <label><span>Section key</span><input name="section_key" required placeholder="hero / introduction / practice_areas / services / people / education / insights / news / resources / careers / cta / footer" /></label>
+              <label><span>Title</span><input name="title" /></label>
+              <label><span>Subtitle</span><input name="subtitle" /></label>
+              <label><span>Enabled</span><select name="is_enabled"><option value="true">Enabled</option><option value="false">Disabled</option></select></label>
+              <label><span>Sort order</span><input name="sort_order" type="number" /></label>
+              <label><span>CTA label</span><input name="cta_label" /></label>
+              <label><span>CTA URL</span><input name="cta_url" /></label>
+              <label class="field-full"><span>Image URL</span><input name="image_url" /></label>
+              <label class="field-full"><span>Content</span><textarea name="content" rows="5"></textarea></label>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Save section</button><button class="btn" id="cancelHomepageSectionEditBtn" type="button" hidden>Cancel edit</button><p id="homepageSectionNote" class="form-status"></p></div>
+            </form>
+            <div style="height:1rem"></div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Key</th><th>Title</th><th>Order</th><th>Enabled</th><th>Actions</th></tr></thead><tbody id="homepageSectionsBody"></tbody></table></div>
+          </div>
+
+          <div id="navigationPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Navigation</h2><p class="note">Menu links for main, header, footer and mobile navigation. Set a parent to nest a link under another item.</p></div></div>
+            <form id="navigationForm" class="form admin-form">
+              <label><span>Menu</span><select name="menu"><option value="main">Main</option><option value="header">Header</option><option value="footer">Footer</option><option value="mobile">Mobile</option></select></label>
+              <label><span>Label</span><input name="label" required /></label>
+              <label class="field-full"><span>URL</span><input name="url" required /></label>
+              <label><span>Parent item</span><select name="parent_id"><option value="">— none (top-level) —</option></select></label>
+              <label><span>Sort order</span><input name="sort_order" type="number" /></label>
+              <label><span>Visible</span><select name="is_visible"><option value="true">Visible</option><option value="false">Hidden</option></select></label>
+              <label><span>Open in new tab</span><select name="open_new_tab"><option value="false">No</option><option value="true">Yes</option></select></label>
+              <label><span>Call-to-action style</span><select name="is_cta"><option value="false">No</option><option value="true">Yes</option></select></label>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Save link</button><button class="btn" id="cancelNavigationEditBtn" type="button" hidden>Cancel edit</button><p id="navigationNote" class="form-status"></p></div>
+            </form>
+            <div style="height:1rem"></div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Menu</th><th>Label</th><th>URL</th><th>Parent</th><th>Order</th><th>Visible</th><th>Actions</th></tr></thead><tbody id="navigationBody"></tbody></table></div>
+          </div>
+
+          <div id="certTemplatesPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Certificate templates</h2><p class="note">Design templates used when issuing certificates. Exactly one template can be marked default.</p></div></div>
+            <form id="certTemplateForm" class="form admin-form">
+              <label><span>Template name</span><input name="name" required placeholder="Template A" /></label>
+              <label><span>Status</span><select name="status"><option value="draft">Draft</option><option value="published">Published</option></select></label>
+              <label><span>Certificate logo URL</span><input name="cert_logo_url" /></label>
+              <label><span>Organization name (display)</span><input name="org_name_display" /></label>
+              <label><span>Certificate title</span><input name="cert_title" placeholder="Certificate of Completion" /></label>
+              <label><span>Signature name</span><input name="signature_name" /></label>
+              <label><span>Signature image URL</span><input name="signature_image_url" /></label>
+              <label><span>Seal image URL</span><input name="seal_image_url" /></label>
+              <label><span>Background image URL</span><input name="background_url" /></label>
+              <label><span>Primary color</span><input name="color_primary" type="color" /></label>
+              <label><span>Secondary color</span><input name="color_secondary" type="color" /></label>
+              <label><span>Numbering format</span><input name="numbering_format" placeholder="RLF-CERT-{YYYY}-{SEQ}" /></label>
+              <label class="field-full"><span>Footer text</span><textarea name="footer_text" rows="2"></textarea></label>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Save template</button><button class="btn" id="cancelCertTemplateEditBtn" type="button" hidden>Cancel edit</button><p id="certTemplateNote" class="form-status"></p></div>
+            </form>
+            <div style="height:1rem"></div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Name</th><th>Status</th><th>Default</th><th>Actions</th></tr></thead><tbody id="certTemplatesBody"></tbody></table></div>
+          </div>
+
+          <div id="certIssuancesPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Certificate issuances</h2><p class="note">Issue a numbered, verifiable certificate to a student for a completed module. Verification code is generated automatically.</p></div></div>
+            <form id="certIssuanceForm" class="form admin-form">
+              <label><span>Student</span><select name="student_id" required><option value="">Select student…</option></select></label>
+              <label><span>Module</span><select name="module_id"><option value="">Select module…</option></select></label>
+              <label><span>Template</span><select name="template_id"><option value="">Use default template</option></select></label>
+              <label><span>Certificate number</span><input name="certificate_number" required placeholder="RLF-CERT-2026-0001" /></label>
+              <label><span>Issue date</span><input name="issue_date" type="date" /></label>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Issue certificate</button><p id="certIssuanceNote" class="form-status"></p></div>
+            </form>
+            <div style="height:1rem"></div>
+            <div class="admin-toolbar"><input type="search" id="certIssuanceSearch" placeholder="Search by student, certificate number or module" aria-label="Search issuances" /></div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Cert #</th><th>Student</th><th>Module</th><th>Template</th><th>Issue date</th><th>Status</th><th>Verify code</th><th>Actions</th></tr></thead><tbody id="certIssuancesBody"></tbody></table></div>
+          </div>
+
+          <div id="seoOverridesPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>SEO overrides</h2><p class="note">Per-record SEO metadata that overrides the site-wide SEO defaults for a specific piece of content. Select a content type and record, then edit its SEO fields.</p></div></div>
+            <form id="seoOverrideForm" class="form admin-form">
+              <label><span>Content type</span><select name="entity" id="seoOverrideEntitySelect"></select></label>
+              <label><span>Record</span><select name="entity_id" id="seoOverrideRecordSelect"><option value="">Select record…</option></select></label>
+              <label class="field-full"><span>SEO title</span><input name="seo_title" /></label>
+              <label class="field-full"><span>Meta description</span><textarea name="meta_desc" rows="3"></textarea></label>
+              <label><span>Slug override</span><input name="slug_override" /></label>
+              <label><span>Canonical URL</span><input name="canonical_url" /></label>
+              <label class="field-full"><span>Social image URL</span><input name="social_image" /></label>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Save override</button><button class="btn" id="deleteSeoOverrideBtn" type="button" hidden>Remove override</button><p id="seoOverrideNote" class="form-status"></p></div>
+            </form>
+            <div style="height:1rem"></div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Content type</th><th>Record</th><th>SEO title</th><th>Actions</th></tr></thead><tbody id="seoOverridesBody"></tbody></table></div>
+          </div>
+
+          <div id="notificationsPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Notifications</h2><p class="note">System-generated staff notifications (new inquiries, new students, applications, pending requests, warnings).</p></div></div>
+            <div class="admin-toolbar"><button type="button" class="btn" id="markAllNotificationsReadBtn">Mark all as read</button></div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Event</th><th>Title</th><th>Body</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody id="notificationsBody"></tbody></table></div>
           </div>
         </main>
       </section>
@@ -3540,6 +3703,70 @@ window.ramdaniAuth = {
     document.getElementById('orgSettingsForm').addEventListener('submit', saveOrgSettings);
     document.getElementById('brandingLogoForm').addEventListener('submit', saveBrandingLogo);
     document.getElementById('brandingTypeForm').addEventListener('submit', saveBrandingType);
+    document.getElementById('contactInfoForm').addEventListener('submit', saveContactInfo);
+    document.getElementById('seoSettingsForm').addEventListener('submit', saveSeoSettings);
+    document.getElementById('systemSettingsForm').addEventListener('submit', saveSystemSettings);
+    document.getElementById('disclaimerForm').addEventListener('submit', saveDisclaimer);
+    document.getElementById('cancelDisclaimerEditBtn').addEventListener('click', cancelDisclaimerEdit);
+    document.getElementById('disclaimersBody').addEventListener('click', function (e) {
+      var editBtn = e.target.closest('[data-edit-disclaimer]');
+      if (editBtn) { editDisclaimer(editBtn.getAttribute('data-edit-disclaimer')); return; }
+      var delBtn = e.target.closest('[data-delete-disclaimer]');
+      if (delBtn) { deleteDisclaimer(delBtn.getAttribute('data-delete-disclaimer')); }
+    });
+    document.getElementById('homepageSectionForm').addEventListener('submit', saveHomepageSection);
+    document.getElementById('cancelHomepageSectionEditBtn').addEventListener('click', cancelHomepageSectionEdit);
+    document.getElementById('homepageSectionsBody').addEventListener('click', function (e) {
+      var editBtn = e.target.closest('[data-edit-section]');
+      if (editBtn) { editHomepageSection(editBtn.getAttribute('data-edit-section')); return; }
+      var delBtn = e.target.closest('[data-delete-section]');
+      if (delBtn) { deleteHomepageSection(delBtn.getAttribute('data-delete-section')); }
+    });
+    document.getElementById('navigationForm').addEventListener('submit', saveNavigation);
+    document.getElementById('cancelNavigationEditBtn').addEventListener('click', cancelNavigationEdit);
+    document.getElementById('navigationBody').addEventListener('click', function (e) {
+      var editBtn = e.target.closest('[data-edit-nav]');
+      if (editBtn) { editNavigation(editBtn.getAttribute('data-edit-nav')); return; }
+      var delBtn = e.target.closest('[data-delete-nav]');
+      if (delBtn) { deleteNavigation(delBtn.getAttribute('data-delete-nav')); }
+    });
+    document.getElementById('certTemplateForm').addEventListener('submit', saveCertTemplate);
+    document.getElementById('cancelCertTemplateEditBtn').addEventListener('click', cancelCertTemplateEdit);
+    document.getElementById('certTemplatesBody').addEventListener('click', function (e) {
+      var editBtn = e.target.closest('[data-edit-cert-template]');
+      if (editBtn) { editCertTemplate(editBtn.getAttribute('data-edit-cert-template')); return; }
+      var defBtn = e.target.closest('[data-default-cert-template]');
+      if (defBtn) { setDefaultCertTemplate(defBtn.getAttribute('data-default-cert-template')); return; }
+      var delBtn = e.target.closest('[data-delete-cert-template]');
+      if (delBtn) { deleteCertTemplate(delBtn.getAttribute('data-delete-cert-template')); }
+    });
+    document.getElementById('certIssuanceForm').addEventListener('submit', saveCertIssuance);
+    document.getElementById('certIssuanceSearch').addEventListener('input', renderCertIssuances);
+    document.getElementById('certIssuancesBody').addEventListener('click', function (e) {
+      var revokeBtn = e.target.closest('[data-revoke-cert]');
+      if (revokeBtn) { revokeCertIssuance(revokeBtn.getAttribute('data-revoke-cert')); return; }
+      var reissueBtn = e.target.closest('[data-reissue-cert]');
+      if (reissueBtn) { reissueCertIssuance(reissueBtn.getAttribute('data-reissue-cert')); return; }
+      var delBtn = e.target.closest('[data-delete-cert-issuance]');
+      if (delBtn) { deleteCertIssuance(delBtn.getAttribute('data-delete-cert-issuance')); }
+    });
+    document.getElementById('markAllNotificationsReadBtn').addEventListener('click', markAllNotificationsRead);
+    document.getElementById('seoOverrideEntitySelect').addEventListener('change', function () { loadSeoOverrideRecords().then(loadSeoOverrideForRecord); });
+    document.getElementById('seoOverrideRecordSelect').addEventListener('change', loadSeoOverrideForRecord);
+    document.getElementById('seoOverrideForm').addEventListener('submit', saveSeoOverride);
+    document.getElementById('deleteSeoOverrideBtn').addEventListener('click', function () { if (seoOverrideEditingId) deleteSeoOverrideById(seoOverrideEditingId); });
+    document.getElementById('seoOverridesBody').addEventListener('click', function (e) {
+      var jumpBtn = e.target.closest('[data-jump-seo-override]');
+      if (jumpBtn) { var parts = jumpBtn.getAttribute('data-jump-seo-override').split('|'); jumpToSeoOverride(parts[0], parts[1]); return; }
+      var delBtn = e.target.closest('[data-delete-seo-override]');
+      if (delBtn) { deleteSeoOverrideById(delBtn.getAttribute('data-delete-seo-override')); }
+    });
+    document.getElementById('notificationsBody').addEventListener('click', function (e) {
+      var readBtn = e.target.closest('[data-mark-read]');
+      if (readBtn) { markNotificationRead(readBtn.getAttribute('data-mark-read')); return; }
+      var delBtn = e.target.closest('[data-delete-notification]');
+      if (delBtn) { deleteNotification(delBtn.getAttribute('data-delete-notification')); }
+    });
   }
 
   var allStudents = [];
@@ -3737,11 +3964,842 @@ window.ramdaniAuth = {
       'font_weight_heading','font_weight_body','font_button']);
   }
 
+  var contactInfoId = null;
+
+  async function loadContactInfo() {
+    var note = document.getElementById('contactInfoNote');
+    note.className = 'form-status';
+    var res = await sb.from('contact_info').select('*').limit(1).maybeSingle();
+    if (res.error) {
+      note.className = 'form-status err';
+      note.textContent = 'Could not load contact info — has the contact_info table been created yet? (' + res.error.message + ')';
+      return;
+    }
+    var row = res.data;
+    var form = document.getElementById('contactInfoForm');
+    contactInfoId = row ? row.id : null;
+    if (row) {
+      Object.keys(row).forEach(function (k) {
+        var el = form.querySelector('[name="' + k + '"]');
+        if (!el) return;
+        if (k === 'office_hours') { el.value = row[k] ? JSON.stringify(row[k], null, 2) : ''; return; }
+        el.value = row[k] == null ? '' : row[k];
+      });
+      note.textContent = '';
+    } else {
+      note.textContent = 'No contact info saved yet — fill in the form and save to create the first record.';
+    }
+  }
+
+  async function saveContactInfo(e) {
+    e.preventDefault();
+    var form = e.target;
+    var note = document.getElementById('contactInfoNote');
+    note.className = 'form-status';
+    var fd = new FormData(form);
+    var officeHoursRaw = (fd.get('office_hours') || '').trim();
+    var officeHours = null;
+    if (officeHoursRaw) {
+      try { officeHours = JSON.parse(officeHoursRaw); }
+      catch (err) {
+        note.className = 'form-status err';
+        note.textContent = 'Office hours must be valid JSON — ' + err.message;
+        return;
+      }
+    }
+    note.textContent = 'Saving…';
+    var payload = {
+      official_email: fd.get('official_email') || null,
+      inquiry_email: fd.get('inquiry_email') || null,
+      consultation_email: fd.get('consultation_email') || null,
+      phone: fd.get('phone') || null,
+      whatsapp: fd.get('whatsapp') || null,
+      office_address: fd.get('office_address') || null,
+      city: fd.get('city') || null,
+      province: fd.get('province') || null,
+      country: fd.get('country') || null,
+      map_url: fd.get('map_url') || null,
+      office_hours: officeHours
+    };
+    var res;
+    if (contactInfoId) {
+      res = await sb.from('contact_info').update(payload).eq('id', contactInfoId);
+    } else {
+      res = await sb.from('contact_info').insert(payload).select().single();
+      if (!res.error && res.data) contactInfoId = res.data.id;
+    }
+    if (res.error) {
+      note.className = 'form-status err';
+      note.textContent = res.error.message;
+      return;
+    }
+    note.className = 'form-status ok';
+    note.textContent = 'Saved.';
+  }
+
+  async function loadJsonSingleton(opts) {
+    // opts: {table, formId, noteId, jsonFields:[], idSetter, idGetter}
+    var note = document.getElementById(opts.noteId);
+    note.className = 'form-status';
+    var res = await sb.from(opts.table).select('*').limit(1).maybeSingle();
+    if (res.error) {
+      note.className = 'form-status err';
+      note.textContent = 'Could not load — has the ' + opts.table + ' table been created yet? (' + res.error.message + ')';
+      return;
+    }
+    var row = res.data;
+    var form = document.getElementById(opts.formId);
+    opts.idSetter(row ? row.id : null);
+    if (row) {
+      Object.keys(row).forEach(function (k) {
+        var el = form.querySelector('[name="' + k + '"]');
+        if (!el) return;
+        if (opts.jsonFields.indexOf(k) !== -1) { el.value = row[k] ? JSON.stringify(row[k], null, 2) : ''; return; }
+        if (el.tagName === 'SELECT' && typeof row[k] === 'boolean') { el.value = String(row[k]); return; }
+        el.value = row[k] == null ? '' : row[k];
+      });
+      note.textContent = '';
+    } else {
+      note.textContent = 'No record saved yet — fill in the form and save to create the first one.';
+    }
+  }
+
+  var seoSettingsId = null;
+  function loadSeoSettings() {
+    return loadJsonSingleton({ table: 'seo_settings', formId: 'seoSettingsForm', noteId: 'seoSettingsNote',
+      jsonFields: ['structured_data'], idSetter: function (v) { seoSettingsId = v; } });
+  }
+  async function saveSeoSettings(e) {
+    e.preventDefault();
+    var form = e.target;
+    var note = document.getElementById('seoSettingsNote');
+    note.className = 'form-status';
+    var fd = new FormData(form);
+    var structuredRaw = (fd.get('structured_data') || '').trim();
+    var structured = null;
+    if (structuredRaw) {
+      try { structured = JSON.parse(structuredRaw); }
+      catch (err) { note.className = 'form-status err'; note.textContent = 'Structured data must be valid JSON — ' + err.message; return; }
+    }
+    note.textContent = 'Saving…';
+    var payload = {
+      site_title: fd.get('site_title') || null,
+      default_meta_desc: fd.get('default_meta_desc') || null,
+      favicon_url: fd.get('favicon_url') || null,
+      og_image_url: fd.get('og_image_url') || null,
+      robots_directive: fd.get('robots_directive') || null,
+      canonical_base_url: fd.get('canonical_base_url') || null,
+      structured_data: structured
+    };
+    var res;
+    if (seoSettingsId) {
+      res = await sb.from('seo_settings').update(payload).eq('id', seoSettingsId);
+    } else {
+      res = await sb.from('seo_settings').insert(payload).select().single();
+      if (!res.error && res.data) seoSettingsId = res.data.id;
+    }
+    if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; return; }
+    note.className = 'form-status ok';
+    note.textContent = 'Saved.';
+  }
+
+  var systemSettingsId = null;
+  function loadSystemSettings() {
+    return loadJsonSingleton({ table: 'system_settings', formId: 'systemSettingsForm', noteId: 'systemSettingsNote',
+      jsonFields: ['flags'], idSetter: function (v) { systemSettingsId = v; } });
+  }
+  async function saveSystemSettings(e) {
+    e.preventDefault();
+    var form = e.target;
+    var note = document.getElementById('systemSettingsNote');
+    note.className = 'form-status';
+    var fd = new FormData(form);
+    var flagsRaw = (fd.get('flags') || '').trim();
+    var flags = null;
+    if (flagsRaw) {
+      try { flags = JSON.parse(flagsRaw); }
+      catch (err) { note.className = 'form-status err'; note.textContent = 'Flags must be valid JSON — ' + err.message; return; }
+    }
+    note.textContent = 'Saving…';
+    var payload = {
+      default_language: fd.get('default_language') || null,
+      default_theme: fd.get('default_theme') || null,
+      maintenance_mode: fd.get('maintenance_mode') === 'true',
+      default_pagination: fd.get('default_pagination') ? Number(fd.get('default_pagination')) : null,
+      date_format: fd.get('date_format') || null,
+      timezone: fd.get('timezone') || null,
+      flags: flags
+    };
+    var res;
+    if (systemSettingsId) {
+      res = await sb.from('system_settings').update(payload).eq('id', systemSettingsId);
+    } else {
+      res = await sb.from('system_settings').insert(payload).select().single();
+      if (!res.error && res.data) systemSettingsId = res.data.id;
+    }
+    if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; return; }
+    note.className = 'form-status ok';
+    note.textContent = 'Saved.';
+  }
+
+  var disclaimerEditingId = null;
+  var disclaimersCache = [];
+
+  async function loadDisclaimers() {
+    var note = document.getElementById('disclaimerNote');
+    note.className = 'form-status';
+    var res = await sb.from('disclaimers').select('*').order('disclaimer_key');
+    var body = document.getElementById('disclaimersBody');
+    if (res.error) {
+      note.className = 'form-status err';
+      note.textContent = 'Could not load disclaimers — has the disclaimers table been created yet? (' + res.error.message + ')';
+      body.innerHTML = '';
+      return;
+    }
+    disclaimersCache = res.data || [];
+    note.textContent = '';
+    body.innerHTML = disclaimersCache.map(function (r) {
+      return '<tr><td>' + escapeHtml(r.disclaimer_key) + '</td><td>' + escapeHtml(r.title || '') + '</td><td>' +
+        (r.is_enabled ? 'Enabled' : 'Disabled') + '</td><td>' +
+        '<button type="button" class="btn" data-edit-disclaimer="' + r.id + '">Edit</button> ' +
+        '<button type="button" class="btn" data-delete-disclaimer="' + r.id + '">Delete</button></td></tr>';
+    }).join('') || '<tr><td colspan="4">No disclaimers yet.</td></tr>';
+  }
+
+  function editDisclaimer(id) {
+    var row = disclaimersCache.find(function (r) { return r.id === id; });
+    if (!row) return;
+    var form = document.getElementById('disclaimerForm');
+    form.querySelector('[name="disclaimer_key"]').value = row.disclaimer_key || '';
+    form.querySelector('[name="title"]').value = row.title || '';
+    form.querySelector('[name="is_enabled"]').value = String(!!row.is_enabled);
+    form.querySelector('[name="body"]').value = row.body || '';
+    disclaimerEditingId = row.id;
+    document.getElementById('cancelDisclaimerEditBtn').hidden = false;
+  }
+
+  function cancelDisclaimerEdit() {
+    disclaimerEditingId = null;
+    document.getElementById('disclaimerForm').reset();
+    document.getElementById('cancelDisclaimerEditBtn').hidden = true;
+  }
+
+  async function deleteDisclaimer(id) {
+    if (!confirm('Delete this disclaimer?')) return;
+    var res = await sb.from('disclaimers').delete().eq('id', id);
+    var note = document.getElementById('disclaimerNote');
+    if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; return; }
+    if (disclaimerEditingId === id) cancelDisclaimerEdit();
+    loadDisclaimers();
+  }
+
+  async function saveDisclaimer(e) {
+    e.preventDefault();
+    var form = e.target;
+    var note = document.getElementById('disclaimerNote');
+    note.className = 'form-status';
+    var fd = new FormData(form);
+    var key = (fd.get('disclaimer_key') || '').trim();
+    if (!key) { note.className = 'form-status err'; note.textContent = 'Disclaimer key is required.'; return; }
+    note.textContent = 'Saving…';
+    var payload = {
+      disclaimer_key: key,
+      title: fd.get('title') || null,
+      body: fd.get('body') || null,
+      is_enabled: fd.get('is_enabled') === 'true'
+    };
+    var res;
+    if (disclaimerEditingId) {
+      res = await sb.from('disclaimers').update(payload).eq('id', disclaimerEditingId);
+    } else {
+      res = await sb.from('disclaimers').upsert(payload, { onConflict: 'disclaimer_key' });
+    }
+    if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; return; }
+    note.className = 'form-status ok';
+    note.textContent = 'Saved.';
+    cancelDisclaimerEdit();
+    loadDisclaimers();
+  }
+
+  var homepageSectionEditingId = null;
+  var homepageSectionsCache = [];
+
+  async function loadHomepageSections() {
+    var note = document.getElementById('homepageSectionNote');
+    note.className = 'form-status';
+    var res = await sb.from('homepage_sections').select('*').order('sort_order').order('section_key');
+    var body = document.getElementById('homepageSectionsBody');
+    if (res.error) {
+      note.className = 'form-status err';
+      note.textContent = 'Could not load sections — has the homepage_sections table been created yet? (' + res.error.message + ')';
+      body.innerHTML = '';
+      return;
+    }
+    homepageSectionsCache = res.data || [];
+    note.textContent = '';
+    body.innerHTML = homepageSectionsCache.map(function (r) {
+      return '<tr><td>' + escapeHtml(r.section_key) + '</td><td>' + escapeHtml(r.title || '') + '</td><td>' +
+        (r.sort_order == null ? '' : r.sort_order) + '</td><td>' + (r.is_enabled ? 'Enabled' : 'Disabled') + '</td><td>' +
+        '<button type="button" class="btn" data-edit-section="' + r.id + '">Edit</button> ' +
+        '<button type="button" class="btn" data-delete-section="' + r.id + '">Delete</button></td></tr>';
+    }).join('') || '<tr><td colspan="5">No homepage sections yet.</td></tr>';
+  }
+
+  function editHomepageSection(id) {
+    var row = homepageSectionsCache.find(function (r) { return r.id === id; });
+    if (!row) return;
+    var form = document.getElementById('homepageSectionForm');
+    form.querySelector('[name="section_key"]').value = row.section_key || '';
+    form.querySelector('[name="title"]').value = row.title || '';
+    form.querySelector('[name="subtitle"]').value = row.subtitle || '';
+    form.querySelector('[name="is_enabled"]').value = String(!!row.is_enabled);
+    form.querySelector('[name="sort_order"]').value = row.sort_order == null ? '' : row.sort_order;
+    form.querySelector('[name="cta_label"]').value = row.cta_label || '';
+    form.querySelector('[name="cta_url"]').value = row.cta_url || '';
+    form.querySelector('[name="image_url"]').value = row.image_url || '';
+    form.querySelector('[name="content"]').value = row.content || '';
+    homepageSectionEditingId = row.id;
+    document.getElementById('cancelHomepageSectionEditBtn').hidden = false;
+  }
+
+  function cancelHomepageSectionEdit() {
+    homepageSectionEditingId = null;
+    document.getElementById('homepageSectionForm').reset();
+    document.getElementById('cancelHomepageSectionEditBtn').hidden = true;
+  }
+
+  async function deleteHomepageSection(id) {
+    if (!confirm('Delete this homepage section?')) return;
+    var res = await sb.from('homepage_sections').delete().eq('id', id);
+    var note = document.getElementById('homepageSectionNote');
+    if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; return; }
+    if (homepageSectionEditingId === id) cancelHomepageSectionEdit();
+    loadHomepageSections();
+  }
+
+  async function saveHomepageSection(e) {
+    e.preventDefault();
+    var form = e.target;
+    var note = document.getElementById('homepageSectionNote');
+    note.className = 'form-status';
+    var fd = new FormData(form);
+    var key = (fd.get('section_key') || '').trim();
+    if (!key) { note.className = 'form-status err'; note.textContent = 'Section key is required.'; return; }
+    note.textContent = 'Saving…';
+    var payload = {
+      section_key: key,
+      title: fd.get('title') || null,
+      subtitle: fd.get('subtitle') || null,
+      content: fd.get('content') || null,
+      cta_label: fd.get('cta_label') || null,
+      cta_url: fd.get('cta_url') || null,
+      image_url: fd.get('image_url') || null,
+      is_enabled: fd.get('is_enabled') === 'true',
+      sort_order: fd.get('sort_order') ? Number(fd.get('sort_order')) : 0
+    };
+    var res;
+    if (homepageSectionEditingId) {
+      res = await sb.from('homepage_sections').update(payload).eq('id', homepageSectionEditingId);
+    } else {
+      res = await sb.from('homepage_sections').upsert(payload, { onConflict: 'section_key' });
+    }
+    if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; return; }
+    note.className = 'form-status ok';
+    note.textContent = 'Saved.';
+    cancelHomepageSectionEdit();
+    loadHomepageSections();
+  }
+
+  var navigationEditingId = null;
+  var navigationCache = [];
+
+  function populateNavParentOptions(excludeId) {
+    var sel = document.getElementById('navigationForm').querySelector('[name="parent_id"]');
+    var current = sel.value;
+    sel.innerHTML = '<option value="">— none (top-level) —</option>' + navigationCache
+      .filter(function (r) { return r.id !== excludeId; })
+      .map(function (r) { return '<option value="' + r.id + '">' + escapeHtml(r.menu) + ' — ' + escapeHtml(r.label) + '</option>'; })
+      .join('');
+    sel.value = current;
+  }
+
+  async function loadNavigation() {
+    var note = document.getElementById('navigationNote');
+    note.className = 'form-status';
+    var res = await sb.from('navigation_items').select('*').order('menu').order('sort_order');
+    var body = document.getElementById('navigationBody');
+    if (res.error) {
+      note.className = 'form-status err';
+      note.textContent = 'Could not load navigation — has the navigation_items table been created yet? (' + res.error.message + ')';
+      body.innerHTML = '';
+      return;
+    }
+    navigationCache = res.data || [];
+    note.textContent = '';
+    populateNavParentOptions(navigationEditingId);
+    body.innerHTML = navigationCache.map(function (r) {
+      var parent = navigationCache.find(function (p) { return p.id === r.parent_id; });
+      return '<tr><td>' + escapeHtml(r.menu) + '</td><td>' + escapeHtml(r.label) + '</td><td>' + escapeHtml(r.url) + '</td><td>' +
+        (parent ? escapeHtml(parent.label) : '') + '</td><td>' + (r.sort_order == null ? '' : r.sort_order) + '</td><td>' +
+        (r.is_visible ? 'Visible' : 'Hidden') + '</td><td>' +
+        '<button type="button" class="btn" data-edit-nav="' + r.id + '">Edit</button> ' +
+        '<button type="button" class="btn" data-delete-nav="' + r.id + '">Delete</button></td></tr>';
+    }).join('') || '<tr><td colspan="7">No navigation items yet.</td></tr>';
+  }
+
+  function editNavigation(id) {
+    var row = navigationCache.find(function (r) { return r.id === id; });
+    if (!row) return;
+    var form = document.getElementById('navigationForm');
+    navigationEditingId = row.id;
+    populateNavParentOptions(row.id);
+    form.querySelector('[name="menu"]').value = row.menu || 'main';
+    form.querySelector('[name="label"]').value = row.label || '';
+    form.querySelector('[name="url"]').value = row.url || '';
+    form.querySelector('[name="parent_id"]').value = row.parent_id || '';
+    form.querySelector('[name="sort_order"]').value = row.sort_order == null ? '' : row.sort_order;
+    form.querySelector('[name="is_visible"]').value = String(!!row.is_visible);
+    form.querySelector('[name="open_new_tab"]').value = String(!!row.open_new_tab);
+    form.querySelector('[name="is_cta"]').value = String(!!row.is_cta);
+    document.getElementById('cancelNavigationEditBtn').hidden = false;
+  }
+
+  function cancelNavigationEdit() {
+    navigationEditingId = null;
+    document.getElementById('navigationForm').reset();
+    populateNavParentOptions(null);
+    document.getElementById('cancelNavigationEditBtn').hidden = true;
+  }
+
+  async function deleteNavigation(id) {
+    if (!confirm('Delete this navigation item? Any children nested under it will also be removed.')) return;
+    var res = await sb.from('navigation_items').delete().eq('id', id);
+    var note = document.getElementById('navigationNote');
+    if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; return; }
+    if (navigationEditingId === id) cancelNavigationEdit();
+    loadNavigation();
+  }
+
+  async function saveNavigation(e) {
+    e.preventDefault();
+    var form = e.target;
+    var note = document.getElementById('navigationNote');
+    note.className = 'form-status';
+    var fd = new FormData(form);
+    var label = (fd.get('label') || '').trim();
+    var url = (fd.get('url') || '').trim();
+    if (!label || !url) { note.className = 'form-status err'; note.textContent = 'Label and URL are required.'; return; }
+    if (navigationEditingId && fd.get('parent_id') === navigationEditingId) {
+      note.className = 'form-status err'; note.textContent = 'A navigation item cannot be its own parent.'; return;
+    }
+    note.textContent = 'Saving…';
+    var payload = {
+      menu: fd.get('menu') || 'main',
+      label: label,
+      url: url,
+      parent_id: fd.get('parent_id') || null,
+      sort_order: fd.get('sort_order') ? Number(fd.get('sort_order')) : 0,
+      is_visible: fd.get('is_visible') === 'true',
+      open_new_tab: fd.get('open_new_tab') === 'true',
+      is_cta: fd.get('is_cta') === 'true'
+    };
+    var res;
+    if (navigationEditingId) {
+      res = await sb.from('navigation_items').update(payload).eq('id', navigationEditingId);
+    } else {
+      res = await sb.from('navigation_items').insert(payload);
+    }
+    if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; return; }
+    note.className = 'form-status ok';
+    note.textContent = 'Saved.';
+    cancelNavigationEdit();
+    loadNavigation();
+  }
+
+  var certTemplateEditingId = null;
+  var certTemplatesCache = [];
+
+  async function loadCertTemplates() {
+    var note = document.getElementById('certTemplateNote');
+    note.className = 'form-status';
+    var res = await sb.from('certificate_templates').select('*').order('name');
+    var body = document.getElementById('certTemplatesBody');
+    if (res.error) {
+      note.className = 'form-status err';
+      note.textContent = 'Could not load templates — has the certificate_templates table been created yet? (' + res.error.message + ')';
+      body.innerHTML = '';
+      return;
+    }
+    certTemplatesCache = res.data || [];
+    note.textContent = '';
+    body.innerHTML = certTemplatesCache.map(function (r) {
+      return '<tr><td>' + escapeHtml(r.name) + '</td><td>' + escapeHtml(r.status || '') + '</td><td>' +
+        (r.is_default ? 'Default' : '') + '</td><td>' +
+        '<button type="button" class="btn" data-edit-cert-template="' + r.id + '">Edit</button> ' +
+        (r.is_default ? '' : '<button type="button" class="btn" data-default-cert-template="' + r.id + '">Set default</button> ') +
+        '<button type="button" class="btn" data-delete-cert-template="' + r.id + '">Delete</button></td></tr>';
+    }).join('') || '<tr><td colspan="4">No certificate templates yet.</td></tr>';
+  }
+
+  function editCertTemplate(id) {
+    var row = certTemplatesCache.find(function (r) { return r.id === id; });
+    if (!row) return;
+    var form = document.getElementById('certTemplateForm');
+    Object.keys(row).forEach(function (k) {
+      var el = form.querySelector('[name="' + k + '"]');
+      if (el) el.value = row[k] == null ? '' : row[k];
+    });
+    certTemplateEditingId = row.id;
+    document.getElementById('cancelCertTemplateEditBtn').hidden = false;
+  }
+
+  function cancelCertTemplateEdit() {
+    certTemplateEditingId = null;
+    document.getElementById('certTemplateForm').reset();
+    document.getElementById('cancelCertTemplateEditBtn').hidden = true;
+  }
+
+  async function deleteCertTemplate(id) {
+    if (!confirm('Delete this certificate template?')) return;
+    var res = await sb.from('certificate_templates').delete().eq('id', id);
+    var note = document.getElementById('certTemplateNote');
+    if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; return; }
+    if (certTemplateEditingId === id) cancelCertTemplateEdit();
+    loadCertTemplates();
+  }
+
+  async function setDefaultCertTemplate(id) {
+    var note = document.getElementById('certTemplateNote');
+    note.className = 'form-status';
+    note.textContent = 'Updating default…';
+    var clearRes = await sb.from('certificate_templates').update({ is_default: false }).neq('id', id);
+    if (clearRes.error) { note.className = 'form-status err'; note.textContent = clearRes.error.message; return; }
+    var setRes = await sb.from('certificate_templates').update({ is_default: true }).eq('id', id);
+    if (setRes.error) { note.className = 'form-status err'; note.textContent = setRes.error.message; return; }
+    note.className = 'form-status ok';
+    note.textContent = 'Default template updated.';
+    loadCertTemplates();
+  }
+
+  async function saveCertTemplate(e) {
+    e.preventDefault();
+    var form = e.target;
+    var note = document.getElementById('certTemplateNote');
+    note.className = 'form-status';
+    var fd = new FormData(form);
+    var name = (fd.get('name') || '').trim();
+    if (!name) { note.className = 'form-status err'; note.textContent = 'Template name is required.'; return; }
+    note.textContent = 'Saving…';
+    var payload = {
+      name: name,
+      status: fd.get('status') || 'draft',
+      cert_logo_url: fd.get('cert_logo_url') || null,
+      org_name_display: fd.get('org_name_display') || null,
+      cert_title: fd.get('cert_title') || null,
+      signature_name: fd.get('signature_name') || null,
+      signature_image_url: fd.get('signature_image_url') || null,
+      seal_image_url: fd.get('seal_image_url') || null,
+      background_url: fd.get('background_url') || null,
+      color_primary: fd.get('color_primary') || null,
+      color_secondary: fd.get('color_secondary') || null,
+      numbering_format: fd.get('numbering_format') || null,
+      footer_text: fd.get('footer_text') || null
+    };
+    var res;
+    if (certTemplateEditingId) {
+      res = await sb.from('certificate_templates').update(payload).eq('id', certTemplateEditingId);
+    } else {
+      res = await sb.from('certificate_templates').insert(payload);
+    }
+    if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; return; }
+    note.className = 'form-status ok';
+    note.textContent = 'Saved.';
+    cancelCertTemplateEdit();
+    loadCertTemplates();
+  }
+
+  var certIssuancesCache = [];
+  var certIssuanceStudentsCache = [];
+  var certIssuanceModulesCache = [];
+
+  function randomVerificationCode() {
+    var chars = 'abcdef0123456789';
+    var out = '';
+    for (var i = 0; i < 16; i++) out += chars.charAt(Math.floor(Math.random() * chars.length));
+    return out;
+  }
+
+  async function loadCertIssuanceLookups() {
+    var form = document.getElementById('certIssuanceForm');
+    var studentSel = form.querySelector('[name="student_id"]');
+    var moduleSel = form.querySelector('[name="module_id"]');
+    var templateSel = form.querySelector('[name="template_id"]');
+
+    var studentsRes = await sb.from('profiles').select('id, full_name, email, student_id').eq('role', 'student').order('full_name');
+    certIssuanceStudentsCache = studentsRes.data || [];
+    studentSel.innerHTML = '<option value="">Select student…</option>' + certIssuanceStudentsCache.map(function (s) {
+      return '<option value="' + s.id + '">' + escapeHtml(s.full_name || s.email) + (s.student_id ? ' (' + escapeHtml(s.student_id) + ')' : '') + '</option>';
+    }).join('');
+
+    var modulesRes = await sb.from('modules').select('id, title, code').order('title');
+    certIssuanceModulesCache = modulesRes.data || [];
+    moduleSel.innerHTML = '<option value="">Select module…</option>' + certIssuanceModulesCache.map(function (m) {
+      return '<option value="' + m.id + '">' + escapeHtml(m.title || m.code) + '</option>';
+    }).join('');
+
+    templateSel.innerHTML = '<option value="">Use default template</option>' + certTemplatesCache.map(function (t) {
+      return '<option value="' + t.id + '">' + escapeHtml(t.name) + (t.is_default ? ' (default)' : '') + '</option>';
+    }).join('');
+  }
+
+  async function loadCertIssuances() {
+    var note = document.getElementById('certIssuanceNote');
+    note.className = 'form-status';
+    if (!certTemplatesCache.length) { var tRes = await sb.from('certificate_templates').select('*'); certTemplatesCache = tRes.data || []; }
+    await loadCertIssuanceLookups();
+    var res = await sb.from('certificate_issuances').select('*').order('created_at', { ascending: false });
+    var body = document.getElementById('certIssuancesBody');
+    if (res.error) {
+      note.className = 'form-status err';
+      note.textContent = 'Could not load issuances — has the certificate_issuances table been created yet? (' + res.error.message + ')';
+      body.innerHTML = '';
+      return;
+    }
+    certIssuancesCache = res.data || [];
+    note.textContent = '';
+    renderCertIssuances();
+  }
+
+  function renderCertIssuances() {
+    var body = document.getElementById('certIssuancesBody');
+    var q = (document.getElementById('certIssuanceSearch').value || '').toLowerCase();
+    var rows = certIssuancesCache.filter(function (r) {
+      if (!q) return true;
+      var student = certIssuanceStudentsCache.find(function (s) { return s.id === r.student_id; });
+      var mod = certIssuanceModulesCache.find(function (m) { return m.id === r.module_id; });
+      var hay = [r.certificate_number, student && student.full_name, student && student.email, mod && mod.title].filter(Boolean).join(' ').toLowerCase();
+      return hay.indexOf(q) !== -1;
+    });
+    body.innerHTML = rows.map(function (r) {
+      var student = certIssuanceStudentsCache.find(function (s) { return s.id === r.student_id; });
+      var mod = certIssuanceModulesCache.find(function (m) { return m.id === r.module_id; });
+      var tpl = certTemplatesCache.find(function (t) { return t.id === r.template_id; });
+      return '<tr><td>' + escapeHtml(r.certificate_number) + '</td><td>' + escapeHtml(student ? (student.full_name || student.email) : '') +
+        '</td><td>' + escapeHtml(mod ? mod.title : '') + '</td><td>' + escapeHtml(tpl ? tpl.name : 'Default') + '</td><td>' +
+        escapeHtml(r.issue_date || '') + '</td><td>' + escapeHtml(r.status || '') + '</td><td>' + escapeHtml(r.verification_code || '') + '</td><td>' +
+        (r.status === 'issued'
+          ? '<button type="button" class="btn" data-revoke-cert="' + r.id + '">Revoke</button>'
+          : '<button type="button" class="btn" data-reissue-cert="' + r.id + '">Reissue</button>') +
+        ' <button type="button" class="btn" data-delete-cert-issuance="' + r.id + '">Delete</button></td></tr>';
+    }).join('') || '<tr><td colspan="8">No certificates issued yet.</td></tr>';
+  }
+
+  async function revokeCertIssuance(id) {
+    if (!confirm('Revoke this certificate? It will no longer verify as valid on the public site.')) return;
+    var res = await sb.from('certificate_issuances').update({ status: 'revoked' }).eq('id', id);
+    var note = document.getElementById('certIssuanceNote');
+    if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; return; }
+    loadCertIssuances();
+  }
+
+  async function reissueCertIssuance(id) {
+    if (!confirm('Reissue this certificate? It will verify as valid again.')) return;
+    var res = await sb.from('certificate_issuances').update({ status: 'issued' }).eq('id', id);
+    var note = document.getElementById('certIssuanceNote');
+    if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; return; }
+    loadCertIssuances();
+  }
+
+  async function deleteCertIssuance(id) {
+    if (!confirm('Permanently delete this certificate record? This cannot be undone.')) return;
+    var res = await sb.from('certificate_issuances').delete().eq('id', id);
+    var note = document.getElementById('certIssuanceNote');
+    if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; return; }
+    loadCertIssuances();
+  }
+
+  async function saveCertIssuance(e) {
+    e.preventDefault();
+    var form = e.target;
+    var note = document.getElementById('certIssuanceNote');
+    note.className = 'form-status';
+    var fd = new FormData(form);
+    var studentId = fd.get('student_id');
+    var certNumber = (fd.get('certificate_number') || '').trim();
+    if (!studentId) { note.className = 'form-status err'; note.textContent = 'Student is required.'; return; }
+    if (!certNumber) { note.className = 'form-status err'; note.textContent = 'Certificate number is required.'; return; }
+    note.textContent = 'Issuing…';
+    var payload = {
+      student_id: studentId,
+      module_id: fd.get('module_id') || null,
+      template_id: fd.get('template_id') || null,
+      certificate_number: certNumber,
+      verification_code: randomVerificationCode(),
+      issue_date: fd.get('issue_date') || null,
+      status: 'issued'
+    };
+    var res = await sb.from('certificate_issuances').insert(payload);
+    if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; return; }
+    note.className = 'form-status ok';
+    note.textContent = 'Certificate issued.';
+    form.reset();
+    loadCertIssuances();
+  }
+
+  var seoOverridesCache = [];
+  var seoOverrideRecordsCache = [];
+  var seoOverrideEditingId = null;
+
+  function seoOverrideEntityLabelField(entityId) {
+    var t = TABLES.find(function (x) { return x.id === entityId; });
+    return (t && t.fields.indexOf('full_name') !== -1) ? 'full_name' : 'title';
+  }
+
+  function populateSeoOverrideEntitySelect() {
+    var sel = document.getElementById('seoOverrideEntitySelect');
+    sel.innerHTML = TABLES.map(function (t) { return '<option value="' + t.id + '">' + escapeHtml(t.label) + '</option>'; }).join('');
+  }
+
+  async function loadSeoOverrideRecords() {
+    var entity = document.getElementById('seoOverrideEntitySelect').value;
+    var labelField = seoOverrideEntityLabelField(entity);
+    var recSel = document.getElementById('seoOverrideRecordSelect');
+    var res = await sb.from(entity).select('id, ' + labelField).order(labelField).limit(500);
+    seoOverrideRecordsCache = res.data || [];
+    recSel.innerHTML = '<option value="">Select record…</option>' + seoOverrideRecordsCache.map(function (r) {
+      return '<option value="' + r.id + '">' + escapeHtml(r[labelField] || r.id) + '</option>';
+    }).join('');
+  }
+
+  async function loadSeoOverrideForRecord() {
+    var form = document.getElementById('seoOverrideForm');
+    var entity = document.getElementById('seoOverrideEntitySelect').value;
+    var entityId = document.getElementById('seoOverrideRecordSelect').value;
+    var note = document.getElementById('seoOverrideNote');
+    note.className = 'form-status';
+    ['seo_title', 'meta_desc', 'slug_override', 'canonical_url', 'social_image'].forEach(function (f) {
+      var el = form.querySelector('[name="' + f + '"]'); if (el) el.value = '';
+    });
+    document.getElementById('deleteSeoOverrideBtn').hidden = true;
+    seoOverrideEditingId = null;
+    if (!entityId) { note.textContent = ''; return; }
+    var res = await sb.from('seo_overrides').select('*').eq('entity', entity).eq('entity_id', entityId).maybeSingle();
+    if (res.error) {
+      note.className = 'form-status err';
+      note.textContent = 'Could not load override — has the seo_overrides table been created yet? (' + res.error.message + ')';
+      return;
+    }
+    if (res.data) {
+      seoOverrideEditingId = res.data.id;
+      ['seo_title', 'meta_desc', 'slug_override', 'canonical_url', 'social_image'].forEach(function (f) {
+        var el = form.querySelector('[name="' + f + '"]'); if (el) el.value = res.data[f] == null ? '' : res.data[f];
+      });
+      document.getElementById('deleteSeoOverrideBtn').hidden = false;
+      note.textContent = 'Editing existing override for this record.';
+    } else {
+      note.textContent = 'No override yet for this record — fill in fields and save to create one.';
+    }
+  }
+
+  async function loadSeoOverridesList() {
+    var body = document.getElementById('seoOverridesBody');
+    var res = await sb.from('seo_overrides').select('*').order('updated_at', { ascending: false }).limit(200);
+    if (res.error) {
+      body.innerHTML = '<tr><td colspan="4">Could not load overrides — has the seo_overrides table been created yet? (' + escapeHtml(res.error.message) + ')</td></tr>';
+      return;
+    }
+    seoOverridesCache = res.data || [];
+    body.innerHTML = seoOverridesCache.map(function (r) {
+      var t = TABLES.find(function (x) { return x.id === r.entity; });
+      return '<tr><td>' + escapeHtml(t ? t.label : r.entity) + '</td><td>' + escapeHtml(r.entity_id) + '</td><td>' +
+        escapeHtml(r.seo_title || '') + '</td><td>' +
+        '<button type="button" class="btn" data-jump-seo-override="' + r.entity + '|' + r.entity_id + '">Edit</button> ' +
+        '<button type="button" class="btn" data-delete-seo-override="' + r.id + '">Delete</button></td></tr>';
+    }).join('') || '<tr><td colspan="4">No SEO overrides yet.</td></tr>';
+  }
+
+  async function jumpToSeoOverride(entity, entityId) {
+    document.getElementById('seoOverrideEntitySelect').value = entity;
+    await loadSeoOverrideRecords();
+    document.getElementById('seoOverrideRecordSelect').value = entityId;
+    await loadSeoOverrideForRecord();
+    document.getElementById('seoOverrideForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  async function deleteSeoOverrideById(id) {
+    if (!confirm('Remove this SEO override? The record will fall back to site-wide SEO defaults.')) return;
+    var res = await sb.from('seo_overrides').delete().eq('id', id);
+    if (res.error) { document.getElementById('seoOverrideNote').className = 'form-status err'; document.getElementById('seoOverrideNote').textContent = res.error.message; return; }
+    loadSeoOverrideForRecord();
+    loadSeoOverridesList();
+  }
+
+  async function saveSeoOverride(e) {
+    e.preventDefault();
+    var form = e.target;
+    var note = document.getElementById('seoOverrideNote');
+    note.className = 'form-status';
+    var entity = document.getElementById('seoOverrideEntitySelect').value;
+    var entityId = document.getElementById('seoOverrideRecordSelect').value;
+    if (!entityId) { note.className = 'form-status err'; note.textContent = 'Select a record first.'; return; }
+    note.textContent = 'Saving…';
+    var fd = new FormData(form);
+    var payload = {
+      entity: entity,
+      entity_id: entityId,
+      seo_title: fd.get('seo_title') || null,
+      meta_desc: fd.get('meta_desc') || null,
+      slug_override: fd.get('slug_override') || null,
+      canonical_url: fd.get('canonical_url') || null,
+      social_image: fd.get('social_image') || null
+    };
+    var res = await sb.from('seo_overrides').upsert(payload, { onConflict: 'entity,entity_id' });
+    if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; return; }
+    note.className = 'form-status ok';
+    note.textContent = 'Saved.';
+    loadSeoOverrideForRecord();
+    loadSeoOverridesList();
+  }
+
+  async function loadNotifications() {
+    var body = document.getElementById('notificationsBody');
+    var res = await sb.from('admin_notifications').select('*').order('created_at', { ascending: false }).limit(100);
+    if (res.error) {
+      body.innerHTML = '<tr><td colspan="6">Could not load notifications — has the admin_notifications table been created yet? (' + escapeHtml(res.error.message) + ')</td></tr>';
+      return;
+    }
+    var rows = res.data || [];
+    body.innerHTML = rows.map(function (r) {
+      var date = r.created_at ? new Date(r.created_at).toLocaleString() : '';
+      return '<tr' + (r.is_read ? '' : ' style="font-weight:600"') + '><td>' + escapeHtml(r.event_type) + '</td><td>' +
+        escapeHtml(r.title) + '</td><td>' + escapeHtml(r.body || '') + '</td><td>' + escapeHtml(date) + '</td><td>' +
+        (r.is_read ? 'Read' : 'Unread') + '</td><td>' +
+        (r.is_read ? '' : '<button type="button" class="btn" data-mark-read="' + r.id + '">Mark read</button> ') +
+        '<button type="button" class="btn" data-delete-notification="' + r.id + '">Delete</button></td></tr>';
+    }).join('') || '<tr><td colspan="6">No notifications.</td></tr>';
+  }
+
+  async function markNotificationRead(id) {
+    await sb.from('admin_notifications').update({ is_read: true }).eq('id', id);
+    loadNotifications();
+  }
+
+  async function markAllNotificationsRead() {
+    await sb.from('admin_notifications').update({ is_read: true }).eq('is_read', false);
+    loadNotifications();
+  }
+
+  async function deleteNotification(id) {
+    if (!confirm('Delete this notification?')) return;
+    await sb.from('admin_notifications').delete().eq('id', id);
+    loadNotifications();
+  }
+
   var currentRows = [];
   var editingId = null;
 
   function showAdminView(view) {
-    var panels = ['dashboardPanel','studentsPanel','adminsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','orgSettingsPanel','brandingLogoPanel','brandingTypePanel'];
+    var panels = ['dashboardPanel','studentsPanel','adminsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','orgSettingsPanel','brandingLogoPanel','brandingTypePanel','contactInfoPanel','seoSettingsPanel','systemSettingsPanel','disclaimersPanel','homepageSectionsPanel','navigationPanel','certTemplatesPanel','certIssuancesPanel','seoOverridesPanel','notificationsPanel'];
     panels.forEach(function(id){ var el=document.getElementById(id); if(el){ el.hidden=true; el.classList.remove('is-active'); }});
     document.querySelectorAll('.admin-nav [data-table]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-table')===view); });
     document.getElementById('adminApp').classList.remove('nav-open');
@@ -3754,6 +4812,16 @@ window.ramdaniAuth = {
     if(view==='__orgsettings') { activate('orgSettingsPanel','Organization settings'); loadOrgSettings(); return; }
     if(view==='__brandinglogo') { activate('brandingLogoPanel','Logo & colors'); loadBranding('brandingLogoForm','brandingLogoNote'); return; }
     if(view==='__brandingtype') { activate('brandingTypePanel','Typography'); loadBranding('brandingTypeForm','brandingTypeNote'); return; }
+    if(view==='__contactinfo') { activate('contactInfoPanel','Contact info'); loadContactInfo(); return; }
+    if(view==='__seosettings') { activate('seoSettingsPanel','SEO settings'); loadSeoSettings(); return; }
+    if(view==='__systemsettings') { activate('systemSettingsPanel','System settings'); loadSystemSettings(); return; }
+    if(view==='__disclaimers') { activate('disclaimersPanel','Disclaimers'); loadDisclaimers(); return; }
+    if(view==='__homepagesections') { activate('homepageSectionsPanel','Homepage sections'); loadHomepageSections(); return; }
+    if(view==='__navigation') { activate('navigationPanel','Navigation'); loadNavigation(); return; }
+    if(view==='__certtemplates') { activate('certTemplatesPanel','Certificate templates'); loadCertTemplates(); return; }
+    if(view==='__certissuances') { activate('certIssuancesPanel','Certificate issuances'); loadCertIssuances(); return; }
+    if(view==='__seooverrides') { activate('seoOverridesPanel','SEO overrides'); populateSeoOverrideEntitySelect(); loadSeoOverrideRecords().then(loadSeoOverrideForRecord); loadSeoOverridesList(); return; }
+    if(view==='__notifications') { activate('notificationsPanel','Notifications'); loadNotifications(); return; }
     activate('contentPanel', (TABLES.find(function(t){return t.id===view;})||{}).label || 'Content');
     loadTable(view);
   }
