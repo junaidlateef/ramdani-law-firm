@@ -423,7 +423,7 @@ html[dir="rtl"] .lead {
 
 
 /* ===== single-file shell ===== */
-.ramdani-view[hidden], #adminRoot[hidden], #resetRoot[hidden], #publicShell[hidden] { display: none !important; }
+.ramdani-view[hidden], #adminRoot[hidden], #resetRoot[hidden], #publicShell[hidden], #studentRoot[hidden] { display: none !important; }
 #adminRoot, #resetRoot { min-height: 100vh; }
 
   </style>
@@ -2276,9 +2276,11 @@ window.ramdaniAuth = {
     }
 
     // default: /student/login
-    var session = await ramdaniAuth.session();
+    var session = null;
+    try { session = await ramdaniAuth.session(); } catch (e) { session = null; }
     if (session) {
-      var p = await ramdaniAuth.profile();
+      var p = null;
+      try { p = await ramdaniAuth.profile(); } catch (e) { p = null; }
       if (p && p.role === 'student') { window.ramdaniGo('/student/dashboard'); return; }
     }
     showPanel('studentLoginPanel');
