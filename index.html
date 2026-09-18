@@ -2004,7 +2004,9 @@ window.ramdaniAuth = {
     return { data: data };
   },
   async resetPassword(email) {
-    return sb.auth.resetPasswordForEmail(email, {\n      redirectTo: this.recoveryRedirectTo()\n    });
+    return sb.auth.resetPasswordForEmail(email, {
+      redirectTo: this.recoveryRedirectTo()
+    });
   },
   rememberRecoverySession: function (session) {
     if (session && session.access_token) this._recoverySession = session;
