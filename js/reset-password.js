@@ -18,7 +18,7 @@
     if (waiting) waiting.hidden = true;
     if (result.error || !result.session) {
       form.hidden = true;
-      setStatus(result.error || 'This reset link is invalid or has expired. Request a new one from Staff sign in.');
+      setStatus(result.error || 'Recovery link is invalid or expired. Please request a new password reset link.');
       return;
     }
 
@@ -40,9 +40,8 @@
         setStatus(res.error.message);
         return;
       }
-      await ramdaniAuth.signOut();
       form.hidden = true;
-      setStatus('Password updated. You can now sign in.', true);
+      setStatus('Password updated successfully', true);
     });
   });
 })();
