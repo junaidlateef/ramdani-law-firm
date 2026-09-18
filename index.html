@@ -189,43 +189,81 @@ h1 { font-size: clamp(2rem, 5vw, 3.4rem); }
   .nav { justify-content: flex-start; }
 }
 
-/* ===== css/components.css ===== */
-.admin-shell { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+/* ===== Professional dashboard / auth system ===== */
+.admin-shell {
+  display:grid; grid-template-columns:260px minmax(0,1fr); min-height:100vh;
+  background:var(--paper);
+}
 .admin-nav {
-  border-right: 1px solid var(--line);
-  background: var(--white);
-  padding: 1.25rem;
+  position:sticky; top:0; height:100vh; overflow-y:auto;
+  border-inline-end:1px solid var(--line); background:var(--deep-navy,#0B1F33);
+  color:#eef3f7; padding:1.15rem .9rem; z-index:30;
 }
-.admin-nav a { display: block; padding: 0.4rem 0; color: var(--ink); }
-.admin-main { padding: 1.5rem; }
-.table-wrap { overflow-x: auto; }
-table.data {
-  width: 100%;
-  border-collapse: collapse;
-  background: var(--card);
-}
-table.data th, table.data td {
-  border-bottom: 1px solid var(--line);
-  text-align: start;
-  padding: 0.55rem 0.4rem;
-  font-size: 0.92rem;
-}
-.auth-box {
-  max-width: 28rem;
-  margin: 4rem auto;
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 1.5rem;
-}
-.auth-actions { display: grid; gap: 0.5rem; margin-top: 1rem; }
-.hidden { display: none !important; }
+.admin-brand { display:flex; align-items:center; gap:.7rem; padding:.35rem .55rem 1rem; border-bottom:1px solid rgba(255,255,255,.12); margin-bottom:1rem; }
+.admin-brand img { width:42px; height:42px; object-fit:contain; border-radius:10px; background:#fff; }
+.admin-brand strong { display:block; font-family:var(--serif); font-size:1.1rem; color:#fff; }
+.admin-brand small { display:block; color:#aebdca; font-size:.7rem; margin-top:.12rem; }
+.admin-user { padding:.75rem .7rem; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); border-radius:12px; margin-bottom:1rem; }
+.admin-user-label { font-size:.68rem; text-transform:uppercase; letter-spacing:.1em; color:#aebdca; }
+#staffName { margin:.15rem 0 0; font-weight:600; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.admin-nav-group { margin:1rem 0; }
+.admin-nav-group-title { padding:.35rem .7rem; font-size:.68rem; text-transform:uppercase; letter-spacing:.12em; color:#93a5b5; }
+.admin-nav button[data-table] { width:100%; display:flex; align-items:center; justify-content:flex-start; gap:.55rem; border:1px solid transparent; background:transparent; color:#dbe5ec; border-radius:9px; padding:.58rem .7rem; margin:.08rem 0; text-align:start; cursor:pointer; font:inherit; font-size:.86rem; }
+.admin-nav button[data-table]:hover, .admin-nav button[data-table].active { background:rgba(255,255,255,.1); color:#fff; border-color:rgba(255,255,255,.08); }
+.admin-nav .signout { width:100%; margin-top:.8rem; background:transparent; color:#dbe5ec; border-color:rgba(255,255,255,.16); }
+.admin-main { min-width:0; padding:0; }
+.admin-topbar { position:sticky; top:0; z-index:20; display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:1rem 1.6rem; background:color-mix(in srgb, var(--white) 94%, transparent); backdrop-filter:blur(12px); border-bottom:1px solid var(--line); }
+.admin-topbar-left { display:flex; align-items:center; gap:.8rem; min-width:0; }
+.admin-menu-btn { display:none; }
+.admin-eyebrow { font-size:.7rem; text-transform:uppercase; letter-spacing:.12em; color:var(--muted); }
+.admin-page-title { font-family:var(--serif); font-size:1.65rem; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.admin-content { padding:1.5rem; max-width:1500px; margin:0 auto; width:100%; }
+.admin-panel { display:none; }
+.admin-panel.is-active { display:block; }
+.admin-card { background:var(--card); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); padding:1.1rem; }
+.dashboard-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1rem; margin:1rem 0 1.25rem; }
+.stat-card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:1rem; }
+.stat-card .label { color:var(--muted); font-size:.76rem; }
+.stat-card .value { font-family:var(--serif); font-size:2rem; line-height:1.1; margin-top:.25rem; }
+.admin-section-head { display:flex; align-items:flex-end; justify-content:space-between; gap:1rem; margin:0 0 1rem; }
+.admin-section-head h2 { margin:0; font-size:1.55rem; }
+.admin-toolbar { display:flex; align-items:center; gap:.65rem; flex-wrap:wrap; margin-bottom:1rem; }
+.admin-toolbar input,.admin-toolbar select { min-height:42px; padding:.55rem .7rem; border:1px solid var(--line); border-radius:9px; background:var(--white); color:var(--ink); font:inherit; }
+.form.admin-form { max-width:none; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:1.2rem; box-shadow:var(--shadow); grid-template-columns:repeat(2,minmax(0,1fr)); }
+.form.admin-form .field-full { grid-column:1/-1; }
+.form.admin-form label { display:grid; gap:.35rem; align-content:start; }
+.form.admin-form label > span { font-size:.75rem; font-weight:600; color:var(--muted); }
+.form.admin-form input,.form.admin-form textarea,.form.admin-form select { margin:0; min-height:44px; border-radius:9px; }
+.form.admin-form textarea { min-height:110px; }
+.form-actions { grid-column:1/-1; display:flex; align-items:center; gap:.65rem; padding-top:.35rem; border-top:1px solid var(--line); }
+.table-wrap { overflow:auto; border:1px solid var(--line); border-radius:14px; background:var(--card); }
+table.data { width:100%; border-collapse:separate; border-spacing:0; min-width:720px; }
+table.data th { background:color-mix(in srgb,var(--paper) 75%,var(--card)); color:var(--muted); font-size:.7rem; text-transform:uppercase; letter-spacing:.06em; white-space:nowrap; }
+table.data th, table.data td { border-bottom:1px solid var(--line); text-align:start; padding:.75rem .8rem; vertical-align:middle; }
+table.data tr:last-child td { border-bottom:0; }
+table.data tbody tr:hover { background:color-mix(in srgb,var(--accent) 5%,transparent); }
+.table-actions { display:flex; gap:.35rem; flex-wrap:wrap; }
+.btn-sm { padding:.34rem .58rem; border-radius:8px; font-size:.78rem; }
+.status-badge { display:inline-flex; align-items:center; border-radius:999px; padding:.2rem .55rem; font-size:.7rem; font-weight:600; border:1px solid var(--line); }
+.status-published,.status-active { color:var(--ok); }
+.status-draft,.status-inactive { color:var(--muted); }
+.status-archived,.status-closed { color:var(--danger); }
+.auth-screen { min-height:100vh; display:grid; place-items:center; padding:2rem 1rem; background:linear-gradient(135deg,var(--deep-navy,#0B1F33),#162f46); }
+.auth-box { width:min(460px,100%); margin:0; background:var(--card); border:1px solid var(--line); border-top:4px solid var(--accent); border-radius:18px; padding:1.5rem; box-shadow:0 24px 70px rgba(0,0,0,.22); }
+.auth-brand { display:flex; align-items:center; gap:.8rem; margin-bottom:1.2rem; }
+.auth-brand img { width:48px; height:48px; border-radius:12px; background:#fff; object-fit:contain; }
+.auth-brand strong { font-family:var(--serif); font-size:1.35rem; }
+.auth-brand small { display:block; color:var(--muted); font-size:.72rem; }
+.auth-divider { height:1px; background:var(--line); margin:1.15rem 0; }
+.hidden { display:none !important; }
 
-@media (max-width: 800px) {
-  .admin-shell { grid-template-columns: 1fr; }
-  .admin-nav { border-right: 0; border-bottom: 1px solid var(--line); }
+@media (max-width:1050px){ .dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr));} .admin-shell{grid-template-columns:230px minmax(0,1fr);} }
+@media (max-width:800px){
+  .admin-shell{grid-template-columns:1fr;} .admin-nav{position:fixed; inset:0 auto 0 0; width:min(290px,88vw); transform:translateX(-105%); transition:transform .2s ease; box-shadow:20px 0 50px rgba(0,0,0,.2);}
+  html[dir="rtl"] .admin-nav{inset:0 0 0 auto; transform:translateX(105%);} .admin-shell.nav-open .admin-nav{transform:translateX(0);} .admin-menu-btn{display:inline-flex;}
+  .admin-topbar{padding:.8rem 1rem;} .admin-content{padding:1rem;} .form.admin-form{grid-template-columns:1fr;} .form.admin-form .field-full,.form-actions{grid-column:1;}
 }
-
+@media (max-width:520px){ .dashboard-grid{grid-template-columns:1fr 1fr;gap:.7rem;} .stat-card{padding:.8rem;} .stat-card .value{font-size:1.55rem;} .admin-page-title{font-size:1.35rem;} }
 /* Compact primary nav + semester grid + leak-free quiz ticks */
 .hero-stats {
   display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 1.75rem;
@@ -448,176 +486,156 @@ html[dir="rtl"] .lead {
 
   <!-- ADMIN PANEL -->
   <div id="adminRoot" hidden>
-<div id="loginPanel" class="auth-box">
-    <h1>Staff sign in</h1>
-    <p class="note">Authorised staff only. Accounts are created by the firm, not from this page.</p>
-    <form id="passwordForm" class="form">
-      <label>Email <input id="email" type="email" required autocomplete="username" /></label>
-      <label>Password <input id="password" type="password" required minlength="8" autocomplete="current-password" /></label>
-      <button class="btn btn-primary" type="submit">Sign in</button>
-    </form>
-    <form id="forgotForm" class="form" style="margin-top:1.5rem">
-      <h2>Reset password</h2>
-      <label>Email <input id="forgotEmail" type="email" required autocomplete="username" /></label>
-      <button class="btn" type="submit">Send reset link</button>
-    </form>
-    <p id="authError" class="form-status err"></p>
-    <p><a href="/">Back to public site</a></p>
-  </div>
-
-  <div id="adminApp" class="admin-shell hidden">
-    <aside class="admin-nav">
-      <p id="staffName"></p>
-      <button type="button" class="btn" id="signOutBtn">Sign out</button>
-      <hr />
-      <button type="button" class="btn" data-table="__students">Students</button>
-      <button type="button" class="btn" data-table="__admins">Admin accounts</button>
-      <hr />
-      <button type="button" class="btn" data-table="people">People</button>
-      <button type="button" class="btn" data-table="practice_areas">Practice areas</button>
-      <button type="button" class="btn" data-table="services">Services</button>
-      <button type="button" class="btn" data-table="matters">Matters</button>
-      <button type="button" class="btn" data-table="articles">Insights</button>
-      <button type="button" class="btn" data-table="news">News</button>
-      <button type="button" class="btn" data-table="resources">Resources</button>
-      <button type="button" class="btn" data-table="careers">Careers</button>
-      <button type="button" class="btn" data-table="internships">Internships</button>
-      <button type="button" class="btn" data-table="quizzes">Quizzes</button>
-      <button type="button" class="btn" data-table="books">Library</button>
-      <button type="button" class="btn" data-table="modules">Modules</button>
-      <button type="button" class="btn" data-table="cases">Case notes</button>
-      <button type="button" class="btn" data-table="statutes">Statutes</button>
-      <button type="button" class="btn" data-table="societies">Societies</button>
-      <button type="button" class="btn" data-table="chapters">Chapters</button>
-      <button type="button" class="btn" data-table="lectures">Lectures</button>
-      <button type="button" class="btn" data-table="social_posts">Social posts</button>
-      <button type="button" class="btn" data-table="cabinets">Cabinets</button>
-      <button type="button" class="btn" data-table="certificates">Certificates</button>
-    </aside>
-    <section class="admin-main">
-      <h1 id="tableTitle">People</h1>
-
-      <div id="studentsPanel" hidden>
-        <h2>Students <span id="studentTotal" class="note"></span></h2>
-        <input type="search" id="studentSearch" placeholder="Search by name, email, or student ID" style="width:100%;max-width:28rem;margin-bottom:0.75rem;padding:0.6rem;border:1px solid var(--line);border-radius:10px" />
-        <div class="table-wrap">
-          <table class="data">
-            <thead><tr><th>Name</th><th>Email</th><th>Student ID</th><th>Department</th><th>University</th><th>Session</th><th>Status</th><th></th></tr></thead>
-            <tbody id="studentsBody"></tbody>
-          </table>
+    <div id="loginPanel" class="auth-screen">
+      <div class="auth-box">
+        <div class="auth-brand">
+          <img src="https://ramdani-law-firm.vercel.app/assets/ramdani-logo.png" alt="Ramdani Law Firm logo" />
+          <div><strong>Ramdani Law Firm</strong><small>Staff Administration Portal</small></div>
         </div>
-        <p id="studentsNote" class="form-status"></p>
-      </div>
-
-      <div id="adminsPanel" hidden>
-        <h2>Admin / staff accounts</h2>
-        <div class="table-wrap">
-          <table class="data">
-            <thead><tr><th>Name</th><th>Email</th><th>Status</th></tr></thead>
-            <tbody id="adminsBody"></tbody>
-          </table>
-        </div>
-        <h3>Create a new admin account</h3>
-        <p class="note">New admin accounts can only be created here, server-side. There is no public admin sign-up.</p>
-        <form id="createAdminForm" class="form">
-          <label>Full name <input name="full_name" required /></label>
-          <label>Email <input name="email" type="email" required /></label>
-          <label>Temporary password <input name="password" type="password" required minlength="8" /></label>
-          <button class="btn btn-primary" type="submit">Create admin</button>
+        <h1>Staff sign in</h1>
+        <p class="note">Authorised staff only. Administrator accounts are created by the firm.</p>
+        <form id="passwordForm" class="form">
+          <label>Email <input id="email" type="email" required autocomplete="username" /></label>
+          <label>Password <input id="password" type="password" required minlength="8" autocomplete="current-password" /></label>
+          <button class="btn btn-primary" type="submit">Sign in</button>
         </form>
-        <p id="createAdminNote" class="form-status"></p>
+        <div class="auth-divider"></div>
+        <form id="forgotForm" class="form">
+          <h2>Reset password</h2>
+          <label>Email <input id="forgotEmail" type="email" required autocomplete="username" /></label>
+          <button class="btn" type="submit">Send reset link</button>
+        </form>
+        <p id="authError" class="form-status err"></p>
+        <p><a href="/">Back to public site</a></p>
       </div>
+    </div>
 
-      <div id="contentPanel">
-      <form id="createForm" class="form" data-table="people">
-        <label>Title / name <input name="title" /><input name="full_name" placeholder="Full name (people)" /></label>
-        <label>Slug <input name="slug" required /></label>
-        <label>Role title <input name="role_title" /></label>
-        <label>Code / category <input name="code" placeholder="LLB-101" /><input name="category" placeholder="llb | lat | gat | pakistan_law | skills" /></label>
-        <label>Citation (cases) <input name="citation" placeholder="Only publish if verified" />
-          <select name="citation_status">
-            <option value="unverified">unverified — stays hidden</option>
-            <option value="verified">verified — may be public</option>
-          </select>
-        </label>
-        <label>Court / year / official URL <input name="court" placeholder="Court" /><input name="year" type="number" placeholder="Year" /><input name="official_url" placeholder="https:// official source" /><input name="jurisdiction" placeholder="Pakistan" /></label>
-        <label>City / province / YouTube <input name="city" placeholder="City" /><input name="province" placeholder="Province" /><input name="youtube_url" placeholder="https://www.youtube.com/watch?v=" /><input name="youtube_id" placeholder="optional video id" /></label>
-        <label>Cabinet parent / seats
-          <select name="parent_kind">
-            <option value="">parent (cabinets)</option>
-            <option value="society">society</option>
-            <option value="chapter">chapter</option>
-          </select>
-          <input name="society_slug" placeholder="society slug" />
-          <input name="chapter_slug" placeholder="chapter slug" />
-          <input name="seat_limit" type="number" min="1" max="10" placeholder="seats 1–10" />
-        </label>
-        <label>Certificate module code <input name="module_code" placeholder="LLB-101" /></label>
-        <label>Social platform / permalink
-          <select name="platform">
-            <option value="">platform</option>
-            <option value="facebook">facebook</option>
-            <option value="instagram">instagram</option>
-            <option value="linkedin">linkedin</option>
-            <option value="youtube">youtube</option>
-            <option value="tiktok">tiktok</option>
-            <option value="x">x</option>
-          </select>
-          <input name="permalink" placeholder="https:// public post" />
-        </label>
-        <label>Internship location / duration / stipend <input name="location" placeholder="Location" /><input name="duration" placeholder="Duration" /><input name="stipend_note" placeholder="Stipend note" /></label>
-        <label>Mode / deadline
-          <select name="mode">
-            <option value="">Mode (internships)</option>
-            <option value="onsite">onsite</option>
-            <option value="remote">remote</option>
-            <option value="hybrid">hybrid</option>
-          </select>
-          <input name="deadline" type="date" />
-        </label>
-        <label>Summary / short bio <textarea name="summary" rows="3"></textarea><textarea name="short_bio" rows="3" placeholder="Short bio (people)"></textarea></label>
-        <label>Status
-          <select name="status">
-            <option value="draft">draft</option>
-            <option value="published">published</option>
-            <option value="archived">archived</option>
-          </select>
-        </label>
-        <button class="btn btn-primary" type="submit">Save</button>
-        <p id="saveNote" class="form-status"></p>
-      </form>
-      <div class="table-wrap">
-        <table class="data">
-          <thead id="dataHead"></thead>
-          <tbody id="dataBody"></tbody>
-        </table>
-      </div>
-      <h2>Inquiries</h2>
-      <div class="table-wrap">
-        <table class="data">
-          <thead><tr><th>Kind</th><th>Name</th><th>Email</th><th>Subject</th><th>Status</th></tr></thead>
-          <tbody id="inqBody"></tbody>
-        </table>
-      </div>
-      <h2>Internship applications</h2>
-      <p class="note">Public apply form submissions. Status changes are staff-only and are not shown on the public site.</p>
-      <div class="table-wrap">
-        <table class="data">
-          <thead><tr><th>Listing</th><th>Name</th><th>Email</th><th>Education</th><th>Status</th></tr></thead>
-          <tbody id="internAppBody"></tbody>
-        </table>
-      </div>
-      <h2>Society / chapter inquiries</h2>
-      <p class="note">Public join forms. These are inquiries, not memberships.</p>
-      <div class="table-wrap">
-        <table class="data">
-          <thead><tr><th>Kind</th><th>Listing</th><th>Name</th><th>Email</th><th>Message</th></tr></thead>
-          <tbody id="joinReqBody"></tbody>
-        </table>
-      </div>
-      </div><!-- /contentPanel -->
-    </section>
-  </div>
+    <div id="adminApp" class="admin-shell hidden">
+      <aside class="admin-nav" id="adminSidebar">
+        <div class="admin-brand">
+          <img src="https://ramdani-law-firm.vercel.app/assets/ramdani-logo.png" alt="" />
+          <div><strong>Ramdani Law Firm</strong><small>Administration</small></div>
+        </div>
+        <div class="admin-user"><div class="admin-user-label">Signed in as</div><p id="staffName"></p></div>
+        <div class="admin-nav-group">
+          <div class="admin-nav-group-title">Workspace</div>
+          <button type="button" data-table="__dashboard">◈ &nbsp; Dashboard</button>
+          <button type="button" data-table="__students">♙ &nbsp; Students</button>
+          <button type="button" data-table="__admins">♙ &nbsp; Admin accounts</button>
+        </div>
+        <div class="admin-nav-group">
+          <div class="admin-nav-group-title">Website Content</div>
+          <button type="button" data-table="people">People</button>
+          <button type="button" data-table="practice_areas">Practice areas</button>
+          <button type="button" data-table="services">Services</button>
+          <button type="button" data-table="matters">Matters</button>
+          <button type="button" data-table="articles">Insights</button>
+          <button type="button" data-table="news">News</button>
+          <button type="button" data-table="resources">Resources</button>
+          <button type="button" data-table="careers">Careers</button>
+        </div>
+        <div class="admin-nav-group">
+          <div class="admin-nav-group-title">Education & Community</div>
+          <button type="button" data-table="internships">Internships</button>
+          <button type="button" data-table="quizzes">Quizzes</button>
+          <button type="button" data-table="books">Library</button>
+          <button type="button" data-table="modules">Modules</button>
+          <button type="button" data-table="cases">Case notes</button>
+          <button type="button" data-table="statutes">Statutes</button>
+          <button type="button" data-table="societies">Societies</button>
+          <button type="button" data-table="chapters">Chapters</button>
+          <button type="button" data-table="lectures">Lectures</button>
+          <button type="button" data-table="certificates">Certificates</button>
+          <button type="button" data-table="cabinets">Cabinets</button>
+        </div>
+        <div class="admin-nav-group">
+          <div class="admin-nav-group-title">Communications</div>
+          <button type="button" data-table="__inquiries">Inquiries</button>
+          <button type="button" data-table="__applications">Internship applications</button>
+          <button type="button" data-table="__joinrequests">Society / chapter requests</button>
+          <button type="button" data-table="social_posts">Social posts</button>
+        </div>
+        <button type="button" class="btn signout" id="signOutBtn">Sign out</button>
+      </aside>
+
+      <section class="admin-main">
+        <header class="admin-topbar">
+          <div class="admin-topbar-left"><button type="button" class="btn admin-menu-btn" id="adminMenuBtn" aria-label="Open menu">☰</button><div><div class="admin-eyebrow">Ramdani Law Firm</div><h1 id="tableTitle" class="admin-page-title">Dashboard</h1></div></div>
+          <a class="btn" href="/" target="_blank" rel="noopener">View website</a>
+        </header>
+        <main class="admin-content">
+          <div id="dashboardPanel" class="admin-panel is-active">
+            <div class="admin-section-head"><div><h2>Dashboard overview</h2><p class="note">Manage the firm's website, education content, students and incoming requests from one place.</p></div><button class="btn btn-primary" type="button" data-table="people">Add content</button></div>
+            <div class="dashboard-grid">
+              <div class="stat-card"><div class="label">Students</div><div class="value" id="statStudents">—</div></div>
+              <div class="stat-card"><div class="label">Published content</div><div class="value" id="statPublished">—</div></div>
+              <div class="stat-card"><div class="label">Pending inquiries</div><div class="value" id="statInquiries">—</div></div>
+              <div class="stat-card"><div class="label">Internship applications</div><div class="value" id="statApplications">—</div></div>
+            </div>
+            <div class="admin-card"><div class="admin-section-head"><h2>Quick access</h2></div><div class="admin-toolbar">
+              <button class="btn" type="button" data-table="practice_areas">Practice areas</button><button class="btn" type="button" data-table="services">Services</button><button class="btn" type="button" data-table="articles">Insights</button><button class="btn" type="button" data-table="modules">Modules</button><button class="btn" type="button" data-table="__students">Students</button><button class="btn" type="button" data-table="__inquiries">Inquiries</button>
+            </div></div>
+          </div>
+
+          <div id="studentsPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Students <span id="studentTotal" class="note"></span></h2><p class="note">Search, review and manage registered student accounts.</p></div></div>
+            <div class="admin-toolbar"><input type="search" id="studentSearch" placeholder="Search name, email or student ID" aria-label="Search students" /></div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Name</th><th>Email</th><th>Student ID</th><th>Department</th><th>University</th><th>Session</th><th>Status</th><th>Actions</th></tr></thead><tbody id="studentsBody"></tbody></table></div><p id="studentsNote" class="form-status"></p>
+          </div>
+
+          <div id="adminsPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Admin accounts</h2><p class="note">Staff accounts are managed server-side. There is no public admin sign-up.</p></div></div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Name</th><th>Email</th><th>Status</th></tr></thead><tbody id="adminsBody"></tbody></table></div>
+            <div class="admin-card" style="margin-top:1rem"><h3>Create admin account</h3><form id="createAdminForm" class="form admin-form"><label><span>Full name</span><input name="full_name" required /></label><label><span>Email</span><input name="email" type="email" required /></label><label><span>Temporary password</span><input name="password" type="password" required minlength="8" /></label><div class="form-actions"><button class="btn btn-primary" type="submit">Create admin</button><p id="createAdminNote" class="form-status"></p></div></form></div>
+          </div>
+
+          <div id="contentPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2 id="contentHeading">Manage content</h2><p class="note" id="contentDescription">Create and manage website records.</p></div></div>
+            <form id="createForm" class="form admin-form" data-table="people">
+              <label data-field="title"><span>Title / name</span><input name="title" /></label>
+              <label data-field="full_name"><span>Full name</span><input name="full_name" /></label>
+              <label data-field="slug"><span>Slug</span><input name="slug" required /></label>
+              <label data-field="role_title"><span>Role title</span><input name="role_title" /></label>
+              <label data-field="code"><span>Code</span><input name="code" placeholder="LLB-101" /></label>
+              <label data-field="category"><span>Category</span><input name="category" placeholder="llb / lat / gat / pakistan_law / skills" /></label>
+              <label data-field="citation"><span>Citation</span><input name="citation" placeholder="Only publish if verified" /></label>
+              <label data-field="citation_status"><span>Citation status</span><select name="citation_status"><option value="unverified">Unverified</option><option value="verified">Verified</option></select></label>
+              <label data-field="court"><span>Court</span><input name="court" /></label>
+              <label data-field="year"><span>Year</span><input name="year" type="number" /></label>
+              <label data-field="official_url" class="field-full"><span>Official URL</span><input name="official_url" /></label>
+              <label data-field="jurisdiction"><span>Jurisdiction</span><input name="jurisdiction" placeholder="Pakistan" /></label>
+              <label data-field="city"><span>City</span><input name="city" /></label>
+              <label data-field="province"><span>Province</span><input name="province" /></label>
+              <label data-field="youtube_url" class="field-full"><span>YouTube URL</span><input name="youtube_url" /></label>
+              <label data-field="youtube_id"><span>YouTube ID</span><input name="youtube_id" /></label>
+              <label data-field="parent_kind"><span>Cabinet parent</span><select name="parent_kind"><option value="">Select parent</option><option value="society">Society</option><option value="chapter">Chapter</option></select></label>
+              <label data-field="society_slug"><span>Society slug</span><input name="society_slug" /></label>
+              <label data-field="chapter_slug"><span>Chapter slug</span><input name="chapter_slug" /></label>
+              <label data-field="seat_limit"><span>Seat limit</span><input name="seat_limit" type="number" min="1" max="10" /></label>
+              <label data-field="module_code"><span>Certificate module code</span><input name="module_code" /></label>
+              <label data-field="platform"><span>Social platform</span><select name="platform"><option value="">Select platform</option><option value="facebook">Facebook</option><option value="instagram">Instagram</option><option value="linkedin">LinkedIn</option><option value="youtube">YouTube</option><option value="tiktok">TikTok</option><option value="x">X</option></select></label>
+              <label data-field="permalink" class="field-full"><span>Permalink</span><input name="permalink" /></label>
+              <label data-field="location"><span>Location</span><input name="location" /></label>
+              <label data-field="duration"><span>Duration</span><input name="duration" /></label>
+              <label data-field="stipend_note"><span>Stipend note</span><input name="stipend_note" /></label>
+              <label data-field="mode"><span>Mode</span><select name="mode"><option value="">Select mode</option><option value="onsite">Onsite</option><option value="remote">Remote</option><option value="hybrid">Hybrid</option></select></label>
+              <label data-field="deadline"><span>Deadline</span><input name="deadline" type="date" /></label>
+              <label data-field="summary" class="field-full"><span>Summary</span><textarea name="summary" rows="4"></textarea></label>
+              <label data-field="short_bio" class="field-full"><span>Short bio</span><textarea name="short_bio" rows="4"></textarea></label>
+              <label data-field="status"><span>Publishing status</span><select name="status"><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></label>
+              <div class="form-actions"><button class="btn btn-primary" id="saveBtn" type="submit">Save</button><button class="btn" id="cancelEditBtn" type="button" hidden>Cancel edit</button><p id="saveNote" class="form-status"></p></div>
+            </form>
+            <div style="height:1rem"></div>
+            <div class="admin-toolbar"><input id="contentSearch" type="search" placeholder="Search current records" aria-label="Search current records" /></div>
+            <div class="table-wrap"><table class="data"><thead id="dataHead"></thead><tbody id="dataBody"></tbody></table></div>
+          </div>
+
+          <div id="inquiriesPanel" class="admin-panel" hidden><div class="admin-section-head"><div><h2>Inquiries</h2><p class="note">Incoming public consultation and contact requests.</p></div></div><div class="table-wrap"><table class="data"><thead><tr><th>Kind</th><th>Name</th><th>Email</th><th>Subject</th><th>Status</th></tr></thead><tbody id="inqBody"></tbody></table></div></div>
+          <div id="applicationsPanel" class="admin-panel" hidden><div class="admin-section-head"><div><h2>Internship applications</h2><p class="note">Public application submissions. Status changes are staff-only.</p></div></div><div class="table-wrap"><table class="data"><thead><tr><th>Listing</th><th>Name</th><th>Email</th><th>Education</th><th>Status</th></tr></thead><tbody id="internAppBody"></tbody></table></div></div>
+          <div id="joinrequestsPanel" class="admin-panel" hidden><div class="admin-section-head"><div><h2>Society / chapter requests</h2><p class="note">Public join-form inquiries, not memberships.</p></div></div><div class="table-wrap"><table class="data"><thead><tr><th>Kind</th><th>Listing</th><th>Name</th><th>Email</th><th>Message</th></tr></thead><tbody id="joinReqBody"></tbody></table></div></div>
+        </main>
+      </section>
+    </div>
   </div>
 
   <div id="resetRoot" hidden>
@@ -3385,11 +3403,11 @@ window.ramdaniAuth = {
       login.classList.add('hidden');
       app.classList.remove('hidden');
       document.getElementById('staffName').textContent = profile.full_name || profile.role;
-      await loadTable('people');
+      await loadDashboard();
+      await loadStudents();
       await loadInquiries();
       await loadInternshipApps();
       await loadJoinRequests();
-      await loadStudents();
     } catch (e) {
       login.classList.remove('hidden');
       app.classList.add('hidden');
@@ -3419,25 +3437,13 @@ window.ramdaniAuth = {
 
     document.querySelectorAll('[data-table]').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        var t = btn.getAttribute('data-table');
-        var studentsPanel = document.getElementById('studentsPanel');
-        var adminsPanel = document.getElementById('adminsPanel');
-        var contentPanel = document.getElementById('contentPanel');
-        if (t === '__students') {
-          studentsPanel.hidden = false; adminsPanel.hidden = true; contentPanel.hidden = true;
-          document.getElementById('tableTitle').textContent = 'Students';
-          loadStudents();
-          return;
-        }
-        if (t === '__admins') {
-          adminsPanel.hidden = false; studentsPanel.hidden = true; contentPanel.hidden = true;
-          document.getElementById('tableTitle').textContent = 'Admin accounts';
-          loadAdmins();
-          return;
-        }
-        studentsPanel.hidden = true; adminsPanel.hidden = true; contentPanel.hidden = false;
-        loadTable(t);
+        showAdminView(btn.getAttribute('data-table'));
       });
+    });
+
+    var menuBtn = document.getElementById('adminMenuBtn');
+    if (menuBtn) menuBtn.addEventListener('click', function () {
+      document.getElementById('adminApp').classList.toggle('nav-open');
     });
 
     document.getElementById('studentSearch').addEventListener('input', function () {
@@ -3462,6 +3468,8 @@ window.ramdaniAuth = {
       loadAdmins();
     });
 
+    document.getElementById('contentSearch').addEventListener('input', renderContentRows);
+    document.getElementById('cancelEditBtn').addEventListener('click', resetEditor);
     document.getElementById('createForm').addEventListener('submit', saveRow);
   }
 
@@ -3525,89 +3533,120 @@ window.ramdaniAuth = {
     }).join('') || '<tr><td colspan="3">No admin accounts.</td></tr>';
   }
 
-  async function loadTable(name) {
-    var meta = TABLES.find(function (t) { return t.id === name; });
-    if (!meta) return;
-    document.getElementById('tableTitle').textContent = meta.label;
-    document.getElementById('createForm').dataset.table = name;
-    var res = await sb.from(name).select('*').order('updated_at', { ascending: false });
-    var rows = res.data || [];
-    var head = '<tr>' + meta.fields.map(function (f) { return '<th>' + ramdaniUi.escape(f) + '</th>'; }).join('') + '<th></th></tr>';
-    var body = rows.map(function (row) {
-      return '<tr>' + meta.fields.map(function (f) {
-        return '<td>' + ramdaniUi.escape(row[f]) + '</td>';
-      }).join('') + '<td><button type="button" data-del="' + ramdaniUi.escape(row.id) + '">Delete</button></td></tr>';
-    }).join('');
-    document.getElementById('dataHead').innerHTML = head;
-    document.getElementById('dataBody').innerHTML = body || '<tr><td colspan="8">No rows yet.</td></tr>';
-    document.querySelectorAll('[data-del]').forEach(function (btn) {
-      btn.addEventListener('click', async function () {
-        await sb.from(name).delete().eq('id', btn.getAttribute('data-del'));
-        loadTable(name);
-      });
+  var currentRows = [];
+  var editingId = null;
+
+  function showAdminView(view) {
+    var panels = ['dashboardPanel','studentsPanel','adminsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel'];
+    panels.forEach(function(id){ var el=document.getElementById(id); if(el){ el.hidden=true; el.classList.remove('is-active'); }});
+    document.querySelectorAll('.admin-nav [data-table]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-table')===view); });
+    document.getElementById('adminApp').classList.remove('nav-open');
+    if(view==='__dashboard') { activate('dashboardPanel','Dashboard'); loadDashboard(); return; }
+    if(view==='__students') { activate('studentsPanel','Students'); loadStudents(); return; }
+    if(view==='__admins') { activate('adminsPanel','Admin accounts'); loadAdmins(); return; }
+    if(view==='__inquiries') { activate('inquiriesPanel','Inquiries'); loadInquiries(); return; }
+    if(view==='__applications') { activate('applicationsPanel','Internship applications'); loadInternshipApps(); return; }
+    if(view==='__joinrequests') { activate('joinrequestsPanel','Society / chapter requests'); loadJoinRequests(); return; }
+    activate('contentPanel', (TABLES.find(function(t){return t.id===view;})||{}).label || 'Content');
+    loadTable(view);
+  }
+  function activate(id,title){ var p=document.getElementById(id); if(p){p.hidden=false;p.classList.add('is-active');} document.getElementById('tableTitle').textContent=title; }
+
+  function configureForm(name) {
+    var meta = TABLES.find(function(t){return t.id===name;});
+    if(!meta) return;
+    var fields = meta.fields.slice();
+    if(name==='cabinets') fields = fields.concat(['society_slug','chapter_slug']);
+    if(name==='certificates') fields = fields.concat(['module_code']);
+    var special = {cases:['citation','citation_status','court','year','official_url','jurisdiction'], modules:['code','category'], societies:['category','city'], chapters:['city','province'], lectures:['youtube_url','youtube_id'], social_posts:['platform','permalink'], internships:['location','duration','stipend_note','mode','deadline'], people:['full_name','role_title','short_bio'], certificates:['category','module_code'], cabinets:['parent_kind','society_slug','chapter_slug','seat_limit']};
+    (special[name]||[]).forEach(function(f){ if(fields.indexOf(f)<0) fields.push(f); });
+    var form=document.getElementById('createForm');
+    form.querySelectorAll('[data-field]').forEach(function(label){
+      var f=label.getAttribute('data-field');
+      var show=fields.indexOf(f)>=0;
+      label.hidden=!show;
+      if(!show){ var input=label.querySelector('[name="'+f+'"]'); if(input) input.value=''; }
     });
+    form.querySelector('[name="title"]').required = name!=='people';
+    form.querySelector('[name="full_name"]').required = name==='people';
+    document.getElementById('contentHeading').textContent='Manage '+meta.label;
+    document.getElementById('contentDescription').textContent='Create, edit, publish and remove '+meta.label.toLowerCase()+'.';
+  }
+
+  function fillForm(row) {
+    var form=document.getElementById('createForm');
+    Object.keys(row||{}).forEach(function(k){ var el=form.querySelector('[name="'+k+'"]'); if(el) el.value=row[k]==null?'':row[k]; });
+    editingId=row.id;
+    document.getElementById('saveBtn').textContent='Update';
+    document.getElementById('cancelEditBtn').hidden=false;
+    document.getElementById('saveNote').textContent='Editing selected record.';
+    form.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  function resetEditor(){
+    editingId=null; var form=document.getElementById('createForm'); form.reset();
+    document.getElementById('saveBtn').textContent='Save'; document.getElementById('cancelEditBtn').hidden=true; document.getElementById('saveNote').textContent='';
+  }
+
+  async function loadDashboard() {
+    var queries = await Promise.all([
+      sb.from('profiles').select('id',{count:'exact',head:true}).eq('role','student'),
+      sb.from('inquiries').select('id',{count:'exact',head:true}).eq('status','new'),
+      sb.from('internship_applications').select('id',{count:'exact',head:true}).in('status',['new','reviewed','shortlisted'])
+    ]);
+    var studentCount=queries[0].count, inquiryCount=queries[1].count, appCount=queries[2].count;
+    document.getElementById('statStudents').textContent=studentCount==null?'—':studentCount;
+    document.getElementById('statInquiries').textContent=inquiryCount==null?'—':inquiryCount;
+    document.getElementById('statApplications').textContent=appCount==null?'—':appCount;
+    var published=0;
+    for(var i=0;i<TABLES.length;i++){
+      var r=await sb.from(TABLES[i].id).select('id',{count:'exact',head:true}).eq('status','published');
+      if(typeof r.count==='number') published+=r.count;
+    }
+    document.getElementById('statPublished').textContent=published;
+  }
+
+  async function loadTable(name) {
+    var meta = TABLES.find(function(t){return t.id===name;}); if(!meta) return;
+    var form=document.getElementById('createForm'); form.dataset.table=name; configureForm(name);
+    resetEditor();
+    var res=await sb.from(name).select('*').order('updated_at',{ascending:false});
+    currentRows=res.data||[];
+    renderContentRows();
+  }
+
+  function renderContentRows(){
+    var name=document.getElementById('createForm').dataset.table;
+    var meta=TABLES.find(function(t){return t.id===name;}); if(!meta) return;
+    var filter=(document.getElementById('contentSearch').value||'').trim().toLowerCase();
+    var rows=!filter?currentRows:currentRows.filter(function(row){return meta.fields.some(function(f){return String(row[f]==null?'':row[f]).toLowerCase().indexOf(filter)!==-1;});});
+    document.getElementById('dataHead').innerHTML='<tr>'+meta.fields.map(function(f){return '<th>'+ramdaniUi.escape(f)+'</th>';}).join('')+'<th>Actions</th></tr>';
+    document.getElementById('dataBody').innerHTML=rows.map(function(row){
+      var status=row.status?'<span class="status-badge status-'+ramdaniUi.escape(String(row.status))+'">'+ramdaniUi.escape(row.status)+'</span>':'';
+      return '<tr>'+meta.fields.map(function(f){return '<td>'+((f==='status')?status:ramdaniUi.escape(row[f]))+'</td>';}).join('')+'<td><div class="table-actions"><button type="button" class="btn btn-sm" data-edit="'+ramdaniUi.escape(row.id)+'">Edit</button><button type="button" class="btn btn-sm" data-del="'+ramdaniUi.escape(row.id)+'">Delete</button></div></td></tr>';
+    }).join('')||'<tr><td colspan="'+(meta.fields.length+1)+'">No records found.</td></tr>';
+    document.querySelectorAll('[data-edit]').forEach(function(btn){btn.addEventListener('click',function(){var row=currentRows.find(function(r){return String(r.id)===String(btn.getAttribute('data-edit'));});if(row)fillForm(row);});});
+    document.querySelectorAll('[data-del]').forEach(function(btn){btn.addEventListener('click',async function(){if(!confirm('Permanently delete this record? This cannot be undone.'))return;var res=await sb.from(name).delete().eq('id',btn.getAttribute('data-del'));var note=document.getElementById('saveNote');note.className='form-status '+(res.error?'err':'ok');note.textContent=res.error?res.error.message:'Record deleted.';if(!res.error)loadTable(name);});});
   }
 
   async function saveRow(e) {
-    e.preventDefault();
-    var form = e.target;
-    var table = form.dataset.table;
-    var payload = {
-      title: (form.querySelector('[name="title"]') || {}).value,
-      full_name: (form.querySelector('[name="full_name"]') || {}).value,
-      slug: form.querySelector('[name="slug"]').value.trim(),
-      summary: (form.querySelector('[name="summary"]') || {}).value,
-      short_bio: (form.querySelector('[name="short_bio"]') || {}).value,
-      role_title: (form.querySelector('[name="role_title"]') || {}).value,
-      location: (form.querySelector('[name="location"]') || {}).value,
-      mode: (form.querySelector('[name="mode"]') || {}).value,
-      duration: (form.querySelector('[name="duration"]') || {}).value,
-      stipend_note: (form.querySelector('[name="stipend_note"]') || {}).value,
-      deadline: (form.querySelector('[name="deadline"]') || {}).value,
-      category: (form.querySelector('[name="category"]') || {}).value,
-      city: (form.querySelector('[name="city"]') || {}).value,
-      province: (form.querySelector('[name="province"]') || {}).value,
-      youtube_url: (form.querySelector('[name="youtube_url"]') || {}).value,
-      youtube_id: (form.querySelector('[name="youtube_id"]') || {}).value,
-      platform: (form.querySelector('[name="platform"]') || {}).value,
-      permalink: (form.querySelector('[name="permalink"]') || {}).value,
-      parent_kind: (form.querySelector('[name="parent_kind"]') || {}).value,
-      seat_limit: (form.querySelector('[name="seat_limit"]') || {}).value,
-      status: form.querySelector('[name="status"]').value
-    };
-    Object.keys(payload).forEach(function (k) { if (payload[k] === undefined || payload[k] === '') delete payload[k]; });
-    if (table === 'cabinets') {
-      var limit = Number(payload.seat_limit || 10);
-      if (!limit || limit < 1) limit = 1;
-      if (limit > 10) limit = 10;
-      payload.seat_limit = limit;
-      var parentKind = payload.parent_kind;
-      var socSlug = (form.querySelector('[name="society_slug"]') || {}).value;
-      var chSlug = (form.querySelector('[name="chapter_slug"]') || {}).value;
-      if (parentKind === 'society' && socSlug) {
-        var s = await sb.from('societies').select('id').eq('slug', socSlug.trim()).maybeSingle();
-        payload.society_id = s.data && s.data.id;
-        delete payload.chapter_id;
-      }
-      if (parentKind === 'chapter' && chSlug) {
-        var c = await sb.from('chapters').select('id').eq('slug', chSlug.trim()).maybeSingle();
-        payload.chapter_id = c.data && c.data.id;
-        delete payload.society_id;
-      }
+    e.preventDefault(); var form=e.target, table=form.dataset.table; var meta=TABLES.find(function(t){return t.id===table;}); if(!meta)return;
+    var payload={};
+    meta.fields.forEach(function(f){var el=form.querySelector('[name="'+f+'"]');if(el&&el.value!=='')payload[f]=el.value.trim?el.value.trim():el.value;});
+    if(table==='cabinets'){
+      var limit=Number((form.querySelector('[name="seat_limit"]')||{}).value||10); if(!limit||limit<1)limit=1;if(limit>10)limit=10;payload.seat_limit=limit;
+      var pk=payload.parent_kind, ss=(form.querySelector('[name="society_slug"]')||{}).value, cs=(form.querySelector('[name="chapter_slug"]')||{}).value;
+      if(pk==='society'&&ss){var sr=await sb.from('societies').select('id').eq('slug',ss.trim()).maybeSingle();if(sr.data)payload.society_id=sr.data.id;delete payload.chapter_id;}
+      if(pk==='chapter'&&cs){var cr=await sb.from('chapters').select('id').eq('slug',cs.trim()).maybeSingle();if(cr.data)payload.chapter_id=cr.data.id;delete payload.society_id;}
+      delete payload.parent_kind; delete payload.society_slug; delete payload.chapter_slug;
     }
-    if (table === 'certificates') {
-      var code = ((form.querySelector('[name="module_code"]') || {}).value || '').trim();
-      if (code) {
-        var m = await sb.from('modules').select('id').eq('code', code).maybeSingle();
-        if (m.data) payload.module_id = m.data.id;
-      }
+    if(table==='certificates'){
+      var code=((form.querySelector('[name="module_code"]')||{}).value||'').trim(); if(code){var mr=await sb.from('modules').select('id').eq('code',code).maybeSingle();if(mr.data)payload.module_id=mr.data.id;} delete payload.module_code;
     }
-    if (table === 'people' && !payload.full_name) return;
-    if (table !== 'people' && !payload.title) return;
-    var res = await sb.from(table).insert(payload);
-    var note = document.getElementById('saveNote');
-    note.textContent = res.error ? res.error.message : 'Saved.';
-    if (!res.error) { form.reset(); loadTable(table); }
+    if(table==='people'&&!payload.full_name){document.getElementById('saveNote').textContent='Full name is required.';return;}
+    if(table!=='people'&&!payload.title){document.getElementById('saveNote').textContent='Title is required.';return;}
+    var res=editingId?await sb.from(table).update(payload).eq('id',editingId):await sb.from(table).insert(payload);
+    var note=document.getElementById('saveNote'); note.className='form-status '+(res.error?'err':'ok'); note.textContent=res.error?res.error.message:(editingId?'Updated successfully.':'Saved successfully.');
+    if(!res.error){resetEditor();loadTable(table);}
   }
 
   async function loadInquiries() {
