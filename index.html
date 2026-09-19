@@ -1876,7 +1876,7 @@ html[dir="rtl"] .lead {
           <button class="btn btn-primary" type="submit">Sign in</button>
         </form>
         <p id="portalLoginStatus" class="form-status"></p>
-        <p>Create an account: <a href="/student/signup">Student</a> · <a href="/lawyer/signup">Lawyer</a> · <a href="/student/forgot-password">Forgot password?</a></p>
+        <p>Create an account: <a href="/join">Join</a> (<a href="/student/signup">Student</a> · <a href="/lawyer/signup">Lawyer</a>) · <a href="/student/forgot-password">Forgot password?</a></p>
         <p class="note">Member and client accounts are created by the firm. <a href="/">Back to public site</a></p>
       </div>
       <div id="portalDashHost"></div>
@@ -1911,6 +1911,7 @@ html[dir="rtl"] .lead {
           <label>Department <input name="department" required /></label>
           <label>University <input name="university" required /></label>
           <label>Session <input name="session" placeholder="e.g. 2023–2027" required /></label>
+          <div data-captcha></div>
           <button class="btn btn-primary" type="submit">Create account</button>
         </form>
         <p id="studentSignupStatus" class="form-status"></p>
@@ -2192,6 +2193,9 @@ html[dir="rtl"] .lead {
           </select></label>
           <label>Profile photo (JPG, PNG or WebP) <input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required /></label>
           <img id="lawSignupPhotoPreview" class="portal-photo is-empty" alt="Photo preview" hidden />
+          <label>Bar licence card (JPG, PNG, WebP or PDF, max 5 MB) <input name="license_card" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" required /></label>
+          <label>CV (PDF preferred; JPG, PNG or WebP scan also accepted, max 5 MB) <input name="cv" type="file" accept="application/pdf,image/jpeg,image/png,image/webp" required /></label>
+          <div data-captcha></div>
           <input name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;height:0;width:0;opacity:0" aria-hidden="true" />
           <button class="btn btn-primary" type="submit">Submit registration</button>
         </form>
@@ -2564,6 +2568,31 @@ var rows = await ramdaniApi.listPublished('articles', null); ramdaniUi.renderLis
     </div></section>`, init: async function () {
 if (window.ramdaniEducation) ramdaniEducation.bindInternshipApply();
   } },
+  '/pages/join.html': { title: 'Join — Ramdani Law Firm', desc: 'Create a student or lawyer account with Ramdani Law Firm.', html: `<section class="section"><div class="wrap"><div class="auth-box">
+      <h1>Join Ramdani Law Firm</h1>
+      <p class="note">Choose the kind of account you want to create.</p>
+      <form id="joinForm" class="form">
+        <label>I am a <select id="joinType" required><option value="">Select…</option><option value="student">Student</option><option value="lawyer">Lawyer</option></select></label>
+        <p class="note" id="joinHint"></p>
+        <p id="joinStatus" class="form-status"></p>
+        <button class="btn btn-primary" type="submit">Continue</button>
+      </form>
+      <p>Already have an account? <a href="/portal/login">Sign in</a></p>
+    </div></div></section>`, init: async function () {
+    var form = document.getElementById('joinForm'), sel = document.getElementById('joinType'), hint = document.getElementById('joinHint'), st = document.getElementById('joinStatus');
+    if (!form) return;
+    sel.addEventListener('change', function () {
+      st.textContent = ''; st.className = 'form-status';
+      hint.textContent = sel.value === 'lawyer'
+        ? 'Lawyer registrations need your bar licence card and CV, and are reviewed and approved by the firm admin before you can sign in.'
+        : (sel.value === 'student' ? 'Students register with their roll number, department and university details.' : '');
+    });
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (!sel.value) { st.className = 'form-status err'; st.textContent = 'Select Student or Lawyer first.'; return; }
+      window.ramdaniGo(sel.value === 'lawyer' ? '/lawyer/signup' : '/student/signup');
+    });
+  } },
   '/pages/internships.html': { title: 'Internships — Ramdani Law Firm', desc: 'Internships — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section"><div class="wrap">
       <h1 data-i18n="internships_title"></h1>
       <p class="lead" data-i18n="internships_lead"></p>
@@ -2866,6 +2895,7 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
     if (path === '/admin') path = '/admin/';
     if (path === '/reset-password/' ) path = '/reset-password';
     if (path === '/index.html') path = '/';
+    if (path === '/join' || path === '/join/') path = '/pages/join.html';
     if (path === '/student') path = '/student/login';
     if (path === '/member') path = '/member/login';
     if (path === '/client') path = '/client/login';
@@ -3263,6 +3293,7 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
     form.dataset.bound = '1';
     var st = document.getElementById('lawyerSignupStatus');
     function say(msg, ok) { st.className = 'form-status' + (msg ? (ok ? ' ok' : ' err') : ''); st.textContent = msg || ''; }
+    var cap = window.mountMathCaptcha ? window.mountMathCaptcha(form.querySelector('[data-captcha]')) : null;
     form.elements.photo.addEventListener('change', function () {
       var f = this.files[0], pv = document.getElementById('lawSignupPhotoPreview');
       if (f && /^image\//.test(f.type)) { pv.src = URL.createObjectURL(f); pv.hidden = false; pv.classList.remove('is-empty'); } else { pv.hidden = true; }
@@ -3274,9 +3305,18 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
       if (f.password.value !== f.confirm_password.value) return say('Passwords do not match.');
       var file = f.photo.files[0];
       if (!file || !/^image\/(jpeg|png|webp)$/i.test(file.type)) return say('Choose a JPG, PNG or WebP photo.');
+      var card = f.license_card.files[0], cv = f.cv.files[0];
+      function okDoc(x) { return !!x && (/^(image\/(jpeg|png|webp)|application\/pdf)$/i.test(x.type) || /\.(pdf|jpe?g|png|webp)$/i.test(x.name)); }
+      if (!okDoc(card)) return say('Licence card must be a JPG, PNG, WebP image or a PDF.');
+      if (!okDoc(cv)) return say('CV must be a PDF (or a JPG, PNG or WebP scan).');
+      if (card.size > 5 * 1024 * 1024 || cv.size > 5 * 1024 * 1024) return say('Licence card and CV must each be 5 MB or smaller.');
+      var cc = cap ? cap.check() : null;
+      if (!cc || !cc.ok) { if (cap) cap.refresh(); return say('Security check answer is incorrect.'); }
       var btn = form.querySelector('button[type="submit"]'); btn.disabled = true; say('Submitting…');
       try {
         var photo = await lawyerPhotoToDataUrl(file);
+        var cardB64 = await window.ramdaniFileToBase64(card);
+        var cvB64 = await window.ramdaniFileToBase64(cv);
         var cfg = window.RAMDANI_CONFIG;
         var res = await fetch(cfg.supabaseUrl + '/functions/v1/lawyer-signup', {
           method: 'POST',
@@ -3284,12 +3324,13 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
           body: JSON.stringify({
             full_name: f.full_name.value.trim(), email: f.email.value.trim(), password: f.password.value,
             phone: f.phone.value.trim(), bar_association: f.bar_association.value.trim(), bar_license_no: f.bar_license_no.value.trim(),
-            district: f.district.value.trim(), province: f.province.value, website: f.website.value, photo_base64: photo
+            district: f.district.value.trim(), province: f.province.value, website: f.website.value, photo_base64: photo,
+            license_card_base64: cardB64, cv_base64: cvB64, captcha_expected: cc.expected, captcha_answer: cc.answer
           })
         });
         var data = {}; try { data = await res.json(); } catch (x) {}
-        if (!res.ok) { btn.disabled = false; return say(data.error || ('Registration failed (' + res.status + ')')); }
-        form.reset(); document.getElementById('lawSignupPhotoPreview').hidden = true;
+        if (!res.ok) { btn.disabled = false; if (cap) cap.refresh(); return say(data.error || ('Registration failed (' + res.status + ')')); }
+        form.reset(); document.getElementById('lawSignupPhotoPreview').hidden = true; if (cap) cap.refresh();
         say('Registration submitted. The firm admin will review it; you can sign in once it is approved.' + (data.warning ? ' ' + data.warning : ''), true);
       } catch (err) { say(err.message || 'Registration failed.'); }
       btn.disabled = false;
@@ -3348,6 +3389,49 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
   document.addEventListener('DOMContentLoaded', function () { render(); });
 })();
 
+</script>
+<!-- APPLICATION LOGIC: math captcha + file helpers (signup forms) -->
+<script>
+(function () {
+  function rnd(min, max) {
+    var n = min + Math.floor(Math.random() * (max - min + 1));
+    try { var a = new Uint32Array(1); crypto.getRandomValues(a); n = min + (a[0] % (max - min + 1)); } catch (e) {}
+    return n;
+  }
+  // Simple arithmetic check. It is a light deterrent against casual bots, not a strong CAPTCHA.
+  window.mountMathCaptcha = function (host) {
+    if (!host) return null;
+    var expected = 0;
+    host.innerHTML = '<label>Security check: <span data-cq></span> <input name="captcha_answer" inputmode="numeric" autocomplete="off" required /></label>' +
+      '<button type="button" class="btn" data-crefresh>New question</button>';
+    var q = host.querySelector('[data-cq]'), inp = host.querySelector('input');
+    function refresh() {
+      var a = rnd(2, 9), b = rnd(2, 9);
+      if (rnd(0, 1)) { expected = a + b; q.textContent = 'What is ' + a + ' + ' + b + '?'; }
+      else { if (b > a) { var t = a; a = b; b = t; } expected = a - b; q.textContent = 'What is ' + a + ' \u2212 ' + b + '?'; }
+      inp.value = '';
+    }
+    host.querySelector('[data-crefresh]').addEventListener('click', refresh);
+    refresh();
+    var api = {
+      refresh: refresh,
+      check: function () {
+        var ans = Number(String(inp.value).trim());
+        return { ok: String(inp.value).trim() !== '' && Number.isFinite(ans) && ans === expected, expected: expected, answer: ans };
+      }
+    };
+    host._captcha = api;
+    return api;
+  };
+  window.ramdaniFileToBase64 = function (file) {
+    return new Promise(function (resolve, reject) {
+      var fr = new FileReader();
+      fr.onerror = function () { reject(new Error('File could not be read.')); };
+      fr.onload = function () { resolve(fr.result); };
+      fr.readAsDataURL(file);
+    });
+  };
+})();
 </script>
 <!-- APPLICATION LOGIC: js/config.js -->
 <script>
@@ -4371,6 +4455,7 @@ window.ramdaniAuth = {
       window.ramdaniGo('/student/dashboard');
     });
 
+    var stuCap = window.mountMathCaptcha ? window.mountMathCaptcha(document.querySelector('#studentSignupForm [data-captcha]')) : null;
     document.getElementById('studentSignupForm').addEventListener('submit', async function (e) {
       e.preventDefault();
       setStatus('studentSignupStatus', '');
@@ -4389,8 +4474,10 @@ window.ramdaniAuth = {
       if (!/^\S+@\S+\.\S+$/.test(fields.email)) return setStatus('studentSignupStatus', 'Enter a valid email address.');
       if (fields.password.length < 8) return setStatus('studentSignupStatus', 'Password must be at least 8 characters.');
       if (fields.password !== fields.confirm_password) return setStatus('studentSignupStatus', 'Passwords do not match.');
+      if (!stuCap || !stuCap.check().ok) { if (stuCap) stuCap.refresh(); return setStatus('studentSignupStatus', 'Security check answer is incorrect.'); }
       var res = await ramdaniAuth.signUpStudent(fields);
       if (res.error) {
+        stuCap.refresh();
         var msg = /already registered|already exists/i.test(res.error.message)
           ? 'An account with this email already exists.'
           : res.error.message;
