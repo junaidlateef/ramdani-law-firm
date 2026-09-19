@@ -242,6 +242,14 @@ details.admin-nav-group > summary.admin-nav-group-title:hover { background:rgba(
 .form.admin-form input,.form.admin-form textarea,.form.admin-form select { margin:0; min-height:44px; border-radius:9px; }
 .form.admin-form textarea { min-height:110px; }
 .form-actions { grid-column:1/-1; display:flex; align-items:center; gap:.65rem; padding-top:.35rem; border-top:1px solid var(--line); }
+.asset-field .asset-upload { display:flex; flex-direction:column; gap:.5rem; }
+.asset-preview { width:100%; max-width:220px; height:90px; border:1px dashed var(--line); border-radius:9px; background:var(--paper); display:flex; align-items:center; justify-content:center; overflow:hidden; }
+.asset-preview img { max-width:100%; max-height:100%; object-fit:contain; }
+.asset-empty { color:var(--muted); font-size:.72rem; padding:0 .5rem; text-align:center; }
+.asset-file-input { border:1px solid var(--line); border-radius:9px; padding:.4rem; background:var(--white); font-size:.8rem; }
+.asset-actions { display:flex; gap:.4rem; }
+.asset-status { min-height:1.1rem; font-size:.75rem; margin:0; }
+.asset-status.uploading { color:var(--muted); }
 .table-wrap { overflow:auto; border:1px solid var(--line); border-radius:14px; background:var(--card); }
 table.data { width:100%; border-collapse:separate; border-spacing:0; min-width:720px; }
 table.data th { background:color-mix(in srgb,var(--paper) 75%,var(--card)); color:var(--muted); font-size:.7rem; text-transform:uppercase; letter-spacing:.06em; white-space:nowrap; }
@@ -688,14 +696,78 @@ html[dir="rtl"] .lead {
             <div class="admin-section-head"><div><h2>Logo &amp; colors</h2><p class="note">Logo URLs and brand colors. Publish to make this the live brand shown on the public site.</p></div></div>
             <form id="brandingLogoForm" class="form admin-form">
               <label><span>Status</span><select name="status"><option value="draft">Draft</option><option value="published">Published</option></select></label>
-              <label class="field-full"><span>Primary logo URL</span><input name="logo_primary_url" /></label>
-              <label><span>Light logo URL</span><input name="logo_light_url" /></label>
-              <label><span>Dark logo URL</span><input name="logo_dark_url" /></label>
-              <label><span>Mobile logo URL</span><input name="logo_mobile_url" /></label>
-              <label><span>Favicon URL</span><input name="favicon_url" /></label>
-              <label><span>Social share image URL</span><input name="social_share_image_url" /></label>
-              <label><span>Certificate logo URL</span><input name="certificate_logo_url" /></label>
-              <label><span>Education logo URL</span><input name="education_logo_url" /></label>
+              <label class="field-full asset-field"><span>Primary logo</span>
+                <div class="asset-upload">
+                  <div class="asset-preview" id="preview_logo_primary_url"><img id="img_logo_primary_url" alt="" hidden /><span class="asset-empty" id="empty_logo_primary_url">No file uploaded</span></div>
+                  <input type="hidden" name="logo_primary_url" />
+                  <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon" class="asset-file-input" data-target="logo_primary_url" />
+                  <div class="asset-actions"><button type="button" class="btn btn-sm asset-remove-btn" data-target="logo_primary_url">Remove</button></div>
+                  <p class="form-status asset-status" id="status_logo_primary_url"></p>
+                </div>
+              </label>
+              <label class="asset-field"><span>Light logo</span>
+                <div class="asset-upload">
+                  <div class="asset-preview" id="preview_logo_light_url"><img id="img_logo_light_url" alt="" hidden /><span class="asset-empty" id="empty_logo_light_url">No file uploaded</span></div>
+                  <input type="hidden" name="logo_light_url" />
+                  <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon" class="asset-file-input" data-target="logo_light_url" />
+                  <div class="asset-actions"><button type="button" class="btn btn-sm asset-remove-btn" data-target="logo_light_url">Remove</button></div>
+                  <p class="form-status asset-status" id="status_logo_light_url"></p>
+                </div>
+              </label>
+              <label class="asset-field"><span>Dark logo</span>
+                <div class="asset-upload">
+                  <div class="asset-preview" id="preview_logo_dark_url"><img id="img_logo_dark_url" alt="" hidden /><span class="asset-empty" id="empty_logo_dark_url">No file uploaded</span></div>
+                  <input type="hidden" name="logo_dark_url" />
+                  <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon" class="asset-file-input" data-target="logo_dark_url" />
+                  <div class="asset-actions"><button type="button" class="btn btn-sm asset-remove-btn" data-target="logo_dark_url">Remove</button></div>
+                  <p class="form-status asset-status" id="status_logo_dark_url"></p>
+                </div>
+              </label>
+              <label class="asset-field"><span>Mobile logo</span>
+                <div class="asset-upload">
+                  <div class="asset-preview" id="preview_logo_mobile_url"><img id="img_logo_mobile_url" alt="" hidden /><span class="asset-empty" id="empty_logo_mobile_url">No file uploaded</span></div>
+                  <input type="hidden" name="logo_mobile_url" />
+                  <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon" class="asset-file-input" data-target="logo_mobile_url" />
+                  <div class="asset-actions"><button type="button" class="btn btn-sm asset-remove-btn" data-target="logo_mobile_url">Remove</button></div>
+                  <p class="form-status asset-status" id="status_logo_mobile_url"></p>
+                </div>
+              </label>
+              <label class="asset-field"><span>Favicon</span>
+                <div class="asset-upload">
+                  <div class="asset-preview" id="preview_favicon_url"><img id="img_favicon_url" alt="" hidden /><span class="asset-empty" id="empty_favicon_url">No file uploaded</span></div>
+                  <input type="hidden" name="favicon_url" />
+                  <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon" class="asset-file-input" data-target="favicon_url" />
+                  <div class="asset-actions"><button type="button" class="btn btn-sm asset-remove-btn" data-target="favicon_url">Remove</button></div>
+                  <p class="form-status asset-status" id="status_favicon_url"></p>
+                </div>
+              </label>
+              <label class="asset-field"><span>Social share image</span>
+                <div class="asset-upload">
+                  <div class="asset-preview" id="preview_social_share_image_url"><img id="img_social_share_image_url" alt="" hidden /><span class="asset-empty" id="empty_social_share_image_url">No file uploaded</span></div>
+                  <input type="hidden" name="social_share_image_url" />
+                  <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon" class="asset-file-input" data-target="social_share_image_url" />
+                  <div class="asset-actions"><button type="button" class="btn btn-sm asset-remove-btn" data-target="social_share_image_url">Remove</button></div>
+                  <p class="form-status asset-status" id="status_social_share_image_url"></p>
+                </div>
+              </label>
+              <label class="asset-field"><span>Certificate logo</span>
+                <div class="asset-upload">
+                  <div class="asset-preview" id="preview_certificate_logo_url"><img id="img_certificate_logo_url" alt="" hidden /><span class="asset-empty" id="empty_certificate_logo_url">No file uploaded</span></div>
+                  <input type="hidden" name="certificate_logo_url" />
+                  <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon" class="asset-file-input" data-target="certificate_logo_url" />
+                  <div class="asset-actions"><button type="button" class="btn btn-sm asset-remove-btn" data-target="certificate_logo_url">Remove</button></div>
+                  <p class="form-status asset-status" id="status_certificate_logo_url"></p>
+                </div>
+              </label>
+              <label class="asset-field"><span>Education logo</span>
+                <div class="asset-upload">
+                  <div class="asset-preview" id="preview_education_logo_url"><img id="img_education_logo_url" alt="" hidden /><span class="asset-empty" id="empty_education_logo_url">No file uploaded</span></div>
+                  <input type="hidden" name="education_logo_url" />
+                  <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon" class="asset-file-input" data-target="education_logo_url" />
+                  <div class="asset-actions"><button type="button" class="btn btn-sm asset-remove-btn" data-target="education_logo_url">Remove</button></div>
+                  <p class="form-status asset-status" id="status_education_logo_url"></p>
+                </div>
+              </label>
               <label><span>Primary color</span><input name="color_primary" type="color" /></label>
               <label><span>Secondary color</span><input name="color_secondary" type="color" /></label>
               <label><span>Accent color</span><input name="color_accent" type="color" /></label>
@@ -3917,6 +3989,101 @@ window.ramdaniAuth = {
   var brandingId = null;
   var brandingRow = null;
 
+  var ASSET_FIELDS = ['logo_primary_url','logo_light_url','logo_dark_url','logo_mobile_url','favicon_url','social_share_image_url','certificate_logo_url','education_logo_url'];
+
+  function setAssetPreview(fieldName, url) {
+    var img = document.getElementById('img_' + fieldName);
+    var empty = document.getElementById('empty_' + fieldName);
+    var hidden = document.querySelector('#brandingLogoForm [name="' + fieldName + '"]');
+    if (!img || !empty) return;
+    if (url) {
+      img.src = url;
+      img.hidden = false;
+      empty.hidden = true;
+    } else {
+      img.removeAttribute('src');
+      img.hidden = true;
+      empty.hidden = false;
+    }
+    if (hidden) hidden.value = url || '';
+  }
+
+  function assetStoragePathFromUrl(url) {
+    // Extract the storage object path from a public Supabase Storage URL, so Remove
+    // can best-effort delete the underlying object, not just clear the reference.
+    if (!url) return null;
+    var marker = '/storage/v1/object/public/site-assets/';
+    var idx = url.indexOf(marker);
+    if (idx === -1) return null;
+    return url.slice(idx + marker.length);
+  }
+
+  async function uploadBrandingAsset(fieldName, file) {
+    var status = document.getElementById('status_' + fieldName);
+    if (!file) return;
+    var maxBytes = 10 * 1024 * 1024;
+    var allowed = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml', 'image/x-icon', 'image/vnd.microsoft.icon'];
+    if (file.size > maxBytes) {
+      status.className = 'form-status asset-status err';
+      status.textContent = 'File is too large (max 10 MB).';
+      return;
+    }
+    if (allowed.indexOf(file.type) === -1) {
+      status.className = 'form-status asset-status err';
+      status.textContent = 'Unsupported file type. Use PNG, JPEG, WebP, SVG or ICO.';
+      return;
+    }
+    status.className = 'form-status asset-status uploading';
+    status.textContent = 'Uploading…';
+    var ext = (file.name.split('.').pop() || 'png').toLowerCase().replace(/[^a-z0-9]/g, '') || 'png';
+    var path = 'branding/' + fieldName + '-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.' + ext;
+    var res = await sb.storage.from('site-assets').upload(path, file, { upsert: false, contentType: file.type });
+    if (res.error) {
+      status.className = 'form-status asset-status err';
+      status.textContent = 'Upload failed: ' + res.error.message;
+      return;
+    }
+    var pub = sb.storage.from('site-assets').getPublicUrl(path);
+    var publicUrl = pub && pub.data ? pub.data.publicUrl : null;
+    if (!publicUrl) {
+      status.className = 'form-status asset-status err';
+      status.textContent = 'Uploaded, but could not resolve a public URL.';
+      return;
+    }
+    setAssetPreview(fieldName, publicUrl);
+    status.className = 'form-status asset-status ok';
+    status.textContent = 'Uploaded. Click "Save changes" to publish this to the record.';
+  }
+
+  async function removeBrandingAsset(fieldName) {
+    var hidden = document.querySelector('#brandingLogoForm [name="' + fieldName + '"]');
+    var status = document.getElementById('status_' + fieldName);
+    var oldUrl = hidden ? hidden.value : null;
+    setAssetPreview(fieldName, '');
+    if (status) { status.className = 'form-status asset-status'; status.textContent = 'Removed. Click "Save changes" to apply.'; }
+    var path = assetStoragePathFromUrl(oldUrl);
+    if (path) {
+      try { await sb.storage.from('site-assets').remove([path]); } catch (e) { /* best-effort; reference is already cleared */ }
+    }
+  }
+
+  function initAssetUploads(formId) {
+    var form = document.getElementById(formId);
+    if (!form || form.dataset.assetBound === '1') return;
+    form.dataset.assetBound = '1';
+    form.querySelectorAll('.asset-file-input').forEach(function (input) {
+      input.addEventListener('change', function () {
+        var field = input.getAttribute('data-target');
+        var file = input.files && input.files[0];
+        if (file) uploadBrandingAsset(field, file);
+        input.value = '';
+      });
+    });
+    form.querySelectorAll('.asset-remove-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () { removeBrandingAsset(btn.getAttribute('data-target')); });
+    });
+  }
+
   function fillBrandingForm(formId) {
     var form = document.getElementById(formId);
     if (!brandingRow) return;
@@ -3924,6 +4091,9 @@ window.ramdaniAuth = {
       var el = form.querySelector('[name="' + k + '"]');
       if (el) el.value = brandingRow[k] == null ? '' : brandingRow[k];
     });
+    if (formId === 'brandingLogoForm') {
+      ASSET_FIELDS.forEach(function (f) { setAssetPreview(f, brandingRow[f] || ''); });
+    }
   }
 
   async function loadBranding(formId, noteId) {
@@ -3940,9 +4110,13 @@ window.ramdaniAuth = {
     if (brandingRow) {
       fillBrandingForm(formId);
       note.textContent = '';
+    } else if (formId === 'brandingLogoForm') {
+      ASSET_FIELDS.forEach(function (f) { setAssetPreview(f, ''); });
+      note.textContent = 'No branding saved yet — fill in the form and save to create the first record.';
     } else {
       note.textContent = 'No branding saved yet — fill in the form and save to create the first record.';
     }
+    if (formId === 'brandingLogoForm') initAssetUploads(formId);
   }
 
   async function saveBranding(e, fields) {
