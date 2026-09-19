@@ -1630,7 +1630,7 @@ html[dir="rtl"] .lead {
               <label class="field-full"><span>Description</span><textarea name="description" rows="3"></textarea></label>
               <div class="form-actions"><button class="btn btn-primary" type="submit" id="platEventSave">Save event</button><button class="btn" type="button" id="platEventCancel" hidden>Cancel</button><p id="platEventNote" class="form-status"></p></div>
             </form>
-            <div class="table-wrap"><table class="data"><thead><tr><th>Title</th><th>When</th><th>Type</th><th>Status</th><th></th></tr></thead><tbody id="platEventBody"></tbody></table></div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Event #</th><th>Title</th><th>When</th><th>Type</th><th>Status</th><th></th></tr></thead><tbody id="platEventBody"></tbody></table></div>
           </div>
 
           <div id="eventRegsPanel" class="admin-panel" hidden>
@@ -1810,6 +1810,9 @@ html[dir="rtl"] .lead {
 
         <section class="portal-section">
           <h2>Events & attendance</h2>
+          <div id="myStudentUpcomingEvents"></div>
+          <p id="myStudentEventNote" class="form-status"></p>
+          <h3 class="note" style="margin-top:1rem">My registrations</h3>
           <div id="myStudentEvents"></div>
         </section>
 
@@ -1897,6 +1900,9 @@ html[dir="rtl"] .lead {
         </section>
         <section class="portal-section">
           <h2>Events</h2>
+          <div id="memUpcomingEventsBox"></div>
+          <p id="memEventNote" class="form-status"></p>
+          <h3 class="note" style="margin-top:1rem">My registrations</h3>
           <div id="memEventsBox"></div>
         </section>
       </div>
@@ -2699,6 +2705,30 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
         document.getElementById('memDocsBox').innerHTML = (docs.data || []).map(function (d) {
           return '<article class="card"><h3>' + ramdaniUi.escape(d.category) + '</h3><p class="note">' + ramdaniUi.escape(d.document_number || '') + (d.issued_at ? ' · ' + ramdaniUi.escape(d.issued_at) : '') + '</p></article>';
         }).join('') || '<p class="empty">No documents issued.</p>';
+        var upcomingBox = document.getElementById('memUpcomingEventsBox');
+        if (upcomingBox) {
+          var memRegsIds = {};
+          var myRegs0 = await sb.from('event_registrations').select('event_id').eq('profile_id', p.id);
+          (myRegs0.data || []).forEach(function (r) { memRegsIds[r.event_id] = true; });
+          var avail = await sb.from('events').select('*').eq('status', 'published').eq('registration_open', true).order('starts_at', { ascending: true });
+          upcomingBox.innerHTML = (avail.data || []).map(function (ev) {
+            var already = memRegsIds[ev.id];
+            return '<article class="card"><h3>' + ramdaniUi.escape(ev.title) + '</h3><p class="note">' + ramdaniUi.escape(ev.starts_at || '') + (ev.venue ? ' · ' + ramdaniUi.escape(ev.venue) : '') + '</p>' +
+              (already ? '<p class="note">Already registered</p>' : '<button type="button" class="btn btn-sm" data-mem-register="' + ev.id + '">Register</button>') + '</article>';
+          }).join('') || '<p class="empty">No events open for registration right now.</p>';
+          if (!upcomingBox.dataset.bound) {
+            upcomingBox.dataset.bound = '1';
+            upcomingBox.addEventListener('click', async function (e) {
+              var b = e.target.closest('[data-mem-register]'); if (!b) return;
+              var evId = b.getAttribute('data-mem-register');
+              var noteEl = document.getElementById('memEventNote');
+              var res = await sb.rpc('register_for_event', { p_event_id: evId, p_profile_id: p.id, p_full_name: m.full_name || '', p_email: p.email || '' });
+              if (res.error) { if (noteEl) noteEl.textContent = res.error.message; return; }
+              if (noteEl) noteEl.textContent = res.data && res.data.status === 'waitlisted' ? 'Event is full — you have been waitlisted.' : 'Registered.';
+              await bootMemberPortal(path);
+            });
+          }
+        }
         var regs = await sb.from('event_registrations').select('*, events(title, starts_at, status)').eq('profile_id', p.id).order('created_at', { ascending: false });
         document.getElementById('memEventsBox').innerHTML = (regs.data || []).map(function (r) {
           var ev = r.events || {};
@@ -4023,6 +4053,32 @@ window.ramdaniAuth = {
       }).join('');
     }
     var evEl = document.getElementById('myStudentEvents');
+    var upEl = document.getElementById('myStudentUpcomingEvents');
+    if (upEl) {
+      var myRegsIds = {};
+      var myRegs0 = await sb.from('event_registrations').select('event_id').eq('profile_id', uid);
+      (myRegs0.data || []).forEach(function (r) { myRegsIds[r.event_id] = true; });
+      var avail = await sb.from('events').select('*').eq('status', 'published').eq('registration_open', true).order('starts_at', { ascending: true });
+      if (avail.error) upEl.innerHTML = '<p class="empty">Could not load events.</p>';
+      else if (!avail.data || !avail.data.length) upEl.innerHTML = '<p class="empty">No events open for registration right now.</p>';
+      else upEl.innerHTML = avail.data.map(function (ev) {
+        var already = myRegsIds[ev.id];
+        return '<article class="card"><h3>' + esc(ev.title) + '</h3><p class="note">' + esc(ev.starts_at || '') + (ev.venue ? ' · ' + esc(ev.venue) : '') + '</p>' +
+          (already ? '<p class="note">Already registered</p>' : '<button type="button" class="btn btn-sm" data-student-register="' + ev.id + '">Register</button>') + '</article>';
+      }).join('');
+      if (!upEl.dataset.bound) {
+        upEl.dataset.bound = '1';
+        upEl.addEventListener('click', async function (e) {
+          var b = e.target.closest('[data-student-register]'); if (!b) return;
+          var evId = b.getAttribute('data-student-register');
+          var noteEl = document.getElementById('myStudentEventNote');
+          var res = await sb.rpc('register_for_event', { p_event_id: evId, p_profile_id: uid, p_full_name: profile.full_name || '', p_email: profile.email || '' });
+          if (res.error) { if (noteEl) noteEl.textContent = res.error.message; return; }
+          if (noteEl) noteEl.textContent = res.data && res.data.status === 'waitlisted' ? 'Event is full — you have been waitlisted.' : 'Registered.';
+          await window.ramdaniStudentBoot('/student/dashboard');
+        });
+      }
+    }
     if (evEl) {
       var regs = await sb.from('event_registrations').select('*, events(title, starts_at, status)').eq('profile_id', uid).order('created_at', { ascending: false });
       if (regs.error) evEl.innerHTML = '<p class="empty">Could not load events.</p>';
@@ -5376,6 +5432,9 @@ window.ramdaniAuth = {
     '__members': ['student_manager'],
     '__membercards': ['student_manager'],
     '__docscenter': ['student_manager', 'education_manager'],
+    '__events': ['communications_manager', 'student_manager'],
+    '__eventregs': ['communications_manager', 'student_manager'],
+    '__eventguests': ['communications_manager', 'student_manager'],
     'societies': ['student_manager'], 'chapters': ['student_manager'], 'cabinets': ['student_manager'],
     'internships': ['student_manager'],
     '__inquiries': ['communications_manager'],
@@ -8884,8 +8943,8 @@ window.ramdaniAuth = {
     if (res.error) { setNote('platEventNote', res.error.message); return; }
     platEvents = res.data || [];
     $id('platEventBody').innerHTML = platEvents.map(function (ev) {
-      return '<tr><td>' + escapeHtml(ev.title) + '</td><td>' + escapeHtml(fmtWhenPlat(ev.starts_at)) + '</td><td>' + escapeHtml(ev.event_type) + '</td><td>' + escapeHtml(ev.status) + '</td><td><button type="button" class="btn btn-sm" data-ev-edit="' + ev.id + '">Edit</button></td></tr>';
-    }).join('') || '<tr><td colspan="5">No events yet.</td></tr>';
+      return '<tr><td>' + escapeHtml(ev.event_number || '') + '</td><td>' + escapeHtml(ev.title) + '</td><td>' + escapeHtml(fmtWhenPlat(ev.starts_at)) + '</td><td>' + escapeHtml(ev.event_type) + '</td><td>' + escapeHtml(ev.status) + '</td><td><button type="button" class="btn btn-sm" data-ev-edit="' + ev.id + '">Edit</button></td></tr>';
+    }).join('') || '<tr><td colspan="6">No events yet.</td></tr>';
   }
   function resetPlatEventForm() {
     platEditEventId = null;
