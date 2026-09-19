@@ -1911,6 +1911,8 @@ html[dir="rtl"] .lead {
           <label>Department <input name="department" required /></label>
           <label>University <input name="university" required /></label>
           <label>Session <input name="session" placeholder="e.g. 2023–2027" required /></label>
+          <label>CV (optional; PDF preferred, JPG/PNG/WebP also accepted, max 5 MB) <input name="cv" type="file" accept="application/pdf,image/jpeg,image/png,image/webp" /></label>
+          <input name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;height:0;width:0;opacity:0" aria-hidden="true" />
           <div data-captcha></div>
           <button class="btn btn-primary" type="submit">Create account</button>
         </form>
@@ -3311,7 +3313,7 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
       if (!okDoc(cv)) return say('CV must be a PDF (or a JPG, PNG or WebP scan).');
       if (card.size > 5 * 1024 * 1024 || cv.size > 5 * 1024 * 1024) return say('Licence card and CV must each be 5 MB or smaller.');
       var cc = cap ? cap.check() : null;
-      if (!cc || !cc.ok) { if (cap) cap.refresh(); return say('Security check answer is incorrect.'); }
+      if (!cc || !cc.ok) { if (cap) cap.refresh(); return say('Answer the security check (wait for the question to load).'); }
       var btn = form.querySelector('button[type="submit"]'); btn.disabled = true; say('Submitting…');
       try {
         var photo = await lawyerPhotoToDataUrl(file);
@@ -3325,7 +3327,7 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
             full_name: f.full_name.value.trim(), email: f.email.value.trim(), password: f.password.value,
             phone: f.phone.value.trim(), bar_association: f.bar_association.value.trim(), bar_license_no: f.bar_license_no.value.trim(),
             district: f.district.value.trim(), province: f.province.value, website: f.website.value, photo_base64: photo,
-            license_card_base64: cardB64, cv_base64: cvB64, captcha_expected: cc.expected, captcha_answer: cc.answer
+            license_card_base64: cardB64, cv_base64: cvB64, captcha_token: cc.token, captcha_answer: cc.answer
           })
         });
         var data = {}; try { data = await res.json(); } catch (x) {}
@@ -3390,34 +3392,44 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
 })();
 
 </script>
-<!-- APPLICATION LOGIC: math captcha + file helpers (signup forms) -->
+<!-- APPLICATION LOGIC: server-signed captcha + file helpers (signup forms) -->
 <script>
 (function () {
-  function rnd(min, max) {
-    var n = min + Math.floor(Math.random() * (max - min + 1));
-    try { var a = new Uint32Array(1); crypto.getRandomValues(a); n = min + (a[0] % (max - min + 1)); } catch (e) {}
-    return n;
-  }
-  // Simple arithmetic check. It is a light deterrent against casual bots, not a strong CAPTCHA.
+  // The question and a signed single-use token come from the captcha-challenge edge function.
+  // The server verifies token + answer at signup, so this widget cannot be forged or skipped.
+  // Arithmetic is still solvable by a script; this stops forging/skipping/replay, not a bot doing the sum.
   window.mountMathCaptcha = function (host) {
     if (!host) return null;
-    var expected = 0;
-    host.innerHTML = '<label>Security check: <span data-cq></span> <input name="captcha_answer" inputmode="numeric" autocomplete="off" required /></label>' +
+    var token = '', seq = 0;
+    host.innerHTML = '<label>Security check: <span data-cq>Loading\u2026</span> <input name="captcha_answer" inputmode="numeric" autocomplete="off" required /></label>' +
       '<button type="button" class="btn" data-crefresh>New question</button>';
     var q = host.querySelector('[data-cq]'), inp = host.querySelector('input');
-    function refresh() {
-      var a = rnd(2, 9), b = rnd(2, 9);
-      if (rnd(0, 1)) { expected = a + b; q.textContent = 'What is ' + a + ' + ' + b + '?'; }
-      else { if (b > a) { var t = a; a = b; b = t; } expected = a - b; q.textContent = 'What is ' + a + ' \u2212 ' + b + '?'; }
-      inp.value = '';
+    async function refresh() {
+      var my = ++seq;
+      token = ''; inp.value = ''; q.textContent = 'Loading\u2026';
+      try {
+        var cfg = window.RAMDANI_CONFIG;
+        var res = await fetch(cfg.supabaseUrl + '/functions/v1/captcha-challenge', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': cfg.supabaseAnonKey, 'Authorization': 'Bearer ' + cfg.supabaseAnonKey },
+          body: '{}'
+        });
+        var d = await res.json();
+        if (my !== seq) return;
+        if (!res.ok || !d.token || !d.question) throw new Error('bad challenge');
+        token = d.token; q.textContent = d.question;
+      } catch (e) {
+        if (my === seq) q.textContent = 'Could not load the question. Tap "New question".';
+      }
     }
     host.querySelector('[data-crefresh]').addEventListener('click', refresh);
     refresh();
     var api = {
       refresh: refresh,
+      // ok = a challenge is loaded and an answer was typed; the server decides whether it is correct.
       check: function () {
-        var ans = Number(String(inp.value).trim());
-        return { ok: String(inp.value).trim() !== '' && Number.isFinite(ans) && ans === expected, expected: expected, answer: ans };
+        var a = String(inp.value).trim();
+        return { ok: !!token && /^-?\d{1,3}$/.test(a), token: token, answer: a };
       }
     };
     host._captcha = api;
@@ -4474,22 +4486,52 @@ window.ramdaniAuth = {
       if (!/^\S+@\S+\.\S+$/.test(fields.email)) return setStatus('studentSignupStatus', 'Enter a valid email address.');
       if (fields.password.length < 8) return setStatus('studentSignupStatus', 'Password must be at least 8 characters.');
       if (fields.password !== fields.confirm_password) return setStatus('studentSignupStatus', 'Passwords do not match.');
-      if (!stuCap || !stuCap.check().ok) { if (stuCap) stuCap.refresh(); return setStatus('studentSignupStatus', 'Security check answer is incorrect.'); }
-      var res = await ramdaniAuth.signUpStudent(fields);
-      if (res.error) {
-        stuCap.refresh();
-        var msg = /already registered|already exists/i.test(res.error.message)
-          ? 'An account with this email already exists.'
-          : res.error.message;
-        return setStatus('studentSignupStatus', msg);
+      var cvFile = form.cv && form.cv.files ? form.cv.files[0] : null;
+      var cvExt = '';
+      if (cvFile) {
+        var m = /\.(pdf|jpe?g|png|webp)$/i.exec(cvFile.name || '');
+        cvExt = m ? m[1].toLowerCase().replace('jpeg', 'jpg') : '';
+        if (!cvExt || !/^(application\/pdf|image\/(jpeg|png|webp))$/i.test(cvFile.type || (cvExt === 'pdf' ? 'application/pdf' : 'image/' + cvExt))) return setStatus('studentSignupStatus', 'CV must be a PDF (or a JPG, PNG or WebP scan).');
+        if (cvFile.size > 5 * 1024 * 1024) return setStatus('studentSignupStatus', 'CV must be 5 MB or smaller.');
       }
-      if (res.data && res.data.session) {
-        // Email confirmation is off on this project: session issued immediately.
+      var cc = stuCap ? stuCap.check() : null;
+      if (!cc || !cc.ok) { if (stuCap) stuCap.refresh(); return setStatus('studentSignupStatus', 'Answer the security check (wait for the question to load).'); }
+      var sbtn = form.querySelector('button[type="submit"]'); if (sbtn) sbtn.disabled = true;
+      setStatus('studentSignupStatus', 'Creating account\u2026', true);
+      try {
+        var cfg = window.RAMDANI_CONFIG;
+        var r = await fetch(cfg.supabaseUrl + '/functions/v1/student-signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': cfg.supabaseAnonKey, 'Authorization': 'Bearer ' + cfg.supabaseAnonKey },
+          body: JSON.stringify({
+            email: fields.email, password: fields.password, full_name: fields.full_name, phone: fields.phone,
+            student_id: fields.student_id, department: fields.department, university: fields.university, session: fields.session,
+            website: form.website ? form.website.value : '', captcha_token: cc.token, captcha_answer: cc.answer
+          })
+        });
+        var data = {}; try { data = await r.json(); } catch (x) {}
+        if (!r.ok) { stuCap.refresh(); if (sbtn) sbtn.disabled = false; return setStatus('studentSignupStatus', data.error || ('Registration failed (' + r.status + ')')); }
+        var si = await ramdaniAuth.signInPassword(fields.email, fields.password);
+        if (si.error) {
+          form.reset(); stuCap.refresh(); if (sbtn) sbtn.disabled = false;
+          return setStatus('studentSignupStatus', 'Account created. Please sign in.', true);
+        }
+        // Optional CV: allowed for pending students by the student_cv_pending_insert storage policy (own cv.* path only).
+        if (cvFile) {
+          try {
+            var sess = await ramdaniAuth.session();
+            var cvPath = 'students/' + sess.user.id + '/cv.' + cvExt;
+            var ct = cvExt === 'pdf' ? 'application/pdf' : (cvExt === 'jpg' ? 'image/jpeg' : 'image/' + cvExt);
+            var up = await sb.storage.from('private-docs').upload(cvPath, cvFile, { upsert: true, contentType: ct, cacheControl: '3600' });
+            if (!up.error) await sb.from('profiles').update({ cv_path: cvPath }).eq('id', sess.user.id);
+          } catch (cvErr) { /* non-fatal: the account exists; the CV can be added later */ }
+        }
         window.ramdaniGo('/student/dashboard');
-        return;
+      } catch (err) {
+        if (stuCap) stuCap.refresh();
+        if (sbtn) sbtn.disabled = false;
+        setStatus('studentSignupStatus', err.message || 'Registration failed.');
       }
-      form.reset();
-      setStatus('studentSignupStatus', 'Account created. Check your email to verify your address, then sign in.', true);
     });
 
     document.getElementById('studentForgotForm').addEventListener('submit', async function (e) {
