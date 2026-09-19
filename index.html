@@ -262,6 +262,8 @@ table.data tbody tr:hover { background:color-mix(in srgb,var(--accent) 5%,transp
 .status-published,.status-active { color:var(--ok); }
 .status-draft,.status-inactive { color:var(--muted); }
 .status-archived,.status-closed { color:var(--danger); }
+.staff-preview-banner { background:#8a6a2a; color:#fff; padding:.7rem 1rem; font-size:.88rem; font-weight:600; text-align:center; margin:0 0 1rem; border-radius:8px; letter-spacing:.01em; }
+.staff-preview-banner[hidden] { display:none; }
 .auth-screen { min-height:100vh; display:grid; place-items:center; padding:2rem 1rem; background:linear-gradient(135deg,var(--deep-navy,#0B1F33),#162f46); }
 .auth-box { width:min(460px,100%); margin:0; background:var(--card); border:1px solid var(--line); border-top:4px solid var(--accent); border-radius:18px; padding:1.5rem; box-shadow:0 24px 70px rgba(0,0,0,.22); }
 .auth-brand { display:flex; align-items:center; gap:.8rem; margin-bottom:1.2rem; }
@@ -350,6 +352,10 @@ table.data tbody tr:hover { background:color-mix(in srgb,var(--accent) 5%,transp
 .qb-choice-row { display: flex; align-items: center; gap: .5rem; }
 .qb-choice-row input[type="text"] { flex: 1; }
 .qb-choice-row .qb-remove { flex-shrink: 0; }
+.short-answer-input { width:100%; padding:.6rem .75rem; border:1px solid var(--line); border-radius:10px; font:inherit; min-height:44px; background:var(--white); color:var(--ink); }
+.short-answer-input.ok { border-color:var(--ok); }
+.short-answer-input.bad { border-color:var(--danger); }
+.qb-accepted { grid-column:1/-1; }
 
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
 .library-filters { display: flex; gap: 0.75rem; flex-wrap: wrap; margin: 1.25rem 0 1.5rem; }
@@ -698,7 +704,7 @@ html[dir="rtl"] .lead {
               <label data-field="summary" class="field-full"><span>Summary</span><textarea name="summary" rows="4"></textarea></label>
               <label data-field="short_bio" class="field-full"><span>Short bio</span><textarea name="short_bio" rows="4"></textarea></label>
               <label data-field="status"><span>Publishing status</span><select name="status"><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></label>
-              <div class="form-actions"><button class="btn btn-primary" id="saveBtn" type="submit">Save</button><button class="btn" id="cancelEditBtn" type="button" hidden>Cancel edit</button><p id="saveNote" class="form-status"></p></div>
+              <div class="form-actions"><button class="btn btn-primary" id="saveBtn" type="submit">Save</button><button class="btn" id="cancelEditBtn" type="button" hidden>Cancel edit</button><button class="btn" id="previewContentBtn" type="button" hidden>Preview</button><p id="saveNote" class="form-status"></p></div>
             </form>
             <div style="height:1rem"></div>
             <div class="admin-toolbar"><input id="contentSearch" type="search" placeholder="Search current records" aria-label="Search current records" /></div>
@@ -1008,7 +1014,8 @@ html[dir="rtl"] .lead {
 
           <div id="courseBuilderPanel" class="admin-panel" hidden>
             <div class="admin-section-head"><div><h2>Course builder</h2><p class="note">Build a course from sections and lessons. Students only see items marked <strong>published</strong>. Use ↑ ↓ to set the order.</p></div></div>
-            <div class="admin-toolbar"><label style="display:flex;gap:.5rem;align-items:center"><span>Module</span><select id="cbModule"><option value="">Select module…</option></select></label></div>
+            <div class="admin-toolbar"><label style="display:flex;gap:.5rem;align-items:center"><span>Module</span><select id="cbModule"><option value="">Select module…</option></select></label>
+              <button type="button" class="btn" id="cbPreviewBtn" hidden>Preview course</button></div>
             <p id="cbNote" class="form-status"></p>
             <div id="cbArea" hidden>
               <div class="admin-card">
@@ -1067,6 +1074,7 @@ html[dir="rtl"] .lead {
             <div class="admin-toolbar">
               <label style="display:flex;gap:.5rem;align-items:center"><span>Quiz</span><select id="qbQuiz"><option value="">New quiz…</option></select></label>
               <button type="button" class="btn" id="qbNewQuiz">+ New quiz</button>
+              <button type="button" class="btn" id="qbPreviewBtn" hidden>Preview quiz</button>
             </div>
             <div class="admin-card">
               <h3 id="qbMetaHeading">Quiz details</h3>
@@ -1088,12 +1096,16 @@ html[dir="rtl"] .lead {
                 <h3 id="qbQuestionHeading">Questions</h3>
                 <form id="qbQuestionForm" class="form admin-form">
                   <label><span>Question prompt</span><textarea name="prompt" rows="2" required></textarea></label>
+                  <label><span>Question type</span><select name="question_type" id="qbQuestionType"><option value="multiple_choice">Multiple choice</option><option value="true_false">True / False</option><option value="short_answer">Short answer</option></select></label>
                   <div id="qbChoicesWrap" class="qb-choices"></div>
-                  <div class="form-actions" style="margin-top:.25rem"><button class="btn" type="button" id="qbAddChoice">+ Add choice</button></div>
+                  <div class="form-actions" style="margin-top:.25rem" id="qbAddChoiceRow"><button class="btn" type="button" id="qbAddChoice">+ Add choice</button></div>
+                  <div id="qbAcceptedWrap" class="qb-accepted" hidden>
+                    <label class="field-full"><span>Accepted answers (one per line). Compared case-insensitively after trim. Never sent to the student before submit.</span><textarea name="accepted_answers" rows="3" placeholder="Pakistan Penal Code&#10;PPC"></textarea></label>
+                  </div>
                   <label><span>Explanation (shown after submit, optional)</span><textarea name="explanation" rows="2"></textarea></label>
                   <div class="form-actions"><button class="btn btn-primary" type="submit" id="qbQuestionSave">Add question</button><button class="btn" type="button" id="qbQuestionCancel" hidden>Cancel edit</button><p id="qbQuestionNote" class="form-status"></p></div>
                 </form>
-                <div class="table-wrap"><table class="data"><thead><tr><th>#</th><th>Prompt</th><th>Choices</th><th>Correct</th><th>Actions</th></tr></thead><tbody id="qbQuestionsBody"></tbody></table></div>
+                <div class="table-wrap"><table class="data"><thead><tr><th>#</th><th>Prompt</th><th>Type</th><th>Choices</th><th>Correct</th><th>Actions</th></tr></thead><tbody id="qbQuestionsBody"></tbody></table></div>
               </div>
             </div>
           </div>
@@ -1833,6 +1845,7 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
       document.title = page.title;
     }
     if (typeof page.init === 'function') await page.init();
+    if (window.ramdaniEducation && typeof ramdaniEducation.decorateStaffPreview === 'function') ramdaniEducation.decorateStaffPreview();
     if (window.ramdaniSetLang) ramdaniSetLang(document.documentElement.lang === 'ur' ? 'ur' : (localStorage.getItem('ramdani_lang') || 'en'));
     var pathNorm = path.replace(/\.html$/, '').replace(/\/$/, '') || '/';
     document.querySelectorAll('#publicShell a[href]').forEach(function (a) {
@@ -2476,7 +2489,9 @@ window.ramdaniSite = Object.freeze({
 window.ramdaniApi = {
   async listPublished(table, orderCol) {
     if (!window.sb) return [];
-    var q = sb.from(table).select('*').eq('status', 'published');
+    var q = sb.from(table).select('*');
+    var staffPreview = !!(window.ramdaniAuth && await ramdaniAuth.isStaffPreview());
+    if (!staffPreview) q = q.eq('status', 'published');
     if (orderCol) q = q.order(orderCol, { ascending: true });
     else q = q.order('published_at', { ascending: false });
     var res = await q;
@@ -2488,7 +2503,10 @@ window.ramdaniApi = {
   },
   async getBySlug(table, slug) {
     if (!window.sb || !slug) return null;
-    var res = await sb.from(table).select('*').eq('slug', slug).eq('status', 'published').maybeSingle();
+    var q = sb.from(table).select('*').eq('slug', slug);
+    var staffPreview = !!(window.ramdaniAuth && await ramdaniAuth.isStaffPreview());
+    if (!staffPreview) q = q.eq('status', 'published');
+    var res = await q.maybeSingle();
     if (res.error) return null;
     return res.data;
   },
@@ -2796,6 +2814,14 @@ window.ramdaniAuth = {
     }
 
     return { session: null, error: this.invalidRecoveryMessage };
+  },
+  async isStaffPreview() {
+    var search = '';
+    try { search = (window.ramdaniRoute && ramdaniRoute.search()) || ''; } catch (e) {}
+    var params = new URLSearchParams(String(search).replace(/^\?/, ''));
+    if (params.get('preview') !== '1') return false;
+    var p = await this.profile();
+    return !!(p && p.is_active && this.STAFF_ROLES.indexOf(p.role) !== -1);
   },
   async signOut() {
     this._recoverySession = null;
@@ -3132,6 +3158,30 @@ window.ramdaniAuth = {
   function qs(name) {
     return new URLSearchParams(window.ramdaniRoute.search()).get(name);
   }
+  async function staffPreview() {
+    return !!(window.ramdaniAuth && await ramdaniAuth.isStaffPreview());
+  }
+  function withPreview(href, preview) {
+    if (!preview || !href) return href;
+    return href + (href.indexOf('?') >= 0 ? '&' : '?') + 'preview=1';
+  }
+  function decorateStaffPreview() {
+    var existing = document.getElementById('staffPreviewBanner');
+    if (existing) existing.remove();
+    if (!window.ramdaniAuth) return;
+    ramdaniAuth.isStaffPreview().then(function (ok) {
+      if (!ok) return;
+      var bar = document.createElement('div');
+      bar.id = 'staffPreviewBanner';
+      bar.className = 'staff-preview-banner';
+      bar.setAttribute('role', 'status');
+      bar.textContent = 'Staff preview — unpublished. Visitors will not see this until it is published.';
+      var root = document.getElementById('viewRoot');
+      if (root) root.insertBefore(bar, root.firstChild);
+      var robots = document.querySelector('meta[name="robots"]');
+      if (robots) robots.setAttribute('content', 'noindex, nofollow');
+    });
+  }
   function escape(s) {
     var d = document.createElement('div');
     d.textContent = s == null ? '' : String(s);
@@ -3143,7 +3193,8 @@ window.ramdaniAuth = {
 
   async function listPublished(table, extra) {
     if (!window.sb) return [];
-    var q = sb.from(table).select('*').eq('status', 'published');
+    var q = sb.from(table).select('*');
+    if (!(await staffPreview())) q = q.eq('status', 'published');
     if (extra) q = extra(q);
     var res = await q.order('published_at', { ascending: false });
     if (res.error) { console.warn(res.error.message); return []; }
@@ -3178,8 +3229,8 @@ window.ramdaniAuth = {
         '<div class="internship-meta">' + chips + '</div></div></div>' +
         '<p>' + escape(r.summary || '') + '</p>' + body +
         '<div class="internship-foot"><p class="note">' + escape(stipend) + ' · ' + escape(deadline) +
-        '</p><a class="btn btn-primary" href="/pages/internship-apply.html?slug=' +
-        encodeURIComponent(r.slug) + '">Apply</a></div></article>';
+        '</p><a class="btn btn-primary" href="' + withPreview('/pages/internship-apply.html?slug=' +
+        encodeURIComponent(r.slug), qs('preview') === '1') + '">Apply</a></div></article>';
     }).join('');
   }
 
@@ -3191,7 +3242,9 @@ window.ramdaniAuth = {
     if (slugInput && slug) slugInput.value = slug;
     var listing = document.getElementById('internListing');
     if (slug && window.sb) {
-      var found = await sb.from('internships').select('title, summary, location, mode, duration, stipend_note, deadline, status').eq('slug', slug).eq('status', 'published').maybeSingle();
+      var internQ = sb.from('internships').select('title, summary, location, mode, duration, stipend_note, deadline, status').eq('slug', slug);
+      if (!(await staffPreview())) internQ = internQ.eq('status', 'published');
+      var found = await internQ.maybeSingle();
       if (found.data && listing) {
         listing.hidden = false;
         listing.innerHTML = '<h2>' + escape(found.data.title) + '</h2><p>' + escape(found.data.summary || '') +
@@ -3253,7 +3306,7 @@ window.ramdaniAuth = {
     el.innerHTML = rows.map(function (r) {
       return '<article class="card"><p class="kicker">' + escape((r.category || 'practice').toUpperCase()) +
         '</p><h3>' + escape(r.title) + '</h3><p>' + escape(r.summary || '') +
-        '</p><a class="btn btn-primary" href="/pages/quiz.html?slug=' + encodeURIComponent(r.slug) + '">Start</a></article>';
+        '</p><a class="btn btn-primary" href="' + withPreview('/pages/quiz.html?slug=' + encodeURIComponent(r.slug), qs('preview') === '1') + '">Start</a></article>';
     }).join('');
   }
 
@@ -3261,7 +3314,10 @@ window.ramdaniAuth = {
     var slug = qs('slug');
     var form = document.getElementById('quizForm');
     if (!form || !slug || !window.sb) return;
-    var quizRes = await sb.from('quizzes').select('*').eq('slug', slug).eq('status', 'published').maybeSingle();
+    var preview = await staffPreview();
+    var quizQ = sb.from('quizzes').select('*').eq('slug', slug);
+    if (!preview) quizQ = quizQ.eq('status', 'published');
+    var quizRes = await quizQ.maybeSingle();
     var quiz = quizRes.data;
     if (!quiz) {
       document.getElementById('quizTitle').textContent = 'Quiz not available';
@@ -3280,7 +3336,9 @@ window.ramdaniAuth = {
         { name: quiz.title, url: window.ramdaniSeo.origin + '/pages/quiz.html?slug=' + encodeURIComponent(quiz.slug) }
       ]);
     }
-    var qRes = await sb.from('quiz_questions_public').select('id, prompt, choices, sort_order').eq('quiz_id', quiz.id).order('sort_order');
+    var qRes = preview
+      ? await sb.from('quiz_questions').select('id, prompt, choices, sort_order, question_type').eq('quiz_id', quiz.id).order('sort_order')
+      : await sb.from('quiz_questions_public').select('id, prompt, choices, sort_order, question_type').eq('quiz_id', quiz.id).order('sort_order');
     var questions = qRes.data || [];
     if (!questions.length) {
       form.innerHTML = '<p class="empty">No questions published yet.</p>';
@@ -3289,14 +3347,22 @@ window.ramdaniAuth = {
     var letters = ['A', 'B', 'C', 'D'];
     form.classList.add('quiz-compact');
     form.innerHTML = questions.map(function (q, i) {
+      var qtype = q.question_type || 'multiple_choice';
+      var head = '<legend class="mcq-head"><span class="mcq-num">' + (i + 1) + '</span><span class="mcq-q">' + escape(q.prompt) + '</span></legend>';
+      if (qtype === 'short_answer') {
+        return '<fieldset class="card mcq" data-id="' + q.id + '" data-kind="short_answer">' + head +
+          '<input type="text" class="short-answer-input" data-q="' + q.id + '" autocomplete="off" maxlength="300" />' +
+          '<div class="mcq-explanation"></div></fieldset>';
+      }
       var choices = Array.isArray(q.choices) ? q.choices : [];
+      if (qtype === 'true_false' && choices.length < 2) choices = ['True', 'False'];
       var opts = choices.map(function (c, idx) {
         return '<button type="button" class="mcq-opt" data-q="' + q.id + '" data-idx="' + idx + '">' +
-          '<span class="opt-label">' + letters[idx] + '</span>' +
+          '<span class="opt-label">' + (letters[idx] || (idx + 1)) + '</span>' +
           '<span class="opt-text">' + escape(c) + '</span>' +
           '<span class="opt-tick" aria-hidden="true">✓</span></button>';
       }).join('');
-      return '<fieldset class="card mcq" data-id="' + q.id + '"><legend class="mcq-head"><span class="mcq-num">' + (i + 1) + '</span><span class="mcq-q">' + escape(q.prompt) + '</span></legend><div class="mcq-options">' + opts + '</div><div class="mcq-explanation"></div></fieldset>';
+      return '<fieldset class="card mcq" data-id="' + q.id + '" data-kind="' + escape(qtype) + '">' + head + '<div class="mcq-options">' + opts + '</div><div class="mcq-explanation"></div></fieldset>';
     }).join('') + '<label>Email (optional, for staff follow-up)<input type="email" name="email" /></label><div class="quiz-footer"><p class="form-status" id="quizScore">' + escape(window.ramdaniT ? ramdaniT('quiz_not_submitted') : 'Not submitted') + '</p><button class="btn btn-primary" type="submit">' + escape(window.ramdaniT ? ramdaniT('quiz_submit') : 'Submit') + '</button></div>';
     form.querySelectorAll('.mcq-opt').forEach(function (btn) {
       btn.addEventListener('click', function () {
@@ -3306,15 +3372,29 @@ window.ramdaniAuth = {
         btn.classList.add('selected');
       });
     });
+    if (preview) {
+      form.dataset.preview = '1';
+      var submitBtn = form.querySelector('[type="submit"]');
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Submit disabled in preview'; }
+    }
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
+      if (form.dataset.preview === '1') return;
       if (form.dataset.submitted === '1') return;
       var answers = {};
       var missing = false;
       questions.forEach(function (q) {
-        var sel = form.querySelector('.mcq-opt.selected[data-q="' + q.id + '"]');
-        if (!sel) missing = true;
-        else answers[q.id] = Number(sel.getAttribute('data-idx'));
+        var qtype = q.question_type || 'multiple_choice';
+        if (qtype === 'short_answer') {
+          var inp = form.querySelector('.short-answer-input[data-q="' + q.id + '"]');
+          var val = inp ? String(inp.value || '').trim() : '';
+          if (!val) missing = true;
+          else answers[q.id] = val;
+        } else {
+          var sel = form.querySelector('.mcq-opt.selected[data-q="' + q.id + '"]');
+          if (!sel) missing = true;
+          else answers[q.id] = Number(sel.getAttribute('data-idx'));
+        }
       });
       var status = form.querySelector('#quizScore');
       if (missing) {
@@ -3340,12 +3420,23 @@ window.ramdaniAuth = {
         var field = form.querySelector('.mcq[data-id="' + q.id + '"]');
         if (!field) return;
         field.classList.add('revealed');
+        var expl = field.querySelector('.mcq-explanation');
+        if ((ex.kind || q.question_type) === 'short_answer') {
+          var inp = field.querySelector('.short-answer-input');
+          if (inp) { inp.readOnly = true; inp.classList.add(ex.ok ? 'ok' : 'bad'); }
+          if (expl) {
+            var bits = [ex.ok ? 'Correct.' : 'Not matched.'];
+            if (ex.sample) bits.push('Example accepted answer: ' + ex.sample);
+            if (ex.explanation) bits.push(ex.explanation);
+            expl.textContent = bits.join(' ');
+          }
+          return;
+        }
         field.querySelectorAll('.mcq-opt').forEach(function (btn) {
           var idx = Number(btn.getAttribute('data-idx'));
           if (ex.correct != null && idx === Number(ex.correct)) btn.classList.add('correct-answer');
           else if (idx === answers[q.id]) btn.classList.add('wrong-answer');
         });
-        var expl = field.querySelector('.mcq-explanation');
         if (expl && ex.explanation) expl.textContent = ex.explanation;
       });
       status.className = 'form-status ok';
@@ -3594,8 +3685,8 @@ window.ramdaniAuth = {
     el.innerHTML = rows.map(function (r) {
       var meta = [r.code, catLabel(r.category), r.semester ? ('Semester ' + r.semester) : ''].filter(Boolean).join(' · ');
       return '<article class="card"><p class="kicker">' + escape(meta) + '</p><h3>' + escape(r.title) +
-        '</h3><p>' + escape(r.summary || '') + '</p><a class="btn btn-primary" href="/pages/module.html?slug=' +
-        encodeURIComponent(r.slug) + '">Open outline</a></article>';
+        '</h3><p>' + escape(r.summary || '') + '</p><a class="btn btn-primary" href="' + withPreview('/pages/module.html?slug=' +
+        encodeURIComponent(r.slug), qs('preview') === '1') + '">Open outline</a></article>';
     }).join('');
   }
 
@@ -3610,7 +3701,10 @@ window.ramdaniAuth = {
   async function renderModule() {
     var slug = qs('slug');
     if (!slug || !window.sb) return;
-    var res = await sb.from('modules').select('*, people:instructor_id(full_name, role_title, slug)').eq('slug', slug).eq('status', 'published').maybeSingle();
+    var preview = await staffPreview();
+    var modQ = sb.from('modules').select('*, people:instructor_id(full_name, role_title, slug)').eq('slug', slug);
+    if (!preview) modQ = modQ.eq('status', 'published');
+    var res = await modQ.maybeSingle();
     var m = res.data;
     if (!m) {
       document.getElementById('modTitle').textContent = 'Module not available';
@@ -3623,9 +3717,13 @@ window.ramdaniAuth = {
     var readings = listItems(m.readings);
     var quizzes = [];
     var cases = [];
-    var qRes = await sb.from('quizzes').select('title,slug,summary,category').eq('status', 'published').eq('module_id', m.id);
+    var qQ = sb.from('quizzes').select('title,slug,summary,category').eq('module_id', m.id);
+    if (!preview) qQ = qQ.eq('status', 'published');
+    var qRes = await qQ;
     quizzes = qRes.data || [];
-    var cRes = await sb.from('cases').select('title,slug,citation,court,year').eq('status', 'published').eq('citation_status', 'verified').eq('module_id', m.id);
+    var cQ = sb.from('cases').select('title,slug,citation,court,year').eq('module_id', m.id);
+    if (!preview) cQ = cQ.eq('status', 'published').eq('citation_status', 'verified');
+    var cRes = await cQ;
     cases = cRes.data || [];
     var html = '';
     html += '<p class="note">' + escape([m.code, catLabel(m.category), m.semester ? ('Semester ' + m.semester) : '', m.credit_hours ? (m.credit_hours + ' credit hours') : ''].filter(Boolean).join(' · ')) + '</p>';
@@ -3652,7 +3750,7 @@ window.ramdaniAuth = {
     if (quizzes.length) {
       html += quizzes.map(function (q) {
         return '<article class="card"><h3>' + escape(q.title) + '</h3><p>' + escape(q.summary || '') +
-          '</p><a class="btn" href="/pages/quiz.html?slug=' + encodeURIComponent(q.slug) + '">Start</a></article>';
+          '</p><a class="btn" href="' + withPreview('/pages/quiz.html?slug=' + encodeURIComponent(q.slug), preview) + '">Start</a></article>';
       }).join('');
     } else {
       html += '<p class="empty">No practice quiz is linked to this module yet.</p>';
@@ -3661,13 +3759,15 @@ window.ramdaniAuth = {
     if (cases.length) {
       html += cases.map(function (c) {
         return '<article class="card"><h3>' + escape(c.title) + '</h3><p class="note">' + escape([c.citation, c.court, c.year].filter(Boolean).join(' · ')) +
-          '</p><a class="btn" href="/pages/case.html?slug=' + encodeURIComponent(c.slug) + '">Read note</a></article>';
+          '</p><a class="btn" href="' + withPreview('/pages/case.html?slug=' + encodeURIComponent(c.slug), preview) + '">Read note</a></article>';
       }).join('');
     } else {
       html += '<p class="empty">No verified case note is linked yet. Unverified citations are not shown.</p>';
     }
     var certs = [];
-    var certRes = await sb.from('certificates').select('title,slug,summary,category').eq('status', 'published').eq('module_id', m.id);
+    var certQ = sb.from('certificates').select('title,slug,summary,category').eq('module_id', m.id);
+    if (!preview) certQ = certQ.eq('status', 'published');
+    var certRes = await certQ;
     certs = certRes.data || [];
     html += '<h2>Linked certificates</h2>';
     if (certs.length) {
@@ -3688,13 +3788,13 @@ window.ramdaniAuth = {
         { name: m.title, url: window.ramdaniSeo.origin + '/pages/module.html?slug=' + encodeURIComponent(m.slug) }
       ]);
     }
-    await renderEnrollmentAndLessons(m);
+    await renderEnrollmentAndLessons(m, preview);
   }
 
   // Phase 3: enrollment + lesson checklist shown under the module outline.
   // Anonymous visitors see a sign-in prompt; signed-in students can enroll and
   // mark published lessons complete. Progress % is computed server-side.
-  async function renderEnrollmentAndLessons(m) {
+  async function renderEnrollmentAndLessons(m, preview) {
     var box = document.getElementById('modLearning');
     if (!box || !window.ramdaniStudent) return;
     var session = await ramdaniStudent.session();
@@ -3704,9 +3804,13 @@ window.ramdaniAuth = {
       return;
     }
     var enr = await ramdaniStudent.myEnrollment(m.id);
-    var secRes = await sb.from('course_sections').select('*').eq('module_id', m.id).eq('status', 'published').order('sort_order');
+    var secQ = sb.from('course_sections').select('*').eq('module_id', m.id);
+    if (!preview) secQ = secQ.eq('status', 'published');
+    var secRes = await secQ.order('sort_order');
     var sections = secRes.data || [];
-    var lesRes = await sb.from('lessons').select('*').eq('module_id', m.id).eq('status', 'published').order('sort_order');
+    var lesQ = sb.from('lessons').select('*').eq('module_id', m.id);
+    if (!preview) lesQ = lesQ.eq('status', 'published');
+    var lesRes = await lesQ.order('sort_order');
     var lessons = lesRes.data || [];
     var progRes = await sb.from('lesson_progress').select('lesson_id, is_completed').eq('student_id', session.user.id).eq('module_id', m.id);
     var doneMap = {};
@@ -3750,13 +3854,15 @@ window.ramdaniAuth = {
   async function renderCases() {
     var el = document.getElementById('list');
     if (!window.sb) return empty(el, 'cases_empty');
-    var res = await sb.from('cases').select('title,slug,citation,court,year').eq('status', 'published').eq('citation_status', 'verified').order('year', { ascending: false });
+    var caseListQ = sb.from('cases').select('title,slug,citation,court,year');
+    if (!(await staffPreview())) caseListQ = caseListQ.eq('status', 'published').eq('citation_status', 'verified');
+    var res = await caseListQ.order('year', { ascending: false });
     var rows = res.data || [];
     if (!rows.length) return empty(el, 'cases_empty');
     el.innerHTML = rows.map(function (r) {
       return '<article class="card"><p class="kicker">' + escape([r.citation, r.court, r.year].filter(Boolean).join(' · ')) +
-        '</p><h3>' + escape(r.title) + '</h3><a class="btn btn-primary" href="/pages/case.html?slug=' +
-        encodeURIComponent(r.slug) + '">Read note</a></article>';
+        '</p><h3>' + escape(r.title) + '</h3><a class="btn btn-primary" href="' + withPreview('/pages/case.html?slug=' +
+        encodeURIComponent(r.slug), qs('preview') === '1') + '">Read note</a></article>';
     }).join('');
   }
 
@@ -3764,7 +3870,9 @@ window.ramdaniAuth = {
     var slug = qs('slug');
     var el = document.getElementById('caseBody');
     if (!el || !slug || !window.sb) return;
-    var res = await sb.from('cases').select('*').eq('slug', slug).eq('status', 'published').eq('citation_status', 'verified').maybeSingle();
+    var caseQ = sb.from('cases').select('*').eq('slug', slug);
+    if (!(await staffPreview())) caseQ = caseQ.eq('status', 'published').eq('citation_status', 'verified');
+    var res = await caseQ.maybeSingle();
     var c = res.data;
     if (!c) { el.innerHTML = '<p class="empty">This case note is not available.</p>'; return; }
     var bits = [
@@ -4075,7 +4183,7 @@ window.ramdaniAuth = {
     el.innerHTML = rows.map(function (r) {
       return '<article class="card"><p class="kicker">Practice outline</p><h3>' + escape(r.title) +
         '</h3><p>' + escape(r.summary || '') + '</p>' +
-        '<a class="btn btn-primary" href="/pages/practice-area.html?slug=' + encodeURIComponent(r.slug) + '">Read outline</a></article>';
+        '<a class="btn btn-primary" href="' + withPreview('/pages/practice-area.html?slug=' + encodeURIComponent(r.slug), qs('preview') === '1') + '">Read outline</a></article>';
     }).join('');
   }
 
@@ -4094,7 +4202,9 @@ window.ramdaniAuth = {
       el.innerHTML = '<p class="empty">Choose a published practice outline from the list.</p>';
       return;
     }
-    var res = await sb.from('practice_areas').select('*').eq('slug', slug).eq('status', 'published').maybeSingle();
+    var areaQ = sb.from('practice_areas').select('*').eq('slug', slug);
+    if (!(await staffPreview())) areaQ = areaQ.eq('status', 'published');
+    var res = await areaQ.maybeSingle();
     var a = res.data;
     if (!a) {
       el.innerHTML = '<p class="empty">This practice outline is not published.</p>';
@@ -4155,6 +4265,7 @@ window.ramdaniAuth = {
   }
 
   window.ramdaniEducation = {
+    decorateStaffPreview: decorateStaffPreview,
     renderInternships: renderInternships,
     bindInternshipApply: bindInternshipApply,
     renderQuizzes: renderQuizzes,
@@ -4202,6 +4313,45 @@ window.ramdaniAuth = {
     { id: 'cabinets', label: 'Cabinets', fields: ['title', 'slug', 'parent_kind', 'seat_limit', 'status'] },
     { id: 'certificates', label: 'Certificates', fields: ['title', 'slug', 'category', 'status'] }
   ];
+
+  var PREVIEW_ROUTES = {
+    modules: { path: '/pages/module.html', slug: true },
+    quizzes: { path: '/pages/quiz.html', slug: true },
+    cases: { path: '/pages/case.html', slug: true },
+    practice_areas: { path: '/pages/practice-area.html', slug: true },
+    internships: { path: '/pages/internship-apply.html', slug: true },
+    lectures: { path: '/pages/learning.html', slug: false },
+    books: { path: '/pages/library.html', slug: false },
+    statutes: { path: '/pages/statutes.html', slug: false },
+    certificates: { path: '/pages/certificates.html', slug: false },
+    articles: { path: '/pages/insights.html', slug: false },
+    news: { path: '/pages/news.html', slug: false },
+    resources: { path: '/pages/resources.html', slug: false },
+    careers: { path: '/pages/careers.html', slug: false },
+    people: { path: '/pages/people.html', slug: false },
+    services: { path: '/pages/services.html', slug: false },
+    matters: { path: '/pages/matters.html', slug: false },
+    societies: { path: '/pages/societies.html', slug: false },
+    chapters: { path: '/pages/chapters.html', slug: false }
+  };
+  function contentPreviewHref(table, slug) {
+    var r = PREVIEW_ROUTES[table];
+    if (!r) return '';
+    var q = [];
+    if (r.slug) {
+      if (!slug) return '';
+      q.push('slug=' + encodeURIComponent(slug));
+    }
+    q.push('preview=1');
+    return r.path + '?' + q.join('&');
+  }
+  function openContentPreview(table, slug) {
+    var href = contentPreviewHref(table, slug);
+    if (!href) return false;
+    var url = (location.pathname || '/') + '#' + href;
+    window.open(url, '_blank', 'noopener');
+    return true;
+  }
 
   // Which granular roles (beyond admin/editor, who always see everything)
   // may use each sidebar view. This is a UX convenience only — the real
@@ -4329,6 +4479,15 @@ window.ramdaniAuth = {
 
     document.getElementById('contentSearch').addEventListener('input', renderContentRows);
     document.getElementById('cancelEditBtn').addEventListener('click', resetEditor);
+    document.getElementById('previewContentBtn').addEventListener('click', function(){
+      var form=document.getElementById('createForm');
+      var slugEl=form.querySelector('[name="slug"]');
+      if(!openContentPreview(form.dataset.table, slugEl?slugEl.value:'')) {
+        var note=document.getElementById('saveNote');
+        note.className='form-status err';
+        note.textContent='This content type has no public page to preview.';
+      }
+    });
     document.getElementById('createForm').addEventListener('submit', saveRow);
     document.getElementById('orgSettingsForm').addEventListener('submit', saveOrgSettings);
     document.getElementById('brandingLogoForm').addEventListener('submit', saveBrandingLogo);
@@ -5804,7 +5963,7 @@ window.ramdaniAuth = {
   }
 
   async function loadCourseBuilder() {
-    var res = await sb.from('modules').select('id, title, code').order('title');
+    var res = await sb.from('modules').select('id, title, code, slug').order('title');
     var mods = res.data || [];
     var sel = $id('cbModule');
     sel.innerHTML = '<option value="">Select module…</option>' + mods.map(function (m) {
@@ -5826,7 +5985,7 @@ window.ramdaniAuth = {
 
   async function loadCourseBuilderData() {
     var area = $id('cbArea');
-    if (!cbModuleId) { area.hidden = true; setNote('cbNote', 'Choose a module to build its sections and lessons.'); return; }
+    if (!cbModuleId) { area.hidden = true; var p0=$id('cbPreviewBtn'); if(p0) p0.hidden=true; setNote('cbNote', 'Choose a module to build its sections and lessons.'); return; }
     setNote('cbNote', '');
     var s = await sb.from('course_sections').select('*').eq('module_id', cbModuleId).order('sort_order').order('created_at');
     var l = await sb.from('lessons').select('*').eq('module_id', cbModuleId).order('sort_order').order('created_at');
@@ -5836,8 +5995,13 @@ window.ramdaniAuth = {
     area.hidden = false;
     renderCbSections();
     renderCbLessons();
-    var modRes = await sb.from('modules').select('instructor_id').eq('id', cbModuleId).maybeSingle();
+    var modRes = await sb.from('modules').select('instructor_id, slug').eq('id', cbModuleId).maybeSingle();
     $id('cbModuleMetaForm').elements.instructor_id.value = (modRes.data && modRes.data.instructor_id) || '';
+    var prevBtn = $id('cbPreviewBtn');
+    if (prevBtn) {
+      prevBtn.hidden = !(modRes.data && modRes.data.slug);
+      prevBtn.dataset.slug = (modRes.data && modRes.data.slug) || '';
+    }
     setNote('cbModuleMetaNote', '');
     var r = await sb.from('course_completion_rules').select('*').eq('module_id', cbModuleId).maybeSingle();
     var f = $id('cbRulesForm');
@@ -5915,10 +6079,13 @@ window.ramdaniAuth = {
     var payload = { title: title, description: f.elements.description.value.trim() || null, status: f.elements.status.value };
     var res;
     if (cbEditSectionId) {
+      var oldSec = cbSections.find(function (x) { return x.id === cbEditSectionId; }) || {};
+      if (payload.status === 'published' && !oldSec.published_at) payload.published_at = new Date().toISOString();
       res = await sb.from('course_sections').update(payload).eq('id', cbEditSectionId);
     } else {
       payload.module_id = cbModuleId;
       payload.sort_order = cbSections.length ? Math.max.apply(null, cbSections.map(function (x) { return x.sort_order; })) + 1 : 0;
+      if (payload.status === 'published') payload.published_at = new Date().toISOString();
       res = await sb.from('course_sections').insert(payload);
     }
     if (res.error) return setNote('cbSectionNote', res.error.message);
@@ -5995,6 +6162,7 @@ window.ramdaniAuth = {
 
   function bindCourseBuilder() {
     $id('cbModule').addEventListener('change', function () { cbModuleId = this.value; resetSectionForm(); resetLessonForm(); loadCourseBuilderData(); });
+    $id('cbPreviewBtn').addEventListener('click', function () { openContentPreview('modules', this.dataset.slug || ''); });
     $id('cbModuleMetaForm').addEventListener('submit', saveCbModuleMeta);
     $id('cbSectionForm').addEventListener('submit', saveCbSection);
     $id('cbLessonForm').addEventListener('submit', saveCbLesson);
@@ -6120,6 +6288,7 @@ window.ramdaniAuth = {
     f.elements.status.value = 'draft';
     $id('qbMetaSave').textContent = 'Create quiz';
     $id('qbMetaDelete').hidden = true;
+    var qbPrev = $id('qbPreviewBtn'); if (qbPrev) qbPrev.hidden = true;
     $id('qbQuestionsArea').hidden = true;
     qbQuestions = [];
     resetQuestionForm();
@@ -6141,6 +6310,7 @@ window.ramdaniAuth = {
     f.elements.status.value = q.status || 'draft';
     $id('qbMetaSave').textContent = 'Update quiz';
     $id('qbMetaDelete').hidden = false;
+    var qbPrev = $id('qbPreviewBtn'); if (qbPrev) qbPrev.hidden = !q.slug;
     $id('qbQuestionsArea').hidden = false;
     setNote('qbMetaNote', '');
     resetQuestionForm();
@@ -6158,14 +6328,18 @@ window.ramdaniAuth = {
   function renderQbQuestions() {
     var body = $id('qbQuestionsBody');
     body.innerHTML = qbQuestions.map(function (q, i) {
+      var qtype = q.question_type || 'multiple_choice';
+      var typeLabel = qtype === 'true_false' ? 'True/False' : (qtype === 'short_answer' ? 'Short answer' : 'Multiple choice');
       var choices = Array.isArray(q.choices) ? q.choices : [];
-      var correctText = choices[q.correct_index] || '';
-      return '<tr><td>' + (i + 1) + '</td><td>' + escapeHtml(q.prompt) + '</td><td>' + choices.length + '</td><td>' + escapeHtml(correctText) + '</td><td>' +
+      var accepted = Array.isArray(q.accepted_answers) ? q.accepted_answers : [];
+      var correctText = qtype === 'short_answer' ? (accepted[0] || '') : (choices[q.correct_index] || '');
+      var nChoices = qtype === 'short_answer' ? accepted.length : choices.length;
+      return '<tr><td>' + (i + 1) + '</td><td>' + escapeHtml(q.prompt) + '</td><td>' + escapeHtml(typeLabel) + '</td><td>' + nChoices + '</td><td>' + escapeHtml(correctText) + '</td><td>' +
         '<button type="button" class="btn" data-q-up="' + q.id + '"' + (i === 0 ? ' disabled' : '') + ' aria-label="Move up">↑</button> ' +
         '<button type="button" class="btn" data-q-down="' + q.id + '"' + (i === qbQuestions.length - 1 ? ' disabled' : '') + ' aria-label="Move down">↓</button> ' +
         '<button type="button" class="btn" data-q-edit="' + q.id + '">Edit</button> ' +
         '<button type="button" class="btn" data-q-del="' + q.id + '">Delete</button></td></tr>';
-    }).join('') || '<tr><td colspan="5">No questions yet. Add the first question above.</td></tr>';
+    }).join('') || '<tr><td colspan="6">No questions yet. Add the first question above.</td></tr>';
   }
 
   function qbChoiceRow(value, checked) {
@@ -6176,11 +6350,57 @@ window.ramdaniAuth = {
       '<button type="button" class="btn qb-remove" data-remove-choice aria-label="Remove choice">✕</button></div>';
   }
 
+  function qbQuestionType() {
+    var f = $id('qbQuestionForm');
+    return (f && f.elements.question_type && f.elements.question_type.value) || 'multiple_choice';
+  }
+
+  function qbSyncQuestionTypeUi(preserve) {
+    var t = qbQuestionType();
+    var wrap = $id('qbChoicesWrap');
+    var addRow = $id('qbAddChoiceRow');
+    var acc = $id('qbAcceptedWrap');
+    if (!wrap) return;
+    if (t === 'short_answer') {
+      wrap.hidden = true;
+      if (addRow) addRow.hidden = true;
+      if (acc) acc.hidden = false;
+      wrap.querySelectorAll('input').forEach(function (el) { el.required = false; });
+      return;
+    }
+    wrap.hidden = false;
+    if (acc) acc.hidden = true;
+    if (t === 'true_false') {
+      if (addRow) addRow.hidden = true;
+      if (!preserve || wrap.querySelectorAll('.qb-choice-row').length !== 2) {
+        var checked = 0;
+        wrap.querySelectorAll('input[type="radio"]').forEach(function (r, i) { if (r.checked) checked = i; });
+        wrap.innerHTML = qbChoiceRow('True', checked !== 1) + qbChoiceRow('False', checked === 1);
+      }
+      wrap.querySelectorAll('input[type="text"]').forEach(function (inp) { inp.readOnly = true; inp.required = true; });
+      wrap.querySelectorAll('[data-remove-choice]').forEach(function (b) { b.hidden = true; });
+      return;
+    }
+    if (addRow) addRow.hidden = false;
+    wrap.querySelectorAll('input[type="text"]').forEach(function (inp) { inp.readOnly = false; inp.required = true; });
+    wrap.querySelectorAll('[data-remove-choice]').forEach(function (b) { b.hidden = false; });
+    if (!preserve) {
+      var texts = [];
+      wrap.querySelectorAll('input[type="text"]').forEach(function (inp) { texts.push(inp.value); });
+      if (texts.length === 2 && texts[0] === 'True' && texts[1] === 'False') {
+        wrap.innerHTML = qbChoiceRow('', true) + qbChoiceRow('') + qbChoiceRow('') + qbChoiceRow('');
+      }
+    }
+  }
+
   function resetQuestionForm() {
     qbEditQuestionId = null;
     var f = $id('qbQuestionForm');
     f.reset();
+    if (f.elements.question_type) f.elements.question_type.value = 'multiple_choice';
+    if (f.elements.accepted_answers) f.elements.accepted_answers.value = '';
     $id('qbChoicesWrap').innerHTML = qbChoiceRow('', true) + qbChoiceRow('') + qbChoiceRow('') + qbChoiceRow('');
+    qbSyncQuestionTypeUi();
     $id('qbQuestionSave').textContent = 'Add question';
     $id('qbQuestionCancel').hidden = true;
     setNote('qbQuestionNote', '');
@@ -6235,19 +6455,36 @@ window.ramdaniAuth = {
     var f = e.target;
     var prompt = f.elements.prompt.value.trim();
     if (!prompt) return setNote('qbQuestionNote', 'Prompt is required.');
-    var rows = Array.prototype.slice.call($id('qbChoicesWrap').querySelectorAll('.qb-choice-row'));
-    var choices = [], correctIndex = -1;
-    rows.forEach(function (row) {
-      var input = row.querySelector('input[type="text"]');
-      var radio = row.querySelector('input[type="radio"]');
-      var val = input.value.trim();
-      if (!val) return;
-      choices.push(val);
-      if (radio.checked) correctIndex = choices.length - 1;
-    });
-    if (choices.length < 2) return setNote('qbQuestionNote', 'Add at least two choices.');
-    if (correctIndex < 0) return setNote('qbQuestionNote', 'Mark one choice as the correct answer.');
-    var payload = { prompt: prompt, choices: choices, correct_index: correctIndex, explanation: f.elements.explanation.value.trim() || null };
+    var qtype = (f.elements.question_type && f.elements.question_type.value) || 'multiple_choice';
+    var payload = { prompt: prompt, question_type: qtype, explanation: f.elements.explanation.value.trim() || null };
+    if (qtype === 'short_answer') {
+      var accepted = String(f.elements.accepted_answers.value || '').split(/\n/).map(function (s) { return s.trim(); }).filter(Boolean);
+      if (!accepted.length) return setNote('qbQuestionNote', 'Add at least one accepted answer.');
+      payload.choices = [];
+      payload.correct_index = 0;
+      payload.accepted_answers = accepted;
+    } else {
+      var rows = Array.prototype.slice.call($id('qbChoicesWrap').querySelectorAll('.qb-choice-row'));
+      var choices = [], correctIndex = -1;
+      rows.forEach(function (row) {
+        var input = row.querySelector('input[type="text"]');
+        var radio = row.querySelector('input[type="radio"]');
+        var val = input.value.trim();
+        if (!val) return;
+        choices.push(val);
+        if (radio.checked) correctIndex = choices.length - 1;
+      });
+      if (qtype === 'true_false') {
+        choices = ['True', 'False'];
+        if (correctIndex < 0) correctIndex = 0;
+        if (correctIndex > 1) correctIndex = 1;
+      }
+      if (choices.length < 2) return setNote('qbQuestionNote', 'Add at least two choices.');
+      if (correctIndex < 0) return setNote('qbQuestionNote', 'Mark one choice as the correct answer.');
+      payload.choices = choices;
+      payload.correct_index = correctIndex;
+      payload.accepted_answers = [];
+    }
     var res;
     if (qbEditQuestionId) {
       res = await sb.from('quiz_questions').update(payload).eq('id', qbEditQuestionId);
@@ -6281,9 +6518,14 @@ window.ramdaniAuth = {
   function bindQuizBuilder() {
     $id('qbQuiz').addEventListener('change', function () { if (this.value) loadQuizMeta(this.value); else resetQuizMetaForm(); });
     $id('qbNewQuiz').addEventListener('click', function () { $id('qbQuiz').value = ''; resetQuizMetaForm(); $id('qbMetaForm').scrollIntoView({ behavior: 'smooth', block: 'center' }); });
+    $id('qbPreviewBtn').addEventListener('click', function () {
+      var slugEl = $id('qbMetaForm').elements.slug;
+      openContentPreview('quizzes', slugEl ? slugEl.value : '');
+    });
     $id('qbMetaForm').addEventListener('submit', saveQuizMeta);
     $id('qbMetaDelete').addEventListener('click', deleteQuiz);
-    $id('qbAddChoice').addEventListener('click', function () { $id('qbChoicesWrap').insertAdjacentHTML('beforeend', qbChoiceRow('')); });
+    $id('qbQuestionType').addEventListener('change', function () { qbSyncQuestionTypeUi(); });
+    $id('qbAddChoice').addEventListener('click', function () { if (qbQuestionType() !== 'multiple_choice') return; $id('qbChoicesWrap').insertAdjacentHTML('beforeend', qbChoiceRow('')); });
     $id('qbChoicesWrap').addEventListener('click', function (e) {
       var b = e.target.closest('[data-remove-choice]'); if (!b) return;
       var rows = $id('qbChoicesWrap').querySelectorAll('.qb-choice-row');
@@ -6302,8 +6544,19 @@ window.ramdaniAuth = {
         var f = $id('qbQuestionForm');
         f.elements.prompt.value = qq.prompt || '';
         f.elements.explanation.value = qq.explanation || '';
+        var qtype = qq.question_type || 'multiple_choice';
+        if (f.elements.question_type) f.elements.question_type.value = qtype;
+        var accepted = Array.isArray(qq.accepted_answers) ? qq.accepted_answers : [];
+        if (f.elements.accepted_answers) f.elements.accepted_answers.value = accepted.join('\n');
         var choices = Array.isArray(qq.choices) ? qq.choices : [];
-        $id('qbChoicesWrap').innerHTML = choices.length ? choices.map(function (c, idx) { return qbChoiceRow(c, idx === qq.correct_index); }).join('') : (qbChoiceRow('', true) + qbChoiceRow(''));
+        if (qtype === 'true_false') {
+          $id('qbChoicesWrap').innerHTML = qbChoiceRow('True', qq.correct_index !== 1) + qbChoiceRow('False', qq.correct_index === 1);
+        } else if (qtype === 'short_answer') {
+          $id('qbChoicesWrap').innerHTML = qbChoiceRow('', true) + qbChoiceRow('');
+        } else {
+          $id('qbChoicesWrap').innerHTML = choices.length ? choices.map(function (c, idx) { return qbChoiceRow(c, idx === qq.correct_index); }).join('') : (qbChoiceRow('', true) + qbChoiceRow(''));
+        }
+        qbSyncQuestionTypeUi(true);
         qbEditQuestionId = qq.id;
         $id('qbQuestionSave').textContent = 'Update question'; $id('qbQuestionCancel').hidden = false;
         f.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -6422,7 +6675,9 @@ window.ramdaniAuth = {
     body.innerHTML = rows.map(function (item) {
       var s = item.source, row = item.row;
       return '<tr><td>' + escapeHtml(s.type) + '</td><td>' + escapeHtml(row[s.titleField] || '') + '</td><td>' + escapeHtml(s.detail(row)) + '</td><td>' + escapeHtml(row.status || '') + '</td>' +
-        '<td><button type="button" class="btn" data-es-edit="' + s.table + '|' + row.id + '">Open</button></td></tr>';
+        '<td><div class="table-actions"><button type="button" class="btn" data-es-edit="' + s.table + '|' + row.id + '">Open</button>' +
+        (s.table === 'lessons' || contentPreviewHref(s.table, row.slug) ? '<button type="button" class="btn" data-es-preview="' + s.table + '|' + row.id + '|' + escapeHtml(row.slug || '') + '">Preview</button>' : '') +
+        '</div></td></tr>';
     }).join('');
     setNote('esNote', rows.length + ' result(s).', true);
   }
@@ -6431,6 +6686,22 @@ window.ramdaniAuth = {
     $id('esRun').addEventListener('click', runEduSearch);
     $id('esQuery').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); runEduSearch(); } });
     $id('esBody').addEventListener('click', function (e) {
+      var prev = e.target.closest('[data-es-preview]');
+      if (prev) {
+        var p = prev.getAttribute('data-es-preview').split('|');
+        var pTable = p[0], pId = p[1], pSlug = p[2] || '';
+        if (pTable === 'lessons') {
+          sb.from('lessons').select('module_id').eq('id', pId).maybeSingle().then(function (res) {
+            if (!res.data || !res.data.module_id) return;
+            return sb.from('modules').select('slug').eq('id', res.data.module_id).maybeSingle();
+          }).then(function (mod) {
+            if (mod && mod.data && mod.data.slug) openContentPreview('modules', mod.data.slug);
+          });
+          return;
+        }
+        openContentPreview(pTable, pSlug);
+        return;
+      }
       var b = e.target.closest('[data-es-edit]'); if (!b) return;
       var parts = b.getAttribute('data-es-edit').split('|');
       var table = parts[0], id = parts[1];
@@ -6619,12 +6890,14 @@ window.ramdaniAuth = {
     editingId=row.id;
     document.getElementById('saveBtn').textContent='Update';
     document.getElementById('cancelEditBtn').hidden=false;
+    var prevBtn=document.getElementById('previewContentBtn');
+    if(prevBtn) prevBtn.hidden=!contentPreviewHref(form.dataset.table, row.slug);
     document.getElementById('saveNote').textContent='Editing selected record.';
     form.scrollIntoView({behavior:'smooth',block:'start'});
   }
   function resetEditor(){
     editingId=null; var form=document.getElementById('createForm'); form.reset();
-    document.getElementById('saveBtn').textContent='Save'; document.getElementById('cancelEditBtn').hidden=true; document.getElementById('saveNote').textContent='';
+    document.getElementById('saveBtn').textContent='Save'; document.getElementById('cancelEditBtn').hidden=true; var prevBtn=document.getElementById('previewContentBtn'); if(prevBtn) prevBtn.hidden=true; document.getElementById('saveNote').textContent='';
   }
 
   async function loadDashboard() {
@@ -6668,9 +6941,10 @@ window.ramdaniAuth = {
     document.getElementById('dataHead').innerHTML='<tr>'+meta.fields.map(function(f){return '<th>'+ramdaniUi.escape(f)+'</th>';}).join('')+'<th>Actions</th></tr>';
     document.getElementById('dataBody').innerHTML=rows.map(function(row){
       var status=row.status?'<span class="status-badge status-'+ramdaniUi.escape(String(row.status))+'">'+ramdaniUi.escape(row.status)+'</span>':'';
-      return '<tr>'+meta.fields.map(function(f){return '<td>'+((f==='status')?status:ramdaniUi.escape(row[f]))+'</td>';}).join('')+'<td><div class="table-actions"><button type="button" class="btn btn-sm" data-edit="'+ramdaniUi.escape(row.id)+'">Edit</button><button type="button" class="btn btn-sm" data-del="'+ramdaniUi.escape(row.id)+'">Delete</button></div></td></tr>';
+      return '<tr>'+meta.fields.map(function(f){return '<td>'+((f==='status')?status:ramdaniUi.escape(row[f]))+'</td>';}).join('')+'<td><div class="table-actions"><button type="button" class="btn btn-sm" data-edit="'+ramdaniUi.escape(row.id)+'">Edit</button>'+(contentPreviewHref(name, row.slug)?'<button type="button" class="btn btn-sm" data-preview="'+ramdaniUi.escape(row.id)+'">Preview</button>':'')+'<button type="button" class="btn btn-sm" data-del="'+ramdaniUi.escape(row.id)+'">Delete</button></div></td></tr>';
     }).join('')||'<tr><td colspan="'+(meta.fields.length+1)+'">No records found.</td></tr>';
     document.querySelectorAll('[data-edit]').forEach(function(btn){btn.addEventListener('click',function(){var row=currentRows.find(function(r){return String(r.id)===String(btn.getAttribute('data-edit'));});if(row)fillForm(row);});});
+    document.querySelectorAll('[data-preview]').forEach(function(btn){btn.addEventListener('click',function(){var row=currentRows.find(function(r){return String(r.id)===String(btn.getAttribute('data-preview'));});if(row)openContentPreview(name, row.slug);});});
     document.querySelectorAll('[data-del]').forEach(function(btn){btn.addEventListener('click',async function(){if(!confirm('Permanently delete this record? This cannot be undone.'))return;var res=await sb.from(name).delete().eq('id',btn.getAttribute('data-del'));var note=document.getElementById('saveNote');note.className='form-status '+(res.error?'err':'ok');note.textContent=res.error?res.error.message:'Record deleted.';if(!res.error)loadTable(name);});});
   }
 
