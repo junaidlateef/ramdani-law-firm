@@ -677,7 +677,7 @@ html[dir="rtl"] .lead {
   <footer class="site-footer">
     <div class="wrap">
       <p>Dera Ghazi Khan, Pakistan</p>
-      <p class="note"><a href="/student/login">Student portal</a> · <a href="/member/login">Member portal</a> · <a href="/client/login">Client portal</a> · <a href="/lawyer/login">Lawyer portal</a></p>
+      <p class="note"><a href="/portal/login">Portal</a> · <a href="/client/login">Client portal</a></p>
     </div>
   </footer>
   </div>
@@ -1832,7 +1832,7 @@ html[dir="rtl"] .lead {
       <button class="btn btn-primary" type="submit">Update password</button>
     </form>
     <p id="resetStatus" class="form-status"></p>
-    <p><a href="/admin/">Admin sign in</a> · <a href="/student/login">Student sign in</a> · <a href="/lawyer/login">Lawyer sign in</a></p>
+    <p><a href="/admin/">Admin sign in</a> · <a href="/portal/login">Portal sign in</a></p>
   </div>
   </div>
 
@@ -1886,7 +1886,7 @@ html[dir="rtl"] .lead {
           <button class="btn btn-primary" type="submit">Create account</button>
         </form>
         <p id="studentSignupStatus" class="form-status"></p>
-        <p>Already have an account? <a href="/student/login">Sign in</a></p>
+        <p>Already have an account? <a href="/portal/login">Sign in</a></p>
         <p class="note"><a href="/">Back to public site</a></p>
       </div>
 
@@ -1897,7 +1897,7 @@ html[dir="rtl"] .lead {
           <button class="btn" type="submit">Send reset link</button>
         </form>
         <p id="studentForgotStatus" class="form-status"></p>
-        <p><a href="/student/login">Back to sign in</a></p>
+        <p><a href="/portal/login">Back to sign in</a></p>
       </div>
 
       <div id="studentDashboardPanel" class="portal-dash" hidden>
@@ -2168,7 +2168,7 @@ html[dir="rtl"] .lead {
           <button class="btn btn-primary" type="submit">Submit registration</button>
         </form>
         <p id="lawyerSignupStatus" class="form-status"></p>
-        <p>Already approved? <a href="/lawyer/login">Sign in</a></p>
+        <p>Already approved? <a href="/portal/login">Sign in</a></p>
         <p class="note"><a href="/">Back to public site</a></p>
       </div>
 
@@ -2968,11 +2968,11 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
         if (!p || p.role !== 'member') { await ramdaniAuth.signOut(); return setSt('This account is not a member account.'); }
         window.ramdaniGo('/member/dashboard');
       });
-      document.getElementById('memberSignOutBtn').addEventListener('click', async function () { await ramdaniAuth.signOut(); window.ramdaniGo('/member/login'); });
+      document.getElementById('memberSignOutBtn').addEventListener('click', async function () { await ramdaniAuth.signOut(); window.ramdaniGo('/portal/login'); });
     }
     var p = await ramdaniAuth.profile();
     if (path.indexOf('/dashboard') >= 0) {
-      if (!p || p.role !== 'member') { window.ramdaniGo('/member/login'); return; }
+      if (!p || p.role !== 'member') { window.ramdaniGo('/portal/login'); return; }
       login.hidden = true; dash.hidden = false;
       document.getElementById('memWelcome').textContent = 'Welcome, ' + (p.full_name || 'Member');
       document.getElementById('memDashMeta').textContent = p.email || '';
@@ -3288,7 +3288,7 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
         }
         window.ramdaniGo('/lawyer/dashboard');
       });
-      document.getElementById('lawyerSignOutBtn').addEventListener('click', async function () { await ramdaniAuth.signOut(); window.ramdaniGo('/lawyer/login'); });
+      document.getElementById('lawyerSignOutBtn').addEventListener('click', async function () { await ramdaniAuth.signOut(); window.ramdaniGo('/portal/login'); });
     }
     var signup = document.getElementById('lawyerSignupPanel');
     bindLawyerSignup();
@@ -3296,7 +3296,7 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
     signup.hidden = true;
     var p = await ramdaniAuth.profile();
     if (path.indexOf('/dashboard') < 0) { login.hidden = false; dash.hidden = true; return; }
-    if (!p || p.role !== 'lawyer' || !p.is_active) { window.ramdaniGo('/lawyer/login'); return; }
+    if (!p || p.role !== 'lawyer' || !p.is_active) { window.ramdaniGo('/portal/login'); return; }
     login.hidden = true; dash.hidden = false;
     if (window.ramdaniLawyerBoot) await window.ramdaniLawyerBoot(p);
   }
@@ -3369,8 +3369,7 @@ window.ramdaniSite = Object.freeze({
     ['/pages/library.html', 'nav_library', 'Library'],
     ['/pages/internships.html', 'nav_internships', 'Internships'],
     ['/pages/practice-areas.html', 'nav_practice', 'Practice Areas'],
-    ['/student/login', 'nav_student', 'Student portal'],
-    ['/lawyer/login', 'nav_lawyer', 'Lawyer portal']
+    ['/portal/login', 'nav_portal', 'Portal']
   ],
   navigation: [
     ['/', 'nav_home', 'Home'], ['/pages/about.html', 'nav_about', 'About'],
@@ -3381,7 +3380,7 @@ window.ramdaniSite = Object.freeze({
     ['/pages/internships.html', 'nav_internships', 'Internships'], ['/pages/quizzes.html', 'nav_quizzes', 'LAT / GAT'],
     ['/pages/modules.html', 'nav_modules', 'Study modules'], ['/pages/cases.html', 'nav_cases', 'Case notes'],
     ['/pages/statutes.html', 'nav_statutes', 'Pakistan laws'], ['/pages/library.html', 'nav_library', 'Library'], ['/pages/learning.html', 'nav_learning', 'Lectures'], ['/pages/societies.html', 'nav_societies', 'Societies'], ['/pages/chapters.html', 'nav_chapters', 'Chapters'], ['/pages/certificates.html', 'nav_certificates', 'Certificates'], ['/pages/faq.html', 'nav_faq', 'FAQ'],
-    ['/pages/contact.html', 'nav_contact', 'Contact'], ['/student/login', 'nav_student', 'Student portal'], ['/lawyer/login', 'nav_lawyer', 'Lawyer portal']
+    ['/pages/contact.html', 'nav_contact', 'Contact'], ['/portal/login', 'nav_portal', 'Portal']
   ]
 });
 
@@ -3671,6 +3670,7 @@ window.ramdaniSite = Object.freeze({
       nav_certificates: 'Certificates',
       nav_student: 'Student portal',
       nav_lawyer: 'Lawyer portal',
+      nav_portal: 'Portal',
       nav_faq: 'FAQ',
       nav_contact: 'Contact',
       nav_consult: 'Consultation',
@@ -3785,6 +3785,7 @@ window.ramdaniSite = Object.freeze({
       nav_certificates: 'سرٹیفکیٹس',
       nav_student: 'اسٹوڈنٹ پورٹل',
       nav_lawyer: 'وکیل پورٹل',
+      nav_portal: 'پورٹل',
       nav_faq: 'سوالات',
       nav_contact: '\u0631\u0627\u0628\u0637\u06c1',
       nav_consult: '\u0645\u0634\u0627\u0648\u0631\u06c1',
@@ -4420,7 +4421,7 @@ window.ramdaniAuth = {
 
     document.getElementById('studentSignOutBtn').addEventListener('click', async function () {
       await ramdaniAuth.signOut();
-      window.ramdaniGo('/student/login');
+      window.ramdaniGo('/portal/login');
     });
   }
 
@@ -4648,7 +4649,7 @@ window.ramdaniAuth = {
     if (path === '/student/dashboard') {
       var profile = null;
       try { profile = await ramdaniAuth.requireStudent(); } catch (e) { profile = null; }
-      if (!profile) { window.ramdaniGo('/student/login'); return; }
+      if (!profile) { window.ramdaniGo('/portal/login'); return; }
       fillDashboard(profile);
       showPanel('studentDashboardPanel');
       renderLearning();
@@ -5673,7 +5674,7 @@ window.ramdaniAuth = {
     var session = await ramdaniStudent.session();
     if (!session) {
       box.innerHTML = '<div class="card"><p>Sign in as a student to enroll in this course and track your progress.</p>' +
-        '<a class="btn btn-primary" href="/student/login">Student sign in</a></div>';
+        '<a class="btn btn-primary" href="/portal/login">Sign in</a></div>';
       return;
     }
     var enr = await ramdaniStudent.myEnrollment(m.id);
