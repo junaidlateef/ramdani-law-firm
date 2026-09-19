@@ -507,6 +507,24 @@ html[dir="rtl"] .lead {
 #studentRoot .learning-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:1rem}
 #studentRoot .learning-table{width:100%;border-collapse:collapse}
 #studentRoot .learning-table th,#studentRoot .learning-table td{text-align:start;padding:.5rem;border-bottom:1px solid var(--line)}
+#studentRoot{background:linear-gradient(180deg,#0B1F33 0 18rem,#eef3f7 18rem);min-height:100vh}
+#studentRoot>.wrap{max-width:56rem!important;padding:1.5rem 1rem 3rem}
+#studentRoot .portal-dash{width:100%;max-width:none;margin:0;background:transparent;border:0;box-shadow:none;padding:0;border-radius:0}
+#studentRoot .portal-hero{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:1rem;color:#f7f1e4;margin-bottom:1.25rem}
+#studentRoot .portal-hero h1{margin:.15rem 0 0;color:#fff;font-size:clamp(1.6rem,3vw,2.2rem)}
+#studentRoot .portal-hero .note{color:#d9c9a5}
+#studentRoot .portal-section{background:#fff;border:1px solid #d7dee6;border-radius:16px;padding:1.1rem 1.15rem;margin-bottom:1rem;box-shadow:0 10px 30px rgba(11,31,51,.06)}
+#studentRoot .portal-section h2{margin:0 0 .75rem;font-size:1.05rem;color:#0B1F33;border-bottom:2px solid #c9a227;padding-bottom:.4rem}
+#studentRoot .portal-identity{display:grid;grid-template-columns:9.5rem 1fr;gap:1.1rem;align-items:start}
+@media (max-width:640px){#studentRoot .portal-identity{grid-template-columns:1fr}}
+#studentRoot .portal-photo{width:9.5rem;height:9.5rem;border-radius:18px;object-fit:cover;background:#0B1F33;border:3px solid #c9a227;display:block}
+#studentRoot .portal-photo.is-empty{display:grid;place-items:center;color:#d9c9a5;font-size:.8rem;text-align:center;padding:.6rem}
+#studentRoot .portal-kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.55rem .9rem;margin:0}
+@media (max-width:640px){#studentRoot .portal-kv{grid-template-columns:1fr}}
+#studentRoot .portal-kv div{background:#f6f8fb;border-radius:10px;padding:.55rem .7rem}
+#studentRoot .portal-kv dt{font-size:.7rem;letter-spacing:.04em;text-transform:uppercase;color:#5b6b7a;margin:0}
+#studentRoot .portal-kv dd{margin:.15rem 0 0;font-weight:600;color:#0B1F33}
+#studentRoot .portal-photo-form{margin-top:.6rem;display:grid;gap:.4rem}
 </style>
 </head>
 <body>
@@ -1075,9 +1093,10 @@ html[dir="rtl"] .lead {
           <div id="certIssuancesPanel" class="admin-panel" hidden>
             <div class="admin-section-head"><div><h2>Certificate issuances</h2><p class="note">Issue a numbered, verifiable certificate to a student for a completed module. Verification code is generated automatically.</p></div></div>
             <form id="certIssuanceForm" class="form admin-form">
-              <label><span>Student</span><select name="student_id" required><option value="">Select student…</option></select></label>
-              <label><span>Module</span><select name="module_id"><option value="">Select module…</option></select></label>
-              <label><span>Template</span><select name="template_id"><option value="">Use default template</option></select></label>
+              <p class="note field-full">Issue only to an <strong>active</strong> student who is <strong>enrolled</strong> in the selected module. Dropdowns load live IDs from the database.</p>
+              <label><span>Student (active only)</span><select name="student_id" required><option value="">Select student…</option></select></label>
+              <label><span>Enrolled module</span><select name="module_id" required><option value="">Select enrolled module…</option></select></label>
+              <label><span>Certificate template</span><select name="template_id"><option value="">Use default template</option></select></label>
               <label><span>Certificate number</span><input name="certificate_number" required placeholder="RLF-CERT-2026-0001" /></label>
               <label><span>Issue date</span><input name="issue_date" type="date" /></label>
               <div class="form-actions"><button class="btn btn-primary" type="submit">Issue certificate</button><p id="certIssuanceNote" class="form-status"></p></div>
@@ -1545,7 +1564,7 @@ html[dir="rtl"] .lead {
 
   <!-- STUDENT PORTAL -->
   <div id="studentRoot" hidden>
-    <div class="wrap" style="padding:2.5rem 0;max-width:46rem">
+    <div class="wrap">
 
       <div id="studentLoginPanel" class="auth-box" hidden>
         <h1>Welcome, Student</h1>
@@ -1588,56 +1607,98 @@ html[dir="rtl"] .lead {
         <p><a href="/student/login">Back to sign in</a></p>
       </div>
 
-      <div id="studentDashboardPanel" class="auth-box" hidden>
-        <h1 id="stuWelcome">Welcome, Student</h1>
-        <div class="card" style="margin-bottom:1rem">
-          <p><strong id="stuDashName"></strong></p>
-          <p class="note" id="stuDashEmail"></p>
-          <p>Student ID: <span id="stuDashId"></span></p>
-          <p>Department: <span id="stuDashDept"></span></p>
-          <p>University: <span id="stuDashUni"></span></p>
-          <p>Session: <span id="stuDashSession"></span></p>
-        </div>
+      <div id="studentDashboardPanel" class="portal-dash" hidden>
+        <header class="portal-hero">
+          <div>
+            <p class="kicker">Student portal</p>
+            <h1 id="stuWelcome">Welcome, Student</h1>
+            <p class="note" id="stuDashEmail"></p>
+          </div>
+          <button type="button" class="btn" id="studentSignOutBtn">Logout</button>
+        </header>
 
-        <h2>My courses</h2>
-        <div id="myCourses" class="learning-grid" style="margin-bottom:1rem"></div>
+        <section class="portal-section portal-identity" aria-labelledby="stuProfileHeading">
+          <div>
+            <img id="stuDashPhoto" class="portal-photo is-empty" alt="Student photo" />
+            <form id="studentPhotoForm" class="portal-photo-form">
+              <label><span class="note">Upload your photo</span><input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required /></label>
+              <button class="btn btn-primary" type="submit">Save photo</button>
+            </form>
+            <p id="studentPhotoStatus" class="form-status"></p>
+          </div>
+          <div>
+            <h2 id="stuProfileHeading">Profile</h2>
+            <p id="stuDashName" hidden></p>
+            <dl class="portal-kv">
+              <div><dt>Student ID</dt><dd id="stuDashId">—</dd></div>
+              <div><dt>Status</dt><dd id="stuDashStatus">—</dd></div>
+              <div><dt>Department</dt><dd id="stuDashDept">—</dd></div>
+              <div><dt>University</dt><dd id="stuDashUni">—</dd></div>
+              <div><dt>Session</dt><dd id="stuDashSession">—</dd></div>
+              <div><dt>Phone</dt><dd id="stuDashPhone">—</dd></div>
+              <div><dt>Program</dt><dd id="stuDashProgram">—</dd></div>
+              <div><dt>Batch</dt><dd id="stuDashBatch">—</dd></div>
+            </dl>
+          </div>
+        </section>
 
-        <h2>Quiz results</h2>
-        <div id="myQuizResults" style="margin-bottom:1rem"></div>
+        <section class="portal-section">
+          <h2>Certificates</h2>
+          <p class="note">Only certificates issued by staff after you are active and enrolled.</p>
+          <div id="myCertificates" class="learning-grid"></div>
+        </section>
 
-        <h2>My certificates</h2>
-        <div id="myCertificates" class="learning-grid" style="margin-bottom:1rem"></div>
+        <section class="portal-section">
+          <h2>Documents</h2>
+          <div id="myStudentDocs"></div>
+        </section>
 
-        <h2>Student card</h2>
-        <div id="myStudentCard" class="card" style="margin-bottom:1rem"></div>
+        <section class="portal-section">
+          <h2>Courses</h2>
+          <div id="myCourses" class="learning-grid"></div>
+        </section>
 
-        <h2>My documents</h2>
-        <div id="myStudentDocs" style="margin-bottom:1rem"></div>
+        <section class="portal-section">
+          <h2>Quizzes</h2>
+          <div id="myQuizResults"></div>
+        </section>
 
-        <h2>Events &amp; attendance</h2>
-        <div id="myStudentEvents" style="margin-bottom:1rem"></div>
+        <section class="portal-section">
+          <h2>Student card</h2>
+          <div id="myStudentCard"></div>
+        </section>
 
-        <h2>Update profile</h2>
-        <form id="studentProfileForm" class="form">
-          <label>Full name <input name="full_name" required /></label>
-          <label>Phone number <input name="phone" required /></label>
-          <label>Student ID / Roll number <input name="student_id" required /></label>
-          <label>Department <input name="department" required /></label>
-          <label>University <input name="university" required /></label>
-          <label>Session <input name="session" required /></label>
-          <button class="btn btn-primary" type="submit">Save changes</button>
-        </form>
-        <p id="studentProfileStatus" class="form-status"></p>
+        <section class="portal-section">
+          <h2>Events & attendance</h2>
+          <div id="myStudentEvents"></div>
+        </section>
 
-        <h2>Change password</h2>
-        <form id="studentPasswordForm" class="form">
-          <label>New password <input id="stuNewPassword" type="password" required minlength="8" autocomplete="new-password" /></label>
-          <label>Confirm new password <input id="stuNewPasswordConfirm" type="password" required minlength="8" autocomplete="new-password" /></label>
-          <button class="btn" type="submit">Update password</button>
-        </form>
-        <p id="studentPasswordStatus" class="form-status"></p>
+        <section class="portal-section">
+          <h2>Update profile</h2>
+          <form id="studentProfileForm" class="form">
+            <label>Full name <input name="full_name" required /></label>
+            <label>Phone number <input name="phone" required /></label>
+            <label>Student ID / Roll number <input name="student_id" required /></label>
+            <label>Department <input name="department" required /></label>
+            <label>University <input name="university" required /></label>
+            <label>Session <input name="session" required /></label>
+            <label>Program <input name="program" /></label>
+            <label>Batch <input name="batch" /></label>
+            <button class="btn btn-primary" type="submit">Save changes</button>
+          </form>
+          <p id="studentProfileStatus" class="form-status"></p>
+        </section>
 
-        <button type="button" class="btn" id="studentSignOutBtn">Logout</button>
+        <section class="portal-section">
+          <h2>Change password</h2>
+          <form id="studentPasswordForm" class="form">
+            <label>New password <input id="stuNewPassword" type="password" required minlength="8" autocomplete="new-password" /></label>
+            <label>Confirm new password <input id="stuNewPasswordConfirm" type="password" required minlength="8" autocomplete="new-password" /></label>
+            <button class="btn" type="submit">Update password</button>
+          </form>
+          <p id="studentPasswordStatus" class="form-status"></p>
+        </section>
+      </div>
       </div>
 
     </div>
@@ -3151,7 +3212,7 @@ window.ramdaniAuth = {
   async profile() {
     var session = await this.session();
     if (!session) return null;
-    var res = await sb.from('profiles').select('id, full_name, email, phone, student_id, department, university, session, role, is_active').eq('id', session.user.id).maybeSingle();
+    var res = await sb.from('profiles').select('id, full_name, email, phone, student_id, department, university, session, role, is_active, status, photo_path, program, batch').eq('id', session.user.id).maybeSingle();
     return res.data || null;
   },
   // Any role considered "staff" for the purpose of signing into the admin
@@ -3213,6 +3274,8 @@ window.ramdaniAuth = {
       university: fields.university,
       session: fields.session
     };
+    if (fields.program !== undefined) payload.program = fields.program;
+    if (fields.batch !== undefined) payload.batch = fields.batch;
     return sb.from('profiles').update(payload).eq('id', session.user.id);
   },
   async changePassword(newPassword) {
@@ -3396,20 +3459,47 @@ window.ramdaniAuth = {
     });
   }
 
+  function dashText(id, v) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = v || '—';
+  }
+  async function showStudentPhoto(path) {
+    var img = document.getElementById('stuDashPhoto');
+    if (!img) return;
+    if (!path) {
+      img.removeAttribute('src');
+      img.classList.add('is-empty');
+      img.alt = 'No photo uploaded';
+      return;
+    }
+    var signed = await sb.storage.from('private-docs').createSignedUrl(path, 3600);
+    if (signed.error || !signed.data || !signed.data.signedUrl) {
+      img.classList.add('is-empty');
+      return;
+    }
+    img.src = signed.data.signedUrl;
+    img.classList.remove('is-empty');
+    img.alt = 'Student photo';
+  }
   function fillDashboard(p) {
     var w = document.getElementById('stuWelcome');
     if (w) w.textContent = 'Welcome, ' + (p.full_name || 'Student');
-    document.getElementById('stuDashName').textContent = p.full_name || '';
-    document.getElementById('stuDashEmail').textContent = p.email || '';
-    document.getElementById('stuDashId').textContent = p.student_id || '';
-    document.getElementById('stuDashDept').textContent = p.department || '';
-    document.getElementById('stuDashUni').textContent = p.university || '';
-    document.getElementById('stuDashSession').textContent = p.session || '';
+    dashText('stuDashName', p.full_name);
+    dashText('stuDashEmail', p.email);
+    dashText('stuDashId', p.student_id);
+    dashText('stuDashDept', p.department);
+    dashText('stuDashUni', p.university);
+    dashText('stuDashSession', p.session);
+    dashText('stuDashPhone', p.phone);
+    dashText('stuDashProgram', p.program);
+    dashText('stuDashBatch', p.batch);
+    dashText('stuDashStatus', p.is_active === false ? 'Inactive' : (p.status || 'active'));
     var form = document.getElementById('studentProfileForm');
-    ['full_name', 'phone', 'student_id', 'department', 'university', 'session'].forEach(function (f) {
+    ['full_name', 'phone', 'student_id', 'department', 'university', 'session', 'program', 'batch'].forEach(function (f) {
       var input = form.querySelector('[name="' + f + '"]');
       if (input) input.value = p[f] || '';
     });
+    showStudentPhoto(p.photo_path);
   }
 
   var bound = false;
@@ -3482,7 +3572,9 @@ window.ramdaniAuth = {
         student_id: form.student_id.value.trim(),
         department: form.department.value.trim(),
         university: form.university.value.trim(),
-        session: form.session.value.trim()
+        session: form.session.value.trim(),
+        program: form.program.value.trim(),
+        batch: form.batch.value.trim()
       };
       var res = await ramdaniAuth.updateMyProfile(fields);
       setStatus('studentProfileStatus', res.error ? res.error.message : 'Profile updated.', !res.error);
@@ -3503,10 +3595,34 @@ window.ramdaniAuth = {
       if (!res.error) { document.getElementById('stuNewPassword').value = ''; document.getElementById('stuNewPasswordConfirm').value = ''; }
     });
 
+    var photoForm = document.getElementById('studentPhotoForm');
+    if (photoForm) photoForm.addEventListener('submit', uploadStudentPhoto);
+
     document.getElementById('studentSignOutBtn').addEventListener('click', async function () {
       await ramdaniAuth.signOut();
       window.ramdaniGo('/student/login');
     });
+  }
+
+  async function uploadStudentPhoto(e) {
+    e.preventDefault();
+    var file = e.target.elements.photo.files[0];
+    if (!file) return setStatus('studentPhotoStatus', 'Choose a photo first.');
+    if (!/^image\/(jpeg|png|webp)$/i.test(file.type)) return setStatus('studentPhotoStatus', 'Use a JPG, PNG or WebP image.');
+    if (file.size > 4 * 1024 * 1024) return setStatus('studentPhotoStatus', 'Photo must be under 4 MB.');
+    var s = await ramdaniAuth.session();
+    if (!s) return setStatus('studentPhotoStatus', 'Sign in required.');
+    setStatus('studentPhotoStatus', 'Uploading…');
+    var ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+    if (['jpeg','jpg','png','webp'].indexOf(ext) === -1) ext = 'jpg';
+    var storagePath = 'students/' + s.user.id + '/photo.' + ext;
+    var up = await sb.storage.from('private-docs').upload(storagePath, file, { upsert: true, contentType: file.type, cacheControl: '3600' });
+    if (up.error) return setStatus('studentPhotoStatus', up.error.message);
+    var upd = await sb.from('profiles').update({ photo_path: storagePath }).eq('id', s.user.id);
+    if (upd.error) return setStatus('studentPhotoStatus', upd.error.message);
+    await showStudentPhoto(storagePath);
+    e.target.reset();
+    setStatus('studentPhotoStatus', 'Photo saved.', true);
   }
 
   // ---- Phase 3: enrollment, lesson progress, learning dashboard ----
@@ -6252,20 +6368,44 @@ window.ramdaniAuth = {
     var moduleSel = form.querySelector('[name="module_id"]');
     var templateSel = form.querySelector('[name="template_id"]');
 
-    var studentsRes = await sb.from('profiles').select('id, full_name, email, student_id').eq('role', 'student').order('full_name');
+    var studentsRes = await sb.from('profiles').select('id, full_name, email, student_id, is_active, status').eq('role', 'student').eq('is_active', true).eq('status', 'active').order('full_name');
     certIssuanceStudentsCache = studentsRes.data || [];
     studentSel.innerHTML = '<option value="">Select student…</option>' + certIssuanceStudentsCache.map(function (s) {
       return '<option value="' + s.id + '">' + escapeHtml(s.full_name || s.email) + (s.student_id ? ' (' + escapeHtml(s.student_id) + ')' : '') + '</option>';
     }).join('');
 
-    var modulesRes = await sb.from('modules').select('id, title, code').order('title');
-    certIssuanceModulesCache = modulesRes.data || [];
-    moduleSel.innerHTML = '<option value="">Select module…</option>' + certIssuanceModulesCache.map(function (m) {
-      return '<option value="' + m.id + '">' + escapeHtml(m.title || m.code) + '</option>';
+    templateSel.innerHTML = '<option value="">Use default template</option>' + certTemplatesCache.filter(function (t) {
+      return !t.status || t.status === 'published' || t.status === 'active';
+    }).map(function (t) {
+      return '<option value="' + t.id + '">' + escapeHtml(t.name) + (t.is_default ? ' (default)' : '') + '</option>';
     }).join('');
 
-    templateSel.innerHTML = '<option value="">Use default template</option>' + certTemplatesCache.map(function (t) {
-      return '<option value="' + t.id + '">' + escapeHtml(t.name) + (t.is_default ? ' (default)' : '') + '</option>';
+    if (!studentSel.dataset.enrollBound) {
+      studentSel.dataset.enrollBound = '1';
+      studentSel.addEventListener('change', fillCertModulesForStudent);
+    }
+    await fillCertModulesForStudent();
+  }
+
+  async function fillCertModulesForStudent() {
+    var form = document.getElementById('certIssuanceForm');
+    if (!form) return;
+    var moduleSel = form.querySelector('[name="module_id"]');
+    var studentId = form.elements.student_id.value;
+    if (!studentId) {
+      certIssuanceModulesCache = [];
+      moduleSel.innerHTML = '<option value="">Select a student first…</option>';
+      return;
+    }
+    var enr = await sb.from('enrollments').select('module_id, status, modules(id, title, code)').eq('student_id', studentId).in('status', ['active', 'completed']);
+    var rows = enr.data || [];
+    certIssuanceModulesCache = rows.map(function (r) { return r.modules || { id: r.module_id, title: r.module_id }; }).filter(function (m) { return m && m.id; });
+    if (!certIssuanceModulesCache.length) {
+      moduleSel.innerHTML = '<option value="">No active/completed enrollment</option>';
+      return;
+    }
+    moduleSel.innerHTML = '<option value="">Select enrolled module…</option>' + certIssuanceModulesCache.map(function (m) {
+      return '<option value="' + m.id + '">' + escapeHtml(m.title || m.code || m.id) + '</option>';
     }).join('');
   }
 
@@ -6352,10 +6492,24 @@ window.ramdaniAuth = {
     var certNumber = (fd.get('certificate_number') || '').trim();
     if (!studentId) { note.className = 'form-status err'; note.textContent = 'Student is required.'; return; }
     if (!certNumber) { note.className = 'form-status err'; note.textContent = 'Certificate number is required.'; return; }
+    var moduleId = fd.get('module_id');
+    if (!moduleId) { note.className = 'form-status err'; note.textContent = 'An enrolled module is required.'; return; }
+    var stu = certIssuanceStudentsCache.find(function (s) { return s.id === studentId; });
+    if (!stu || stu.is_active === false || (stu.status && stu.status !== 'active')) {
+      note.className = 'form-status err';
+      note.textContent = 'Certificate can only be issued to an active student.';
+      return;
+    }
+    var enr = await sb.from('enrollments').select('id, status').eq('student_id', studentId).eq('module_id', moduleId).in('status', ['active', 'completed']).maybeSingle();
+    if (enr.error || !enr.data) {
+      note.className = 'form-status err';
+      note.textContent = 'Student must be enrolled (active or completed) in this module.';
+      return;
+    }
     note.textContent = 'Issuing…';
     var payload = {
       student_id: studentId,
-      module_id: fd.get('module_id') || null,
+      module_id: moduleId,
       template_id: fd.get('template_id') || null,
       certificate_number: certNumber,
       verification_code: randomVerificationCode(),
