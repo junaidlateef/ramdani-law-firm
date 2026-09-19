@@ -585,6 +585,7 @@ html[dir="rtl"] .lead {
           <button type="button" data-table="__admins">Admin accounts</button>
           <button type="button" data-table="__systemsettings">System settings</button>
           <button type="button" data-table="__notifications">Notifications</button>
+          <button type="button" data-table="__auditlog">Audit log</button>
         </details>
         <button type="button" class="btn signout" id="signOutBtn">Sign out</button>
       </aside>
@@ -876,6 +877,12 @@ html[dir="rtl"] .lead {
             <div class="admin-section-head"><div><h2>Notifications</h2><p class="note">System-generated staff notifications (new inquiries, new students, applications, pending requests, warnings).</p></div></div>
             <div class="admin-toolbar"><button type="button" class="btn" id="markAllNotificationsReadBtn">Mark all as read</button></div>
             <div class="table-wrap"><table class="data"><thead><tr><th>Event</th><th>Title</th><th>Body</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody id="notificationsBody"></tbody></table></div>
+          </div>
+
+          <div id="auditLogPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Audit log</h2><p class="note">Read-only record of staff actions across the admin panel. Newest first, limited to the most recent 200 entries.</p></div></div>
+            <div class="admin-toolbar"><input type="search" id="auditLogSearch" placeholder="Search action, entity or staff name" aria-label="Search audit log" /></div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>When</th><th>Staff</th><th>Action</th><th>Entity</th><th>Entity ID</th></tr></thead><tbody id="auditLogBody"></tbody></table></div>
           </div>
         </main>
       </section>
@@ -3766,6 +3773,7 @@ window.ramdaniAuth = {
       if (delBtn) { deleteCertIssuance(delBtn.getAttribute('data-delete-cert-issuance')); }
     });
     document.getElementById('markAllNotificationsReadBtn').addEventListener('click', markAllNotificationsRead);
+    document.getElementById('auditLogSearch').addEventListener('input', renderAuditLog);
     document.getElementById('seoOverrideEntitySelect').addEventListener('change', function () { loadSeoOverrideRecords().then(loadSeoOverrideForRecord); });
     document.getElementById('seoOverrideRecordSelect').addEventListener('change', loadSeoOverrideForRecord);
     document.getElementById('seoOverrideForm').addEventListener('submit', saveSeoOverride);
@@ -4810,11 +4818,40 @@ window.ramdaniAuth = {
     loadNotifications();
   }
 
+  var auditLogCache = [];
+
+  async function loadAuditLog() {
+    var body = document.getElementById('auditLogBody');
+    var res = await sb.from('audit_events').select('id, action, entity, entity_id, created_at, profiles(full_name, email)').order('created_at', { ascending: false }).limit(200);
+    if (res.error) {
+      body.innerHTML = '<tr><td colspan="5">Could not load audit log — ' + escapeHtml(res.error.message) + '</td></tr>';
+      return;
+    }
+    auditLogCache = res.data || [];
+    renderAuditLog();
+  }
+
+  function renderAuditLog() {
+    var body = document.getElementById('auditLogBody');
+    var q = (document.getElementById('auditLogSearch').value || '').trim().toLowerCase();
+    var rows = !q ? auditLogCache : auditLogCache.filter(function (r) {
+      var staff = r.profiles ? (r.profiles.full_name || r.profiles.email || '') : '';
+      var hay = [r.action, r.entity, staff].filter(Boolean).join(' ').toLowerCase();
+      return hay.indexOf(q) !== -1;
+    });
+    body.innerHTML = rows.map(function (r) {
+      var when = r.created_at ? new Date(r.created_at).toLocaleString() : '';
+      var staff = r.profiles ? (r.profiles.full_name || r.profiles.email || '') : '(unknown)';
+      return '<tr><td>' + escapeHtml(when) + '</td><td>' + escapeHtml(staff) + '</td><td>' + escapeHtml(r.action) +
+        '</td><td>' + escapeHtml(r.entity || '') + '</td><td>' + escapeHtml(r.entity_id || '') + '</td></tr>';
+    }).join('') || '<tr><td colspan="5">No audit events yet.</td></tr>';
+  }
+
   var currentRows = [];
   var editingId = null;
 
   function showAdminView(view) {
-    var panels = ['dashboardPanel','studentsPanel','adminsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','orgSettingsPanel','brandingLogoPanel','brandingTypePanel','contactInfoPanel','seoSettingsPanel','systemSettingsPanel','disclaimersPanel','homepageSectionsPanel','navigationPanel','certTemplatesPanel','certIssuancesPanel','seoOverridesPanel','notificationsPanel'];
+    var panels = ['dashboardPanel','studentsPanel','adminsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','orgSettingsPanel','brandingLogoPanel','brandingTypePanel','contactInfoPanel','seoSettingsPanel','systemSettingsPanel','disclaimersPanel','homepageSectionsPanel','navigationPanel','certTemplatesPanel','certIssuancesPanel','seoOverridesPanel','notificationsPanel','auditLogPanel'];
     panels.forEach(function(id){ var el=document.getElementById(id); if(el){ el.hidden=true; el.classList.remove('is-active'); }});
     document.querySelectorAll('.admin-nav [data-table]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-table')===view); });
     document.getElementById('adminApp').classList.remove('nav-open');
@@ -4837,6 +4874,7 @@ window.ramdaniAuth = {
     if(view==='__certissuances') { activate('certIssuancesPanel','Certificate issuances'); loadCertIssuances(); return; }
     if(view==='__seooverrides') { activate('seoOverridesPanel','SEO overrides'); populateSeoOverrideEntitySelect(); loadSeoOverrideRecords().then(loadSeoOverrideForRecord); loadSeoOverridesList(); return; }
     if(view==='__notifications') { activate('notificationsPanel','Notifications'); loadNotifications(); return; }
+    if(view==='__auditlog') { activate('auditLogPanel','Audit log'); loadAuditLog(); return; }
     activate('contentPanel', (TABLES.find(function(t){return t.id===view;})||{}).label || 'Content');
     loadTable(view);
   }
