@@ -587,6 +587,7 @@ html[dir="rtl"] .lead {
           <button type="button" data-table="__brandingtype">Typography</button>
           <button type="button" data-table="__contactinfo">Contact info</button>
           <button type="button" data-table="__certtemplates">Certificate templates</button>
+          <button type="button" data-table="__medialibrary">Media library</button>
         </details>
         <details class="admin-nav-group" open>
           <summary class="admin-nav-group-title">System</summary>
@@ -912,6 +913,47 @@ html[dir="rtl"] .lead {
             </form>
             <div style="height:1rem"></div>
             <div class="table-wrap"><table class="data"><thead><tr><th>Name</th><th>Status</th><th>Default</th><th>Actions</th></tr></thead><tbody id="certTemplatesBody"></tbody></table></div>
+          </div>
+
+          <div id="mediaLibraryPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Media library</h2><p class="note">Upload and manage images and files used across the site and admin panel. Stored in the shared site-assets bucket (10&nbsp;MB max per file).</p></div></div>
+            <div class="admin-card">
+              <h3>Upload new asset</h3>
+              <form id="mediaUploadForm" class="form admin-form">
+                <label><span>Category</span><select name="category">
+                  <option value="Logos">Logos</option>
+                  <option value="Profile Photos">Profile Photos</option>
+                  <option value="Website Images">Website Images</option>
+                  <option value="Certificate Assets">Certificate Assets</option>
+                  <option value="Education Materials">Education Materials</option>
+                  <option value="PDFs">PDFs</option>
+                  <option value="Legal Resources">Legal Resources</option>
+                  <option value="Other" selected>Other</option>
+                </select></label>
+                <label><span>Visibility</span><select name="is_public"><option value="true">Public</option><option value="false">Staff only</option></select></label>
+                <label class="field-full"><span>Alt text</span><input name="alt_text" placeholder="Short description for accessibility" /></label>
+                <label class="field-full"><span>File</span><input type="file" id="mediaUploadFile" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon,application/pdf" required /></label>
+                <div class="form-actions"><button class="btn btn-primary" type="submit">Upload</button><p id="mediaUploadNote" class="form-status"></p></div>
+              </form>
+            </div>
+            <div style="height:1rem"></div>
+            <div class="admin-toolbar">
+              <input type="search" id="mediaSearch" placeholder="Search filename or alt text" aria-label="Search media" />
+              <select id="mediaCategoryFilter" aria-label="Filter by category">
+                <option value="">All categories</option>
+                <option value="Logos">Logos</option>
+                <option value="Profile Photos">Profile Photos</option>
+                <option value="Website Images">Website Images</option>
+                <option value="Certificate Assets">Certificate Assets</option>
+                <option value="Education Materials">Education Materials</option>
+                <option value="PDFs">PDFs</option>
+                <option value="Legal Resources">Legal Resources</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <p id="mediaLibraryNote" class="form-status"></p>
+            <div id="mediaGrid" class="grid"></div>
+            <input type="file" id="mediaReplaceFile" class="hidden" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon,application/pdf" />
           </div>
 
           <div id="certIssuancesPanel" class="admin-panel" hidden>
@@ -3746,6 +3788,7 @@ window.ramdaniAuth = {
     '__seosettings': ['content_manager'], '__seooverrides': ['content_manager'], '__disclaimers': ['content_manager'],
     '__orgsettings': [], '__brandinglogo': [], '__brandingtype': [], '__contactinfo': [],
     '__certtemplates': ['education_manager'],
+    '__medialibrary': [],
     '__systemsettings': [], '__notifications': ['communications_manager'], '__auditlog': []
   };
 
@@ -3875,6 +3918,7 @@ window.ramdaniAuth = {
       var delBtn = e.target.closest('[data-delete-nav]');
       if (delBtn) { deleteNavigation(delBtn.getAttribute('data-delete-nav')); }
     });
+    bindMediaLibrary();
     document.getElementById('certTemplateForm').addEventListener('submit', saveCertTemplate);
     document.getElementById('cancelCertTemplateEditBtn').addEventListener('click', cancelCertTemplateEdit);
     document.getElementById('certTemplatesBody').addEventListener('click', function (e) {
@@ -4132,6 +4176,202 @@ window.ramdaniAuth = {
     });
     form.querySelectorAll('.asset-remove-btn').forEach(function (btn) {
       btn.addEventListener('click', function () { removeBrandingAsset(btn.getAttribute('data-target')); });
+    });
+  }
+
+  // ---- Media library ----
+  var MEDIA_ALLOWED = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml', 'image/x-icon', 'image/vnd.microsoft.icon', 'application/pdf'];
+  var MEDIA_MAX_BYTES = 10 * 1024 * 1024;
+  var mediaAssetsCache = [];
+  var mediaReplacingId = null;
+
+  function mediaPublicUrl(path) {
+    if (!path) return null;
+    var pub = sb.storage.from('site-assets').getPublicUrl(path);
+    return pub && pub.data ? pub.data.publicUrl : null;
+  }
+
+  function formatBytes(n) {
+    if (n == null) return '';
+    if (n < 1024) return n + ' B';
+    if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+    return (n / 1024 / 1024).toFixed(1) + ' MB';
+  }
+
+  async function loadMediaLibrary() {
+    var note = document.getElementById('mediaLibraryNote');
+    note.className = 'form-status';
+    var res = await sb.from('media_assets').select('*').order('created_at', { ascending: false });
+    if (res.error) {
+      note.className = 'form-status err';
+      note.textContent = 'Could not load media — has the media_assets table been created yet? (' + res.error.message + ')';
+      mediaAssetsCache = [];
+      renderMediaGrid();
+      return;
+    }
+    mediaAssetsCache = res.data || [];
+    note.textContent = '';
+    renderMediaGrid();
+  }
+
+  function renderMediaGrid() {
+    var grid = document.getElementById('mediaGrid');
+    if (!grid) return;
+    var q = (document.getElementById('mediaSearch').value || '').trim().toLowerCase();
+    var cat = document.getElementById('mediaCategoryFilter').value || '';
+    var rows = mediaAssetsCache.filter(function (r) {
+      if (cat && r.category !== cat) return false;
+      if (!q) return true;
+      var hay = [r.filename, r.alt_text, r.category].filter(Boolean).join(' ').toLowerCase();
+      return hay.indexOf(q) !== -1;
+    });
+    if (!rows.length) {
+      grid.innerHTML = '<p class="empty">No media assets match. Upload one above.</p>';
+      return;
+    }
+    grid.innerHTML = rows.map(function (r) {
+      var url = mediaPublicUrl(r.storage_path);
+      var isImg = /^image\//.test(r.file_type || '') && r.file_type !== 'image/x-icon' && r.file_type !== 'image/vnd.microsoft.icon';
+      var thumb = (isImg && url)
+        ? '<img src="' + escapeHtml(url) + '" alt="" style="max-width:100%;max-height:100%;object-fit:contain" />'
+        : '<span class="asset-empty">' + escapeHtml(((r.file_type || 'file').split('/').pop() || 'file').toUpperCase()) + '</span>';
+      return '<article class="card" data-media="' + escapeHtml(r.id) + '">' +
+        '<div class="asset-preview" style="height:120px;margin-bottom:.6rem">' + thumb + '</div>' +
+        '<h3 style="font-size:.92rem;word-break:break-all">' + escapeHtml(r.filename) + '</h3>' +
+        '<p class="note">' + escapeHtml([r.category, formatBytes(r.size_bytes)].filter(Boolean).join(' · ')) + '</p>' +
+        (r.alt_text ? '<p class="note">' + escapeHtml(r.alt_text) + '</p>' : '') +
+        '<p class="note">' + (r.is_public ? 'Public' : 'Staff only') + '</p>' +
+        '<div class="table-actions">' +
+        '<button type="button" class="btn btn-sm" data-copy-media="' + escapeHtml(r.id) + '">Copy link</button>' +
+        '<button type="button" class="btn btn-sm" data-replace-media="' + escapeHtml(r.id) + '">Replace</button>' +
+        '<button type="button" class="btn btn-sm" data-delete-media="' + escapeHtml(r.id) + '">Delete</button>' +
+        '</div></article>';
+    }).join('');
+  }
+
+  async function submitMediaUpload(e) {
+    e.preventDefault();
+    var form = e.target;
+    var note = document.getElementById('mediaUploadNote');
+    var fileInput = document.getElementById('mediaUploadFile');
+    var file = fileInput.files && fileInput.files[0];
+    note.className = 'form-status';
+    if (!file) { note.className = 'form-status err'; note.textContent = 'Choose a file first.'; return; }
+    if (file.size > MEDIA_MAX_BYTES) { note.className = 'form-status err'; note.textContent = 'File is too large (max 10 MB).'; return; }
+    if (MEDIA_ALLOWED.indexOf(file.type) === -1) { note.className = 'form-status err'; note.textContent = 'Unsupported file type. Use PNG, JPEG, WebP, SVG, ICO or PDF.'; return; }
+    note.className = 'form-status uploading';
+    note.textContent = 'Uploading…';
+    var fd = new FormData(form);
+    var category = fd.get('category') || 'Other';
+    var isPublic = fd.get('is_public') === 'true';
+    var altText = (fd.get('alt_text') || '').trim();
+    var ext = (file.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin';
+    var path = 'media/' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.' + ext;
+    var upRes = await sb.storage.from('site-assets').upload(path, file, { upsert: false, contentType: file.type });
+    if (upRes.error) { note.className = 'form-status err'; note.textContent = 'Upload failed: ' + upRes.error.message; return; }
+    var session = await ramdaniAuth.session();
+    var payload = {
+      filename: file.name,
+      storage_path: path,
+      file_type: file.type,
+      size_bytes: file.size,
+      category: category,
+      alt_text: altText || null,
+      is_public: isPublic,
+      uploaded_by: session ? session.user.id : null
+    };
+    var insRes = await sb.from('media_assets').insert(payload);
+    if (insRes.error) {
+      try { await sb.storage.from('site-assets').remove([path]); } catch (e2) { /* best-effort cleanup of the orphaned object */ }
+      note.className = 'form-status err'; note.textContent = insRes.error.message; return;
+    }
+    note.className = 'form-status ok';
+    note.textContent = 'Uploaded.';
+    form.reset();
+    loadMediaLibrary();
+  }
+
+  async function copyMediaLink(id) {
+    var row = mediaAssetsCache.find(function (r) { return r.id === id; });
+    var note = document.getElementById('mediaLibraryNote');
+    if (!row) return;
+    var url = mediaPublicUrl(row.storage_path);
+    if (!url) { note.className = 'form-status err'; note.textContent = 'Could not resolve a link for this asset.'; return; }
+    try {
+      await navigator.clipboard.writeText(url);
+      note.className = 'form-status ok';
+      note.textContent = 'Link copied to clipboard.';
+    } catch (e) {
+      note.className = 'form-status';
+      note.textContent = url;
+    }
+  }
+
+  function startMediaReplace(id) {
+    mediaReplacingId = id;
+    document.getElementById('mediaReplaceFile').click();
+  }
+
+  async function handleMediaReplaceChange(e) {
+    var file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    var id = mediaReplacingId;
+    mediaReplacingId = null;
+    if (!file || !id) return;
+    var row = mediaAssetsCache.find(function (r) { return r.id === id; });
+    var note = document.getElementById('mediaLibraryNote');
+    if (!row) return;
+    if (file.size > MEDIA_MAX_BYTES) { note.className = 'form-status err'; note.textContent = 'File is too large (max 10 MB).'; return; }
+    if (MEDIA_ALLOWED.indexOf(file.type) === -1) { note.className = 'form-status err'; note.textContent = 'Unsupported file type. Use PNG, JPEG, WebP, SVG, ICO or PDF.'; return; }
+    note.className = 'form-status uploading';
+    note.textContent = 'Replacing…';
+    var ext = (file.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin';
+    var newPath = 'media/' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.' + ext;
+    var upRes = await sb.storage.from('site-assets').upload(newPath, file, { upsert: false, contentType: file.type });
+    if (upRes.error) { note.className = 'form-status err'; note.textContent = 'Upload failed: ' + upRes.error.message; return; }
+    var updRes = await sb.from('media_assets').update({ filename: file.name, storage_path: newPath, file_type: file.type, size_bytes: file.size }).eq('id', id);
+    if (updRes.error) {
+      try { await sb.storage.from('site-assets').remove([newPath]); } catch (e2) { /* best-effort cleanup */ }
+      note.className = 'form-status err'; note.textContent = updRes.error.message; return;
+    }
+    var oldPath = row.storage_path;
+    if (oldPath && oldPath !== newPath) {
+      try { await sb.storage.from('site-assets').remove([oldPath]); } catch (e3) { /* best-effort; DB already points at the new object */ }
+    }
+    note.className = 'form-status ok';
+    note.textContent = 'Replaced.';
+    loadMediaLibrary();
+  }
+
+  async function deleteMediaAsset(id) {
+    if (!confirm('Permanently delete this media asset? This cannot be undone.')) return;
+    var row = mediaAssetsCache.find(function (r) { return r.id === id; });
+    var note = document.getElementById('mediaLibraryNote');
+    var res = await sb.from('media_assets').delete().eq('id', id);
+    if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; return; }
+    if (row && row.storage_path) {
+      try { await sb.storage.from('site-assets').remove([row.storage_path]); } catch (e) { /* best-effort; DB row is already gone */ }
+    }
+    note.className = 'form-status ok';
+    note.textContent = 'Deleted.';
+    loadMediaLibrary();
+  }
+
+  function bindMediaLibrary() {
+    var form = document.getElementById('mediaUploadForm');
+    if (!form || form.dataset.bound === '1') return;
+    form.dataset.bound = '1';
+    form.addEventListener('submit', submitMediaUpload);
+    document.getElementById('mediaSearch').addEventListener('input', renderMediaGrid);
+    document.getElementById('mediaCategoryFilter').addEventListener('change', renderMediaGrid);
+    document.getElementById('mediaReplaceFile').addEventListener('change', handleMediaReplaceChange);
+    document.getElementById('mediaGrid').addEventListener('click', function (e) {
+      var copyBtn = e.target.closest('[data-copy-media]');
+      if (copyBtn) { copyMediaLink(copyBtn.getAttribute('data-copy-media')); return; }
+      var replaceBtn = e.target.closest('[data-replace-media]');
+      if (replaceBtn) { startMediaReplace(replaceBtn.getAttribute('data-replace-media')); return; }
+      var delBtn = e.target.closest('[data-delete-media]');
+      if (delBtn) { deleteMediaAsset(delBtn.getAttribute('data-delete-media')); }
     });
   }
 
@@ -5076,7 +5316,7 @@ window.ramdaniAuth = {
   var editingId = null;
 
   function showAdminView(view) {
-    var panels = ['dashboardPanel','studentsPanel','adminsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','orgSettingsPanel','brandingLogoPanel','brandingTypePanel','contactInfoPanel','seoSettingsPanel','systemSettingsPanel','disclaimersPanel','homepageSectionsPanel','navigationPanel','certTemplatesPanel','certIssuancesPanel','seoOverridesPanel','notificationsPanel','auditLogPanel'];
+    var panels = ['dashboardPanel','studentsPanel','adminsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','orgSettingsPanel','brandingLogoPanel','brandingTypePanel','contactInfoPanel','seoSettingsPanel','systemSettingsPanel','disclaimersPanel','homepageSectionsPanel','navigationPanel','certTemplatesPanel','mediaLibraryPanel','certIssuancesPanel','seoOverridesPanel','notificationsPanel','auditLogPanel'];
     panels.forEach(function(id){ var el=document.getElementById(id); if(el){ el.hidden=true; el.classList.remove('is-active'); }});
     document.querySelectorAll('.admin-nav [data-table]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-table')===view); });
     document.getElementById('adminApp').classList.remove('nav-open');
@@ -5096,6 +5336,7 @@ window.ramdaniAuth = {
     if(view==='__homepagesections') { activate('homepageSectionsPanel','Homepage sections'); loadHomepageSections(); return; }
     if(view==='__navigation') { activate('navigationPanel','Navigation'); loadNavigation(); return; }
     if(view==='__certtemplates') { activate('certTemplatesPanel','Certificate templates'); loadCertTemplates(); return; }
+    if(view==='__medialibrary') { activate('mediaLibraryPanel','Media library'); loadMediaLibrary(); return; }
     if(view==='__certissuances') { activate('certIssuancesPanel','Certificate issuances'); loadCertIssuances(); return; }
     if(view==='__seooverrides') { activate('seoOverridesPanel','SEO overrides'); populateSeoOverrideEntitySelect(); loadSeoOverrideRecords().then(loadSeoOverrideForRecord); loadSeoOverridesList(); return; }
     if(view==='__notifications') { activate('notificationsPanel','Notifications'); loadNotifications(); return; }
