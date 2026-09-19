@@ -269,6 +269,10 @@ table.data tbody tr:hover { background:color-mix(in srgb,var(--accent) 5%,transp
 .ops-workspace.is-open { display:block; }
 .ops-header-meta { display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; margin:.35rem 0 1rem; }
 .ops-header-meta span { font-size:.78rem; }
+.id-card { max-width:22rem; border:1px solid var(--line); border-radius:12px; padding:1rem; background:var(--white,#fff); }
+.id-card h3 { margin:.2rem 0; }
+.id-card .qr { font-family:ui-monospace,monospace; font-size:.75rem; word-break:break-all; }
+#mediaCaptureWrap video { display:block; }
 .staff-preview-banner[hidden] { display:none; }
 .auth-screen { min-height:100vh; display:grid; place-items:center; padding:2rem 1rem; background:linear-gradient(135deg,var(--deep-navy,#0B1F33),#162f46); }
 .auth-box { width:min(460px,100%); margin:0; background:var(--card); border:1px solid var(--line); border-top:4px solid var(--accent); border-radius:18px; padding:1.5rem; box-shadow:0 24px 70px rgba(0,0,0,.22); }
@@ -508,17 +512,18 @@ html[dir="rtl"] .lead {
 <body>
   <!-- WEBSITE STRUCTURE -->
   <div id="publicShell">
-  <a class="skip-link" href="#main-content">Skip to content</a>
+  <a class="skip-link" href="#viewRoot">Skip to content</a>
   <header class="site-header">
     <div class="wrap header-inner">
       <a class="brand" href="/">Ramdani Law Firm</a>
       <nav class="nav" aria-label="Primary"></nav>
     </div>
   </header>
-    <main id="viewRoot" class="ramdani-view"></main>
+    <main id="viewRoot" class="ramdani-view" tabindex="-1"></main>
   <footer class="site-footer">
     <div class="wrap">
       <p>Dera Ghazi Khan, Pakistan</p>
+      <p class="note"><a href="/student/login">Student portal</a> · <a href="/member/login">Member portal</a> · <a href="/client/login">Client portal</a></p>
     </div>
   </footer>
   </div>
@@ -582,6 +587,8 @@ html[dir="rtl"] .lead {
           <button type="button" data-table="__legaldocs">Documents</button>
           <button type="button" data-table="__legalcomms">Communications</button>
           <button type="button" data-table="__legalreports">Reports</button>
+          <button type="button" data-table="__legalsearch">Secure search</button>
+          <button type="button" data-table="__auditlog">Audit log</button>
         </details>
         <details class="admin-nav-group" open>
           <summary class="admin-nav-group-title">Courses &amp; Programs</summary>
@@ -627,6 +634,7 @@ html[dir="rtl"] .lead {
           <button type="button" data-table="__inquiries">Inquiries</button>
           <button type="button" data-table="__events">Events</button>
           <button type="button" data-table="__eventregs">Registrations &amp; attendance</button>
+          <button type="button" data-table="__eventguests">Event guests</button>
           <button type="button" data-table="__applications">Internship applications</button>
           <button type="button" data-table="__joinrequests">Society / chapter requests</button>
           <button type="button" data-table="social_posts">Social posts</button>
@@ -742,7 +750,7 @@ html[dir="rtl"] .lead {
             <div class="table-wrap"><table class="data"><thead id="dataHead"></thead><tbody id="dataBody"></tbody></table></div>
           </div>
 
-          <div id="inquiriesPanel" class="admin-panel" hidden><div class="admin-section-head"><div><h2>Inquiries</h2><p class="note">Incoming public consultation and contact requests.</p></div></div><div class="table-wrap"><table class="data"><thead><tr><th>Kind</th><th>Name</th><th>Email</th><th>Subject</th><th>Status</th></tr></thead><tbody id="inqBody"></tbody></table></div></div>
+          <div id="inquiriesPanel" class="admin-panel" hidden><div class="admin-section-head"><div><h2>Inquiries</h2><p class="note">Workflow: New → Reviewing → Contacted → In progress → Closed → Archived. Internal notes never appear publicly.</p></div></div><div class="table-wrap"><table class="data"><thead><tr><th>Kind</th><th>Name</th><th>Email</th><th>Subject</th><th>Assigned</th><th>Status</th></tr></thead><tbody id="inqBody"></tbody></table></div></div>
           <div id="applicationsPanel" class="admin-panel" hidden><div class="admin-section-head"><div><h2>Internship applications</h2><p class="note">Public application submissions. Status changes are staff-only.</p></div></div><div class="table-wrap"><table class="data"><thead><tr><th>Listing</th><th>Name</th><th>Email</th><th>Education</th><th>Status</th></tr></thead><tbody id="internAppBody"></tbody></table></div></div>
           <div id="joinrequestsPanel" class="admin-panel" hidden><div class="admin-section-head"><div><h2>Society / chapter requests</h2><p class="note">Public join-form inquiries, not memberships.</p></div></div><div class="table-wrap"><table class="data"><thead><tr><th>Kind</th><th>Listing</th><th>Name</th><th>Email</th><th>Message</th></tr></thead><tbody id="joinReqBody"></tbody></table></div></div>
 
@@ -760,6 +768,13 @@ html[dir="rtl"] .lead {
               <label class="field-full"><span>Mission</span><textarea name="mission" rows="3"></textarea></label>
               <label class="field-full"><span>Vision</span><textarea name="vision" rows="3"></textarea></label>
               <label class="field-full"><span>Values (comma-separated)</span><input name="values_csv" placeholder="Accuracy, Confidentiality, Integrity" /></label>
+              <label><span>Founder name</span><input name="founder_name" /></label>
+              <label><span>Founder title</span><input name="founder_title" /></label>
+              <label class="field-full"><span>Founder message</span><textarea name="founder_message" rows="4"></textarea></label>
+              <label class="field-full"><span>Founder portrait URL</span><input name="founder_portrait_url" /></label>
+              <label class="field-full"><span>Founder signature URL</span><input name="founder_signature_url" /></label>
+              <label class="field-full"><span>About image URL</span><input name="about_image_url" /></label>
+              <label class="field-full"><span>Vision image URL</span><input name="vision_image_url" /></label>
               <div class="form-actions"><button class="btn btn-primary" type="submit">Save changes</button><p id="orgSettingsNote" class="form-status"></p></div>
             </form>
           </div>
@@ -1018,8 +1033,9 @@ html[dir="rtl"] .lead {
                 </select></label>
                 <label><span>Visibility</span><select name="is_public"><option value="true">Public</option><option value="false">Staff only</option></select></label>
                 <label class="field-full"><span>Alt text</span><input name="alt_text" placeholder="Short description for accessibility" /></label>
-                <label class="field-full"><span>File</span><input type="file" id="mediaUploadFile" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon,application/pdf" required /></label>
-                <div class="form-actions"><button class="btn btn-primary" type="submit">Upload</button><p id="mediaUploadNote" class="form-status"></p></div>
+                <label class="field-full"><span>File</span><input type="file" id="mediaUploadFile" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon,application/pdf,image/*" capture="user" required /></label>
+                <div id="mediaCaptureWrap"></div>
+                <div class="form-actions"><button class="btn btn-primary" type="submit">Upload</button><button class="btn" type="button" id="mediaCaptureBtn">Take photo</button><p id="mediaUploadNote" class="form-status"></p></div>
               </form>
             </div>
             <div style="height:1rem"></div>
@@ -1293,6 +1309,8 @@ html[dir="rtl"] .lead {
               <select id="lmStatus"><option value="">All statuses</option><option value="intake">Intake</option><option value="open">Open</option><option value="active">Active</option><option value="on_hold">On hold</option><option value="pending">Pending</option><option value="closed">Closed</option><option value="archived">Archived</option></select>
               <select id="lmType"><option value="">All types</option><option value="litigation">Litigation</option><option value="corporate">Corporate</option><option value="family">Family</option><option value="property">Property</option><option value="employment">Employment</option><option value="advisory">Advisory</option><option value="other">Other</option></select>
               <select id="lmPriority"><option value="">All priorities</option><option value="low">Low</option><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option></select>
+              <select id="lmLead"><option value="">All lead lawyers</option></select>
+              <select id="lmPractice"><option value="">All practice areas</option></select>
               <input type="search" id="lmSearch" placeholder="Search number, title or client" aria-label="Search matters" />
             </div>
             <div class="table-wrap"><table class="data"><thead><tr><th>Number</th><th>Title</th><th>Client</th><th>Lead</th><th>Status</th><th>Priority</th><th>Actions</th></tr></thead><tbody id="legalMatterBody"></tbody></table></div>
@@ -1382,6 +1400,14 @@ html[dir="rtl"] .lead {
             <div class="admin-section-head"><div><h2>Operational reports</h2><p class="note">Counts from live private records. No outcome statistics.</p></div></div>
             <div class="dashboard-grid" id="legalReportStats"></div>
             <p id="legalReportNote" class="form-status"></p>
+          </div>
+          <div id="legalSearchPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Secure search</h2><p class="note">Only records the signed-in role is authorized to see. Unauthorized rows are never returned.</p></div></div>
+            <form id="legalSearchForm" class="form admin-form" style="grid-template-columns:1fr auto">
+              <label class="field-full"><span>Search authorized clients, matters, tasks, dates, documents, communications</span><input name="q" required minlength="2" /></label>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Search</button><p id="legalSearchNote" class="form-status"></p></div>
+            </form>
+            <div id="legalSearchResults"></div>
           </div>
           <div id="membersPanel" class="admin-panel" hidden>
             <div class="admin-section-head"><div><h2>Members</h2><p class="note">Society/chapter members. Not students and not law-firm clients. Approval is never automatic.</p></div></div>
@@ -1481,6 +1507,21 @@ html[dir="rtl"] .lead {
             </form>
             <div class="table-wrap"><table class="data"><thead><tr><th>Recipient</th><th>Category</th><th>Status</th><th>Verify</th></tr></thead><tbody id="issuedDocBody"></tbody></table></div>
           </div>
+          <div id="eventGuestsPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Event guests</h2><p class="note">Named guests only. Invitation and attendance are recorded here, not invented.</p></div></div>
+            <form id="eventGuestForm" class="form admin-form">
+              <label><span>Event</span><select name="event_id" required><option value="">Select event…</option></select></label>
+              <label><span>Full name</span><input name="full_name" required /></label>
+              <label><span>Designation</span><input name="designation" /></label>
+              <label><span>Organization</span><input name="organization" /></label>
+              <label><span>Invitation</span><select name="invitation_status"><option value="invited">Invited</option><option value="confirmed">Confirmed</option><option value="declined">Declined</option></select></label>
+              <label><span>Attendance</span><select name="attendance_status"><option value="unknown">Unknown</option><option value="present">Present</option><option value="absent">Absent</option></select></label>
+              <label class="field-full"><span>Biography</span><textarea name="biography" rows="2"></textarea></label>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Save guest</button><p id="eventGuestNote" class="form-status"></p></div>
+            </form>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Event</th><th>Name</th><th>Invitation</th><th>Attendance</th></tr></thead><tbody id="eventGuestBody"></tbody></table></div>
+          </div>
+
 
         </main>
       </section>
@@ -1548,7 +1589,7 @@ html[dir="rtl"] .lead {
       </div>
 
       <div id="studentDashboardPanel" class="auth-box" hidden>
-        <h1>Student dashboard</h1>
+        <h1 id="stuWelcome">Welcome, Student</h1>
         <div class="card" style="margin-bottom:1rem">
           <p><strong id="stuDashName"></strong></p>
           <p class="note" id="stuDashEmail"></p>
@@ -1602,6 +1643,59 @@ html[dir="rtl"] .lead {
     </div>
   </div>
 
+  <!-- MEMBER PORTAL -->
+  <div id="memberRoot" hidden>
+    <div class="wrap" style="padding:2.5rem 0;max-width:46rem">
+      <div id="memberLoginPanel" class="auth-box">
+        <h1>Welcome, Member</h1>
+        <form id="memberLoginForm" class="form">
+          <label>Email <input id="memLoginEmail" type="email" required autocomplete="username" /></label>
+          <label>Password <input id="memLoginPassword" type="password" required minlength="8" autocomplete="current-password" /></label>
+          <button class="btn btn-primary" type="submit">Sign in</button>
+        </form>
+        <p id="memberLoginStatus" class="form-status"></p>
+        <p class="note"><a href="/">Back to public site</a></p>
+      </div>
+      <div id="memberDashPanel" class="auth-box" hidden>
+        <h1 id="memWelcome">Welcome, Member</h1>
+        <p class="note" id="memDashMeta"></p>
+        <h2>Membership card</h2>
+        <div id="memCardBox" class="card" style="margin-bottom:1rem"></div>
+        <h2>My documents</h2>
+        <div id="memDocsBox" style="margin-bottom:1rem"></div>
+        <h2>Events</h2>
+        <div id="memEventsBox" style="margin-bottom:1rem"></div>
+        <button type="button" class="btn" id="memberSignOutBtn">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLIENT PORTAL -->
+  <div id="clientRoot" hidden>
+    <div class="wrap" style="padding:2.5rem 0;max-width:46rem">
+      <div id="clientLoginPanel" class="auth-box">
+        <h1>Client portal</h1>
+        <form id="clientLoginForm" class="form">
+          <label>Email <input id="cliLoginEmail" type="email" required autocomplete="username" /></label>
+          <label>Password <input id="cliLoginPassword" type="password" required minlength="8" autocomplete="current-password" /></label>
+          <button class="btn btn-primary" type="submit">Sign in</button>
+        </form>
+        <p id="clientLoginStatus" class="form-status"></p>
+        <p class="note">Only authorized client accounts. Internal notes and private documents are never shown here.</p>
+        <p class="note"><a href="/">Back to public site</a></p>
+      </div>
+      <div id="clientDashPanel" class="auth-box" hidden>
+        <h1 id="cliWelcome">My matters</h1>
+        <div id="cliMattersBox"></div>
+        <h2>Shared documents</h2>
+        <div id="cliDocsBox" style="margin-bottom:1rem"></div>
+        <h2>Upcoming dates</h2>
+        <div id="cliDatesBox" style="margin-bottom:1rem"></div>
+        <button type="button" class="btn" id="clientSignOutBtn">Logout</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- ROUTING -->
 <script>
@@ -1648,6 +1742,7 @@ if (window.ramdaniEducation) ramdaniEducation.renderHome();
   '/pages/about.html': { title: 'About — Ramdani Law Firm', desc: 'About — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section"><div class="wrap">
       <h1 data-i18n="about_title"></h1>
       <p class="lead" data-i18n="about_lead"></p>
+      <div id="aboutOrgBlock"></div>
       <p>Ramdani Law Firm / Law Chamber is based in Dera Ghazi Khan, Punjab, Pakistan. This website is the firm’s public information channel: who we are, the areas of law we may accept, how to request a consultation, and educational materials the firm chooses to publish.</p>
       <p class="note">Nothing on these pages creates a lawyer–client relationship. Privileged documents and sensitive case facts must not be sent through public forms. Credentials, rankings, fee quotes, and case outcomes appear only when the firm supplies them in writing.</p>
       <h2>Mission</h2>
@@ -1666,7 +1761,28 @@ if (window.ramdaniEducation) ramdaniEducation.renderHome();
       <p>A detailed firm history will be published when the chamber supplies dates, founding facts, and names it is willing to put on the public record. This page does not invent a founding year, a list of reported victories, or a league-table rank.</p>
       <p><a href="/pages/about-standards.html">Professional standards</a> · <a href="/pages/consultation.html">Request a consultation</a></p>
     </div></section>`, init: async function () {
-
+      if (!window.sb) return;
+      var res = await sb.from('organization_settings').select('about_text, about_image_url, founder_name, founder_title, founder_message, founder_portrait_url, founder_signature_url, vision, mission, vision_image_url').limit(1).maybeSingle();
+      var el = document.getElementById('aboutOrgBlock');
+      if (!el || !res.data) return;
+      var o = res.data;
+      var html = '';
+      if (o.about_image_url) html += '<p><img src="' + ramdaniUi.escape(o.about_image_url) + '" alt="" style="max-width:100%;height:auto" /></p>';
+      if (o.about_text) html += '<p>' + ramdaniUi.escape(o.about_text) + '</p>';
+      if (o.founder_name) {
+        html += '<h2>Founder</h2>';
+        if (o.founder_portrait_url) html += '<p><img src="' + ramdaniUi.escape(o.founder_portrait_url) + '" alt="" style="max-width:16rem;height:auto" /></p>';
+        html += '<p><strong>' + ramdaniUi.escape(o.founder_name) + '</strong>' + (o.founder_title ? ' — ' + ramdaniUi.escape(o.founder_title) : '') + '</p>';
+        if (o.founder_message) html += '<p>' + ramdaniUi.escape(o.founder_message) + '</p>';
+        if (o.founder_signature_url) html += '<p><img src="' + ramdaniUi.escape(o.founder_signature_url) + '" alt="Signature" style="max-width:10rem;height:auto" /></p>';
+      }
+      if (o.vision || o.mission) {
+        html += '<h2>Vision ' + AMP + ' mission</h2>';
+        if (o.vision_image_url) html += '<p><img src="' + ramdaniUi.escape(o.vision_image_url) + '" alt="" style="max-width:100%;height:auto" /></p>';
+        if (o.vision) html += '<p>' + ramdaniUi.escape(o.vision) + '</p>';
+        if (o.mission) html += '<p>' + ramdaniUi.escape(o.mission) + '</p>';
+      }
+      el.innerHTML = html;
   } },
   '/pages/careers.html': { title: 'Careers — Ramdani Law Firm', desc: 'Careers — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section"><div class="wrap">
       <h1 data-i18n="careers_title"></h1>
@@ -1801,6 +1917,10 @@ var rows = await ramdaniApi.listPublished('articles', null); ramdaniUi.renderLis
         <label>Degree <input name="degree" placeholder="LLB or current programme" /></label>
         <label>Semester / year <input name="semester" /></label>
         <label>Education notes <textarea name="education" rows="3"></textarea></label>
+        <label>Skills <input name="skills" /></label>
+        <label>Areas of interest <input name="areas_of_interest" /></label>
+        <label>Preferred duration <input name="preferred_duration" /></label>
+        <label>Preferred location <input name="preferred_location" /></label>
         <label>Cover letter <textarea name="cover_letter" rows="6" required></textarea></label>
         <label>CV / portfolio URL (https only) <input name="cv_url" type="url" placeholder="https://" /></label>
         <input type="hidden" name="internship_slug" />
@@ -2107,6 +2227,8 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
     if (path === '/reset-password/' ) path = '/reset-password';
     if (path === '/index.html') path = '/';
     if (path === '/student') path = '/student/login';
+    if (path === '/member') path = '/member/login';
+    if (path === '/client') path = '/client/login';
     return { path: path, search: search, raw: h };
   }
 
@@ -2155,6 +2277,8 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
     adminRoot.hidden = true;
     resetRoot.hidden = true;
     studentRoot.hidden = true;
+    var mr = document.getElementById('memberRoot'); if (mr) mr.hidden = true;
+    var cr = document.getElementById('clientRoot'); if (cr) cr.hidden = true;
   }
 
   async function showPublic(path) {
@@ -2197,6 +2321,106 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
     if (window.ramdaniResetBoot) window.ramdaniResetBoot();
   }
 
+  async function showMemberPortal(path) {
+    hideAllRoots();
+    var root = document.getElementById('memberRoot');
+    if (root) root.hidden = false;
+    document.title = 'Member portal — Ramdani Law Firm';
+    await bootMemberPortal(path);
+  }
+  async function showClientPortal(path) {
+    hideAllRoots();
+    var root = document.getElementById('clientRoot');
+    if (root) root.hidden = false;
+    document.title = 'Client portal — Ramdani Law Firm';
+    await bootClientPortal(path);
+  }
+  async function bootMemberPortal(path) {
+    var login = document.getElementById('memberLoginPanel');
+    var dash = document.getElementById('memberDashPanel');
+    function setSt(msg) { var el = document.getElementById('memberLoginStatus'); if (el) el.textContent = msg || ''; }
+    if (!document.getElementById('memberLoginForm').dataset.bound) {
+      document.getElementById('memberLoginForm').dataset.bound = '1';
+      document.getElementById('memberLoginForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var res = await ramdaniAuth.signInPassword(document.getElementById('memLoginEmail').value.trim(), document.getElementById('memLoginPassword').value);
+        if (res.error) return setSt(res.error.message);
+        var p = await ramdaniAuth.profile();
+        if (!p || p.role !== 'member') { await ramdaniAuth.signOut(); return setSt('This account is not a member account.'); }
+        window.ramdaniGo('/member/dashboard');
+      });
+      document.getElementById('memberSignOutBtn').addEventListener('click', async function () { await ramdaniAuth.signOut(); window.ramdaniGo('/member/login'); });
+    }
+    var p = await ramdaniAuth.profile();
+    if (path.indexOf('/dashboard') >= 0) {
+      if (!p || p.role !== 'member') { window.ramdaniGo('/member/login'); return; }
+      login.hidden = true; dash.hidden = false;
+      document.getElementById('memWelcome').textContent = 'Welcome, ' + (p.full_name || 'Member');
+      document.getElementById('memDashMeta').textContent = p.email || '';
+      var mem = await sb.from('members').select('*').eq('profile_id', p.id).maybeSingle();
+      var box = document.getElementById('memCardBox');
+      if (!mem.data) box.innerHTML = '<p class="empty">No membership record is linked to this login.</p>';
+      else {
+        var card = await sb.from('member_cards').select('*').eq('member_id', mem.data.id).in('status', ['issued','active']).order('created_at', { ascending: false }).limit(1);
+        var c = card.data && card.data[0];
+        box.innerHTML = c
+          ? '<div class="id-card"><p class="note">Member card</p><h3>' + ramdaniUi.escape(mem.data.full_name) + '</h3><p>' + ramdaniUi.escape(c.card_number) + '</p><p class="qr">Verify: ' + ramdaniUi.escape(c.verify_code) + '</p></div>'
+          : '<p class="empty">No card has been issued yet.</p>';
+        var docs = await sb.from('issued_documents').select('category, issued_at, status').eq('member_id', mem.data.id).eq('status', 'issued');
+        document.getElementById('memDocsBox').innerHTML = (docs.data || []).map(function (d) {
+          return '<article class="card"><h3>' + ramdaniUi.escape(d.category) + '</h3></article>';
+        }).join('') || '<p class="empty">No documents issued.</p>';
+      }
+      return;
+    }
+    login.hidden = false; dash.hidden = true;
+  }
+  async function bootClientPortal(path) {
+    var login = document.getElementById('clientLoginPanel');
+    var dash = document.getElementById('clientDashPanel');
+    function setSt(msg) { var el = document.getElementById('clientLoginStatus'); if (el) el.textContent = msg || ''; }
+    if (!document.getElementById('clientLoginForm').dataset.bound) {
+      document.getElementById('clientLoginForm').dataset.bound = '1';
+      document.getElementById('clientLoginForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var res = await ramdaniAuth.signInPassword(document.getElementById('cliLoginEmail').value.trim(), document.getElementById('cliLoginPassword').value);
+        if (res.error) return setSt(res.error.message);
+        var p = await ramdaniAuth.profile();
+        if (!p || p.role !== 'client') { await ramdaniAuth.signOut(); return setSt('This account is not a client account.'); }
+        window.ramdaniGo('/client/dashboard');
+      });
+      document.getElementById('clientSignOutBtn').addEventListener('click', async function () { await ramdaniAuth.signOut(); window.ramdaniGo('/client/login'); });
+    }
+    var p = await ramdaniAuth.profile();
+    if (path.indexOf('/dashboard') >= 0) {
+      if (!p || p.role !== 'client') { window.ramdaniGo('/client/login'); return; }
+      login.hidden = true; dash.hidden = false;
+      document.getElementById('cliWelcome').textContent = 'Welcome, ' + (p.full_name || 'Client');
+      var matters = await sb.rpc('ramdani_my_client_matters');
+      var list = matters.data || [];
+      document.getElementById('cliMattersBox').innerHTML = list.length
+        ? list.map(function (m) {
+            return '<article class="card"><h3>' + ramdaniUi.escape(m.matter_number + ' — ' + m.title) + '</h3><p class="note">' + ramdaniUi.escape(m.status) + '</p></article>';
+          }).join('')
+        : '<p class="empty">No authorized matters.</p>';
+      var ids = list.map(function (m) { return m.id; });
+      if (ids.length) {
+        var docs = await sb.from('matter_documents').select('file_name, matter_id').eq('access_level', 'client_shared').eq('is_current', true).in('matter_id', ids);
+        document.getElementById('cliDocsBox').innerHTML = (docs.data || []).map(function (d) {
+          return '<p>' + ramdaniUi.escape(d.file_name) + '</p>';
+        }).join('') || '<p class="empty">No shared documents.</p>';
+        var dates = await sb.from('matter_events').select('title, starts_at, matter_id').eq('client_visible', true).in('matter_id', ids).order('starts_at');
+        document.getElementById('cliDatesBox').innerHTML = (dates.data || []).map(function (d) {
+          return '<p>' + ramdaniUi.escape(d.title) + ' — ' + ramdaniUi.escape(d.starts_at || '') + '</p>';
+        }).join('') || '<p class="empty">No authorized dates.</p>';
+      } else {
+        document.getElementById('cliDocsBox').innerHTML = '<p class="empty">No shared documents.</p>';
+        document.getElementById('cliDatesBox').innerHTML = '<p class="empty">No authorized dates.</p>';
+      }
+      return;
+    }
+    login.hidden = false; dash.hidden = true;
+  }
   function showStudent(path) {
     hideAllRoots();
     studentRoot.hidden = false;
@@ -2210,6 +2434,8 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
     if (r.path.indexOf('/admin') === 0) return showAdmin();
     if (r.path.indexOf('/reset-password') === 0) return showReset();
     if (r.path.indexOf('/student') === 0) return showStudent(r.path);
+    if (r.path.indexOf('/member') === 0) return showMemberPortal(r.path);
+    if (r.path.indexOf('/client') === 0) return showClientPortal(r.path);
     await showPublic(r.path);
   }
 
@@ -3171,6 +3397,8 @@ window.ramdaniAuth = {
   }
 
   function fillDashboard(p) {
+    var w = document.getElementById('stuWelcome');
+    if (w) w.textContent = 'Welcome, ' + (p.full_name || 'Student');
     document.getElementById('stuDashName').textContent = p.full_name || '';
     document.getElementById('stuDashEmail').textContent = p.email || '';
     document.getElementById('stuDashId').textContent = p.student_id || '';
@@ -3638,8 +3866,16 @@ window.ramdaniAuth = {
         email: form.querySelector('[name="email"]').value.trim(),
         phone: (form.querySelector('[name="phone"]') || {}).value || null,
         education: educationBits.length ? educationBits.join(' · ') : null,
+        institution: ((form.querySelector('[name="university"]') || {}).value || '').trim() || null,
+        degree_program: ((form.querySelector('[name="degree"]') || {}).value || '').trim() || null,
+        semester_year: ((form.querySelector('[name="semester"]') || {}).value || '').trim() || null,
+        skills: ((form.querySelector('[name="skills"]') || {}).value || '').trim() || null,
+        areas_of_interest: ((form.querySelector('[name="areas_of_interest"]') || {}).value || '').trim() || null,
+        preferred_duration: ((form.querySelector('[name="preferred_duration"]') || {}).value || '').trim() || null,
+        preferred_location: ((form.querySelector('[name="preferred_location"]') || {}).value || '').trim() || null,
         cover_letter: form.querySelector('[name="cover_letter"]').value.trim(),
-        cv_url: cv || null
+        cv_url: cv || null,
+        status: 'submitted'
       };
       if (!payload.full_name || !payload.email || !payload.cover_letter) {
         status.className = 'form-status err';
@@ -4905,6 +5141,7 @@ window.ramdaniAuth = {
     bindEduSearch();
     bindLegalOps();
     bindPlatformOps();
+    bindRemainingOps();
     document.getElementById('certIssuanceForm').addEventListener('submit', saveCertIssuance);
     document.getElementById('certIssuanceSearch').addEventListener('input', renderCertIssuances);
     document.getElementById('certIssuancesBody').addEventListener('click', function (e) {
@@ -5039,7 +5276,14 @@ window.ramdaniAuth = {
       about_text: fd.get('about_text') || null,
       mission: fd.get('mission') || null,
       vision: fd.get('vision') || null,
-      values: fd.get('values_csv') ? fd.get('values_csv').split(',').map(function (s) { return s.trim(); }).filter(Boolean) : null
+      values: fd.get('values_csv') ? fd.get('values_csv').split(',').map(function (s) { return s.trim(); }).filter(Boolean) : null,
+      founder_name: fd.get('founder_name') || null,
+      founder_title: fd.get('founder_title') || null,
+      founder_message: fd.get('founder_message') || null,
+      founder_portrait_url: fd.get('founder_portrait_url') || null,
+      founder_signature_url: fd.get('founder_signature_url') || null,
+      about_image_url: fd.get('about_image_url') || null,
+      vision_image_url: fd.get('vision_image_url') || null
     };
     var res;
     if (orgSettingsId) {
@@ -7184,19 +7428,28 @@ window.ramdaniAuth = {
     cf.elements.practice_area_id.innerHTML = '<option value="">None</option>' + legalPractice.map(function (p) {
       return '<option value="' + p.id + '">' + escapeHtml(p.title) + '</option>';
     }).join('');
-    cf.elements.lead_lawyer_id.innerHTML = '<option value="">Unassigned</option>' + legalStaff.filter(function (s) {
+    var leadOpts = legalStaff.filter(function (s) {
       return s.role === 'lawyer' || s.role === 'admin' || s.role === 'firm_admin';
     }).map(function (s) {
       return '<option value="' + s.id + '">' + escapeHtml(s.full_name || s.email) + '</option>';
+    }).join('');
+    cf.elements.lead_lawyer_id.innerHTML = '<option value="">Unassigned</option>' + leadOpts;
+    if ($id('lmLead')) $id('lmLead').innerHTML = '<option value="">All lead lawyers</option>' + leadOpts;
+    if ($id('lmPractice')) $id('lmPractice').innerHTML = '<option value="">All practice areas</option>' + legalPractice.map(function (p) {
+      return '<option value="' + p.id + '">' + escapeHtml(p.title) + '</option>';
     }).join('');
     renderLegalMatters();
   }
   function renderLegalMatters() {
     var st = $id('lmStatus').value, ty = $id('lmType').value, pr = $id('lmPriority').value, q = ($id('lmSearch').value || '').trim().toLowerCase();
+    var lead = $id('lmLead') ? $id('lmLead').value : '';
+    var pa = $id('lmPractice') ? $id('lmPractice').value : '';
     var rows = legalMatters.filter(function (m) {
       if (st && m.status !== st) return false;
       if (ty && m.matter_type !== ty) return false;
       if (pr && m.priority !== pr) return false;
+      if (lead && m.lead_lawyer_id !== lead) return false;
+      if (pa && m.practice_area_id !== pa) return false;
       if (q && [m.matter_number, m.title, clientName(m.client_id)].join(' ').toLowerCase().indexOf(q) === -1) return false;
       return true;
     });
@@ -7510,7 +7763,9 @@ window.ramdaniAuth = {
       sb.from('legal_matters').select('id', { count: 'exact', head: true }).eq('status', 'closed'),
       sb.from('matter_tasks').select('id', { count: 'exact', head: true }).in('status', ['todo', 'in_progress']),
       sb.from('matter_documents').select('id', { count: 'exact', head: true }),
-      sb.from('inquiries').select('id', { count: 'exact', head: true }).in('status', ['new', 'reviewed'])
+      sb.from('matter_tasks').select('id', { count: 'exact', head: true }).eq('status', 'todo').lt('due_at', new Date().toISOString()),
+      sb.from('inquiries').select('id', { count: 'exact', head: true }).in('status', ['new', 'reviewing', 'reviewed', 'contacted', 'in_progress']),
+      sb.from('matter_events').select('id', { count: 'exact', head: true }).gte('starts_at', new Date().toISOString())
     ]);
     var err = jobs.find(function (r) { return r.error; });
     if (err) { setNote('legalReportNote', err.error.message); return; }
@@ -7520,7 +7775,9 @@ window.ramdaniAuth = {
       ['Closed matters', n(jobs[1])],
       ['Open tasks', n(jobs[2])],
       ['Documents', n(jobs[3])],
-      ['Open inquiries', n(jobs[4])]
+      ['Overdue tasks', n(jobs[4])],
+      ['Open inquiries', n(jobs[5])],
+      ['Upcoming dates', n(jobs[6])]
     ].map(function (x) {
       return '<div class="stat-card"><div class="label">' + escapeHtml(x[0]) + '</div><div class="value">' + x[1] + '</div></div>';
     }).join('');
@@ -7549,7 +7806,7 @@ window.ramdaniAuth = {
     });
     $id('legalMatterForm').addEventListener('submit', saveLegalMatter);
     $id('legalMatterCancel').addEventListener('click', resetMatterForm);
-    ['lmStatus', 'lmType', 'lmPriority', 'lmSearch'].forEach(function (id) { $id(id).addEventListener('input', renderLegalMatters); $id(id).addEventListener('change', renderLegalMatters); });
+    ['lmStatus', 'lmType', 'lmPriority', 'lmSearch', 'lmLead', 'lmPractice'].forEach(function (id) { var el = $id(id); if (!el) return; el.addEventListener('input', renderLegalMatters); el.addEventListener('change', renderLegalMatters); });
     $id('legalMatterBody').addEventListener('click', function (e) {
       var open = e.target.closest('[data-lm-open]');
       var ed = e.target.closest('[data-lm-edit]');
@@ -7697,6 +7954,7 @@ window.ramdaniAuth = {
     $id('memberCardBody').innerHTML = (res.data || []).map(function (c) {
       var m = c.members || {};
       return '<tr><td>' + escapeHtml(c.card_number) + '</td><td>' + escapeHtml((m.member_number || '') + ' ' + (m.full_name || '')) + '</td><td>' + escapeHtml(c.status) + '</td><td><code>' + escapeHtml(c.verify_code) + '</code></td><td>' +
+        '<button type="button" class="btn btn-sm" data-mc-preview="' + escapeHtml(c.card_number) + '|' + escapeHtml(m.full_name || '') + '|' + escapeHtml(c.verify_code) + '|' + escapeHtml(c.status) + '">Preview</button> ' +
         (c.status === 'revoked' ? '' : '<button type="button" class="btn btn-sm" data-mc-revoke="' + c.id + '">Revoke</button>') + '</td></tr>';
     }).join('') || '<tr><td colspan="5">No member cards yet.</td></tr>';
   }
@@ -7906,6 +8164,13 @@ window.ramdaniAuth = {
     });
     $id('memberCardForm').addEventListener('submit', saveMemberCard);
     $id('memberCardBody').addEventListener('click', async function (e) {
+      var prev = e.target.closest('[data-mc-preview]');
+      if (prev) {
+        var p = prev.getAttribute('data-mc-preview').split('|');
+        var w = window.open('', '_blank', 'noopener,width=420,height=560');
+        if (w) w.document.write('<html><head><title>Card preview</title></head><body style="font-family:Georgia,serif;padding:24px"><div style="border:1px solid #333;padding:20px;max-width:320px"><p>Ramdani Law Firm</p><h2>' + p[1] + '</h2><p>' + p[0] + '</p><p>Status: ' + p[3] + '</p><p style="font-size:12px;word-break:break-all">Verify: ' + p[2] + '</p><p style="font-size:12px">QR stores only this verification code.</p></div><p><button onclick="window.print()">Print</button></p></body></html>');
+        return;
+      }
       var b = e.target.closest('[data-mc-revoke]'); if (!b) return;
       if (!confirm('Revoke this card?')) return;
       await sb.from('member_cards').update({ status: 'revoked' }).eq('id', b.getAttribute('data-mc-revoke'));
@@ -7945,6 +8210,141 @@ window.ramdaniAuth = {
     });
     $id('docTplForm').addEventListener('submit', saveDocTpl);
     $id('issueDocForm').addEventListener('submit', issueDoc);
+  }
+
+  function bindRemainingOps() {
+    if ($id('eventGuestForm')) {
+      $id('eventGuestForm').addEventListener('submit', saveEventGuest);
+    }
+    var lsf = $id('legalSearchForm');
+    if (lsf && !lsf.dataset.bound) {
+      lsf.dataset.bound = '1';
+      lsf.addEventListener('submit', runLegalSearch);
+    }
+    var cam = $id('mediaCaptureBtn');
+    if (cam) cam.addEventListener('click', captureMediaPhoto);
+    var inq = $id('inqBody');
+    if (inq && !inq.dataset.bound) {
+      inq.dataset.bound = '1';
+      inq.addEventListener('change', async function (e) {
+        var sel = e.target.closest('[data-inq]');
+        if (!sel) return;
+        var payload = {};
+        if (sel.getAttribute('data-field') === 'assigned_to') payload.assigned_to = sel.value || null;
+        else payload.status = sel.value;
+        await sb.from('inquiries').update(payload).eq('id', sel.getAttribute('data-inq'));
+      });
+    }
+  }
+
+  async function loadEventGuests() {
+    await loadPlatLookups();
+    var sel = $id('eventGuestForm') && $id('eventGuestForm').elements.event_id;
+    if (sel) {
+      var cur = sel.value;
+      sel.innerHTML = '<option value="">Select event…</option>' + platEvents.map(function (e) {
+        return '<option value="' + e.id + '">' + escapeHtml(e.title) + '</option>';
+      }).join('');
+      sel.value = cur;
+    }
+    var res = await sb.from('event_guests').select('*, events(title)').order('created_at', { ascending: false }).limit(100);
+    if (res.error) { setNote('eventGuestNote', res.error.message); return; }
+    $id('eventGuestBody').innerHTML = (res.data || []).map(function (g) {
+      return '<tr><td>' + escapeHtml((g.events && g.events.title) || '') + '</td><td>' + escapeHtml(g.full_name) + '</td><td>' + escapeHtml(g.invitation_status) + '</td><td>' + escapeHtml(g.attendance_status) + '</td></tr>';
+    }).join('') || '<tr><td colspan="4">No guests yet.</td></tr>';
+  }
+  async function saveEventGuest(e) {
+    e.preventDefault();
+    var f = e.target;
+    var payload = {
+      event_id: f.elements.event_id.value,
+      full_name: f.elements.full_name.value.trim(),
+      designation: f.elements.designation.value.trim() || null,
+      organization: f.elements.organization.value.trim() || null,
+      invitation_status: f.elements.invitation_status.value,
+      attendance_status: f.elements.attendance_status.value,
+      biography: f.elements.biography.value.trim() || null
+    };
+    if (!payload.event_id || !payload.full_name) return setNote('eventGuestNote', 'Event and name are required.');
+    var res = await sb.from('event_guests').insert(payload);
+    if (res.error) return setNote('eventGuestNote', res.error.message);
+    f.reset();
+    setNote('eventGuestNote', 'Saved.', true);
+    await loadEventGuests();
+  }
+
+  async function runLegalSearch(e) {
+    e.preventDefault();
+    var q = (e.target.elements.q.value || '').trim();
+    var box = $id('legalSearchResults');
+    if (q.length < 2) return setNote('legalSearchNote', 'Enter at least two characters.');
+    setNote('legalSearchNote', 'Searching authorized records…', true);
+    var like = '%' + q + '%';
+    var jobs = await Promise.all([
+      sb.from('clients').select('id, client_number, legal_name, status').or('legal_name.ilike.' + like + ',client_number.ilike.' + like).limit(20),
+      sb.from('legal_matters').select('id, matter_number, title, status').or('title.ilike.' + like + ',matter_number.ilike.' + like).limit(20),
+      sb.from('matter_tasks').select('id, title, status, matter_id').ilike('title', like).limit(20),
+      sb.from('matter_events').select('id, title, starts_at, matter_id').ilike('title', like).limit(20),
+      sb.from('matter_documents').select('id, file_name, category, matter_id').ilike('file_name', like).limit(20),
+      sb.from('matter_communications').select('id, subject, comm_type, matter_id').ilike('subject', like).limit(20)
+    ]);
+    function block(title, rows, render) {
+      if (rows.error) return '<section class="admin-card"><h3>' + escapeHtml(title) + '</h3><p class="note">' + escapeHtml(rows.error.message) + '</p></section>';
+      var list = rows.data || [];
+      return '<section class="admin-card"><h3>' + escapeHtml(title) + '</h3>' + (list.length ? '<ul>' + list.map(render).join('') + '</ul>' : '<p class="empty">No authorized matches.</p>') + '</section>';
+    }
+    box.innerHTML = [
+      block('Clients', jobs[0], function (r) { return '<li>' + escapeHtml((r.client_number || '') + ' — ' + r.legal_name) + ' <span class="status-badge">' + escapeHtml(r.status) + '</span></li>'; }),
+      block('Matters', jobs[1], function (r) { return '<li>' + escapeHtml(r.matter_number + ' — ' + r.title) + ' <span class="status-badge">' + escapeHtml(r.status) + '</span></li>'; }),
+      block('Tasks', jobs[2], function (r) { return '<li>' + escapeHtml(r.title) + ' <span class="status-badge">' + escapeHtml(r.status) + '</span></li>'; }),
+      block('Dates', jobs[3], function (r) { return '<li>' + escapeHtml(r.title) + '</li>'; }),
+      block('Document metadata', jobs[4], function (r) { return '<li>' + escapeHtml(r.file_name) + ' <span class="note">' + escapeHtml(r.category) + '</span></li>'; }),
+      block('Communications', jobs[5], function (r) { return '<li>' + escapeHtml(r.subject || r.comm_type || 'Record') + '</li>'; })
+    ].join('');
+    setNote('legalSearchNote', '');
+  }
+
+  async function captureMediaPhoto() {
+    var note = $id('mediaUploadNote');
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      if (note) { note.className = 'form-status err'; note.textContent = 'Camera is not available in this browser.'; }
+      return;
+    }
+    try {
+      var stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+      var video = document.createElement('video');
+      video.autoplay = true;
+      video.playsInline = true;
+      video.srcObject = stream;
+      video.style.cssText = 'width:100%;max-width:320px;border-radius:8px;margin:.5rem 0';
+      var wrap = $id('mediaCaptureWrap');
+      if (!wrap) return;
+      wrap.innerHTML = '';
+      wrap.appendChild(video);
+      var snap = document.createElement('button');
+      snap.type = 'button';
+      snap.className = 'btn';
+      snap.textContent = 'Capture';
+      wrap.appendChild(snap);
+      snap.addEventListener('click', function () {
+        var canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 480;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        stream.getTracks().forEach(function (t) { t.stop(); });
+        canvas.toBlob(function (blob) {
+          if (!blob) return;
+          var file = new File([blob], 'capture-' + Date.now() + '.jpg', { type: 'image/jpeg' });
+          var dt = new DataTransfer();
+          dt.items.add(file);
+          var input = $id('mediaUploadFile');
+          if (input) input.files = dt.files;
+          wrap.innerHTML = '<p class="note">Photo captured. Submit the upload form to save it.</p>';
+        }, 'image/jpeg', 0.9);
+      });
+    } catch (err) {
+      if (note) { note.className = 'form-status err'; note.textContent = err.message || 'Could not open camera.'; }
+    }
   }
 
   function bindEduSearch() {
@@ -8093,7 +8493,7 @@ window.ramdaniAuth = {
   }
 
   function showAdminView(view) {
-    var panels = ['dashboardPanel','studentsPanel','adminsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','orgSettingsPanel','brandingLogoPanel','brandingTypePanel','contactInfoPanel','seoSettingsPanel','systemSettingsPanel','disclaimersPanel','homepageSectionsPanel','navigationPanel','certTemplatesPanel','mediaLibraryPanel','certIssuancesPanel','courseBuilderPanel','quizBuilderPanel','quizResultsPanel','eduSearchPanel','enrollmentsPanel','seoOverridesPanel','notificationsPanel','auditLogPanel','opsDashPanel','clientsPanel','legalMattersPanel','myTasksPanel','legalCalendarPanel','legalDocsPanel','legalCommsPanel','legalReportsPanel','membersPanel','memberCardsPanel','studentCardsPanel','eventsPanel','eventRegsPanel','docsCenterPanel'];
+    var panels = ['dashboardPanel','studentsPanel','adminsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','orgSettingsPanel','brandingLogoPanel','brandingTypePanel','contactInfoPanel','seoSettingsPanel','systemSettingsPanel','disclaimersPanel','homepageSectionsPanel','navigationPanel','certTemplatesPanel','mediaLibraryPanel','certIssuancesPanel','courseBuilderPanel','quizBuilderPanel','quizResultsPanel','eduSearchPanel','enrollmentsPanel','seoOverridesPanel','notificationsPanel','auditLogPanel','opsDashPanel','clientsPanel','legalMattersPanel','myTasksPanel','legalCalendarPanel','legalDocsPanel','legalCommsPanel','legalReportsPanel','legalSearchPanel','membersPanel','memberCardsPanel','studentCardsPanel','eventsPanel','eventRegsPanel','eventGuestsPanel','docsCenterPanel'];
     panels.forEach(function(id){ var el=document.getElementById(id); if(el){ el.hidden=true; el.classList.remove('is-active'); }});
     document.querySelectorAll('.admin-nav [data-table]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-table')===view); });
     document.getElementById('adminApp').classList.remove('nav-open');
@@ -8131,12 +8531,14 @@ window.ramdaniAuth = {
     if(view==='__legaldocs') { activate('legalDocsPanel','Documents'); loadDocuments(); return; }
     if(view==='__legalcomms') { activate('legalCommsPanel','Communications'); loadComms(); return; }
     if(view==='__legalreports') { activate('legalReportsPanel','Reports'); loadLegalReports(); return; }
+    if(view==='__legalsearch') { activate('legalSearchPanel','Secure search'); return; }
     if(view==='__members') { activate('membersPanel','Members'); loadMembers(); return; }
     if(view==='__membercards') { activate('memberCardsPanel','Member cards'); loadMemberCards(); return; }
     if(view==='__studentcards') { activate('studentCardsPanel','Student cards'); loadStudentCards(); return; }
     if(view==='__events') { activate('eventsPanel','Events'); loadPlatEvents(); return; }
     if(view==='__eventregs') { activate('eventRegsPanel','Registrations & attendance'); loadEventRegs(); return; }
     if(view==='__docscenter') { activate('docsCenterPanel','Document center'); loadDocCenter(); return; }
+    if(view==='__eventguests') { activate('eventGuestsPanel','Event guests'); loadEventGuests(); return; }
     activate('contentPanel', (TABLES.find(function(t){return t.id===view;})||{}).label || 'Content');
     loadTable(view);
   }
@@ -8249,11 +8651,20 @@ window.ramdaniAuth = {
   }
 
   async function loadInquiries() {
-    var res = await sb.from('inquiries').select('id, kind, full_name, email, subject, status, created_at').order('created_at', { ascending: false }).limit(50);
+    var res = await sb.from('inquiries').select('id, kind, full_name, email, subject, status, assigned_to, created_at').order('created_at', { ascending: false }).limit(50);
+    var staff = await sb.from('profiles').select('id, full_name, email, role').in('role', ['admin','firm_admin','lawyer','operations_staff','communications_manager']);
+    var people = staff.data || [];
     var rows = res.data || [];
+    var statuses = ['new','reviewing','reviewed','contacted','in_progress','closed','archived'];
     document.getElementById('inqBody').innerHTML = rows.map(function (r) {
-      return '<tr><td>' + ramdaniUi.escape(r.kind) + '</td><td>' + ramdaniUi.escape(r.full_name) + '</td><td>' + ramdaniUi.escape(r.email) + '</td><td>' + ramdaniUi.escape(r.subject) + '</td><td>' + ramdaniUi.escape(r.status) + '</td></tr>';
-    }).join('') || '<tr><td colspan="5">No inquiries.</td></tr>';
+      var staffOpts = '<option value="">Unassigned</option>' + people.map(function (p) {
+        return '<option value="' + p.id + '"' + (r.assigned_to === p.id ? ' selected' : '') + '>' + ramdaniUi.escape(p.full_name || p.email) + '</option>';
+      }).join('');
+      var stOpts = statuses.map(function (s) {
+        return '<option value="' + s + '"' + (r.status === s ? ' selected' : '') + '>' + s.replace('_',' ') + '</option>';
+      }).join('');
+      return '<tr><td>' + ramdaniUi.escape(r.kind) + '</td><td>' + ramdaniUi.escape(r.full_name) + '</td><td>' + ramdaniUi.escape(r.email) + '</td><td>' + ramdaniUi.escape(r.subject) + '</td><td><select data-inq="' + ramdaniUi.escape(r.id) + '" data-field="assigned_to">' + staffOpts + '</select></td><td><select data-inq="' + ramdaniUi.escape(r.id) + '" data-field="status">' + stOpts + '</select></td></tr>';
+    }).join('') || '<tr><td colspan="6">No inquiries.</td></tr>';
   }
 
   async function loadInternshipApps() {
@@ -8266,7 +8677,7 @@ window.ramdaniAuth = {
       return '<tr><td>' + ramdaniUi.escape(listing) + '</td><td>' + ramdaniUi.escape(r.full_name) +
         '</td><td>' + ramdaniUi.escape(r.email) + '</td><td>' + ramdaniUi.escape(r.education) +
         '</td><td><select data-app="' + ramdaniUi.escape(r.id) + '">' +
-        ['new','reviewed','shortlisted','closed'].map(function (s) {
+        ['submitted','under_review','shortlisted','interview','accepted','rejected','withdrawn','new','reviewed','closed'].map(function (s) {
           return '<option value="' + s + '"' + (r.status === s ? ' selected' : '') + '>' + s + '</option>';
         }).join('') + '</select></td></tr>';
     }).join('') || '<tr><td colspan="5">No applications.</td></tr>';
