@@ -1521,10 +1521,11 @@ html[dir="rtl"] .lead {
             <div class="admin-section-head"><h2>Issue document</h2></div>
             <form id="issueDocForm" class="form admin-form">
               <label><span>Template</span><select name="template_id" required><option value="">Select…</option></select></label>
+              <p class="note field-full">Dropdowns load live IDs. Student documents can be issued only to an <strong>active</strong> student.</p>
               <label><span>Recipient kind</span><select name="recipient_kind"><option value="member">Member</option><option value="student">Student</option><option value="applicant">Applicant</option><option value="other">Other</option></select></label>
               <label><span>Recipient name</span><input name="recipient_name" required /></label>
-              <label><span>Member</span><select name="member_id"><option value="">None</option></select></label>
-              <label><span>Student</span><select name="student_id"><option value="">None</option></select></label>
+              <label><span>Member (linked ID)</span><select name="member_id"><option value="">None</option></select></label>
+              <label><span>Student (active only)</span><select name="student_id"><option value="">None</option></select></label>
               <label><span>Event</span><select name="event_id"><option value="">None</option></select></label>
               <div class="form-actions"><button class="btn btn-primary" type="submit">Issue</button><p id="issueDocNote" class="form-status"></p></div>
             </form>
@@ -8134,7 +8135,7 @@ window.ramdaniAuth = {
       sb.from('cabinets').select('id, title').order('title'),
       sb.from('members').select('id, member_number, full_name, status').order('full_name'),
       sb.from('events').select('id, title, starts_at, status').order('starts_at', { ascending: false }),
-      sb.from('profiles').select('id, full_name, email, student_id').eq('role', 'student').order('full_name')
+      sb.from('profiles').select('id, full_name, email, student_id, is_active, status').eq('role', 'student').eq('is_active', true).eq('status', 'active').order('full_name')
     ]);
     platSocieties = res[0].data || [];
     platChapters = res[1].data || [];
@@ -8391,11 +8392,15 @@ window.ramdaniAuth = {
     var tplId = f.elements.template_id.value;
     var name = f.elements.recipient_name.value.trim();
     if (!tplId || !name) return setNote('issueDocNote', 'Template and recipient name are required.');
-    var tpl = await sb.from('document_templates').select('*').eq('id', tplId).maybeSingle();
-    if (!tpl.data) return setNote('issueDocNote', 'Template not found.');
+    var kind = f.elements.recipient_kind.value;
     var memberId = f.elements.member_id.value || null;
     var studentId = f.elements.student_id.value || null;
     var eventId = f.elements.event_id.value || null;
+    if (kind === 'student' && !studentId) return setNote('issueDocNote', 'Select an active student from the dropdown.');
+    if (kind === 'member' && !memberId) return setNote('issueDocNote', 'Select a member from the dropdown.');
+    var tpl = await sb.from('document_templates').select('*').eq('id', tplId).maybeSingle();
+    if (!tpl.data) return setNote('issueDocNote', 'Template not found.');
+    if (tpl.data.status && tpl.data.status !== 'published') return setNote('issueDocNote', 'Use a published document template.');
     var member = memberId ? platMembers.find(function (m) { return m.id === memberId; }) : null;
     var student = studentId ? platStudents.find(function (s) { return s.id === studentId; }) : null;
     var ev = eventId ? platEvents.find(function (x) { return x.id === eventId; }) : null;
@@ -8497,6 +8502,23 @@ window.ramdaniAuth = {
     });
     $id('docTplForm').addEventListener('submit', saveDocTpl);
     $id('issueDocForm').addEventListener('submit', issueDoc);
+    var idf = $id('issueDocForm');
+    if (idf && !idf.dataset.linked) {
+      idf.dataset.linked = '1';
+      function fillIssueRecipientName() {
+        var kind = idf.elements.recipient_kind.value;
+        if (kind === 'student') {
+          var s = platStudents.find(function (x) { return x.id === idf.elements.student_id.value; });
+          if (s) idf.elements.recipient_name.value = s.full_name || s.email || '';
+        } else if (kind === 'member') {
+          var m = platMembers.find(function (x) { return x.id === idf.elements.member_id.value; });
+          if (m) idf.elements.recipient_name.value = m.full_name || '';
+        }
+      }
+      idf.elements.student_id.addEventListener('change', fillIssueRecipientName);
+      idf.elements.member_id.addEventListener('change', fillIssueRecipientName);
+      idf.elements.recipient_kind.addEventListener('change', fillIssueRecipientName);
+    }
   }
 
   function bindRemainingOps() {
