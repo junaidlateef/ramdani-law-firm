@@ -346,6 +346,10 @@ table.data tbody tr:hover { background:color-mix(in srgb,var(--accent) 5%,transp
 .mcq-explanation { display: none; margin-top: 0.6rem; color: var(--muted); font-size: 0.92rem; }
 .mcq.revealed .mcq-explanation { display: block; }
 .quiz-footer { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-top: 1rem; }
+.qb-choices { display: flex; flex-direction: column; gap: .5rem; }
+.qb-choice-row { display: flex; align-items: center; gap: .5rem; }
+.qb-choice-row input[type="text"] { flex: 1; }
+.qb-choice-row .qb-remove { flex-shrink: 0; }
 
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
 .library-filters { display: flex; gap: 0.75rem; flex-wrap: wrap; margin: 1.25rem 0 1.5rem; }
@@ -559,8 +563,11 @@ html[dir="rtl"] .lead {
         <details class="admin-nav-group" open>
           <summary class="admin-nav-group-title">Education</summary>
           <button type="button" data-table="modules">Modules</button>
+          <button type="button" data-table="__coursebuilder">Course builder</button>
+          <button type="button" data-table="__enrollments">Enrollments &amp; progress</button>
           <button type="button" data-table="lectures">Lectures</button>
           <button type="button" data-table="quizzes">Quizzes</button>
+          <button type="button" data-table="__quizbuilder">Quiz builder</button>
           <button type="button" data-table="books">Library</button>
           <button type="button" data-table="cases">Case notes</button>
           <button type="button" data-table="statutes">Statutes</button>
@@ -622,6 +629,8 @@ html[dir="rtl"] .lead {
               <div class="stat-card"><div class="label">Pending inquiries</div><div class="value" id="statInquiries">—</div></div>
               <div class="stat-card"><div class="label">Internship applications</div><div class="value" id="statApplications">—</div></div>
             </div>
+            <div class="admin-section-head"><h2>Education overview</h2></div>
+            <div class="dashboard-grid" id="eduStats"></div>
             <div class="admin-card"><div class="admin-section-head"><h2>Quick access</h2></div><div class="admin-toolbar">
               <button class="btn" type="button" data-table="practice_areas">Practice areas</button><button class="btn" type="button" data-table="services">Services</button><button class="btn" type="button" data-table="articles">Insights</button><button class="btn" type="button" data-table="modules">Modules</button><button class="btn" type="button" data-table="__students">Students</button><button class="btn" type="button" data-table="__inquiries">Inquiries</button>
             </div></div>
@@ -979,6 +988,101 @@ html[dir="rtl"] .lead {
             <div style="height:1rem"></div>
             <div class="admin-toolbar"><input type="search" id="certIssuanceSearch" placeholder="Search by student, certificate number or module" aria-label="Search issuances" /></div>
             <div class="table-wrap"><table class="data"><thead><tr><th>Cert #</th><th>Student</th><th>Module</th><th>Template</th><th>Issue date</th><th>Status</th><th>Verify code</th><th>Actions</th></tr></thead><tbody id="certIssuancesBody"></tbody></table></div>
+          </div>
+
+          <div id="courseBuilderPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Course builder</h2><p class="note">Build a course from sections and lessons. Students only see items marked <strong>published</strong>. Use ↑ ↓ to set the order.</p></div></div>
+            <div class="admin-toolbar"><label style="display:flex;gap:.5rem;align-items:center"><span>Module</span><select id="cbModule"><option value="">Select module…</option></select></label></div>
+            <p id="cbNote" class="form-status"></p>
+            <div id="cbArea" hidden>
+              <div class="admin-card">
+                <h3 id="cbSectionHeading">Sections</h3>
+                <form id="cbSectionForm" class="form admin-form">
+                  <label><span>Section title</span><input name="title" required /></label>
+                  <label><span>Description</span><input name="description" /></label>
+                  <label><span>Status</span><select name="status"><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></label>
+                  <div class="form-actions"><button class="btn btn-primary" type="submit" id="cbSectionSave">Add section</button><button class="btn" type="button" id="cbSectionCancel" hidden>Cancel edit</button><p id="cbSectionNote" class="form-status"></p></div>
+                </form>
+                <div class="table-wrap"><table class="data"><thead><tr><th>#</th><th>Title</th><th>Lessons</th><th>Status</th><th>Actions</th></tr></thead><tbody id="cbSectionsBody"></tbody></table></div>
+              </div>
+              <div style="height:1rem"></div>
+              <div class="admin-card">
+                <h3 id="cbLessonHeading">Lessons</h3>
+                <form id="cbLessonForm" class="form admin-form">
+                  <label><span>Section</span><select name="section_id" required></select></label>
+                  <label><span>Lesson title</span><input name="title" required /></label>
+                  <label><span>Short description</span><input name="description" /></label>
+                  <label><span>Lesson content</span><textarea name="content" rows="6"></textarea></label>
+                  <label><span>Learning objectives (one per line)</span><textarea name="learning_objectives" rows="3"></textarea></label>
+                  <label><span>Video URL</span><input name="video_url" type="url" placeholder="https://" /></label>
+                  <label><span>Resource URL</span><input name="resource_url" type="url" placeholder="https://" /></label>
+                  <label><span>External URL</span><input name="external_url" type="url" placeholder="https://" /></label>
+                  <label><span>Estimated minutes</span><input name="estimated_minutes" type="number" min="0" /></label>
+                  <label><span>Status</span><select name="status"><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></label>
+                  <div class="form-actions"><button class="btn btn-primary" type="submit" id="cbLessonSave">Add lesson</button><button class="btn" type="button" id="cbLessonCancel" hidden>Cancel edit</button><p id="cbLessonNote" class="form-status"></p></div>
+                </form>
+                <div class="table-wrap"><table class="data"><thead><tr><th>Section</th><th>#</th><th>Lesson</th><th>Min</th><th>Status</th><th>Actions</th></tr></thead><tbody id="cbLessonsBody"></tbody></table></div>
+              </div>
+              <div style="height:1rem"></div>
+              <div class="admin-card">
+                <h3>Completion rules</h3>
+                <p class="note">A student becomes eligible for a certificate when both conditions are met. Progress is calculated by the database from real lesson and quiz records. Staff then issue the certificate from Certificate issuances.</p>
+                <form id="cbRulesForm" class="form admin-form">
+                  <label><span>Required lessons completed (%)</span><input name="required_lesson_percent" type="number" min="0" max="100" required value="100" /></label>
+                  <label><span>Required quiz (optional)</span><select name="required_quiz_id"><option value="">No quiz required</option></select></label>
+                  <label><span>Pass mark for that quiz (%)</span><input name="required_pass_percent" type="number" min="0" max="100" required value="50" /></label>
+                  <label><span>Certificate template listing (optional)</span><select name="certificate_id"><option value="">None</option></select></label>
+                  <div class="form-actions"><button class="btn btn-primary" type="submit">Save rules</button><p id="cbRulesNote" class="form-status"></p></div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div id="quizBuilderPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Quiz builder</h2><p class="note">Create quizzes, configure attempts, and build/reorder questions. Students only see questions on a <strong>published</strong> quiz. Use ↑ ↓ to set the order.</p></div></div>
+            <div class="admin-toolbar">
+              <label style="display:flex;gap:.5rem;align-items:center"><span>Quiz</span><select id="qbQuiz"><option value="">New quiz…</option></select></label>
+              <button type="button" class="btn" id="qbNewQuiz">+ New quiz</button>
+            </div>
+            <div class="admin-card">
+              <h3 id="qbMetaHeading">Quiz details</h3>
+              <form id="qbMetaForm" class="form admin-form">
+                <label><span>Title</span><input name="title" required /></label>
+                <label><span>Slug</span><input name="slug" required placeholder="auto-generated-if-left-blank" /></label>
+                <label><span>Summary</span><input name="summary" /></label>
+                <label><span>Category</span><input name="category" placeholder="practice" /></label>
+                <label><span>Linked module (optional)</span><select name="module_id"><option value="">No module</option></select></label>
+                <label><span>Time limit (minutes, optional)</span><input name="time_limit_minutes" type="number" min="1" /></label>
+                <label><span>Pass mark (%)</span><input name="pass_percent" type="number" min="0" max="100" value="50" /></label>
+                <label><span>Status</span><select name="status"><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></label>
+                <div class="form-actions"><button class="btn btn-primary" type="submit" id="qbMetaSave">Create quiz</button><button class="btn" type="button" id="qbMetaDelete" hidden>Delete quiz</button><p id="qbMetaNote" class="form-status"></p></div>
+              </form>
+            </div>
+            <div style="height:1rem"></div>
+            <div id="qbQuestionsArea" hidden>
+              <div class="admin-card">
+                <h3 id="qbQuestionHeading">Questions</h3>
+                <form id="qbQuestionForm" class="form admin-form">
+                  <label><span>Question prompt</span><textarea name="prompt" rows="2" required></textarea></label>
+                  <div id="qbChoicesWrap" class="qb-choices"></div>
+                  <div class="form-actions" style="margin-top:.25rem"><button class="btn" type="button" id="qbAddChoice">+ Add choice</button></div>
+                  <label><span>Explanation (shown after submit, optional)</span><textarea name="explanation" rows="2"></textarea></label>
+                  <div class="form-actions"><button class="btn btn-primary" type="submit" id="qbQuestionSave">Add question</button><button class="btn" type="button" id="qbQuestionCancel" hidden>Cancel edit</button><p id="qbQuestionNote" class="form-status"></p></div>
+                </form>
+                <div class="table-wrap"><table class="data"><thead><tr><th>#</th><th>Prompt</th><th>Choices</th><th>Correct</th><th>Actions</th></tr></thead><tbody id="qbQuestionsBody"></tbody></table></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="enrollmentsPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Enrollments &amp; progress <span id="enTotal" class="note"></span></h2><p class="note">See who is enrolled in each course, their real lesson and quiz progress, and who is eligible for a certificate.</p></div></div>
+            <div class="admin-toolbar">
+              <select id="enModule" aria-label="Filter by module"><option value="">All modules</option></select>
+              <select id="enStatus" aria-label="Filter by status"><option value="">All statuses</option><option value="pending">Pending</option><option value="active">Active</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select>
+              <input type="search" id="enSearch" placeholder="Search student name, email or ID" aria-label="Search enrollments" />
+            </div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Student</th><th>Module</th><th>Status</th><th>Enrolled</th><th>Lessons</th><th>Best quiz</th><th>Certificate</th><th>Actions</th></tr></thead><tbody id="enBody"></tbody></table></div>
+            <p id="enNote" class="form-status"></p>
           </div>
 
           <div id="seoOverridesPanel" class="admin-panel" hidden>
@@ -4057,6 +4161,7 @@ window.ramdaniAuth = {
     'modules': ['education_manager'], 'lectures': ['education_manager'], 'quizzes': ['education_manager'],
     'books': ['education_manager'], 'cases': ['education_manager'], 'statutes': ['education_manager'],
     'certificates': ['education_manager'], '__certissuances': ['education_manager'],
+    '__coursebuilder': ['education_manager'], '__quizbuilder': ['education_manager'], '__enrollments': ['education_manager', 'student_manager'],
     'societies': ['student_manager'], 'chapters': ['student_manager'], 'cabinets': ['student_manager'],
     'internships': ['student_manager'],
     '__inquiries': ['communications_manager'],
@@ -4222,6 +4327,8 @@ window.ramdaniAuth = {
       var delBtn = e.target.closest('[data-delete-cert-template]');
       if (delBtn) { deleteCertTemplate(delBtn.getAttribute('data-delete-cert-template')); }
     });
+    bindCourseBuilder();
+    bindQuizBuilder();
     document.getElementById('certIssuanceForm').addEventListener('submit', saveCertIssuance);
     document.getElementById('certIssuanceSearch').addEventListener('input', renderCertIssuances);
     document.getElementById('certIssuancesBody').addEventListener('click', function (e) {
@@ -5358,6 +5465,13 @@ window.ramdaniAuth = {
     certIssuancesCache = res.data || [];
     note.textContent = '';
     renderCertIssuances();
+    if (certPrefill) {
+      var pf = document.getElementById('certIssuanceForm');
+      pf.elements.student_id.value = certPrefill.student;
+      pf.elements.module_id.value = certPrefill.module;
+      certPrefill = null;
+      pf.elements.certificate_number.focus();
+    }
   }
 
   function renderCertIssuances() {
@@ -5617,8 +5731,593 @@ window.ramdaniAuth = {
   var currentRows = [];
   var editingId = null;
 
+  // ---- Phase 3: Course builder, enrollments & progress, education stats ----
+  var certPrefill = null;
+  var cbModuleId = '', cbSections = [], cbLessons = [], cbEditSectionId = null, cbEditLessonId = null, cbRulesLoaded = false;
+  var qbQuizId = '', qbQuizzes = [], qbModules = [], qbQuestions = [], qbEditQuestionId = null, qbChoiceCount = 0;
+  var enRows = [], enProfiles = {}, enModules = {}, enCompletions = {}, enIssued = {};
+
+  function $id(id) { return document.getElementById(id); }
+  function setNote(id, msg, ok) { var el = $id(id); if (!el) return; el.className = 'form-status' + (msg ? (ok ? ' ok' : ' err') : ''); el.textContent = msg || ''; }
+  function statusOptions(sel, cur) {
+    return ['draft', 'published', 'archived'].map(function (s) { return '<option value="' + s + '"' + (s === cur ? ' selected' : '') + '>' + s + '</option>'; }).join('');
+  }
+
+  async function loadCourseBuilder() {
+    var res = await sb.from('modules').select('id, title, code').order('title');
+    var mods = res.data || [];
+    var sel = $id('cbModule');
+    sel.innerHTML = '<option value="">Select module…</option>' + mods.map(function (m) {
+      return '<option value="' + m.id + '">' + escapeHtml(m.title || m.code) + '</option>';
+    }).join('');
+    if (cbModuleId && mods.some(function (m) { return m.id === cbModuleId; })) sel.value = cbModuleId; else cbModuleId = '';
+    if (!cbRulesLoaded) {
+      var q = await sb.from('quizzes').select('id, title').order('title');
+      $id('cbRulesForm').querySelector('[name="required_quiz_id"]').innerHTML = '<option value="">No quiz required</option>' + (q.data || []).map(function (x) { return '<option value="' + x.id + '">' + escapeHtml(x.title) + '</option>'; }).join('');
+      var c = await sb.from('certificates').select('id, title').order('title');
+      $id('cbRulesForm').querySelector('[name="certificate_id"]').innerHTML = '<option value="">None</option>' + (c.data || []).map(function (x) { return '<option value="' + x.id + '">' + escapeHtml(x.title) + '</option>'; }).join('');
+      cbRulesLoaded = true;
+    }
+    await loadCourseBuilderData();
+  }
+
+  async function loadCourseBuilderData() {
+    var area = $id('cbArea');
+    if (!cbModuleId) { area.hidden = true; setNote('cbNote', 'Choose a module to build its sections and lessons.'); return; }
+    setNote('cbNote', '');
+    var s = await sb.from('course_sections').select('*').eq('module_id', cbModuleId).order('sort_order').order('created_at');
+    var l = await sb.from('lessons').select('*').eq('module_id', cbModuleId).order('sort_order').order('created_at');
+    if (s.error || l.error) { area.hidden = true; setNote('cbNote', 'Could not load course content: ' + ((s.error || l.error).message)); return; }
+    cbSections = s.data || [];
+    cbLessons = l.data || [];
+    area.hidden = false;
+    renderCbSections();
+    renderCbLessons();
+    var r = await sb.from('course_completion_rules').select('*').eq('module_id', cbModuleId).maybeSingle();
+    var f = $id('cbRulesForm');
+    var rule = r.data || {};
+    f.elements.required_lesson_percent.value = rule.required_lesson_percent == null ? 100 : rule.required_lesson_percent;
+    f.elements.required_pass_percent.value = rule.required_pass_percent == null ? 50 : rule.required_pass_percent;
+    f.elements.required_quiz_id.value = rule.required_quiz_id || '';
+    f.elements.certificate_id.value = rule.certificate_id || '';
+  }
+
+  function renderCbSections() {
+    var body = $id('cbSectionsBody');
+    body.innerHTML = cbSections.map(function (sec, i) {
+      var n = cbLessons.filter(function (x) { return x.section_id === sec.id; }).length;
+      return '<tr><td>' + (i + 1) + '</td><td>' + escapeHtml(sec.title) + '</td><td>' + n + '</td><td>' + escapeHtml(sec.status) + '</td><td>' +
+        '<button type="button" class="btn" data-sec-up="' + sec.id + '"' + (i === 0 ? ' disabled' : '') + ' aria-label="Move up">↑</button> ' +
+        '<button type="button" class="btn" data-sec-down="' + sec.id + '"' + (i === cbSections.length - 1 ? ' disabled' : '') + ' aria-label="Move down">↓</button> ' +
+        '<button type="button" class="btn" data-sec-edit="' + sec.id + '">Edit</button> ' +
+        '<button type="button" class="btn" data-sec-del="' + sec.id + '">Delete</button></td></tr>';
+    }).join('') || '<tr><td colspan="5">No sections yet. Add the first section above.</td></tr>';
+    var lsel = $id('cbLessonForm').querySelector('[name="section_id"]');
+    var cur = lsel.value;
+    lsel.innerHTML = cbSections.map(function (sec) { return '<option value="' + sec.id + '">' + escapeHtml(sec.title) + '</option>'; }).join('');
+    if (cur && cbSections.some(function (x) { return x.id === cur; })) lsel.value = cur;
+  }
+
+  function renderCbLessons() {
+    var body = $id('cbLessonsBody');
+    var rows = [];
+    cbSections.forEach(function (sec) {
+      var list = cbLessons.filter(function (x) { return x.section_id === sec.id; });
+      list.forEach(function (les, i) {
+        rows.push('<tr><td>' + escapeHtml(sec.title) + '</td><td>' + (i + 1) + '</td><td>' + escapeHtml(les.title) + '</td><td>' + escapeHtml(les.estimated_minutes == null ? '' : les.estimated_minutes) + '</td><td>' + escapeHtml(les.status) + '</td><td>' +
+          '<button type="button" class="btn" data-les-up="' + les.id + '"' + (i === 0 ? ' disabled' : '') + ' aria-label="Move up">↑</button> ' +
+          '<button type="button" class="btn" data-les-down="' + les.id + '"' + (i === list.length - 1 ? ' disabled' : '') + ' aria-label="Move down">↓</button> ' +
+          '<button type="button" class="btn" data-les-edit="' + les.id + '">Edit</button> ' +
+          '<button type="button" class="btn" data-les-del="' + les.id + '">Delete</button></td></tr>');
+      });
+    });
+    body.innerHTML = rows.join('') || '<tr><td colspan="6">' + (cbSections.length ? 'No lessons yet. Add the first lesson above.' : 'Add a section first, then add lessons to it.') + '</td></tr>';
+  }
+
+  // Re-number a list 0..n-1 after moving one item; only changed rows are written.
+  async function cbMove(table, list, id, dir) {
+    var i = list.findIndex(function (x) { return x.id === id; });
+    var j = i + dir;
+    if (i < 0 || j < 0 || j >= list.length) return;
+    var arr = list.slice();
+    var item = arr.splice(i, 1)[0];
+    arr.splice(j, 0, item);
+    var jobs = [];
+    arr.forEach(function (x, idx) { if (x.sort_order !== idx) jobs.push(sb.from(table).update({ sort_order: idx }).eq('id', x.id)); });
+    var results = await Promise.all(jobs);
+    var bad = results.find(function (r) { return r.error; });
+    if (bad) { setNote('cbNote', 'Could not reorder: ' + bad.error.message); return; }
+    setNote('cbNote', '');
+    await loadCourseBuilderData();
+  }
+
+  function resetSectionForm() {
+    cbEditSectionId = null; $id('cbSectionForm').reset();
+    $id('cbSectionSave').textContent = 'Add section'; $id('cbSectionCancel').hidden = true; setNote('cbSectionNote', '');
+  }
+  function resetLessonForm() {
+    cbEditLessonId = null; var f = $id('cbLessonForm'); var keep = f.elements.section_id.value; f.reset();
+    if (keep) f.elements.section_id.value = keep;
+    $id('cbLessonSave').textContent = 'Add lesson'; $id('cbLessonCancel').hidden = true; setNote('cbLessonNote', '');
+  }
+
+  async function saveCbSection(e) {
+    e.preventDefault();
+    var f = e.target;
+    var title = f.elements.title.value.trim();
+    if (!title) return setNote('cbSectionNote', 'Title is required.');
+    var payload = { title: title, description: f.elements.description.value.trim() || null, status: f.elements.status.value };
+    var res;
+    if (cbEditSectionId) {
+      res = await sb.from('course_sections').update(payload).eq('id', cbEditSectionId);
+    } else {
+      payload.module_id = cbModuleId;
+      payload.sort_order = cbSections.length ? Math.max.apply(null, cbSections.map(function (x) { return x.sort_order; })) + 1 : 0;
+      res = await sb.from('course_sections').insert(payload);
+    }
+    if (res.error) return setNote('cbSectionNote', res.error.message);
+    resetSectionForm();
+    setNote('cbSectionNote', 'Saved.', true);
+    await loadCourseBuilderData();
+  }
+
+  async function saveCbLesson(e) {
+    e.preventDefault();
+    var f = e.target;
+    var title = f.elements.title.value.trim();
+    if (!f.elements.section_id.value) return setNote('cbLessonNote', 'Add a section first.');
+    if (!title) return setNote('cbLessonNote', 'Title is required.');
+    var mins = f.elements.estimated_minutes.value.trim();
+    var payload = {
+      section_id: f.elements.section_id.value,
+      title: title,
+      description: f.elements.description.value.trim() || null,
+      content: f.elements.content.value.trim() || null,
+      learning_objectives: f.elements.learning_objectives.value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean),
+      video_url: f.elements.video_url.value.trim() || null,
+      resource_url: f.elements.resource_url.value.trim() || null,
+      external_url: f.elements.external_url.value.trim() || null,
+      estimated_minutes: mins === '' ? null : parseInt(mins, 10),
+      status: f.elements.status.value
+    };
+    var res;
+    if (cbEditLessonId) {
+      var old = cbLessons.find(function (x) { return x.id === cbEditLessonId; }) || {};
+      if (payload.status === 'published' && !old.published_at) payload.published_at = new Date().toISOString();
+      if (old.section_id !== payload.section_id) {
+        var peers = cbLessons.filter(function (x) { return x.section_id === payload.section_id; });
+        payload.sort_order = peers.length ? Math.max.apply(null, peers.map(function (x) { return x.sort_order; })) + 1 : 0;
+      }
+      res = await sb.from('lessons').update(payload).eq('id', cbEditLessonId);
+    } else {
+      var same = cbLessons.filter(function (x) { return x.section_id === payload.section_id; });
+      payload.module_id = cbModuleId;
+      payload.sort_order = same.length ? Math.max.apply(null, same.map(function (x) { return x.sort_order; })) + 1 : 0;
+      if (payload.status === 'published') payload.published_at = new Date().toISOString();
+      res = await sb.from('lessons').insert(payload);
+    }
+    if (res.error) return setNote('cbLessonNote', res.error.message);
+    resetLessonForm();
+    setNote('cbLessonNote', 'Saved.', true);
+    await loadCourseBuilderData();
+  }
+
+  async function saveCbRules(e) {
+    e.preventDefault();
+    var f = e.target;
+    var lp = parseInt(f.elements.required_lesson_percent.value, 10), pp = parseInt(f.elements.required_pass_percent.value, 10);
+    if (isNaN(lp) || lp < 0 || lp > 100 || isNaN(pp) || pp < 0 || pp > 100) return setNote('cbRulesNote', 'Percentages must be between 0 and 100.');
+    var payload = {
+      module_id: cbModuleId,
+      required_lesson_percent: lp,
+      required_pass_percent: pp,
+      required_quiz_id: f.elements.required_quiz_id.value || null,
+      certificate_id: f.elements.certificate_id.value || null,
+      updated_at: new Date().toISOString()
+    };
+    var res = await sb.from('course_completion_rules').upsert(payload, { onConflict: 'module_id' });
+    setNote('cbRulesNote', res.error ? res.error.message : 'Rules saved.', !res.error);
+  }
+
+  function bindCourseBuilder() {
+    $id('cbModule').addEventListener('change', function () { cbModuleId = this.value; resetSectionForm(); resetLessonForm(); loadCourseBuilderData(); });
+    $id('cbSectionForm').addEventListener('submit', saveCbSection);
+    $id('cbLessonForm').addEventListener('submit', saveCbLesson);
+    $id('cbRulesForm').addEventListener('submit', saveCbRules);
+    $id('cbSectionCancel').addEventListener('click', resetSectionForm);
+    $id('cbLessonCancel').addEventListener('click', resetLessonForm);
+
+    $id('cbSectionsBody').addEventListener('click', async function (e) {
+      var b = e.target.closest('button'); if (!b || b.disabled) return;
+      var up = b.getAttribute('data-sec-up'), down = b.getAttribute('data-sec-down'), ed = b.getAttribute('data-sec-edit'), del = b.getAttribute('data-sec-del');
+      if (up) return cbMove('course_sections', cbSections, up, -1);
+      if (down) return cbMove('course_sections', cbSections, down, 1);
+      if (ed) {
+        var sec = cbSections.find(function (x) { return x.id === ed; }); if (!sec) return;
+        var f = $id('cbSectionForm'); f.elements.title.value = sec.title || ''; f.elements.description.value = sec.description || ''; f.elements.status.value = sec.status;
+        cbEditSectionId = sec.id; $id('cbSectionSave').textContent = 'Update section'; $id('cbSectionCancel').hidden = false;
+        f.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+      if (del) {
+        var s2 = cbSections.find(function (x) { return x.id === del; });
+        var n = cbLessons.filter(function (x) { return x.section_id === del; }).length;
+        if (!confirm('Delete section "' + (s2 ? s2.title : '') + '"? Its ' + n + ' lesson(s) and all students\' progress on them will also be deleted. This cannot be undone.')) return;
+        var r = await sb.from('course_sections').delete().eq('id', del);
+        if (r.error) return setNote('cbNote', r.error.message);
+        if (cbEditSectionId === del) resetSectionForm();
+        await loadCourseBuilderData();
+      }
+    });
+
+    $id('cbLessonsBody').addEventListener('click', async function (e) {
+      var b = e.target.closest('button'); if (!b || b.disabled) return;
+      var up = b.getAttribute('data-les-up'), down = b.getAttribute('data-les-down'), ed = b.getAttribute('data-les-edit'), del = b.getAttribute('data-les-del');
+      function siblings(id) {
+        var les = cbLessons.find(function (x) { return x.id === id; });
+        return les ? cbLessons.filter(function (x) { return x.section_id === les.section_id; }) : [];
+      }
+      if (up) return cbMove('lessons', siblings(up), up, -1);
+      if (down) return cbMove('lessons', siblings(down), down, 1);
+      if (ed) {
+        var les = cbLessons.find(function (x) { return x.id === ed; }); if (!les) return;
+        var f = $id('cbLessonForm');
+        f.elements.section_id.value = les.section_id; f.elements.title.value = les.title || ''; f.elements.description.value = les.description || '';
+        f.elements.content.value = les.content || '';
+        f.elements.learning_objectives.value = Array.isArray(les.learning_objectives) ? les.learning_objectives.join('\n') : '';
+        f.elements.video_url.value = les.video_url || ''; f.elements.resource_url.value = les.resource_url || ''; f.elements.external_url.value = les.external_url || '';
+        f.elements.estimated_minutes.value = les.estimated_minutes == null ? '' : les.estimated_minutes; f.elements.status.value = les.status;
+        cbEditLessonId = les.id; $id('cbLessonSave').textContent = 'Update lesson'; $id('cbLessonCancel').hidden = false;
+        f.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+      if (del) {
+        var l2 = cbLessons.find(function (x) { return x.id === del; });
+        if (!confirm('Delete lesson "' + (l2 ? l2.title : '') + '"? Students\' progress on it will also be deleted. This cannot be undone.')) return;
+        var r = await sb.from('lessons').delete().eq('id', del);
+        if (r.error) return setNote('cbNote', r.error.message);
+        if (cbEditLessonId === del) resetLessonForm();
+        await loadCourseBuilderData();
+      }
+    });
+
+    // Enrollments panel
+    $id('enModule').addEventListener('change', renderEnrollments);
+    $id('enStatus').addEventListener('change', renderEnrollments);
+    $id('enSearch').addEventListener('input', renderEnrollments);
+    $id('enBody').addEventListener('change', async function (e) {
+      var sel = e.target.closest('select[data-en-status]'); if (!sel) return;
+      var id = sel.getAttribute('data-en-status');
+      var patch = { status: sel.value, completed_at: sel.value === 'completed' ? new Date().toISOString() : null };
+      var r = await sb.from('enrollments').update(patch).eq('id', id);
+      if (r.error) { setNote('enNote', r.error.message); loadEnrollments(); return; }
+      var row = enRows.find(function (x) { return x.id === id; }); if (row) { row.status = sel.value; row.completed_at = patch.completed_at; }
+      setNote('enNote', 'Status updated.', true);
+    });
+    $id('enBody').addEventListener('click', async function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      var issue = b.getAttribute('data-en-issue'), del = b.getAttribute('data-en-del');
+      if (issue) {
+        var p = issue.split('|');
+        certPrefill = { student: p[0], module: p[1] };
+        showAdminView('__certissuances');
+        return;
+      }
+      if (del) {
+        if (!confirm('Remove this enrollment? The student can enroll again. Their lesson progress is kept.')) return;
+        var r = await sb.from('enrollments').delete().eq('id', del);
+        if (r.error) return setNote('enNote', r.error.message);
+        await loadEnrollments();
+      }
+    });
+  }
+
+  async function loadQuizBuilder() {
+    var res = await Promise.all([
+      sb.from('quizzes').select('*').order('title'),
+      sb.from('modules').select('id, title, code').order('title')
+    ]);
+    if (res[0].error) { setNote('qbMetaNote', 'Could not load quizzes: ' + res[0].error.message); return; }
+    qbQuizzes = res[0].data || [];
+    qbModules = res[1].data || [];
+    var sel = $id('qbQuiz');
+    sel.innerHTML = '<option value="">New quiz…</option>' + qbQuizzes.map(function (q) {
+      return '<option value="' + q.id + '">' + escapeHtml(q.title) + '</option>';
+    }).join('');
+    var msel = $id('qbMetaForm').querySelector('[name="module_id"]');
+    msel.innerHTML = '<option value="">No module</option>' + qbModules.map(function (m) {
+      return '<option value="' + m.id + '">' + escapeHtml(m.title || m.code) + '</option>';
+    }).join('');
+    if (qbQuizId && qbQuizzes.some(function (q) { return q.id === qbQuizId; })) {
+      sel.value = qbQuizId;
+      loadQuizMeta(qbQuizId);
+    } else {
+      sel.value = '';
+      resetQuizMetaForm();
+    }
+  }
+
+  function resetQuizMetaForm() {
+    qbQuizId = '';
+    var f = $id('qbMetaForm');
+    f.reset();
+    f.elements.pass_percent.value = 50;
+    f.elements.status.value = 'draft';
+    $id('qbMetaSave').textContent = 'Create quiz';
+    $id('qbMetaDelete').hidden = true;
+    $id('qbQuestionsArea').hidden = true;
+    qbQuestions = [];
+    resetQuestionForm();
+    setNote('qbMetaNote', '');
+  }
+
+  function loadQuizMeta(id) {
+    var q = qbQuizzes.find(function (x) { return x.id === id; });
+    if (!q) return resetQuizMetaForm();
+    qbQuizId = id;
+    var f = $id('qbMetaForm');
+    f.elements.title.value = q.title || '';
+    f.elements.slug.value = q.slug || '';
+    f.elements.summary.value = q.summary || '';
+    f.elements.category.value = q.category || 'practice';
+    f.elements.module_id.value = q.module_id || '';
+    f.elements.time_limit_minutes.value = q.time_limit_minutes == null ? '' : q.time_limit_minutes;
+    f.elements.pass_percent.value = q.pass_percent == null ? 50 : q.pass_percent;
+    f.elements.status.value = q.status || 'draft';
+    $id('qbMetaSave').textContent = 'Update quiz';
+    $id('qbMetaDelete').hidden = false;
+    $id('qbQuestionsArea').hidden = false;
+    setNote('qbMetaNote', '');
+    resetQuestionForm();
+    loadQuizQuestions();
+  }
+
+  async function loadQuizQuestions() {
+    if (!qbQuizId) { qbQuestions = []; renderQbQuestions(); return; }
+    var r = await sb.from('quiz_questions').select('*').eq('quiz_id', qbQuizId).order('sort_order').order('created_at');
+    if (r.error) { setNote('qbQuestionNote', 'Could not load questions: ' + r.error.message); return; }
+    qbQuestions = r.data || [];
+    renderQbQuestions();
+  }
+
+  function renderQbQuestions() {
+    var body = $id('qbQuestionsBody');
+    body.innerHTML = qbQuestions.map(function (q, i) {
+      var choices = Array.isArray(q.choices) ? q.choices : [];
+      var correctText = choices[q.correct_index] || '';
+      return '<tr><td>' + (i + 1) + '</td><td>' + escapeHtml(q.prompt) + '</td><td>' + choices.length + '</td><td>' + escapeHtml(correctText) + '</td><td>' +
+        '<button type="button" class="btn" data-q-up="' + q.id + '"' + (i === 0 ? ' disabled' : '') + ' aria-label="Move up">↑</button> ' +
+        '<button type="button" class="btn" data-q-down="' + q.id + '"' + (i === qbQuestions.length - 1 ? ' disabled' : '') + ' aria-label="Move down">↓</button> ' +
+        '<button type="button" class="btn" data-q-edit="' + q.id + '">Edit</button> ' +
+        '<button type="button" class="btn" data-q-del="' + q.id + '">Delete</button></td></tr>';
+    }).join('') || '<tr><td colspan="5">No questions yet. Add the first question above.</td></tr>';
+  }
+
+  function qbChoiceRow(value, checked) {
+    qbChoiceCount++;
+    var id = 'qbc' + qbChoiceCount;
+    return '<div class="qb-choice-row"><input type="radio" name="correctChoice" value="' + id + '"' + (checked ? ' checked' : '') + ' title="Mark as correct answer" />' +
+      '<input type="text" value="' + escapeHtml(value || '') + '" placeholder="Choice text" required />' +
+      '<button type="button" class="btn qb-remove" data-remove-choice aria-label="Remove choice">✕</button></div>';
+  }
+
+  function resetQuestionForm() {
+    qbEditQuestionId = null;
+    var f = $id('qbQuestionForm');
+    f.reset();
+    $id('qbChoicesWrap').innerHTML = qbChoiceRow('', true) + qbChoiceRow('') + qbChoiceRow('') + qbChoiceRow('');
+    $id('qbQuestionSave').textContent = 'Add question';
+    $id('qbQuestionCancel').hidden = true;
+    setNote('qbQuestionNote', '');
+  }
+
+  async function saveQuizMeta(e) {
+    e.preventDefault();
+    var f = e.target;
+    var title = f.elements.title.value.trim();
+    if (!title) return setNote('qbMetaNote', 'Title is required.');
+    var slug = f.elements.slug.value.trim() || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    var tl = f.elements.time_limit_minutes.value.trim();
+    var pp = parseInt(f.elements.pass_percent.value, 10);
+    if (isNaN(pp) || pp < 0 || pp > 100) return setNote('qbMetaNote', 'Pass mark must be between 0 and 100.');
+    var payload = {
+      title: title, slug: slug, summary: f.elements.summary.value.trim() || null,
+      category: f.elements.category.value.trim() || 'practice',
+      module_id: f.elements.module_id.value || null,
+      time_limit_minutes: tl === '' ? null : parseInt(tl, 10),
+      pass_percent: pp, status: f.elements.status.value,
+      updated_at: new Date().toISOString()
+    };
+    var res;
+    if (qbQuizId) {
+      var existing = qbQuizzes.find(function (x) { return x.id === qbQuizId; }) || {};
+      if (payload.status === 'published' && !existing.published_at) payload.published_at = new Date().toISOString();
+      res = await sb.from('quizzes').update(payload).eq('id', qbQuizId);
+    } else {
+      if (payload.status === 'published') payload.published_at = new Date().toISOString();
+      res = await sb.from('quizzes').insert(payload).select().single();
+    }
+    if (res.error) return setNote('qbMetaNote', res.error.message);
+    if (!qbQuizId && res.data) qbQuizId = res.data.id;
+    setNote('qbMetaNote', 'Saved.', true);
+    await loadQuizBuilder();
+    $id('qbQuiz').value = qbQuizId;
+    loadQuizMeta(qbQuizId);
+  }
+
+  async function deleteQuiz() {
+    if (!qbQuizId) return;
+    var q = qbQuizzes.find(function (x) { return x.id === qbQuizId; });
+    if (!confirm('Delete quiz "' + (q ? q.title : '') + '"? Its questions and all students\' attempt records will also be deleted. This cannot be undone.')) return;
+    var r = await sb.from('quizzes').delete().eq('id', qbQuizId);
+    if (r.error) return setNote('qbMetaNote', r.error.message);
+    await loadQuizBuilder();
+  }
+
+  async function saveQuestion(e) {
+    e.preventDefault();
+    if (!qbQuizId) return setNote('qbQuestionNote', 'Save the quiz first.');
+    var f = e.target;
+    var prompt = f.elements.prompt.value.trim();
+    if (!prompt) return setNote('qbQuestionNote', 'Prompt is required.');
+    var rows = Array.prototype.slice.call($id('qbChoicesWrap').querySelectorAll('.qb-choice-row'));
+    var choices = [], correctIndex = -1;
+    rows.forEach(function (row) {
+      var input = row.querySelector('input[type="text"]');
+      var radio = row.querySelector('input[type="radio"]');
+      var val = input.value.trim();
+      if (!val) return;
+      choices.push(val);
+      if (radio.checked) correctIndex = choices.length - 1;
+    });
+    if (choices.length < 2) return setNote('qbQuestionNote', 'Add at least two choices.');
+    if (correctIndex < 0) return setNote('qbQuestionNote', 'Mark one choice as the correct answer.');
+    var payload = { prompt: prompt, choices: choices, correct_index: correctIndex, explanation: f.elements.explanation.value.trim() || null };
+    var res;
+    if (qbEditQuestionId) {
+      res = await sb.from('quiz_questions').update(payload).eq('id', qbEditQuestionId);
+    } else {
+      payload.quiz_id = qbQuizId;
+      payload.sort_order = qbQuestions.length ? Math.max.apply(null, qbQuestions.map(function (x) { return x.sort_order; })) + 1 : 0;
+      res = await sb.from('quiz_questions').insert(payload);
+    }
+    if (res.error) return setNote('qbQuestionNote', res.error.message);
+    resetQuestionForm();
+    setNote('qbQuestionNote', 'Saved.', true);
+    await loadQuizQuestions();
+  }
+
+  async function qbMove(id, dir) {
+    var i = qbQuestions.findIndex(function (x) { return x.id === id; });
+    var j = i + dir;
+    if (i < 0 || j < 0 || j >= qbQuestions.length) return;
+    var arr = qbQuestions.slice();
+    var item = arr.splice(i, 1)[0];
+    arr.splice(j, 0, item);
+    var jobs = [];
+    arr.forEach(function (x, idx) { if (x.sort_order !== idx) jobs.push(sb.from('quiz_questions').update({ sort_order: idx }).eq('id', x.id)); });
+    var results = await Promise.all(jobs);
+    var bad = results.find(function (r) { return r.error; });
+    if (bad) { setNote('qbQuestionNote', 'Could not reorder: ' + bad.error.message); return; }
+    setNote('qbQuestionNote', '');
+    await loadQuizQuestions();
+  }
+
+  function bindQuizBuilder() {
+    $id('qbQuiz').addEventListener('change', function () { if (this.value) loadQuizMeta(this.value); else resetQuizMetaForm(); });
+    $id('qbNewQuiz').addEventListener('click', function () { $id('qbQuiz').value = ''; resetQuizMetaForm(); $id('qbMetaForm').scrollIntoView({ behavior: 'smooth', block: 'center' }); });
+    $id('qbMetaForm').addEventListener('submit', saveQuizMeta);
+    $id('qbMetaDelete').addEventListener('click', deleteQuiz);
+    $id('qbAddChoice').addEventListener('click', function () { $id('qbChoicesWrap').insertAdjacentHTML('beforeend', qbChoiceRow('')); });
+    $id('qbChoicesWrap').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-remove-choice]'); if (!b) return;
+      var rows = $id('qbChoicesWrap').querySelectorAll('.qb-choice-row');
+      if (rows.length <= 2) return setNote('qbQuestionNote', 'A question needs at least two choices.');
+      b.closest('.qb-choice-row').remove();
+    });
+    $id('qbQuestionForm').addEventListener('submit', saveQuestion);
+    $id('qbQuestionCancel').addEventListener('click', resetQuestionForm);
+    $id('qbQuestionsBody').addEventListener('click', async function (e) {
+      var b = e.target.closest('button'); if (!b || b.disabled) return;
+      var up = b.getAttribute('data-q-up'), down = b.getAttribute('data-q-down'), ed = b.getAttribute('data-q-edit'), del = b.getAttribute('data-q-del');
+      if (up) return qbMove(up, -1);
+      if (down) return qbMove(down, 1);
+      if (ed) {
+        var qq = qbQuestions.find(function (x) { return x.id === ed; }); if (!qq) return;
+        var f = $id('qbQuestionForm');
+        f.elements.prompt.value = qq.prompt || '';
+        f.elements.explanation.value = qq.explanation || '';
+        var choices = Array.isArray(qq.choices) ? qq.choices : [];
+        $id('qbChoicesWrap').innerHTML = choices.length ? choices.map(function (c, idx) { return qbChoiceRow(c, idx === qq.correct_index); }).join('') : (qbChoiceRow('', true) + qbChoiceRow(''));
+        qbEditQuestionId = qq.id;
+        $id('qbQuestionSave').textContent = 'Update question'; $id('qbQuestionCancel').hidden = false;
+        f.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+      if (del) {
+        if (!confirm('Delete this question? This cannot be undone.')) return;
+        var r = await sb.from('quiz_questions').delete().eq('id', del);
+        if (r.error) return setNote('qbQuestionNote', r.error.message);
+        if (qbEditQuestionId === del) resetQuestionForm();
+        await loadQuizQuestions();
+      }
+    });
+  }
+
+  async function loadEnrollments() {
+    setNote('enNote', 'Loading…', true);
+    var res = await Promise.all([
+      sb.from('enrollments').select('*').order('enrolled_at', { ascending: false }),
+      sb.from('profiles').select('id, full_name, email, student_id').eq('role', 'student'),
+      sb.from('modules').select('id, title, code').order('title'),
+      sb.from('course_completions').select('student_id, module_id, lesson_percent, best_quiz_percent, is_eligible_for_certificate'),
+      sb.from('certificate_issuances').select('student_id, module_id, status')
+    ]);
+    if (res[0].error) { setNote('enNote', 'Could not load enrollments: ' + res[0].error.message); $id('enBody').innerHTML = ''; return; }
+    enRows = res[0].data || [];
+    enProfiles = {}; (res[1].data || []).forEach(function (p) { enProfiles[p.id] = p; });
+    var mods = res[2].data || [];
+    enModules = {}; mods.forEach(function (m) { enModules[m.id] = m; });
+    enCompletions = {}; (res[3].data || []).forEach(function (c) { enCompletions[c.student_id + '|' + c.module_id] = c; });
+    enIssued = {}; (res[4].data || []).forEach(function (c) { if (c.status === 'issued') enIssued[c.student_id + '|' + c.module_id] = true; });
+    var sel = $id('enModule'); var cur = sel.value;
+    sel.innerHTML = '<option value="">All modules</option>' + mods.map(function (m) { return '<option value="' + m.id + '">' + escapeHtml(m.title || m.code) + '</option>'; }).join('');
+    sel.value = cur;
+    setNote('enNote', '');
+    renderEnrollments();
+  }
+
+  function renderEnrollments() {
+    var mf = $id('enModule').value, sf = $id('enStatus').value, q = ($id('enSearch').value || '').trim().toLowerCase();
+    var rows = enRows.filter(function (r) {
+      if (mf && r.module_id !== mf) return false;
+      if (sf && r.status !== sf) return false;
+      if (q) {
+        var p = enProfiles[r.student_id] || {};
+        var hay = [p.full_name, p.email, p.student_id].filter(Boolean).join(' ').toLowerCase();
+        if (hay.indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+    $id('enTotal').textContent = '(' + rows.length + ')';
+    $id('enBody').innerHTML = rows.map(function (r) {
+      var p = enProfiles[r.student_id] || {}, m = enModules[r.module_id] || {};
+      var key = r.student_id + '|' + r.module_id, c = enCompletions[key];
+      var lp = c && c.lesson_percent != null ? Math.round(c.lesson_percent) + '%' : '0%';
+      var qp = c && c.best_quiz_percent != null ? Math.round(c.best_quiz_percent) + '%' : '—';
+      var cert = enIssued[key] ? 'Issued' : (c && c.is_eligible_for_certificate ? 'Eligible <button type="button" class="btn" data-en-issue="' + key + '">Issue</button>' : '—');
+      var d = new Date(r.enrolled_at);
+      var opts = ['pending', 'active', 'completed', 'cancelled'].map(function (s) { return '<option value="' + s + '"' + (s === r.status ? ' selected' : '') + '>' + s + '</option>'; }).join('');
+      return '<tr><td>' + escapeHtml(p.full_name || p.email || 'Unknown') + (p.student_id ? '<br><small>' + escapeHtml(p.student_id) + '</small>' : '') + '</td>' +
+        '<td>' + escapeHtml(m.title || m.code || '') + '</td>' +
+        '<td><select data-en-status="' + r.id + '" aria-label="Enrollment status">' + opts + '</select></td>' +
+        '<td>' + escapeHtml(isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-PK')) + '</td>' +
+        '<td>' + lp + '</td><td>' + qp + '</td><td>' + cert + '</td>' +
+        '<td><button type="button" class="btn" data-en-del="' + r.id + '">Remove</button></td></tr>';
+    }).join('') || '<tr><td colspan="8">No enrollments match.</td></tr>';
+  }
+
+  async function loadEducationStats() {
+    var grid = $id('eduStats');
+    if (!grid) return;
+    var s = null;
+    try { var res = await sb.from('education_dashboard_stats').select('*').maybeSingle(); s = res && res.data; } catch (err) { s = null; }
+    function v(k) { return s && s[k] != null ? s[k] : '—'; }
+    var cards = [
+      ['Active students', v('active_students')],
+      ['Published courses', s ? (s.published_courses + ' / ' + s.total_courses) : '—'],
+      ['Enrollments (30 days)', v('recent_enrollments_30d')],
+      ['Quiz attempts (30 days)', v('recent_quiz_activity_30d')],
+      ['Certificates issued', v('certificates_issued')],
+      ['Lectures', v('total_lectures')],
+      ['Quizzes', v('total_quizzes')],
+      ['Pending applications', v('pending_applications')]
+    ];
+    grid.innerHTML = cards.map(function (c) { return '<div class="stat-card"><div class="label">' + c[0] + '</div><div class="value">' + escapeHtml(c[1]) + '</div></div>'; }).join('');
+  }
+
   function showAdminView(view) {
-    var panels = ['dashboardPanel','studentsPanel','adminsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','orgSettingsPanel','brandingLogoPanel','brandingTypePanel','contactInfoPanel','seoSettingsPanel','systemSettingsPanel','disclaimersPanel','homepageSectionsPanel','navigationPanel','certTemplatesPanel','mediaLibraryPanel','certIssuancesPanel','seoOverridesPanel','notificationsPanel','auditLogPanel'];
+    var panels = ['dashboardPanel','studentsPanel','adminsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','orgSettingsPanel','brandingLogoPanel','brandingTypePanel','contactInfoPanel','seoSettingsPanel','systemSettingsPanel','disclaimersPanel','homepageSectionsPanel','navigationPanel','certTemplatesPanel','mediaLibraryPanel','certIssuancesPanel','courseBuilderPanel','quizBuilderPanel','enrollmentsPanel','seoOverridesPanel','notificationsPanel','auditLogPanel'];
     panels.forEach(function(id){ var el=document.getElementById(id); if(el){ el.hidden=true; el.classList.remove('is-active'); }});
     document.querySelectorAll('.admin-nav [data-table]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-table')===view); });
     document.getElementById('adminApp').classList.remove('nav-open');
@@ -5639,6 +6338,9 @@ window.ramdaniAuth = {
     if(view==='__navigation') { activate('navigationPanel','Navigation'); loadNavigation(); return; }
     if(view==='__certtemplates') { activate('certTemplatesPanel','Certificate templates'); loadCertTemplates(); return; }
     if(view==='__medialibrary') { activate('mediaLibraryPanel','Media library'); loadMediaLibrary(); return; }
+    if(view==='__coursebuilder') { activate('courseBuilderPanel','Course builder'); loadCourseBuilder(); return; }
+    if(view==='__quizbuilder') { activate('quizBuilderPanel','Quiz builder'); loadQuizBuilder(); return; }
+    if(view==='__enrollments') { activate('enrollmentsPanel','Enrollments & progress'); loadEnrollments(); return; }
     if(view==='__certissuances') { activate('certIssuancesPanel','Certificate issuances'); loadCertIssuances(); return; }
     if(view==='__seooverrides') { activate('seoOverridesPanel','SEO overrides'); populateSeoOverrideEntitySelect(); loadSeoOverrideRecords().then(loadSeoOverrideForRecord); loadSeoOverridesList(); return; }
     if(view==='__notifications') { activate('notificationsPanel','Notifications'); loadNotifications(); return; }
@@ -5699,6 +6401,7 @@ window.ramdaniAuth = {
       if(typeof r.count==='number') published+=r.count;
     }
     document.getElementById('statPublished').textContent=published;
+    await loadEducationStats();
   }
 
   async function loadTable(name) {
