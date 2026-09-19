@@ -1190,6 +1190,7 @@ if (window.ramdaniEducation) ramdaniEducation.renderCases();
       <h1 data-i18n="certificates_title"></h1>
       <p class="lead" data-i18n="certificates_lead"></p>
       <p class="note">Certificate listings are published by staff and may link to an LLB, LAT, GAT, Pakistan-law, or skills outline. Completing a quiz does not issue a certificate.</p>
+      <p><a class="btn" href="/pages/verify-certificate.html">Verify a certificate</a></p>
       <div id="filters" class="library-filters"></div>
       <div id="list" class="grid"></div>
     </div></section>`, init: async function () {
@@ -1519,6 +1520,51 @@ if (window.ramdaniEducation) ramdaniEducation.renderSocieties();
       <div id="list" class="grid"></div>
     </div></section>`, init: async function () {
 if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
+  } },
+  '/pages/verify-certificate.html': { title: 'Verify a certificate — Ramdani Law Firm', desc: 'Verify a Ramdani Law Firm certificate by its verification code. Confirms only certificate number, holder name, program, issue date and status.', html: `<section class="section"><div class="wrap">
+      <h1>Verify a certificate</h1>
+      <p class="lead">Enter the verification code printed on a Ramdani Law Firm certificate to confirm it is genuine and currently valid. No other student information is shown here.</p>
+      <form class="form" id="verifyCertForm">
+        <label>Verification code<input name="code" required placeholder="Enter the code printed on the certificate" /></label>
+        <button class="btn btn-primary" type="submit">Verify</button>
+        <p class="form-status" id="verifyCertStatus"></p>
+      </form>
+      <div id="verifyCertResult" class="card" hidden></div>
+    </div></section>`, init: async function () {
+      var form = document.getElementById('verifyCertForm');
+      var status = document.getElementById('verifyCertStatus');
+      var result = document.getElementById('verifyCertResult');
+      var input = form.querySelector('[name="code"]');
+      var esc = function (v) { var d = document.createElement('div'); d.textContent = v == null ? '' : String(v); return d.innerHTML; };
+      async function runVerify(code) {
+        result.hidden = true;
+        status.className = 'form-status';
+        if (!code) { status.className = 'form-status err'; status.textContent = 'Enter a verification code.'; return; }
+        status.textContent = 'Checking…';
+        var res = await sb.rpc('verify_certificate', { p_code: code });
+        if (res.error) {
+          status.className = 'form-status err';
+          status.textContent = 'Could not verify right now. Please try again.';
+          return;
+        }
+        var row = Array.isArray(res.data) ? res.data[0] : res.data;
+        status.textContent = '';
+        result.hidden = false;
+        if (!row || !row.certificate_number) {
+          result.innerHTML = '<p class="empty">No valid, currently-issued certificate matches this code.</p>';
+          return;
+        }
+        result.innerHTML = '<h2>Certificate verified</h2>' +
+          '<p><strong>Certificate number:</strong> ' + esc(row.certificate_number) + '</p>' +
+          (row.holder_name ? '<p><strong>Holder:</strong> ' + esc(row.holder_name) + '</p>' : '') +
+          (row.program_title ? '<p><strong>Program:</strong> ' + esc(row.program_title) + '</p>' : '') +
+          (row.issue_date ? '<p><strong>Issue date:</strong> ' + esc(row.issue_date) + '</p>' : '') +
+          '<p><strong>Status:</strong> ' + esc(row.status || 'issued') + '</p>' +
+          (row.org_name ? '<p><strong>Issuing organization:</strong> ' + esc(row.org_name) + '</p>' : '');
+      }
+      form.addEventListener('submit', function (e) { e.preventDefault(); runVerify(input.value.trim()); });
+      var qcode = new URLSearchParams(window.ramdaniRoute.search()).get('code');
+      if (qcode) { input.value = qcode; runVerify(qcode.trim()); }
   } },
 };
 </script>
