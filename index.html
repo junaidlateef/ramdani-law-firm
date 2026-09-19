@@ -691,6 +691,7 @@ html[dir="rtl"] .lead {
         <details class="admin-nav-group" open>
           <summary class="admin-nav-group-title">Community</summary>
           <button type="button" data-table="__organizations">Organizations</button>
+          <button type="button" data-table="__memberships">Memberships</button>
           <button type="button" data-table="societies">Societies</button>
           <button type="button" data-table="chapters">Chapters</button>
           <button type="button" data-table="cabinets">Cabinets</button>
@@ -1505,6 +1506,39 @@ html[dir="rtl"] .lead {
             </form>
             <div class="admin-toolbar"><input type="search" id="organizationSearch" placeholder="Search organizations" /></div>
             <div class="table-wrap"><table class="data"><thead><tr><th>Reference</th><th>Name</th><th>Status</th><th></th></tr></thead><tbody id="organizationBody"></tbody></table></div>
+          </div>
+
+          <div id="membershipsPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Memberships</h2><p class="note">The relationship between a person and an organization/society/chapter/cabinet. Approval is never automatic — use the explicit action buttons below to move a membership through its lifecycle.</p></div></div>
+            <form id="membershipForm" class="form admin-form">
+              <label><span>Member</span><select name="member_id" required><option value="">Select member…</option></select></label>
+              <label><span>Organization</span><select name="organization_id"><option value="">None</option></select></label>
+              <label><span>Society</span><select name="society_id"><option value="">None</option></select></label>
+              <label><span>Chapter</span><select name="chapter_id"><option value="">None</option></select></label>
+              <label><span>Cabinet</span><select name="cabinet_id"><option value="">None</option></select></label>
+              <label><span>Membership type</span><input name="membership_type" placeholder="general" /></label>
+              <label><span>Membership number</span><input name="membership_number" placeholder="Auto if left blank" /></label>
+              <label><span>Joining date</span><input name="joining_date" type="date" /></label>
+              <label><span>Start date</span><input name="start_date" type="date" /></label>
+              <label><span>Expiry date</span><input name="expiry_date" type="date" /></label>
+              <label><span>Status</span><select name="status"><option value="application">Application</option><option value="under_review">Under review</option><option value="approved">Approved</option><option value="active">Active</option><option value="expired">Expired</option><option value="suspended">Suspended</option><option value="revoked">Revoked</option></select></label>
+              <div class="form-actions"><button class="btn btn-primary" type="submit" id="membershipSave">Save membership</button><button class="btn" type="button" id="membershipCancel" hidden>Cancel</button><p id="membershipNote" class="form-status"></p></div>
+            </form>
+            <div class="admin-toolbar">
+              <select id="membershipStatusFilter">
+                <option value="">All memberships</option>
+                <option value="application">Applications</option>
+                <option value="under_review">Under review</option>
+                <option value="approved">Approved</option>
+                <option value="active">Active</option>
+                <option value="expiring">Expiring (≤30 days)</option>
+                <option value="expired">Expired</option>
+                <option value="suspended">Suspended</option>
+                <option value="revoked">Revoked</option>
+              </select>
+              <input type="search" id="membershipSearch" placeholder="Search member, number, society" />
+            </div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Reference</th><th>Member</th><th>Society</th><th>Type</th><th>Expiry</th><th>Status</th><th>Actions</th></tr></thead><tbody id="membershipBody"></tbody></table></div>
           </div>
 
           <div id="membersPanel" class="admin-panel" hidden>
@@ -5313,6 +5347,7 @@ window.ramdaniAuth = {
     'certificates': ['education_manager'], '__certissuances': ['education_manager'],
     '__coursebuilder': ['education_manager'], '__quizbuilder': ['education_manager'], '__quizresults': ['education_manager'], '__edusearch': ['education_manager'], '__enrollments': ['education_manager', 'student_manager'],
     '__organizations': ['student_manager'],
+    '__memberships': ['student_manager'],
     'societies': ['student_manager'], 'chapters': ['student_manager'], 'cabinets': ['student_manager'],
     'internships': ['student_manager'],
     '__inquiries': ['communications_manager'],
@@ -8455,6 +8490,164 @@ window.ramdaniAuth = {
     sel.value = cur;
   }
 
+  var platMemberships = [], platEditMembershipId = null;
+
+  async function ensureOrgSocietyLookupsLoaded() {
+    if (!platOrganizations.length) { var or = await sb.from('organizations').select('*').order('name'); platOrganizations = or.data || []; }
+    if (!platSocieties.length || !platChapters.length || !platCabinets.length || !platMembers.length) { await loadPlatLookups(); }
+  }
+
+  function fillMembershipSelects() {
+    var f = $id('membershipForm'); if (!f) return;
+    function fillSel(sel, rows, labelFn, empty) {
+      if (!sel) return;
+      var cur = sel.value;
+      sel.innerHTML = '<option value="">' + (empty || 'None') + '</option>' + rows.map(function (r) {
+        return '<option value="' + r.id + '">' + escapeHtml(labelFn(r)) + '</option>';
+      }).join('');
+      sel.value = cur;
+    }
+    fillSel(f.elements.member_id, platMembers, function (r) { return (r.member_number ? r.member_number + ' — ' : '') + r.full_name; }, 'Select member…');
+    fillSel(f.elements.organization_id, platOrganizations, function (r) { return r.name; });
+    fillSel(f.elements.society_id, platSocieties, function (r) { return r.title; });
+    fillSel(f.elements.chapter_id, platChapters, function (r) { return r.title; });
+    fillSel(f.elements.cabinet_id, platCabinets, function (r) { return r.title; });
+  }
+
+  async function loadMemberships() {
+    await ensureOrgSocietyLookupsLoaded();
+    fillMembershipSelects();
+    var res = await sb.from('memberships').select('*').order('created_at', { ascending: false });
+    if (res.error) { setNote('membershipNote', res.error.message); return; }
+    platMemberships = res.data || [];
+    renderMemberships();
+  }
+
+  function membershipIsExpiringSoon(m) {
+    if (m.status !== 'active' || !m.expiry_date) return false;
+    var days = (new Date(m.expiry_date) - new Date()) / 86400000;
+    return days >= 0 && days <= 30;
+  }
+
+  function renderMemberships() {
+    var st = ($id('membershipStatusFilter') || {}).value || '';
+    var q = (($id('membershipSearch') || {}).value || '').trim().toLowerCase();
+    var rows = platMemberships.filter(function (m) {
+      if (st === 'expiring') { if (!membershipIsExpiringSoon(m)) return false; }
+      else if (st && m.status !== st) return false;
+      if (q) {
+        var mem = platMembers.find(function (x) { return x.id === m.member_id; });
+        var soc = platSocieties.find(function (x) { return x.id === m.society_id; });
+        var hay = [m.reference_id, m.membership_number, mem && mem.full_name, soc && soc.title].join(' ').toLowerCase();
+        if (hay.indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+    $id('membershipBody').innerHTML = rows.map(function (m) {
+      var mem = platMembers.find(function (x) { return x.id === m.member_id; });
+      var soc = platSocieties.find(function (x) { return x.id === m.society_id; });
+      var actions = '<button type="button" class="btn btn-sm" data-mship-edit="' + m.id + '">Edit</button>';
+      if (m.status === 'application' || m.status === 'under_review') {
+        actions += ' <button type="button" class="btn btn-sm" data-mship-approve="' + m.id + '">Approve</button>';
+      } else if (m.status === 'approved') {
+        actions += ' <button type="button" class="btn btn-sm" data-mship-activate="' + m.id + '">Activate</button>';
+      } else if (m.status === 'active') {
+        actions += ' <button type="button" class="btn btn-sm" data-mship-suspend="' + m.id + '">Suspend</button> <button type="button" class="btn btn-sm" data-mship-renew="' + m.id + '">Renew</button>';
+      } else if (m.status === 'suspended') {
+        actions += ' <button type="button" class="btn btn-sm" data-mship-reactivate="' + m.id + '">Reactivate</button>';
+      } else if (m.status === 'expired') {
+        actions += ' <button type="button" class="btn btn-sm" data-mship-renew="' + m.id + '">Renew</button>';
+      }
+      if (m.status !== 'revoked') {
+        actions += ' <button type="button" class="btn btn-sm" data-mship-revoke="' + m.id + '">Revoke</button>';
+      }
+      var expiring = membershipIsExpiringSoon(m);
+      return '<tr><td>' + escapeHtml(m.reference_id || '') + '</td><td>' + escapeHtml(mem ? mem.full_name : '') + '</td><td>' + escapeHtml(soc ? soc.title : '') + '</td><td>' + escapeHtml(m.membership_type || '') + '</td><td>' + escapeHtml(m.expiry_date || '') + (expiring ? ' <span class="status-badge status-draft">expiring</span>' : '') + '</td><td><span class="status-badge status-' + escapeHtml(m.status) + '">' + escapeHtml(m.status) + '</span></td><td><div class="table-actions">' + actions + '</div></td></tr>';
+    }).join('') || '<tr><td colspan="7">No memberships found.</td></tr>';
+
+    document.querySelectorAll('[data-mship-edit]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var row = platMemberships.find(function (r) { return String(r.id) === String(btn.getAttribute('data-mship-edit')); });
+        if (row) fillMembershipForm(row);
+      });
+    });
+    document.querySelectorAll('[data-mship-approve]').forEach(function (btn) { btn.addEventListener('click', function () { approveMembership(btn.getAttribute('data-mship-approve')); }); });
+    document.querySelectorAll('[data-mship-activate]').forEach(function (btn) { btn.addEventListener('click', function () { setMembershipStatus(btn.getAttribute('data-mship-activate'), 'active'); }); });
+    document.querySelectorAll('[data-mship-suspend]').forEach(function (btn) { btn.addEventListener('click', function () { if (confirm('Suspend this membership?')) setMembershipStatus(btn.getAttribute('data-mship-suspend'), 'suspended'); }); });
+    document.querySelectorAll('[data-mship-reactivate]').forEach(function (btn) { btn.addEventListener('click', function () { setMembershipStatus(btn.getAttribute('data-mship-reactivate'), 'active'); }); });
+    document.querySelectorAll('[data-mship-revoke]').forEach(function (btn) { btn.addEventListener('click', function () { if (confirm('Revoke this membership? This cannot be undone from here.')) setMembershipStatus(btn.getAttribute('data-mship-revoke'), 'revoked'); }); });
+    document.querySelectorAll('[data-mship-renew]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var newExpiry = window.prompt('New expiry date (YYYY-MM-DD):', '');
+        if (!newExpiry) return;
+        renewMembership(btn.getAttribute('data-mship-renew'), newExpiry);
+      });
+    });
+  }
+
+  async function approveMembership(id) {
+    var profile = await ramdaniAuth.profile();
+    var res = await sb.from('memberships').update({ status: 'approved', approved_by: profile && profile.id, approved_at: new Date().toISOString() }).eq('id', id);
+    if (res.error) return setNote('membershipNote', res.error.message);
+    await loadMemberships();
+  }
+  async function setMembershipStatus(id, status) {
+    var res = await sb.from('memberships').update({ status: status }).eq('id', id);
+    if (res.error) return setNote('membershipNote', res.error.message);
+    await loadMemberships();
+  }
+  async function renewMembership(id, newExpiry) {
+    var res = await sb.from('memberships').update({ status: 'active', expiry_date: newExpiry }).eq('id', id);
+    if (res.error) return setNote('membershipNote', res.error.message);
+    await loadMemberships();
+  }
+
+  function fillMembershipForm(row) {
+    var f = $id('membershipForm');
+    ['member_id', 'organization_id', 'society_id', 'chapter_id', 'cabinet_id', 'membership_type', 'membership_number', 'joining_date', 'start_date', 'expiry_date', 'status'].forEach(function (k) {
+      if (f.elements[k]) f.elements[k].value = row[k] == null ? '' : row[k];
+    });
+    platEditMembershipId = row.id;
+    $id('membershipSave').textContent = 'Update membership';
+    $id('membershipCancel').hidden = false;
+  }
+  function resetMembershipForm() {
+    platEditMembershipId = null;
+    $id('membershipForm').reset();
+    $id('membershipSave').textContent = 'Save membership';
+    $id('membershipCancel').hidden = true;
+    setNote('membershipNote', '');
+  }
+  async function saveMembership(e) {
+    e.preventDefault();
+    var f = e.target;
+    var payload = {
+      member_id: f.elements.member_id.value || null,
+      organization_id: f.elements.organization_id.value || null,
+      society_id: f.elements.society_id.value || null,
+      chapter_id: f.elements.chapter_id.value || null,
+      cabinet_id: f.elements.cabinet_id.value || null,
+      membership_type: f.elements.membership_type.value.trim() || 'general',
+      membership_number: f.elements.membership_number.value.trim() || null,
+      joining_date: f.elements.joining_date.value || null,
+      start_date: f.elements.start_date.value || null,
+      expiry_date: f.elements.expiry_date.value || null
+    };
+    if (!payload.member_id) return setNote('membershipNote', 'Member is required.');
+    if (!platEditMembershipId) {
+      // New memberships always start as an application — status/approval fields are never
+      // set directly from this form; use the lifecycle action buttons instead.
+      payload.status = 'application';
+    }
+    var res = platEditMembershipId
+      ? await sb.from('memberships').update(payload).eq('id', platEditMembershipId)
+      : await sb.from('memberships').insert(payload);
+    if (res.error) return setNote('membershipNote', res.error.message);
+    resetMembershipForm();
+    setNote('membershipNote', 'Saved.', true);
+    await loadMemberships();
+  }
+
   async function loadMembers() {
     await loadPlatLookups();
     var res = await sb.from('members').select('*').order('updated_at', { ascending: false });
@@ -8727,6 +8920,10 @@ window.ramdaniAuth = {
     $id('organizationForm').addEventListener('submit', saveOrganization);
     $id('organizationCancel').addEventListener('click', resetOrganizationForm);
     $id('organizationSearch').addEventListener('input', renderOrganizations);
+    $id('membershipForm').addEventListener('submit', saveMembership);
+    $id('membershipCancel').addEventListener('click', resetMembershipForm);
+    $id('membershipStatusFilter').addEventListener('change', renderMemberships);
+    $id('membershipSearch').addEventListener('input', renderMemberships);
     $id('memberForm').addEventListener('submit', saveMember);
     $id('memberCancel').addEventListener('click', resetMemberForm);
     $id('memberStatusFilter').addEventListener('change', renderMembers);
@@ -9093,7 +9290,7 @@ window.ramdaniAuth = {
   }
 
   function showAdminView(view) {
-    var panels = ['dashboardPanel','studentsPanel','adminsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','orgSettingsPanel','brandingLogoPanel','brandingTypePanel','contactInfoPanel','seoSettingsPanel','systemSettingsPanel','disclaimersPanel','homepageSectionsPanel','navigationPanel','certTemplatesPanel','mediaLibraryPanel','certIssuancesPanel','courseBuilderPanel','quizBuilderPanel','quizResultsPanel','eduSearchPanel','enrollmentsPanel','seoOverridesPanel','notificationsPanel','auditLogPanel','opsDashPanel','clientsPanel','legalMattersPanel','myTasksPanel','legalCalendarPanel','legalDocsPanel','legalCommsPanel','legalReportsPanel','legalSearchPanel','organizationsPanel','membersPanel','memberCardsPanel','studentCardsPanel','eventsPanel','eventRegsPanel','eventGuestsPanel','docsCenterPanel'];
+    var panels = ['dashboardPanel','studentsPanel','adminsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','orgSettingsPanel','brandingLogoPanel','brandingTypePanel','contactInfoPanel','seoSettingsPanel','systemSettingsPanel','disclaimersPanel','homepageSectionsPanel','navigationPanel','certTemplatesPanel','mediaLibraryPanel','certIssuancesPanel','courseBuilderPanel','quizBuilderPanel','quizResultsPanel','eduSearchPanel','enrollmentsPanel','seoOverridesPanel','notificationsPanel','auditLogPanel','opsDashPanel','clientsPanel','legalMattersPanel','myTasksPanel','legalCalendarPanel','legalDocsPanel','legalCommsPanel','legalReportsPanel','legalSearchPanel','organizationsPanel','membershipsPanel','membersPanel','memberCardsPanel','studentCardsPanel','eventsPanel','eventRegsPanel','eventGuestsPanel','docsCenterPanel'];
     panels.forEach(function(id){ var el=document.getElementById(id); if(el){ el.hidden=true; el.classList.remove('is-active'); }});
     document.querySelectorAll('.admin-nav [data-table]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-table')===view); });
     document.getElementById('adminApp').classList.remove('nav-open');
@@ -9133,6 +9330,7 @@ window.ramdaniAuth = {
     if(view==='__legalreports') { activate('legalReportsPanel','Reports'); loadLegalReports(); return; }
     if(view==='__legalsearch') { activate('legalSearchPanel','Secure search'); return; }
     if(view==='__organizations') { activate('organizationsPanel','Organizations'); loadOrganizations(); return; }
+    if(view==='__memberships') { activate('membershipsPanel','Memberships'); loadMemberships(); return; }
     if(view==='__members') { activate('membersPanel','Members'); loadMembers(); return; }
     if(view==='__membercards') { activate('memberCardsPanel','Member cards'); loadMemberCards(); return; }
     if(view==='__studentcards') { activate('studentCardsPanel','Student cards'); loadStudentCards(); return; }
