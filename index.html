@@ -1808,6 +1808,7 @@ html[dir="rtl"] .lead {
           <label>Department <input name="department" required /></label>
           <label>University <input name="university" required /></label>
           <label>Session <input name="session" placeholder="e.g. 2023–2027" required /></label>
+          <label>Photo <input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required /></label>
           <button class="btn btn-primary" type="submit">Create account</button>
         </form>
         <p id="studentSignupStatus" class="form-status"></p>
@@ -4213,9 +4214,13 @@ window.ramdaniAuth = {
         university: form.university.value.trim(),
         session: form.session.value.trim()
       };
+      var photoFile = form.photo.files[0];
       if (!/^\S+@\S+\.\S+$/.test(fields.email)) return setStatus('studentSignupStatus', 'Enter a valid email address.');
       if (fields.password.length < 8) return setStatus('studentSignupStatus', 'Password must be at least 8 characters.');
       if (fields.password !== fields.confirm_password) return setStatus('studentSignupStatus', 'Passwords do not match.');
+      if (!photoFile) return setStatus('studentSignupStatus', 'Upload a photo.');
+      if (!/^image\/(jpeg|png|webp)$/i.test(photoFile.type)) return setStatus('studentSignupStatus', 'Use a JPG, PNG or WebP image.');
+      if (photoFile.size > 4 * 1024 * 1024) return setStatus('studentSignupStatus', 'Photo must be under 4 MB.');
       var res = await ramdaniAuth.signUpStudent(fields);
       if (res.error) {
         var msg = /already registered|already exists/i.test(res.error.message)
@@ -4225,11 +4230,23 @@ window.ramdaniAuth = {
       }
       if (res.data && res.data.session) {
         // Email confirmation is off on this project: session issued immediately.
+        setStatus('studentSignupStatus', 'Uploading photo…', true);
+        var ext = (photoFile.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+        if (['jpeg', 'jpg', 'png', 'webp'].indexOf(ext) === -1) ext = 'jpg';
+        var storagePath = 'students/' + res.data.session.user.id + '/photo.' + ext;
+        var up = await sb.storage.from('private-docs').upload(storagePath, photoFile, { upsert: true, contentType: photoFile.type, cacheControl: '3600' });
+        if (up.error) {
+          // Account exists but photo upload failed; let them retry from the dashboard.
+          setStatus('studentSignupStatus', 'Account created, but the photo upload failed: ' + up.error.message + ' You can upload it from your dashboard.', false);
+          window.ramdaniGo('/student/dashboard');
+          return;
+        }
+        await sb.from('profiles').update({ photo_path: storagePath }).eq('id', res.data.session.user.id);
         window.ramdaniGo('/student/dashboard');
         return;
       }
       form.reset();
-      setStatus('studentSignupStatus', 'Account created. Check your email to verify your address, then sign in.', true);
+      setStatus('studentSignupStatus', 'Account created. Check your email to verify your address, then sign in — you can add your photo after signing in.', true);
     });
 
     document.getElementById('studentForgotForm').addEventListener('submit', async function (e) {
