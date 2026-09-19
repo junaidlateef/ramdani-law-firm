@@ -1,4 +1,50 @@
 <!DOCTYPE html>
+<!--
+  RAMDANI LAW FIRM — MASTER HTML (single-file frontend)
+  GitHub: https://github.com/junaidlateef/ramdani-law-firm  (main / index.html)
+  Live:   https://ramdani-law-firm.vercel.app/
+
+  This file inlines the GitHub frontend tree. Database / Supabase is not changed here.
+
+  GitHub frontend map
+  -------------------
+  index.html                 this master file
+  reset-password.html        password-reset shell (also inlined at end)
+  robots.txt / sitemap.xml   crawl files (not inlined)
+  vercel.json                host rewrites (not inlined)
+
+  css/style.css              GLOBAL STYLES — tokens, layout, type
+  css/components.css         cards, admin tables, quizzes, library, internships
+  css/brand.css              navy/gold brand, header, footer, theme
+  css/rtl.css                Urdu / RTL
+
+  js/config.js               public Supabase URL + anon key only
+  js/supabase-client.js      browser client
+  js/site-config.js          nav, logo, location
+  js/seo.js                  titles / meta
+  js/brand.js                header, footer, theme toggle
+  js/i18n.js                 English / Urdu
+  js/api.js                  published-content reads
+  js/components.js           cards
+  js/auth.js                 sign-in / profile
+  js/student.js              student portal
+  js/app.js                  hash router
+  js/education.js            modules, quizzes, library, societies
+  js/admin.js                staff admin + legal operations
+  js/reset-password.js       recovery form
+
+  pages/*.html               public pages, inlined as window.RAMDANI_PAGES
+  admin/index.html           staff shell, inlined as #adminRoot
+
+  Body shells
+  -----------
+  #publicShell   public website
+  #adminRoot     staff administration
+  #studentRoot   student portal
+  #memberRoot    member portal
+  #clientRoot    client portal
+  #resetRoot     password reset
+-->
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -189,7 +235,8 @@ h1 { font-size: clamp(2rem, 5vw, 3.4rem); }
   .nav { justify-content: flex-start; }
 }
 
-/* ===== Professional dashboard / auth system ===== */
+/* ===== css/components.css ===== */
+/* Professional dashboard / auth system */
 .admin-shell {
   display:grid; grid-template-columns:260px minmax(0,1fr); min-height:100vh;
   background:var(--paper);
@@ -531,7 +578,7 @@ html[dir="rtl"] .lead {
 </style>
 </head>
 <body>
-  <!-- WEBSITE STRUCTURE -->
+  <!-- PUBLIC WEBSITE: header, #viewRoot, footer (pages/*.html render here) -->
   <div id="publicShell">
   <a class="skip-link" href="#viewRoot">Skip to content</a>
   <header class="site-header">
@@ -549,7 +596,7 @@ html[dir="rtl"] .lead {
   </footer>
   </div>
 
-  <!-- ADMIN PANEL -->
+  <!-- STAFF ADMIN: admin/index.html inlined -->
   <div id="adminRoot" hidden>
     <div id="loginPanel" class="auth-screen">
       <div class="auth-box">
@@ -1582,7 +1629,7 @@ html[dir="rtl"] .lead {
   </div>
   </div>
 
-  <!-- STUDENT PORTAL -->
+  <!-- STUDENT PORTAL: /student/login|signup|dashboard -->
   <div id="studentRoot" hidden>
     <div class="wrap">
 
@@ -1724,7 +1771,7 @@ html[dir="rtl"] .lead {
     </div>
   </div>
 
-  <!-- MEMBER PORTAL -->
+  <!-- MEMBER PORTAL: /member/login|dashboard -->
   <div id="memberRoot" hidden>
     <div class="wrap">
       <div id="memberLoginPanel" class="auth-box">
@@ -1783,7 +1830,7 @@ html[dir="rtl"] .lead {
     </div>
   </div>
 
-  <!-- CLIENT PORTAL -->
+  <!-- CLIENT PORTAL: /client/login|dashboard -->
   <div id="clientRoot" hidden>
     <div class="wrap">
       <div id="clientLoginPanel" class="auth-box">
@@ -1831,7 +1878,7 @@ html[dir="rtl"] .lead {
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<!-- ROUTING -->
+<!-- PUBLIC PAGES: pages/*.html inlined as RAMDANI_PAGES -->
 <script>
 window.RAMDANI_PAGES = {
   '/': { title: 'Ramdani Law Firm — Dera Ghazi Khan', desc: 'Public website of Ramdani Law Firm in Dera Ghazi Khan, Pakistan. Published LLB study outlines, optional LAT/GAT practice, and consultation inquiries. Not legal advice.', html: `<section class="hero">
@@ -2364,7 +2411,7 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
   } },
 };
 </script>
-<!-- ROUTING -->
+<!-- HASH ROUTER -->
 <script>
 
 (function () {
