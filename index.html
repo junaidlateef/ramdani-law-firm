@@ -208,6 +208,12 @@ h1 { font-size: clamp(2rem, 5vw, 3.4rem); }
 #staffName { margin:.15rem 0 0; font-weight:600; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .admin-nav-group { margin:1rem 0; }
 .admin-nav-group-title { padding:.35rem .7rem; font-size:.68rem; text-transform:uppercase; letter-spacing:.12em; color:#93a5b5; }
+details.admin-nav-group { margin:.4rem 0; }
+details.admin-nav-group > summary.admin-nav-group-title { cursor:pointer; list-style:none; display:flex; align-items:center; justify-content:space-between; user-select:none; border-radius:6px; }
+details.admin-nav-group > summary.admin-nav-group-title::-webkit-details-marker { display:none; }
+details.admin-nav-group > summary.admin-nav-group-title::after { content:'▾'; font-size:.6rem; color:#6d7f8f; transition:transform .15s ease; }
+details.admin-nav-group:not([open]) > summary.admin-nav-group-title::after { transform:rotate(-90deg); }
+details.admin-nav-group > summary.admin-nav-group-title:hover { background:rgba(255,255,255,.06); color:#dbe5ec; }
 .admin-nav button[data-table] { width:100%; display:flex; align-items:center; justify-content:flex-start; gap:.55rem; border:1px solid transparent; background:transparent; color:#dbe5ec; border-radius:9px; padding:.58rem .7rem; margin:.08rem 0; text-align:start; cursor:pointer; font:inherit; font-size:.86rem; }
 .admin-nav button[data-table]:hover, .admin-nav button[data-table].active { background:rgba(255,255,255,.1); color:#fff; border-color:rgba(255,255,255,.08); }
 .admin-nav .signout { width:100%; margin-top:.8rem; background:transparent; color:#dbe5ec; border-color:rgba(255,255,255,.16); }
@@ -517,14 +523,13 @@ html[dir="rtl"] .lead {
           <div><strong>Ramdani Law Firm</strong><small>Administration</small></div>
         </div>
         <div class="admin-user"><div class="admin-user-label">Signed in as</div><p id="staffName"></p></div>
-        <div class="admin-nav-group">
-          <div class="admin-nav-group-title">Workspace</div>
+        <details class="admin-nav-group" open>
+          <summary class="admin-nav-group-title">Dashboard</summary>
           <button type="button" data-table="__dashboard">◈ &nbsp; Dashboard</button>
           <button type="button" data-table="__students">♙ &nbsp; Students</button>
-          <button type="button" data-table="__admins">♙ &nbsp; Admin accounts</button>
-        </div>
-        <div class="admin-nav-group">
-          <div class="admin-nav-group-title">Website Content</div>
+        </details>
+        <details class="admin-nav-group" open>
+          <summary class="admin-nav-group-title">Law Firm</summary>
           <button type="button" data-table="people">People</button>
           <button type="button" data-table="practice_areas">Practice areas</button>
           <button type="button" data-table="services">Services</button>
@@ -533,44 +538,54 @@ html[dir="rtl"] .lead {
           <button type="button" data-table="news">News</button>
           <button type="button" data-table="resources">Resources</button>
           <button type="button" data-table="careers">Careers</button>
-        </div>
-        <div class="admin-nav-group">
-          <div class="admin-nav-group-title">Education & Community</div>
-          <button type="button" data-table="internships">Internships</button>
+        </details>
+        <details class="admin-nav-group" open>
+          <summary class="admin-nav-group-title">Education</summary>
+          <button type="button" data-table="modules">Modules</button>
+          <button type="button" data-table="lectures">Lectures</button>
           <button type="button" data-table="quizzes">Quizzes</button>
           <button type="button" data-table="books">Library</button>
-          <button type="button" data-table="modules">Modules</button>
           <button type="button" data-table="cases">Case notes</button>
           <button type="button" data-table="statutes">Statutes</button>
+          <button type="button" data-table="certificates">Certificates</button>
+          <button type="button" data-table="__certissuances">Certificate issuances</button>
+        </details>
+        <details class="admin-nav-group" open>
+          <summary class="admin-nav-group-title">Community</summary>
           <button type="button" data-table="societies">Societies</button>
           <button type="button" data-table="chapters">Chapters</button>
-          <button type="button" data-table="lectures">Lectures</button>
-          <button type="button" data-table="certificates">Certificates</button>
           <button type="button" data-table="cabinets">Cabinets</button>
-        </div>
-        <div class="admin-nav-group">
-          <div class="admin-nav-group-title">Communications</div>
+          <button type="button" data-table="internships">Internships</button>
+        </details>
+        <details class="admin-nav-group" open>
+          <summary class="admin-nav-group-title">Communications</summary>
           <button type="button" data-table="__inquiries">Inquiries</button>
           <button type="button" data-table="__applications">Internship applications</button>
           <button type="button" data-table="__joinrequests">Society / chapter requests</button>
           <button type="button" data-table="social_posts">Social posts</button>
-        </div>
-        <div class="admin-nav-group">
-          <div class="admin-nav-group-title">Branding</div>
+        </details>
+        <details class="admin-nav-group" open>
+          <summary class="admin-nav-group-title">Website</summary>
+          <button type="button" data-table="__homepagesections">Homepage sections</button>
+          <button type="button" data-table="__navigation">Navigation</button>
+          <button type="button" data-table="__seosettings">SEO settings</button>
+          <button type="button" data-table="__seooverrides">SEO overrides</button>
+          <button type="button" data-table="__disclaimers">Disclaimers</button>
+        </details>
+        <details class="admin-nav-group" open>
+          <summary class="admin-nav-group-title">Branding</summary>
           <button type="button" data-table="__orgsettings">Organization settings</button>
           <button type="button" data-table="__brandinglogo">Logo &amp; colors</button>
           <button type="button" data-table="__brandingtype">Typography</button>
           <button type="button" data-table="__contactinfo">Contact info</button>
-          <button type="button" data-table="__seosettings">SEO settings</button>
-          <button type="button" data-table="__systemsettings">System settings</button>
-          <button type="button" data-table="__disclaimers">Disclaimers</button>
-          <button type="button" data-table="__homepagesections">Homepage sections</button>
-          <button type="button" data-table="__navigation">Navigation</button>
           <button type="button" data-table="__certtemplates">Certificate templates</button>
-          <button type="button" data-table="__certissuances">Certificate issuances</button>
-          <button type="button" data-table="__seooverrides">SEO overrides</button>
+        </details>
+        <details class="admin-nav-group" open>
+          <summary class="admin-nav-group-title">System</summary>
+          <button type="button" data-table="__admins">Admin accounts</button>
+          <button type="button" data-table="__systemsettings">System settings</button>
           <button type="button" data-table="__notifications">Notifications</button>
-        </div>
+        </details>
         <button type="button" class="btn signout" id="signOutBtn">Sign out</button>
       </aside>
 
