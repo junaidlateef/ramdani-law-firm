@@ -507,24 +507,27 @@ html[dir="rtl"] .lead {
 #studentRoot .learning-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:1rem}
 #studentRoot .learning-table{width:100%;border-collapse:collapse}
 #studentRoot .learning-table th,#studentRoot .learning-table td{text-align:start;padding:.5rem;border-bottom:1px solid var(--line)}
-#studentRoot{background:linear-gradient(180deg,#0B1F33 0 18rem,#eef3f7 18rem);min-height:100vh}
-#studentRoot>.wrap{max-width:56rem!important;padding:1.5rem 1rem 3rem}
-#studentRoot .portal-dash{width:100%;max-width:none;margin:0;background:transparent;border:0;box-shadow:none;padding:0;border-radius:0}
-#studentRoot .portal-hero{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:1rem;color:#f7f1e4;margin-bottom:1.25rem}
-#studentRoot .portal-hero h1{margin:.15rem 0 0;color:#fff;font-size:clamp(1.6rem,3vw,2.2rem)}
-#studentRoot .portal-hero .note{color:#d9c9a5}
-#studentRoot .portal-section{background:#fff;border:1px solid #d7dee6;border-radius:16px;padding:1.1rem 1.15rem;margin-bottom:1rem;box-shadow:0 10px 30px rgba(11,31,51,.06)}
-#studentRoot .portal-section h2{margin:0 0 .75rem;font-size:1.05rem;color:#0B1F33;border-bottom:2px solid #c9a227;padding-bottom:.4rem}
-#studentRoot .portal-identity{display:grid;grid-template-columns:9.5rem 1fr;gap:1.1rem;align-items:start}
-@media (max-width:640px){#studentRoot .portal-identity{grid-template-columns:1fr}}
-#studentRoot .portal-photo{width:9.5rem;height:9.5rem;border-radius:18px;object-fit:cover;background:#0B1F33;border:3px solid #c9a227;display:block}
-#studentRoot .portal-photo.is-empty{display:grid;place-items:center;color:#d9c9a5;font-size:.8rem;text-align:center;padding:.6rem}
-#studentRoot .portal-kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.55rem .9rem;margin:0}
-@media (max-width:640px){#studentRoot .portal-kv{grid-template-columns:1fr}}
-#studentRoot .portal-kv div{background:#f6f8fb;border-radius:10px;padding:.55rem .7rem}
-#studentRoot .portal-kv dt{font-size:.7rem;letter-spacing:.04em;text-transform:uppercase;color:#5b6b7a;margin:0}
-#studentRoot .portal-kv dd{margin:.15rem 0 0;font-weight:600;color:#0B1F33}
-#studentRoot .portal-photo-form{margin-top:.6rem;display:grid;gap:.4rem}
+#studentRoot,#memberRoot,#clientRoot{background:linear-gradient(180deg,#0B1F33 0 18rem,#eef3f7 18rem);min-height:100vh}
+#studentRoot>.wrap,#memberRoot>.wrap,#clientRoot>.wrap{max-width:56rem!important;padding:1.5rem 1rem 3rem}
+#studentRoot .portal-dash,#memberRoot .portal-dash,#clientRoot .portal-dash{width:100%;max-width:none;margin:0;background:transparent;border:0;box-shadow:none;padding:0;border-radius:0}
+#studentRoot .portal-hero,#memberRoot .portal-hero,#clientRoot .portal-hero{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:1rem;color:#f7f1e4;margin-bottom:1.25rem}
+#studentRoot .portal-hero h1,#memberRoot .portal-hero h1,#clientRoot .portal-hero h1{margin:.15rem 0 0;color:#fff;font-size:clamp(1.6rem,3vw,2.2rem)}
+#studentRoot .portal-hero .note,#memberRoot .portal-hero .note,#clientRoot .portal-hero .note{color:#d9c9a5}
+#studentRoot .portal-section,#memberRoot .portal-section,#clientRoot .portal-section{background:#fff;border:1px solid #d7dee6;border-radius:16px;padding:1.1rem 1.15rem;margin-bottom:1rem;box-shadow:0 10px 30px rgba(11,31,51,.06)}
+#studentRoot .portal-section h2,#memberRoot .portal-section h2,#clientRoot .portal-section h2{margin:0 0 .75rem;font-size:1.05rem;color:#0B1F33;border-bottom:2px solid #c9a227;padding-bottom:.4rem}
+#studentRoot .portal-identity,#memberRoot .portal-identity{display:grid;grid-template-columns:9.5rem 1fr;gap:1.1rem;align-items:start}
+@media (max-width:640px){#studentRoot .portal-identity,#memberRoot .portal-identity{grid-template-columns:1fr}}
+#studentRoot .portal-photo,#memberRoot .portal-photo,.people-photo{width:9.5rem;height:9.5rem;border-radius:18px;object-fit:cover;background:#0B1F33;border:3px solid #c9a227;display:block}
+#studentRoot .portal-photo.is-empty,#memberRoot .portal-photo.is-empty{display:grid;place-items:center;color:#d9c9a5;font-size:.8rem;text-align:center;padding:.6rem}
+#studentRoot .portal-kv,#memberRoot .portal-kv,#clientRoot .portal-kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.55rem .9rem;margin:0}
+@media (max-width:640px){#studentRoot .portal-kv,#memberRoot .portal-kv,#clientRoot .portal-kv{grid-template-columns:1fr}}
+#studentRoot .portal-kv div,#memberRoot .portal-kv div,#clientRoot .portal-kv div{background:#f6f8fb;border-radius:10px;padding:.55rem .7rem}
+#studentRoot .portal-kv dt,#memberRoot .portal-kv dt,#clientRoot .portal-kv dt{font-size:.7rem;letter-spacing:.04em;text-transform:uppercase;color:#5b6b7a;margin:0}
+#studentRoot .portal-kv dd,#memberRoot .portal-kv dd,#clientRoot .portal-kv dd{margin:.15rem 0 0;font-weight:600;color:#0B1F33}
+#studentRoot .portal-photo-form,#memberRoot .portal-photo-form{margin-top:.6rem;display:grid;gap:.4rem}
+.people-card{display:grid;grid-template-columns:5.5rem 1fr;gap:.9rem;align-items:start}
+.people-card img{width:5.5rem;height:5.5rem;border-radius:14px;object-fit:cover;background:#0B1F33;border:2px solid #c9a227}
+@media (max-width:640px){.people-card{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -752,7 +755,7 @@ html[dir="rtl"] .lead {
               <label data-field="deadline"><span>Deadline</span><input name="deadline" type="date" /></label>
               <label data-field="summary" class="field-full"><span>Summary</span><textarea name="summary" rows="4"></textarea></label>
               <label data-field="short_bio" class="field-full"><span>Short bio</span><textarea name="short_bio" rows="4"></textarea></label>
-              <label data-field="photo_url"><span>Photo URL</span><input name="photo_url" /></label>
+              <label data-field="photo_url"><span>Photo URL or upload</span><input name="photo_url" placeholder="https://…" /><input name="photo_file" type="file" accept="image/jpeg,image/png,image/webp" /></label>
               <label data-field="education"><span>Education</span><input name="education" /></label>
               <label data-field="qualifications"><span>Qualifications</span><input name="qualifications" /></label>
               <label data-field="languages"><span>Languages</span><input name="languages" /></label>
@@ -1442,6 +1445,7 @@ html[dir="rtl"] .lead {
               <label><span>Valid until</span><input name="valid_until" type="date" /></label>
               <label><span>Status</span><select name="status"><option value="application">Application</option><option value="review">Review</option><option value="approved">Approved</option><option value="active">Active</option><option value="expired">Expired</option><option value="suspended">Suspended</option><option value="revoked">Revoked</option></select></label>
               <label class="field-full"><span>Bio</span><textarea name="bio" rows="2"></textarea></label>
+              <label><span>Photo</span><input name="photo" type="file" accept="image/jpeg,image/png,image/webp" /></label>
               <div class="form-actions"><button class="btn btn-primary" type="submit" id="memberSave">Save member</button><button class="btn" type="button" id="memberCancel" hidden>Cancel</button><p id="memberNote" class="form-status"></p></div>
             </form>
             <div class="admin-toolbar"><select id="memberStatusFilter"><option value="">All statuses</option><option value="application">Application</option><option value="review">Review</option><option value="approved">Approved</option><option value="active">Active</option><option value="expired">Expired</option><option value="suspended">Suspended</option><option value="revoked">Revoked</option></select><input type="search" id="memberSearch" placeholder="Search name, email or member number" /></div>
@@ -1706,7 +1710,7 @@ html[dir="rtl"] .lead {
 
   <!-- MEMBER PORTAL -->
   <div id="memberRoot" hidden>
-    <div class="wrap" style="padding:2.5rem 0;max-width:46rem">
+    <div class="wrap">
       <div id="memberLoginPanel" class="auth-box">
         <h1>Welcome, Member</h1>
         <form id="memberLoginForm" class="form">
@@ -1717,23 +1721,55 @@ html[dir="rtl"] .lead {
         <p id="memberLoginStatus" class="form-status"></p>
         <p class="note"><a href="/">Back to public site</a></p>
       </div>
-      <div id="memberDashPanel" class="auth-box" hidden>
-        <h1 id="memWelcome">Welcome, Member</h1>
-        <p class="note" id="memDashMeta"></p>
-        <h2>Membership card</h2>
-        <div id="memCardBox" class="card" style="margin-bottom:1rem"></div>
-        <h2>My documents</h2>
-        <div id="memDocsBox" style="margin-bottom:1rem"></div>
-        <h2>Events</h2>
-        <div id="memEventsBox" style="margin-bottom:1rem"></div>
-        <button type="button" class="btn" id="memberSignOutBtn">Logout</button>
+      <div id="memberDashPanel" class="portal-dash" hidden>
+        <header class="portal-hero">
+          <div>
+            <p class="kicker">Member portal</p>
+            <h1 id="memWelcome">Welcome, Member</h1>
+            <p class="note" id="memDashMeta"></p>
+          </div>
+          <button type="button" class="btn" id="memberSignOutBtn">Logout</button>
+        </header>
+        <section class="portal-section portal-identity">
+          <div>
+            <img id="memDashPhoto" class="portal-photo is-empty" alt="Member photo" />
+            <form id="memberPhotoForm" class="portal-photo-form">
+              <label><span class="note">Upload your photo</span><input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required /></label>
+              <button class="btn btn-primary" type="submit">Save photo</button>
+            </form>
+            <p id="memberPhotoStatus" class="form-status"></p>
+          </div>
+          <div>
+            <h2>Profile</h2>
+            <dl class="portal-kv">
+              <div><dt>Member no.</dt><dd id="memDashNumber">—</dd></div>
+              <div><dt>Status</dt><dd id="memDashStatus">—</dd></div>
+              <div><dt>Society</dt><dd id="memDashSociety">—</dd></div>
+              <div><dt>Chapter</dt><dd id="memDashChapter">—</dd></div>
+              <div><dt>Designation</dt><dd id="memDashRole">—</dd></div>
+              <div><dt>Phone</dt><dd id="memDashPhone">—</dd></div>
+            </dl>
+          </div>
+        </section>
+        <section class="portal-section">
+          <h2>Membership card</h2>
+          <div id="memCardBox"></div>
+        </section>
+        <section class="portal-section">
+          <h2>Documents</h2>
+          <div id="memDocsBox"></div>
+        </section>
+        <section class="portal-section">
+          <h2>Events</h2>
+          <div id="memEventsBox"></div>
+        </section>
       </div>
     </div>
   </div>
 
   <!-- CLIENT PORTAL -->
   <div id="clientRoot" hidden>
-    <div class="wrap" style="padding:2.5rem 0;max-width:46rem">
+    <div class="wrap">
       <div id="clientLoginPanel" class="auth-box">
         <h1>Client portal</h1>
         <form id="clientLoginForm" class="form">
@@ -1745,14 +1781,35 @@ html[dir="rtl"] .lead {
         <p class="note">Only authorized client accounts. Internal notes and private documents are never shown here.</p>
         <p class="note"><a href="/">Back to public site</a></p>
       </div>
-      <div id="clientDashPanel" class="auth-box" hidden>
-        <h1 id="cliWelcome">My matters</h1>
-        <div id="cliMattersBox"></div>
-        <h2>Shared documents</h2>
-        <div id="cliDocsBox" style="margin-bottom:1rem"></div>
-        <h2>Upcoming dates</h2>
-        <div id="cliDatesBox" style="margin-bottom:1rem"></div>
-        <button type="button" class="btn" id="clientSignOutBtn">Logout</button>
+      <div id="clientDashPanel" class="portal-dash" hidden>
+        <header class="portal-hero">
+          <div>
+            <p class="kicker">Client portal</p>
+            <h1 id="cliWelcome">Welcome, Client</h1>
+            <p class="note">Only your authorized matters, shared files and visible dates.</p>
+          </div>
+          <button type="button" class="btn" id="clientSignOutBtn">Logout</button>
+        </header>
+        <section class="portal-section">
+          <h2>Profile</h2>
+          <dl class="portal-kv">
+            <div><dt>Name</dt><dd id="cliDashName">—</dd></div>
+            <div><dt>Email</dt><dd id="cliDashEmail">—</dd></div>
+          </dl>
+        </section>
+        <section class="portal-section">
+          <h2>My matters</h2>
+          <div id="cliMattersBox"></div>
+        </section>
+        <section class="portal-section">
+          <h2>Shared documents</h2>
+          <p class="note">Internal files never appear here.</p>
+          <div id="cliDocsBox"></div>
+        </section>
+        <section class="portal-section">
+          <h2>Upcoming dates</h2>
+          <div id="cliDatesBox"></div>
+        </section>
       </div>
     </div>
   </div>
@@ -2100,7 +2157,13 @@ var rows = await ramdaniApi.listPublished('news', null); ramdaniUi.renderList(do
       <h1 data-i18n="people_title"></h1>
       <div id="list" class="grid"></div>
     </div></section>`, init: async function () {
-var rows = await ramdaniApi.listPublished('people', 'full_name'); ramdaniUi.renderList(document.getElementById('list'), rows, 'people_empty');
+var rows = await ramdaniApi.listPublished('people', 'full_name');
+var el = document.getElementById('list');
+if (!rows || !rows.length) { ramdaniUi.renderList(el, rows, 'people_empty'); return; }
+el.innerHTML = rows.map(function (row) {
+  var img = row.photo_url ? '<img src="' + ramdaniUi.escape(row.photo_url) + '" alt="' + ramdaniUi.escape(row.full_name || 'Lawyer') + '" />' : '';
+  return '<article class="card people-card">' + img + '<div><h3>' + ramdaniUi.escape(row.full_name || 'Untitled') + '</h3><p class="note">' + ramdaniUi.escape(row.role_title || '') + '</p><p>' + ramdaniUi.escape(row.short_bio || '') + '</p></div></article>';
+}).join('');
   } },
   '/pages/practice-area.html': { title: 'Practice outline — Ramdani Law Firm', desc: 'Practice outline — Ramdani Law Firm. Study outlines published by staff. Dera Ghazi Khan, Pakistan.', html: `<section class="section"><div class="wrap">
       <p><a href="/pages/practice-areas.html">All practice outlines</a></p>
@@ -2420,17 +2483,71 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
       document.getElementById('memDashMeta').textContent = p.email || '';
       var mem = await sb.from('members').select('*').eq('profile_id', p.id).maybeSingle();
       var box = document.getElementById('memCardBox');
-      if (!mem.data) box.innerHTML = '<p class="empty">No membership record is linked to this login.</p>';
-      else {
-        var card = await sb.from('member_cards').select('*').eq('member_id', mem.data.id).in('status', ['issued','active']).order('created_at', { ascending: false }).limit(1);
+      function setDd(id, v) { var el = document.getElementById(id); if (el) el.textContent = v || '—'; }
+      async function showMemPhoto(path) {
+        var img = document.getElementById('memDashPhoto');
+        if (!img) return;
+        if (!path) { img.removeAttribute('src'); img.classList.add('is-empty'); return; }
+        var signed = await sb.storage.from('private-docs').createSignedUrl(path, 3600);
+        if (signed.error || !signed.data || !signed.data.signedUrl) { img.classList.add('is-empty'); return; }
+        img.src = signed.data.signedUrl; img.classList.remove('is-empty'); img.alt = 'Member photo';
+      }
+      if (!document.getElementById('memberPhotoForm').dataset.bound) {
+        document.getElementById('memberPhotoForm').dataset.bound = '1';
+        document.getElementById('memberPhotoForm').addEventListener('submit', async function (e) {
+          e.preventDefault();
+          var file = e.target.elements.photo.files[0];
+          var st = document.getElementById('memberPhotoStatus');
+          function note(msg, ok) { if (!st) return; st.className = 'form-status ' + (ok ? 'ok' : 'err'); st.textContent = msg || ''; }
+          if (!file) return note('Choose a photo first.');
+          if (!/^image\/(jpeg|png|webp)$/i.test(file.type)) return note('Use a JPG, PNG or WebP image.');
+          if (file.size > 4 * 1024 * 1024) return note('Photo must be under 4 MB.');
+          note('Uploading…');
+          var ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+          if (['jpeg','jpg','png','webp'].indexOf(ext) === -1) ext = 'jpg';
+          var storagePath = 'members/' + p.id + '/photo.' + ext;
+          var up = await sb.storage.from('private-docs').upload(storagePath, file, { upsert: true, contentType: file.type, cacheControl: '3600' });
+          if (up.error) return note(up.error.message);
+          var rec = await sb.from('members').select('id').eq('profile_id', p.id).maybeSingle();
+          if (rec.data) {
+            var upd = await sb.from('members').update({ photo_path: storagePath }).eq('id', rec.data.id);
+            if (upd.error) return note(upd.error.message);
+          }
+          await showMemPhoto(storagePath);
+          e.target.reset();
+          note('Photo saved.', true);
+        });
+      }
+      if (!mem.data) {
+        setDd('memDashNumber'); setDd('memDashStatus'); setDd('memDashSociety'); setDd('memDashChapter'); setDd('memDashRole'); setDd('memDashPhone');
+        box.innerHTML = '<p class="empty">No membership record is linked to this login.</p>';
+        document.getElementById('memDocsBox').innerHTML = '<p class="empty">No documents issued.</p>';
+        document.getElementById('memEventsBox').innerHTML = '<p class="empty">No events.</p>';
+      } else {
+        var m = mem.data;
+        setDd('memDashNumber', m.member_number);
+        setDd('memDashStatus', m.status);
+        setDd('memDashRole', m.designation);
+        setDd('memDashPhone', m.phone);
+        var soc = m.society_id ? await sb.from('societies').select('title').eq('id', m.society_id).maybeSingle() : { data: null };
+        var ch = m.chapter_id ? await sb.from('chapters').select('title').eq('id', m.chapter_id).maybeSingle() : { data: null };
+        setDd('memDashSociety', soc.data && soc.data.title);
+        setDd('memDashChapter', ch.data && ch.data.title);
+        await showMemPhoto(m.photo_path);
+        var card = await sb.from('member_cards').select('*').eq('member_id', m.id).in('status', ['issued','active']).order('created_at', { ascending: false }).limit(1);
         var c = card.data && card.data[0];
         box.innerHTML = c
-          ? '<div class="id-card"><p class="note">Member card</p><h3>' + ramdaniUi.escape(mem.data.full_name) + '</h3><p>' + ramdaniUi.escape(c.card_number) + '</p><p class="qr">Verify: ' + ramdaniUi.escape(c.verify_code) + '</p></div>'
+          ? '<div class="id-card"><p class="note">Member card</p><h3>' + ramdaniUi.escape(m.full_name) + '</h3><p>' + ramdaniUi.escape(c.card_number) + '</p><p class="qr">Verify: ' + ramdaniUi.escape(c.verify_code) + '</p></div>'
           : '<p class="empty">No card has been issued yet.</p>';
-        var docs = await sb.from('issued_documents').select('category, issued_at, status').eq('member_id', mem.data.id).eq('status', 'issued');
+        var docs = await sb.from('issued_documents').select('category, issued_at, status').eq('member_id', m.id).eq('status', 'issued');
         document.getElementById('memDocsBox').innerHTML = (docs.data || []).map(function (d) {
-          return '<article class="card"><h3>' + ramdaniUi.escape(d.category) + '</h3></article>';
+          return '<article class="card"><h3>' + ramdaniUi.escape(d.category) + '</h3><p class="note">' + ramdaniUi.escape(d.issued_at || '') + '</p></article>';
         }).join('') || '<p class="empty">No documents issued.</p>';
+        var regs = await sb.from('event_registrations').select('*, events(title, starts_at, status)').eq('profile_id', p.id).order('created_at', { ascending: false });
+        document.getElementById('memEventsBox').innerHTML = (regs.data || []).map(function (r) {
+          var ev = r.events || {};
+          return '<article class="card"><h3>' + ramdaniUi.escape(ev.title || 'Event') + '</h3><p class="note">' + ramdaniUi.escape(r.status || '') + (ev.starts_at ? ' · ' + ramdaniUi.escape(ev.starts_at) : '') + '</p></article>';
+        }).join('') || '<p class="empty">You have not registered for any events.</p>';
       }
       return;
     }
@@ -2457,6 +2574,8 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
       if (!p || p.role !== 'client') { window.ramdaniGo('/client/login'); return; }
       login.hidden = true; dash.hidden = false;
       document.getElementById('cliWelcome').textContent = 'Welcome, ' + (p.full_name || 'Client');
+      var cn = document.getElementById('cliDashName'); if (cn) cn.textContent = p.full_name || '—';
+      var ce = document.getElementById('cliDashEmail'); if (ce) ce.textContent = p.email || '—';
       var matters = await sb.rpc('ramdani_my_client_matters');
       var list = matters.data || [];
       document.getElementById('cliMattersBox').innerHTML = list.length
@@ -3141,7 +3260,8 @@ window.ramdaniUi = {
     var title = this.escape(item.title || item.full_name || 'Untitled');
     var summary = this.escape(item.summary || item.short_bio || item.description || '');
     var link = href ? '<a class="card-link" href="' + this.escape(href) + '">' + title + '</a>' : title;
-    return '<article class="card"><h3>' + link + '</h3><p>' + summary + '</p></article>';
+    var img = item.photo_url ? '<img class="people-photo" src="' + this.escape(item.photo_url) + '" alt="" />' : '';
+    return '<article class="card">' + img + '<h3>' + link + '</h3><p>' + summary + '</p></article>';
   },
   empty: function (key) {
     return '<p class="empty" data-i18n="' + this.escape(key) + '">' + this.escape(window.ramdaniT ? ramdaniT(key) : 'Nothing published yet.') + '</p>';
@@ -8092,10 +8212,23 @@ window.ramdaniAuth = {
       bio: f.elements.bio.value.trim() || null
     };
     if (!payload.full_name) return setNote('memberNote', 'Name is required.');
+    var file = f.elements.photo && f.elements.photo.files && f.elements.photo.files[0];
     var res = platEditMemberId
-      ? await sb.from('members').update(payload).eq('id', platEditMemberId)
-      : await sb.from('members').insert(payload);
+      ? await sb.from('members').update(payload).eq('id', platEditMemberId).select('id, profile_id').maybeSingle()
+      : await sb.from('members').insert(payload).select('id, profile_id').maybeSingle();
     if (res.error) return setNote('memberNote', res.error.message);
+    var saved = res.data || {};
+    if (file) {
+      if (!/^image\/(jpeg|png|webp)$/i.test(file.type)) return setNote('memberNote', 'Use a JPG, PNG or WebP photo.');
+      var ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+      if (['jpeg','jpg','png','webp'].indexOf(ext) === -1) ext = 'jpg';
+      var folder = saved.profile_id || saved.id;
+      var storagePath = 'members/' + folder + '/photo.' + ext;
+      var up = await sb.storage.from('private-docs').upload(storagePath, file, { upsert: true, contentType: file.type, cacheControl: '3600' });
+      if (up.error) return setNote('memberNote', up.error.message);
+      var upd = await sb.from('members').update({ photo_path: storagePath }).eq('id', saved.id);
+      if (upd.error) return setNote('memberNote', upd.error.message);
+    }
     resetMemberForm();
     setNote('memberNote', 'Saved.', true);
     await loadMembers();
@@ -8799,6 +8932,21 @@ window.ramdaniAuth = {
     }
     if(table==='people'&&!payload.full_name){document.getElementById('saveNote').textContent='Full name is required.';return;}
     if(table!=='people'&&!payload.title){document.getElementById('saveNote').textContent='Title is required.';return;}
+    if(table==='people'){
+      var pfile = form.querySelector('[name="photo_file"]');
+      var file = pfile && pfile.files && pfile.files[0];
+      if (file) {
+        if (!/^image\/(jpeg|png|webp)$/i.test(file.type)) { document.getElementById('saveNote').textContent='Use a JPG, PNG or WebP photo.'; return; }
+        var ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g,'') || 'jpg';
+        if (['jpeg','jpg','png','webp'].indexOf(ext) === -1) ext = 'jpg';
+        var storagePath = 'people/' + (editingId || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()))) + '/photo.' + ext;
+        var up = await sb.storage.from('site-assets').upload(storagePath, file, { upsert: true, contentType: file.type, cacheControl: '3600' });
+        if (up.error) { document.getElementById('saveNote').textContent = up.error.message; return; }
+        var pub = sb.storage.from('site-assets').getPublicUrl(storagePath);
+        if (pub.data && pub.data.publicUrl) payload.photo_url = pub.data.publicUrl;
+      }
+      delete payload.photo_file;
+    }
     var res=editingId?await sb.from(table).update(payload).eq('id',editingId):await sb.from(table).insert(payload);
     var note=document.getElementById('saveNote'); note.className='form-status '+(res.error?'err':'ok'); note.textContent=res.error?res.error.message:(editingId?'Updated successfully.':'Saved successfully.');
     if(!res.error){resetEditor();loadTable(table);}
