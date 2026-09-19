@@ -759,6 +759,7 @@ html[dir="rtl"] .lead {
         <details class="admin-nav-group" open>
           <summary class="admin-nav-group-title">System</summary>
           <button type="button" data-table="__admins">Admin accounts</button>
+          <button type="button" data-table="__staffaccounts">Staff &amp; portal accounts</button>
           <button type="button" data-table="__systemsettings">System settings</button>
           <button type="button" data-table="__notifications">Notifications</button>
           <button type="button" data-table="__auditlog">Audit log</button>
@@ -793,6 +794,34 @@ html[dir="rtl"] .lead {
             <div class="admin-section-head"><div><h2>Students <span id="studentTotal" class="note"></span></h2><p class="note">Search, review and manage registered student accounts.</p></div></div>
             <div class="admin-toolbar"><input type="search" id="studentSearch" placeholder="Search name, email or student ID" aria-label="Search students" /></div>
             <div class="table-wrap"><table class="data"><thead><tr><th>Name</th><th>Email</th><th>Student ID</th><th>Department</th><th>University</th><th>Session</th><th>Status</th><th>Actions</th></tr></thead><tbody id="studentsBody"></tbody></table></div><p id="studentsNote" class="form-status"></p>
+          </div>
+
+          <div id="staffAccountsPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Staff &amp; portal accounts</h2><p class="note">Create login accounts for lawyers and other portal users. The account is active immediately; share the temporary password privately and ask the person to change it after first sign-in.</p></div></div>
+            <div class="admin-card"><h3>Create account</h3>
+              <form id="createStaffForm" class="form admin-form">
+                <label><span>Role</span><select name="role" required>
+                  <option value="lawyer" selected>Lawyer</option>
+                  <option value="firm_admin">Firm admin</option>
+                  <option value="operations_staff">Operations staff</option>
+                  <option value="member">Member</option>
+                  <option value="client">Client</option>
+                  <option value="society_admin">Society admin</option>
+                  <option value="education_manager">Education manager</option>
+                  <option value="student_manager">Student manager</option>
+                  <option value="content_manager">Content manager</option>
+                  <option value="communications_manager">Communications manager</option>
+                  <option value="editor">Editor</option>
+                </select></label>
+                <label><span>Full name</span><input name="full_name" required /></label>
+                <label><span>Email</span><input name="email" type="email" required autocomplete="off" /></label>
+                <label><span>Phone (optional)</span><input name="phone" type="tel" /></label>
+                <label><span>Temporary password</span><input name="password" type="text" required minlength="8" autocomplete="off" /></label>
+                <div class="form-actions"><button class="btn btn-primary" type="submit">Create account</button><p id="createStaffNote" class="form-status"></p></div>
+              </form>
+            </div>
+            <div class="table-wrap" style="margin-top:1rem"><table class="data"><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead><tbody id="staffAccountsBody"></tbody></table></div>
+            <p id="staffAccountsNote" class="form-status"></p>
           </div>
 
           <div id="adminsPanel" class="admin-panel" hidden>
@@ -1392,6 +1421,18 @@ html[dir="rtl"] .lead {
             </form>
             <div class="admin-toolbar"><input type="search" id="clientSearch" placeholder="Search name, email, phone or client number" aria-label="Search clients" /></div>
             <div class="table-wrap"><table class="data"><thead><tr><th>Number</th><th>Name</th><th>Type</th><th>Email</th><th>Status</th><th>Actions</th></tr></thead><tbody id="clientBody"></tbody></table></div>
+            <div id="clientWorkspace" class="admin-card" style="margin-top:1rem" hidden>
+              <div class="admin-section-head"><div><h3 id="cwTitle">Client</h3><p class="note" id="cwSub"></p></div><button type="button" class="btn" id="cwClose">Close</button></div>
+              <div class="admin-toolbar" id="cwTabs">
+                <button type="button" class="btn btn-sm" data-cw-tab="overview">Overview &amp; login</button>
+                <button type="button" class="btn btn-sm" data-cw-tab="matters">Matters &amp; lawyers</button>
+                <button type="button" class="btn btn-sm" data-cw-tab="documents">Documents</button>
+                <button type="button" class="btn btn-sm" data-cw-tab="appointments">Appointments</button>
+                <button type="button" class="btn btn-sm" data-cw-tab="comms">Communications</button>
+              </div>
+              <div id="cwBody"></div>
+              <p id="cwNote" class="form-status"></p>
+            </div>
           </div>
 
           <div id="legalMattersPanel" class="admin-panel" hidden>
@@ -1727,7 +1768,7 @@ html[dir="rtl"] .lead {
       <button class="btn btn-primary" type="submit">Update password</button>
     </form>
     <p id="resetStatus" class="form-status"></p>
-    <p><a href="/admin/">Staff sign in</a> · <a href="/student/login">Student sign in</a></p>
+    <p><a href="/admin/">Staff sign in</a> · <a href="/student/login">Student sign in</a> · <a href="/lawyer/login">Lawyer sign in</a></p>
   </div>
   </div>
 
@@ -1990,6 +2031,18 @@ html[dir="rtl"] .lead {
         <section class="portal-section">
           <h2>Upcoming dates</h2>
           <div id="cliDatesBox"></div>
+        </section>
+        <section class="portal-section">
+          <h2>My lawyers</h2>
+          <div id="cliLawyersBox"></div>
+        </section>
+        <section class="portal-section">
+          <h2>Appointments</h2>
+          <div id="cliApptBox"></div>
+        </section>
+        <section class="portal-section">
+          <h2>Messages from the firm</h2>
+          <div id="cliCommsBox"></div>
         </section>
       </div>
     </div>
@@ -2945,6 +2998,19 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
         document.getElementById('cliDocsBox').innerHTML = '<p class="empty">No shared documents.</p>';
         document.getElementById('cliDatesBox').innerHTML = '<p class="empty">No authorized dates.</p>';
       }
+      var lw = await sb.rpc('ramdani_my_client_lawyers');
+      document.getElementById('cliLawyersBox').innerHTML = (lw.data || []).map(function (x) {
+        var m = list.find(function (mm) { return mm.id === x.matter_id; });
+        return '<p>' + ramdaniUi.escape(x.lawyer_name) + ' — ' + ramdaniUi.escape(x.team_role) + (m ? ' <span class="note">(' + ramdaniUi.escape(m.matter_number) + ')</span>' : '') + '</p>';
+      }).join('') || '<p class="empty">No lawyer assigned yet.</p>';
+      var ap = await sb.from('client_appointments_client').select('title, starts_at, mode, location, status').order('starts_at');
+      document.getElementById('cliApptBox').innerHTML = (ap.data || []).map(function (x) {
+        return '<p>' + ramdaniUi.escape(x.title) + ' — ' + ramdaniUi.escape(new Date(x.starts_at).toLocaleString()) + ' · ' + ramdaniUi.escape(x.mode) + (x.location ? ' · ' + ramdaniUi.escape(x.location) : '') + ' <span class="note">(' + ramdaniUi.escape(x.status) + ')</span></p>';
+      }).join('') || '<p class="empty">No appointments.</p>';
+      var cm = ids.length ? await sb.from('matter_communications').select('subject, summary, occurred_at').eq('client_visible', true).in('matter_id', ids).order('occurred_at', { ascending: false }) : { data: [] };
+      document.getElementById('cliCommsBox').innerHTML = (cm.data || []).map(function (x) {
+        return '<article class="card"><h3>' + ramdaniUi.escape(x.subject || 'Message') + '</h3><p class="note">' + ramdaniUi.escape(new Date(x.occurred_at).toLocaleString()) + '</p><p>' + ramdaniUi.escape(x.summary || '') + '</p></article>';
+      }).join('') || '<p class="empty">No messages.</p>';
       return;
     }
     login.hidden = false; dash.hidden = true;
@@ -3053,7 +3119,8 @@ window.ramdaniSite = Object.freeze({
     ['/pages/library.html', 'nav_library', 'Library'],
     ['/pages/internships.html', 'nav_internships', 'Internships'],
     ['/pages/practice-areas.html', 'nav_practice', 'Practice Areas'],
-    ['/student/login', 'nav_student', 'Student portal']
+    ['/student/login', 'nav_student', 'Student portal'],
+    ['/lawyer/login', 'nav_lawyer', 'Lawyer portal']
   ],
   navigation: [
     ['/', 'nav_home', 'Home'], ['/pages/about.html', 'nav_about', 'About'],
@@ -3064,7 +3131,7 @@ window.ramdaniSite = Object.freeze({
     ['/pages/internships.html', 'nav_internships', 'Internships'], ['/pages/quizzes.html', 'nav_quizzes', 'LAT / GAT'],
     ['/pages/modules.html', 'nav_modules', 'Study modules'], ['/pages/cases.html', 'nav_cases', 'Case notes'],
     ['/pages/statutes.html', 'nav_statutes', 'Pakistan laws'], ['/pages/library.html', 'nav_library', 'Library'], ['/pages/learning.html', 'nav_learning', 'Lectures'], ['/pages/societies.html', 'nav_societies', 'Societies'], ['/pages/chapters.html', 'nav_chapters', 'Chapters'], ['/pages/certificates.html', 'nav_certificates', 'Certificates'], ['/pages/faq.html', 'nav_faq', 'FAQ'],
-    ['/pages/contact.html', 'nav_contact', 'Contact'], ['/student/login', 'nav_student', 'Student portal']
+    ['/pages/contact.html', 'nav_contact', 'Contact'], ['/student/login', 'nav_student', 'Student portal'], ['/lawyer/login', 'nav_lawyer', 'Lawyer portal']
   ]
 });
 
@@ -3353,6 +3420,7 @@ window.ramdaniSite = Object.freeze({
       nav_chapters: 'Chapters',
       nav_certificates: 'Certificates',
       nav_student: 'Student portal',
+      nav_lawyer: 'Lawyer portal',
       nav_faq: 'FAQ',
       nav_contact: 'Contact',
       nav_consult: 'Consultation',
@@ -3466,6 +3534,7 @@ window.ramdaniSite = Object.freeze({
       nav_chapters: 'چیپٹرز',
       nav_certificates: 'سرٹیفکیٹس',
       nav_student: 'اسٹوڈنٹ پورٹل',
+      nav_lawyer: 'وکیل پورٹل',
       nav_faq: 'سوالات',
       nav_contact: '\u0631\u0627\u0628\u0637\u06c1',
       nav_consult: '\u0645\u0634\u0627\u0648\u0631\u06c1',
@@ -5928,6 +5997,7 @@ window.ramdaniAuth = {
     '__dashboard': ['content_manager', 'education_manager', 'student_manager', 'communications_manager'],
     '__students': ['student_manager'],
     '__admins': [],
+    '__staffaccounts': [],
     'people': ['content_manager'], 'practice_areas': ['content_manager'], 'services': ['content_manager'],
     'matters': ['content_manager'], 'articles': ['content_manager'], 'news': ['content_manager'],
     'resources': ['content_manager'], 'careers': ['content_manager'],
@@ -6030,6 +6100,39 @@ window.ramdaniAuth = {
 
     document.getElementById('studentSearch').addEventListener('input', function () {
       renderStudentRows(allStudents, this.value.trim().toLowerCase());
+    });
+
+    document.getElementById('createStaffForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var form = e.target;
+      var note = document.getElementById('createStaffNote');
+      var btn = form.querySelector('button[type="submit"]');
+      note.className = 'form-status';
+      note.textContent = 'Creating…';
+      btn.disabled = true;
+      var res = await ramdaniAuth.callAdminApi('create_staff', {
+        role: form.role.value,
+        full_name: form.full_name.value.trim(),
+        email: form.email.value.trim(),
+        phone: form.phone.value.trim(),
+        password: form.password.value
+      });
+      btn.disabled = false;
+      if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; return; }
+      note.className = 'form-status ok';
+      note.textContent = (STAFF_ROLE_LABELS[form.role.value] || 'Account') + ' account created. They can now sign in.';
+      form.reset();
+      loadStaffAccounts();
+    });
+
+    document.getElementById('staffAccountsBody').addEventListener('click', async function (e) {
+      var b = e.target.closest('[data-staff-toggle]');
+      if (!b) return;
+      b.disabled = true;
+      var res = await ramdaniAuth.callAdminApi('set_account_active', { user_id: b.getAttribute('data-staff-toggle'), is_active: b.getAttribute('data-active') !== '1' });
+      var note = document.getElementById('staffAccountsNote');
+      if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; b.disabled = false; return; }
+      loadStaffAccounts();
     });
 
     document.getElementById('createAdminForm').addEventListener('submit', async function (e) {
@@ -6204,6 +6307,21 @@ window.ramdaniAuth = {
       .eq('role', 'student').order('created_at', { ascending: false });
     allStudents = res.data || [];
     renderStudentRows(allStudents, document.getElementById('studentSearch').value.trim().toLowerCase());
+  }
+
+  var STAFF_ROLE_LABELS = { lawyer: 'Lawyer', firm_admin: 'Firm admin', operations_staff: 'Operations staff', member: 'Member', client: 'Client', society_admin: 'Society admin', education_manager: 'Education manager', student_manager: 'Student manager', content_manager: 'Content manager', communications_manager: 'Communications manager', editor: 'Editor' };
+
+  async function loadStaffAccounts() {
+    var body = document.getElementById('staffAccountsBody');
+    var note = document.getElementById('staffAccountsNote');
+    note.textContent = '';
+    var res = await sb.from('profiles').select('id, full_name, email, role, is_active')
+      .not('role', 'in', '(student,admin)').order('created_at', { ascending: false });
+    if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; return; }
+    var rows = res.data || [];
+    body.innerHTML = rows.map(function (r) {
+      return '<tr><td>' + escapeHtml(r.full_name) + '</td><td>' + escapeHtml(r.email) + '</td><td>' + escapeHtml(STAFF_ROLE_LABELS[r.role] || r.role) + '</td><td>' + (r.is_active ? 'Active' : 'Inactive') + '</td><td><button type="button" class="btn" data-staff-toggle="' + escapeHtml(r.id) + '" data-active="' + (r.is_active ? '1' : '0') + '">' + (r.is_active ? 'Deactivate' : 'Activate') + '</button></td></tr>';
+    }).join('') || '<tr><td colspan="5">No staff or portal accounts yet.</td></tr>';
   }
 
   async function loadAdmins() {
@@ -8411,7 +8529,7 @@ window.ramdaniAuth = {
     });
     $id('clientBody').innerHTML = rows.map(function (c) {
       return '<tr><td>' + escapeHtml(c.client_number) + '</td><td>' + escapeHtml(c.legal_name) + '</td><td>' + escapeHtml(c.client_type) + '</td><td>' + escapeHtml(c.email || '') + '</td><td>' + escapeHtml(c.status) + '</td><td>' +
-        '<button type="button" class="btn btn-sm" data-cl-edit="' + c.id + '">Edit</button></td></tr>';
+        '<button type="button" class="btn btn-sm" data-cl-open="' + c.id + '">Open</button> <button type="button" class="btn btn-sm" data-cl-edit="' + c.id + '">Edit</button></td></tr>';
     }).join('') || '<tr><td colspan="6">No clients yet.</td></tr>';
   }
   function resetClientForm() {
@@ -8442,6 +8560,81 @@ window.ramdaniAuth = {
     resetClientForm();
     setNote('clientNote', 'Saved.', true);
     await loadClients();
+  }
+
+  // ---------- Module 12: client workspace (inside Admin) ----------
+  var cwClient = null, cwTab = 'overview', cwMatters = [], cwNames = {};
+  function cwPeople(id) { return cwNames[id] || '—'; }
+  async function openClientWorkspace(id) {
+    var c = legalClients.find(function (x) { return x.id === id; }); if (!c) return;
+    cwClient = c; cwTab = 'overview';
+    $id('clientWorkspace').hidden = false;
+    $id('cwTitle').textContent = c.client_number + ' — ' + c.legal_name;
+    $id('cwSub').textContent = (c.reference_id || '') + ' · ' + c.status + (c.profile_id ? ' · portal login linked' : ' · no portal login yet');
+    var l = await sb.rpc('ramdani_assignable_lawyers');
+    cwNames = {}; (l.data || []).forEach(function (x) { cwNames[x.id] = x.full_name; });
+    var m = await sb.from('legal_matters').select('id, matter_number, title, status, priority, lead_lawyer_id').eq('client_id', c.id).order('opened_at', { ascending: false });
+    cwMatters = m.data || [];
+    $id('clientWorkspace').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    renderClientTab();
+  }
+  async function renderClientTab() {
+    var c = cwClient; if (!c) return; var body = $id('cwBody'); setNote('cwNote', '');
+    document.querySelectorAll('#cwTabs [data-cw-tab]').forEach(function (b) { b.classList.toggle('btn-primary', b.getAttribute('data-cw-tab') === cwTab); });
+    var ids = cwMatters.map(function (m) { return m.id; });
+    if (cwTab === 'overview') {
+      body.innerHTML = '<dl class="portal-kv"><div><dt>Email</dt><dd>' + escapeHtml(c.email || '—') + '</dd></div><div><dt>Phone</dt><dd>' + escapeHtml(c.phone || '—') + '</dd></div><div><dt>Type</dt><dd>' + escapeHtml(c.client_type) + '</dd></div><div><dt>Address</dt><dd>' + escapeHtml(c.address || '—') + '</dd></div><div><dt>Preferred contact</dt><dd>' + escapeHtml(c.preferred_contact_method || '—') + '</dd></div></dl>' +
+        (c.profile_id ? '<p class="note">This client already has a portal login. Deactivate or reactivate it from Staff &amp; portal accounts.</p>' :
+        '<h4>Give this client a portal login</h4><form id="cwLoginForm" class="form admin-form"><label><span>Email</span><input name="email" type="email" required value="' + escapeHtml(c.email || '') + '" /></label><label><span>Temporary password</span><input name="password" type="text" required minlength="8" autocomplete="off" /></label><div class="form-actions"><button class="btn btn-primary" type="submit">Create login</button></div></form>');
+      var f = $id('cwLoginForm');
+      if (f) f.addEventListener('submit', async function (e) {
+        e.preventDefault(); setNote('cwNote', 'Creating…');
+        var r = await ramdaniAuth.callAdminApi('create_staff', { role: 'client', full_name: c.legal_name, email: f.email.value.trim(), password: f.password.value, phone: c.phone || '', link_client_id: c.id });
+        if (r.error) return setNote('cwNote', r.error.message);
+        c.profile_id = r.data && r.data.user_id; setNote('cwNote', 'Login created and linked to this client.', true);
+        openClientWorkspace(c.id);
+      });
+      return;
+    }
+    if (cwTab === 'matters') {
+      var team = ids.length ? (await sb.from('matter_team').select('matter_id, profile_id, team_role').in('matter_id', ids)).data || [] : [];
+      body.innerHTML = '<div class="table-wrap"><table class="data"><thead><tr><th>Matter</th><th>Status</th><th>Lead lawyer</th><th>Team</th></tr></thead><tbody>' + (cwMatters.map(function (m) {
+        var t = team.filter(function (x) { return x.matter_id === m.id; }).map(function (x) { return escapeHtml(cwPeople(x.profile_id) + ' (' + x.team_role + ')'); }).join(', ');
+        return '<tr><td>' + escapeHtml(m.matter_number + ' — ' + m.title) + '</td><td>' + escapeHtml(m.status + ' / ' + m.priority) + '</td><td>' + escapeHtml(cwPeople(m.lead_lawyer_id)) + '</td><td>' + (t || '—') + '</td></tr>';
+      }).join('') || '<tr><td colspan="4">No matters linked to this client. Create one under Matters / Cases.</td></tr>') + '</tbody></table></div>';
+      return;
+    }
+    if (cwTab === 'documents') {
+      var d = ids.length ? (await sb.from('matter_documents').select('file_name, matter_id, category, access_level, uploaded_at').in('matter_id', ids).eq('is_current', true).order('uploaded_at', { ascending: false })).data || [] : [];
+      body.innerHTML = '<div class="table-wrap"><table class="data"><thead><tr><th>File</th><th>Matter</th><th>Category</th><th>Client can see</th></tr></thead><tbody>' + (d.map(function (x) {
+        var m = cwMatters.find(function (mm) { return mm.id === x.matter_id; });
+        return '<tr><td>' + escapeHtml(x.file_name) + '</td><td>' + escapeHtml(m ? m.matter_number : '') + '</td><td>' + escapeHtml(x.category || '') + '</td><td>' + (x.access_level === 'client_shared' ? 'Yes' : 'No') + '</td></tr>';
+      }).join('') || '<tr><td colspan="4">No documents.</td></tr>') + '</tbody></table></div>';
+      return;
+    }
+    if (cwTab === 'comms') {
+      var cm = ids.length ? (await sb.from('matter_communications').select('occurred_at, matter_id, comm_type, direction, subject, client_visible').in('matter_id', ids).order('occurred_at', { ascending: false })).data || [] : [];
+      body.innerHTML = '<div class="table-wrap"><table class="data"><thead><tr><th>When</th><th>Type</th><th>Subject</th><th>Visible to client</th></tr></thead><tbody>' + (cm.map(function (x) {
+        return '<tr><td>' + escapeHtml(fmtWhen(x.occurred_at)) + '</td><td>' + escapeHtml((x.comm_type || '') + ' / ' + (x.direction || '')) + '</td><td>' + escapeHtml(x.subject || '') + '</td><td>' + (x.client_visible ? 'Yes' : 'No') + '</td></tr>';
+      }).join('') || '<tr><td colspan="4">No communications logged.</td></tr>') + '</tbody></table></div>';
+      return;
+    }
+    if (cwTab === 'appointments') {
+      var a = (await sb.from('client_appointments').select('*').eq('client_id', c.id).order('starts_at', { ascending: false })).data || [];
+      var lawyerOpts = '<option value="">—</option>' + Object.keys(cwNames).map(function (k) { return '<option value="' + k + '">' + escapeHtml(cwNames[k]) + '</option>'; }).join('');
+      var matterOpts = '<option value="">—</option>' + cwMatters.map(function (m) { return '<option value="' + m.id + '">' + escapeHtml(m.matter_number) + '</option>'; }).join('');
+      body.innerHTML = '<form id="cwApptForm" class="form admin-form"><label><span>Title</span><input name="title" required /></label><label><span>Type</span><select name="appointment_type"><option value="consultation">Consultation</option><option value="meeting">Meeting</option><option value="call">Call</option><option value="court_prep">Court preparation</option><option value="document_signing">Document signing</option><option value="other">Other</option></select></label><label><span>Starts</span><input name="starts_at" type="datetime-local" required /></label><label><span>Ends</span><input name="ends_at" type="datetime-local" /></label><label><span>Mode</span><select name="mode"><option value="in_person">In person</option><option value="phone">Phone</option><option value="online">Online</option></select></label><label><span>Location / meeting link</span><input name="location" /></label><label><span>Lawyer</span><select name="lawyer_id">' + lawyerOpts + '</select></label><label><span>Matter</span><select name="matter_id">' + matterOpts + '</select></label><label><span>Show to client</span><select name="client_visible"><option value="true">Yes</option><option value="false">No</option></select></label><label class="field-full"><span>Internal notes (never shown to client)</span><textarea name="internal_notes" rows="2"></textarea></label><div class="form-actions"><button class="btn btn-primary" type="submit">Add appointment</button></div></form>' +
+        '<div class="table-wrap"><table class="data"><thead><tr><th>Ref</th><th>When</th><th>Title</th><th>Lawyer</th><th>Status</th><th></th></tr></thead><tbody>' + (a.map(function (x) {
+          return '<tr><td>' + escapeHtml(x.reference_id) + '</td><td>' + escapeHtml(fmtWhen(x.starts_at)) + '</td><td>' + escapeHtml(x.title) + '</td><td>' + escapeHtml(cwPeople(x.lawyer_id)) + '</td><td>' + escapeHtml(x.status) + '</td><td>' + (x.status === 'scheduled' || x.status === 'requested' ? '<button type="button" class="btn btn-sm" data-cw-appt="' + x.id + '" data-to="completed">Complete</button> <button type="button" class="btn btn-sm" data-cw-appt="' + x.id + '" data-to="cancelled">Cancel</button>' : '') + '</td></tr>';
+        }).join('') || '<tr><td colspan="6">No appointments.</td></tr>') + '</tbody></table></div>';
+      $id('cwApptForm').addEventListener('submit', async function (e) {
+        e.preventDefault(); var f = e.target;
+        var payload = { client_id: c.id, title: f.title.value.trim(), appointment_type: f.appointment_type.value, starts_at: new Date(f.starts_at.value).toISOString(), ends_at: f.ends_at.value ? new Date(f.ends_at.value).toISOString() : null, mode: f.mode.value, location: f.location.value.trim() || null, lawyer_id: f.lawyer_id.value || null, matter_id: f.matter_id.value || null, client_visible: f.client_visible.value === 'true', internal_notes: f.internal_notes.value.trim() || null };
+        var r = await sb.from('client_appointments').insert(payload);
+        if (r.error) return setNote('cwNote', r.error.message);
+        setNote('cwNote', 'Appointment added.', true); renderClientTab();
+      });
+    }
   }
 
   async function loadLegalMatters() {
@@ -8897,6 +9090,14 @@ window.ramdaniAuth = {
     $id('clientForm').addEventListener('submit', saveClient);
     $id('clientCancel').addEventListener('click', resetClientForm);
     $id('clientSearch').addEventListener('input', renderClients);
+    $id('cwClose').addEventListener('click', function () { $id('clientWorkspace').hidden = true; cwClient = null; });
+    $id('cwTabs').addEventListener('click', function (e) { var b = e.target.closest('[data-cw-tab]'); if (!b) return; cwTab = b.getAttribute('data-cw-tab'); renderClientTab(); });
+    $id('cwBody').addEventListener('click', async function (e) {
+      var b = e.target.closest('[data-cw-appt]'); if (!b) return;
+      var r = await sb.from('client_appointments').update({ status: b.getAttribute('data-to') }).eq('id', b.getAttribute('data-cw-appt'));
+      if (r.error) return setNote('cwNote', r.error.message); renderClientTab();
+    });
+    $id('clientBody').addEventListener('click', function (e) { var b = e.target.closest('[data-cl-open]'); if (b) openClientWorkspace(b.getAttribute('data-cl-open')); });
     $id('clientBody').addEventListener('click', function (e) {
       var b = e.target.closest('[data-cl-edit]'); if (!b) return;
       var c = legalClients.find(function (x) { return x.id === b.getAttribute('data-cl-edit'); }); if (!c) return;
@@ -10031,13 +10232,14 @@ window.ramdaniAuth = {
   }
 
   function showAdminView(view) {
-    var panels = ['dashboardPanel','studentsPanel','adminsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','orgSettingsPanel','brandingLogoPanel','brandingTypePanel','contactInfoPanel','seoSettingsPanel','systemSettingsPanel','disclaimersPanel','homepageSectionsPanel','navigationPanel','certTemplatesPanel','mediaLibraryPanel','certIssuancesPanel','courseBuilderPanel','quizBuilderPanel','quizResultsPanel','eduSearchPanel','enrollmentsPanel','seoOverridesPanel','notificationsPanel','auditLogPanel','opsDashPanel','clientsPanel','legalMattersPanel','myTasksPanel','legalCalendarPanel','legalDocsPanel','legalCommsPanel','legalReportsPanel','legalSearchPanel','organizationsPanel','membershipsPanel','membersPanel','memberProfilePanel','memberCardsPanel','studentCardsPanel','eventsPanel','eventRegsPanel','eventGuestsPanel','docsCenterPanel'];
+    var panels = ['dashboardPanel','studentsPanel','adminsPanel','staffAccountsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','orgSettingsPanel','brandingLogoPanel','brandingTypePanel','contactInfoPanel','seoSettingsPanel','systemSettingsPanel','disclaimersPanel','homepageSectionsPanel','navigationPanel','certTemplatesPanel','mediaLibraryPanel','certIssuancesPanel','courseBuilderPanel','quizBuilderPanel','quizResultsPanel','eduSearchPanel','enrollmentsPanel','seoOverridesPanel','notificationsPanel','auditLogPanel','opsDashPanel','clientsPanel','legalMattersPanel','myTasksPanel','legalCalendarPanel','legalDocsPanel','legalCommsPanel','legalReportsPanel','legalSearchPanel','organizationsPanel','membershipsPanel','membersPanel','memberProfilePanel','memberCardsPanel','studentCardsPanel','eventsPanel','eventRegsPanel','eventGuestsPanel','docsCenterPanel'];
     panels.forEach(function(id){ var el=document.getElementById(id); if(el){ el.hidden=true; el.classList.remove('is-active'); }});
     document.querySelectorAll('.admin-nav [data-table]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-table')===view); });
     document.getElementById('adminApp').classList.remove('nav-open');
     if(view==='__dashboard') { activate('dashboardPanel','Dashboard'); loadDashboard(); return; }
     if(view==='__students') { activate('studentsPanel','Students'); loadStudents(); return; }
     if(view==='__admins') { activate('adminsPanel','Admin accounts'); loadAdmins(); return; }
+    if(view==='__staffaccounts') { activate('staffAccountsPanel','Staff & portal accounts'); loadStaffAccounts(); return; }
     if(view==='__inquiries') { activate('inquiriesPanel','Inquiries'); loadInquiries(); return; }
     if(view==='__applications') { activate('applicationsPanel','Internship applications'); loadInternshipApps(); return; }
     if(view==='__joinrequests') { activate('joinrequestsPanel','Society / chapter requests'); loadJoinRequests(); return; }
