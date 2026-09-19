@@ -771,7 +771,7 @@ html[dir="rtl"] .lead {
             <div class="table-wrap"><table class="data"><thead id="dataHead"></thead><tbody id="dataBody"></tbody></table></div>
           </div>
 
-          <div id="inquiriesPanel" class="admin-panel" hidden><div class="admin-section-head"><div><h2>Inquiries</h2><p class="note">Workflow: New → Reviewing → Contacted → In progress → Closed → Archived. Internal notes never appear publicly.</p></div></div><div class="table-wrap"><table class="data"><thead><tr><th>Kind</th><th>Name</th><th>Email</th><th>Subject</th><th>Assigned</th><th>Status</th></tr></thead><tbody id="inqBody"></tbody></table></div></div>
+          <div id="inquiriesPanel" class="admin-panel" hidden><div class="admin-section-head"><div><h2>Inquiries</h2><p class="note">Workflow: New → Reviewing → Contacted → In progress → Closed → Archived. Internal notes never appear publicly.</p></div></div><div class="table-wrap"><table class="data"><thead><tr><th>Kind</th><th>Type</th><th>Name</th><th>Email</th><th>Subject</th><th>Assigned</th><th>Status</th></tr></thead><tbody id="inqBody"></tbody></table></div></div>
           <div id="applicationsPanel" class="admin-panel" hidden><div class="admin-section-head"><div><h2>Internship applications</h2><p class="note">Public application submissions. Status changes are staff-only.</p></div></div><div class="table-wrap"><table class="data"><thead><tr><th>Listing</th><th>Name</th><th>Email</th><th>Education</th><th>Status</th></tr></thead><tbody id="internAppBody"></tbody></table></div></div>
           <div id="joinrequestsPanel" class="admin-panel" hidden><div class="admin-section-head"><div><h2>Society / chapter requests</h2><p class="note">Public join-form inquiries, not memberships.</p></div></div><div class="table-wrap"><table class="data"><thead><tr><th>Kind</th><th>Listing</th><th>Name</th><th>Email</th><th>Message</th></tr></thead><tbody id="joinReqBody"></tbody></table></div></div>
 
@@ -1333,6 +1333,12 @@ html[dir="rtl"] .lead {
               <select id="lmPriority"><option value="">All priorities</option><option value="low">Low</option><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option></select>
               <select id="lmLead"><option value="">All lead lawyers</option></select>
               <select id="lmPractice"><option value="">All practice areas</option></select>
+              <label class="note">Opened from <input type="date" id="lmOpenedFrom" /></label>
+              <label class="note">Opened to <input type="date" id="lmOpenedTo" /></label>
+              <label class="note">Close from <input type="date" id="lmCloseFrom" /></label>
+              <label class="note">Close to <input type="date" id="lmCloseTo" /></label>
+              <label class="note"><input type="checkbox" id="lmOverdue" /> Overdue tasks</label>
+              <label class="note"><input type="checkbox" id="lmUpcoming" /> Upcoming hearings</label>
               <input type="search" id="lmSearch" placeholder="Search number, title or client" aria-label="Search matters" />
             </div>
             <div class="table-wrap"><table class="data"><thead><tr><th>Number</th><th>Title</th><th>Client</th><th>Lead</th><th>Status</th><th>Priority</th><th>Actions</th></tr></thead><tbody id="legalMatterBody"></tbody></table></div>
@@ -1971,6 +1977,16 @@ if (window.ramdaniEducation) ramdaniEducation.renderChapters();
         <label><span data-i18n="form_email"></span><input name="email" type="email" required /></label>
         <label><span data-i18n="form_phone"></span><input name="phone" /></label>
         <label><span data-i18n="form_subject"></span><input name="subject" /></label>
+        <label><span>Inquiry type</span>
+          <select name="inquiry_type">
+            <option value="consultation" selected>Consultation</option>
+            <option value="general">General</option>
+            <option value="internships">Internships</option>
+            <option value="membership">Membership</option>
+            <option value="media">Media</option>
+            <option value="other">Other</option>
+          </select>
+        </label>
         <label><span data-i18n="form_preferred"></span>
           <select name="preferred_contact">
             <option value="email">Email</option>
@@ -1995,6 +2011,16 @@ ramdaniBindInquiry("consultForm","consultation");
         <label><span data-i18n="form_email"></span><input name="email" type="email" required /></label>
         <label><span data-i18n="form_phone"></span><input name="phone" /></label>
         <label><span data-i18n="form_subject"></span><input name="subject" /></label>
+        <label><span>Inquiry type</span>
+          <select name="inquiry_type">
+            <option value="general">General</option>
+            <option value="consultation">Consultation</option>
+            <option value="internships">Internships</option>
+            <option value="membership">Membership</option>
+            <option value="media">Media</option>
+            <option value="other">Other</option>
+          </select>
+        </label>
         <label><span data-i18n="form_preferred"></span>
           <select name="preferred_contact">
             <option value="email">Email</option>
@@ -3949,7 +3975,8 @@ window.ramdaniAuth = {
         phone: (form.querySelector('[name="phone"]') || {}).value || null,
         subject: (form.querySelector('[name="subject"]') || {}).value || null,
         message: form.querySelector('[name="message"]').value.trim(),
-        preferred_contact: (form.querySelector('[name="preferred_contact"]') || {}).value || null
+        preferred_contact: (form.querySelector('[name="preferred_contact"]') || {}).value || null,
+        inquiry_type: (form.querySelector('[name="inquiry_type"]') || {}).value || (kind === 'consultation' ? 'consultation' : 'general')
       };
       if (!payload.full_name || !payload.email || !payload.message) {
         status.className = 'form-status err';
@@ -7559,6 +7586,7 @@ window.ramdaniAuth = {
   }
 
   var legalClients = [], legalMatters = [], legalPeople = [], legalPractice = [], legalStaff = [];
+  var legalOverdueMatterIds = {}, legalUpcomingHearingIds = {};
   var legalEditClientId = null, legalEditMatterId = null, mwMatterId = null, mwTab = 'overview';
   var myProfileId = null;
 
@@ -7713,18 +7741,39 @@ window.ramdaniAuth = {
     if ($id('lmPractice')) $id('lmPractice').innerHTML = '<option value="">All practice areas</option>' + legalPractice.map(function (p) {
       return '<option value="' + p.id + '">' + escapeHtml(p.title) + '</option>';
     }).join('');
+    legalOverdueMatterIds = {};
+    legalUpcomingHearingIds = {};
+    var nowIso = new Date().toISOString();
+    var odRes = await sb.from('matter_tasks').select('matter_id').in('status', ['todo', 'in_progress']).lt('due_at', nowIso);
+    (odRes.data || []).forEach(function (t) { if (t.matter_id) legalOverdueMatterIds[t.matter_id] = true; });
+    var uhRes = await sb.from('matter_events').select('matter_id').eq('event_type', 'hearing').gte('starts_at', nowIso);
+    (uhRes.data || []).forEach(function (t) { if (t.matter_id) legalUpcomingHearingIds[t.matter_id] = true; });
     renderLegalMatters();
   }
   function renderLegalMatters() {
     var st = $id('lmStatus').value, ty = $id('lmType').value, pr = $id('lmPriority').value, q = ($id('lmSearch').value || '').trim().toLowerCase();
     var lead = $id('lmLead') ? $id('lmLead').value : '';
     var pa = $id('lmPractice') ? $id('lmPractice').value : '';
+    function ymd(v) { return v ? String(v).slice(0, 10) : ''; }
+    var of = $id('lmOpenedFrom') ? $id('lmOpenedFrom').value : '';
+    var ot = $id('lmOpenedTo') ? $id('lmOpenedTo').value : '';
+    var cf = $id('lmCloseFrom') ? $id('lmCloseFrom').value : '';
+    var ct = $id('lmCloseTo') ? $id('lmCloseTo').value : '';
+    var od = $id('lmOverdue') && $id('lmOverdue').checked;
+    var uh = $id('lmUpcoming') && $id('lmUpcoming').checked;
     var rows = legalMatters.filter(function (m) {
       if (st && m.status !== st) return false;
       if (ty && m.matter_type !== ty) return false;
       if (pr && m.priority !== pr) return false;
       if (lead && m.lead_lawyer_id !== lead) return false;
       if (pa && m.practice_area_id !== pa) return false;
+      if (of && (!ymd(m.opened_at) || ymd(m.opened_at) < of)) return false;
+      if (ot && (!ymd(m.opened_at) || ymd(m.opened_at) > ot)) return false;
+      var close = ymd(m.closed_at) || ymd(m.target_close_at);
+      if (cf && (!close || close < cf)) return false;
+      if (ct && (!close || close > ct)) return false;
+      if (od && !legalOverdueMatterIds[m.id]) return false;
+      if (uh && !legalUpcomingHearingIds[m.id]) return false;
       if (q && [m.matter_number, m.title, clientName(m.client_id)].join(' ').toLowerCase().indexOf(q) === -1) return false;
       return true;
     });
@@ -8081,7 +8130,7 @@ window.ramdaniAuth = {
     });
     $id('legalMatterForm').addEventListener('submit', saveLegalMatter);
     $id('legalMatterCancel').addEventListener('click', resetMatterForm);
-    ['lmStatus', 'lmType', 'lmPriority', 'lmSearch', 'lmLead', 'lmPractice'].forEach(function (id) { var el = $id(id); if (!el) return; el.addEventListener('input', renderLegalMatters); el.addEventListener('change', renderLegalMatters); });
+    ['lmStatus', 'lmType', 'lmPriority', 'lmSearch', 'lmLead', 'lmPractice', 'lmOpenedFrom', 'lmOpenedTo', 'lmCloseFrom', 'lmCloseTo', 'lmOverdue', 'lmUpcoming'].forEach(function (id) { var el = $id(id); if (!el) return; el.addEventListener('input', renderLegalMatters); el.addEventListener('change', renderLegalMatters); });
     $id('legalMatterBody').addEventListener('click', function (e) {
       var open = e.target.closest('[data-lm-open]');
       var ed = e.target.closest('[data-lm-edit]');
@@ -8539,7 +8588,9 @@ window.ramdaniAuth = {
         var sel = e.target.closest('[data-inq]');
         if (!sel) return;
         var payload = {};
-        if (sel.getAttribute('data-field') === 'assigned_to') payload.assigned_to = sel.value || null;
+        var field = sel.getAttribute('data-field');
+        if (field === 'assigned_to') payload.assigned_to = sel.value || null;
+        else if (field === 'inquiry_type') payload.inquiry_type = sel.value || null;
         else payload.status = sel.value;
         await sb.from('inquiries').update(payload).eq('id', sel.getAttribute('data-inq'));
       });
@@ -8975,11 +9026,12 @@ window.ramdaniAuth = {
   }
 
   async function loadInquiries() {
-    var res = await sb.from('inquiries').select('id, kind, full_name, email, subject, status, assigned_to, created_at').order('created_at', { ascending: false }).limit(50);
+    var res = await sb.from('inquiries').select('id, kind, inquiry_type, full_name, email, subject, status, assigned_to, created_at').order('created_at', { ascending: false }).limit(50);
     var staff = await sb.from('profiles').select('id, full_name, email, role').in('role', ['admin','firm_admin','lawyer','operations_staff','communications_manager']);
     var people = staff.data || [];
     var rows = res.data || [];
     var statuses = ['new','reviewing','reviewed','contacted','in_progress','closed','archived'];
+    var types = ['general','consultation','internships','membership','media','other'];
     document.getElementById('inqBody').innerHTML = rows.map(function (r) {
       var staffOpts = '<option value="">Unassigned</option>' + people.map(function (p) {
         return '<option value="' + p.id + '"' + (r.assigned_to === p.id ? ' selected' : '') + '>' + ramdaniUi.escape(p.full_name || p.email) + '</option>';
@@ -8987,8 +9039,13 @@ window.ramdaniAuth = {
       var stOpts = statuses.map(function (s) {
         return '<option value="' + s + '"' + (r.status === s ? ' selected' : '') + '>' + s.replace('_',' ') + '</option>';
       }).join('');
-      return '<tr><td>' + ramdaniUi.escape(r.kind) + '</td><td>' + ramdaniUi.escape(r.full_name) + '</td><td>' + ramdaniUi.escape(r.email) + '</td><td>' + ramdaniUi.escape(r.subject) + '</td><td><select data-inq="' + ramdaniUi.escape(r.id) + '" data-field="assigned_to">' + staffOpts + '</select></td><td><select data-inq="' + ramdaniUi.escape(r.id) + '" data-field="status">' + stOpts + '</select></td></tr>';
-    }).join('') || '<tr><td colspan="6">No inquiries.</td></tr>';
+      var typeVal = r.inquiry_type || '';
+      var typeOpts = '<option value="">—</option>' + types.map(function (t) {
+        return '<option value="' + t + '"' + (typeVal === t ? ' selected' : '') + '>' + t + '</option>';
+      }).join('');
+      if (typeVal && types.indexOf(typeVal) === -1) typeOpts += '<option value="' + ramdaniUi.escape(typeVal) + '" selected>' + ramdaniUi.escape(typeVal) + '</option>';
+      return '<tr><td>' + ramdaniUi.escape(r.kind) + '</td><td><select data-inq="' + ramdaniUi.escape(r.id) + '" data-field="inquiry_type">' + typeOpts + '</select></td><td>' + ramdaniUi.escape(r.full_name) + '</td><td>' + ramdaniUi.escape(r.email) + '</td><td>' + ramdaniUi.escape(r.subject) + '</td><td><select data-inq="' + ramdaniUi.escape(r.id) + '" data-field="assigned_to">' + staffOpts + '</select></td><td><select data-inq="' + ramdaniUi.escape(r.id) + '" data-field="status">' + stOpts + '</select></td></tr>';
+    }).join('') || '<tr><td colspan="7">No inquiries.</td></tr>';
   }
 
   async function loadInternshipApps() {
