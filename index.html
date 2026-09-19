@@ -1563,15 +1563,16 @@ html[dir="rtl"] .lead {
           </div>
 
           <div id="memberCardsPanel" class="admin-panel" hidden>
-            <div class="admin-section-head"><div><h2>Member cards</h2><p class="note">QR stores only a verification code. Issue is a staff action — never automatic on application.</p></div></div>
+            <div class="admin-section-head"><div><h2>Member cards</h2><p class="note">QR stores only a verification code — never private member data. A card can only be generated from an approved or active membership. Issue is a staff action, never automatic.</p></div></div>
             <form id="memberCardForm" class="form admin-form">
-              <label><span>Member</span><select name="member_id" required><option value="">Select member…</option></select></label>
+              <label class="field-full"><span>Membership</span><select name="membership_id" required><option value="">Select an approved/active membership…</option></select></label>
+              <label><span>Designation</span><input name="designation" placeholder="President / Member / Secretary…" /></label>
               <label><span>Issue date</span><input name="issue_date" type="date" /></label>
               <label><span>Expiry</span><input name="expiry_date" type="date" /></label>
-              <label><span>Status</span><select name="status"><option value="draft">Draft</option><option value="approved">Approved</option><option value="issued">Issued</option><option value="active">Active</option><option value="expired">Expired</option><option value="revoked">Revoked</option></select></label>
-              <div class="form-actions"><button class="btn btn-primary" type="submit">Save card</button><p id="memberCardNote" class="form-status"></p></div>
+              <div class="form-actions"><button class="btn btn-primary" type="submit" id="memberCardSave">Save card</button><p id="memberCardNote" class="form-status"></p></div>
             </form>
-            <div class="table-wrap"><table class="data"><thead><tr><th>Card #</th><th>Member</th><th>Status</th><th>Verify code</th><th></th></tr></thead><tbody id="memberCardBody"></tbody></table></div>
+            <div class="admin-toolbar"><select id="memberCardStatusFilter"><option value="">All statuses</option><option value="draft">Draft</option><option value="approved">Approved</option><option value="issued">Issued</option><option value="active">Active</option><option value="expired">Expired</option><option value="revoked">Revoked</option></select></div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Card #</th><th>Member</th><th>Society</th><th>Status</th><th>Verify code</th><th>Actions</th></tr></thead><tbody id="memberCardBody"></tbody></table></div>
           </div>
 
           <div id="studentCardsPanel" class="admin-panel" hidden>
@@ -8713,32 +8714,74 @@ window.ramdaniAuth = {
     await loadMembers();
   }
 
+  var platEditCardId = null;
+  function fillMemberCardMembershipSelect() {
+    var sel = document.querySelector('#memberCardForm [name="membership_id"]');
+    if (!sel) return;
+    var cur = sel.value;
+    var eligible = platMemberships.filter(function (m) { return m.status === 'approved' || m.status === 'active'; });
+    sel.innerHTML = '<option value="">Select an approved/active membership…</option>' + eligible.map(function (m) {
+      var mem = platMembers.find(function (x) { return x.id === m.member_id; });
+      var soc = platSocieties.find(function (x) { return x.id === m.society_id; });
+      var label = (mem ? mem.full_name : m.member_id) + (soc ? ' — ' + soc.title : '') + ' [' + m.status + ']';
+      return '<option value="' + m.id + '">' + escapeHtml(label) + '</option>';
+    }).join('');
+    sel.value = cur;
+  }
+
   async function loadMemberCards() {
-    await loadPlatLookups();
-    var res = await sb.from('member_cards').select('*, members(full_name, member_number)').order('created_at', { ascending: false });
+    await ensureOrgSocietyLookupsLoaded();
+    if (!platMemberships.length) { var mr = await sb.from('memberships').select('*'); platMemberships = mr.data || []; }
+    fillMemberCardMembershipSelect();
+    var st = ($id('memberCardStatusFilter') || {}).value || '';
+    var q = sb.from('member_cards').select('*, members(full_name, member_number)').order('created_at', { ascending: false });
+    if (st) q = q.eq('status', st);
+    var res = await q;
     if (res.error) { setNote('memberCardNote', res.error.message); return; }
-    $id('memberCardBody').innerHTML = (res.data || []).map(function (c) {
+    var cards = res.data || [];
+    $id('memberCardBody').innerHTML = cards.map(function (c) {
       var m = c.members || {};
-      return '<tr><td>' + escapeHtml(c.card_number) + '</td><td>' + escapeHtml((m.member_number || '') + ' ' + (m.full_name || '')) + '</td><td>' + escapeHtml(c.status) + '</td><td><code>' + escapeHtml(c.verify_code) + '</code></td><td>' +
-        '<button type="button" class="btn btn-sm" data-mc-preview="' + escapeHtml(c.card_number) + '|' + escapeHtml(m.full_name || '') + '|' + escapeHtml(c.verify_code) + '|' + escapeHtml(c.status) + '">Preview</button> ' +
-        (c.status === 'revoked' ? '' : '<button type="button" class="btn btn-sm" data-mc-revoke="' + c.id + '">Revoke</button>') + '</td></tr>';
-    }).join('') || '<tr><td colspan="5">No member cards yet.</td></tr>';
+      var soc = platSocieties.find(function (x) { return x.id === c.society_id; });
+      var actions = '';
+      if (c.status === 'draft') actions += '<button type="button" class="btn btn-sm" data-mc-approve="' + c.id + '">Approve</button> ';
+      else if (c.status === 'approved') actions += '<button type="button" class="btn btn-sm" data-mc-issue="' + c.id + '">Issue</button> ';
+      else if (c.status === 'issued') actions += '<button type="button" class="btn btn-sm" data-mc-activate="' + c.id + '">Activate</button> ';
+      else if (c.status === 'active' || c.status === 'expired') actions += '<button type="button" class="btn btn-sm" data-mc-renew="' + c.id + '">Renew</button> ';
+      actions += '<button type="button" class="btn btn-sm" data-mc-preview="' + escapeHtml(c.card_number || '') + '|' + escapeHtml(m.full_name || '') + '|' + escapeHtml(c.verify_code || '') + '|' + escapeHtml(c.status) + '">Preview</button> ';
+      if (c.status !== 'revoked') actions += '<button type="button" class="btn btn-sm" data-mc-revoke="' + c.id + '">Revoke</button>';
+      return '<tr><td>' + escapeHtml(c.card_number || '(pending)') + '</td><td>' + escapeHtml((m.member_number || '') + ' ' + (m.full_name || '')) + '</td><td>' + escapeHtml(soc ? soc.title : '') + '</td><td><span class="status-badge status-' + escapeHtml(c.status) + '">' + escapeHtml(c.status) + '</span></td><td><code>' + escapeHtml(c.verify_code || '') + '</code></td><td><div class="table-actions">' + actions + '</div></td></tr>';
+    }).join('') || '<tr><td colspan="6">No member cards yet.</td></tr>';
+
+    document.querySelectorAll('[data-mc-approve]').forEach(function (btn) { btn.addEventListener('click', async function () { var p = await ramdaniAuth.profile(); var r = await sb.from('member_cards').update({ status: 'approved', approved_by: p && p.id, approved_at: new Date().toISOString() }).eq('id', btn.getAttribute('data-mc-approve')); if (r.error) setNote('memberCardNote', r.error.message); else loadMemberCards(); }); });
+    document.querySelectorAll('[data-mc-issue]').forEach(function (btn) { btn.addEventListener('click', async function () { var p = await ramdaniAuth.profile(); var r = await sb.from('member_cards').update({ status: 'issued', issued_by: p && p.id }).eq('id', btn.getAttribute('data-mc-issue')); if (r.error) setNote('memberCardNote', r.error.message); else loadMemberCards(); }); });
+    document.querySelectorAll('[data-mc-activate]').forEach(function (btn) { btn.addEventListener('click', async function () { var r = await sb.from('member_cards').update({ status: 'active' }).eq('id', btn.getAttribute('data-mc-activate')); if (r.error) setNote('memberCardNote', r.error.message); else loadMemberCards(); }); });
+    document.querySelectorAll('[data-mc-renew]').forEach(function (btn) { btn.addEventListener('click', async function () { var d = window.prompt('New expiry date (YYYY-MM-DD):', ''); if (!d) return; var r = await sb.from('member_cards').update({ status: 'active', expiry_date: d }).eq('id', btn.getAttribute('data-mc-renew')); if (r.error) setNote('memberCardNote', r.error.message); else loadMemberCards(); }); });
+    document.querySelectorAll('[data-mc-revoke]').forEach(function (btn) { btn.addEventListener('click', async function () { if (!confirm('Revoke this card?')) return; var r = await sb.from('member_cards').update({ status: 'revoked' }).eq('id', btn.getAttribute('data-mc-revoke')); if (r.error) setNote('memberCardNote', r.error.message); else loadMemberCards(); }); });
   }
   async function saveMemberCard(e) {
     e.preventDefault();
     var f = e.target;
+    var membershipId = f.elements.membership_id.value;
+    if (!membershipId) return setNote('memberCardNote', 'Select an approved or active membership.');
+    var membership = platMemberships.find(function (m) { return m.id === membershipId; });
+    if (!membership || (membership.status !== 'approved' && membership.status !== 'active')) {
+      return setNote('memberCardNote', 'Card can only be generated from an approved or active membership.');
+    }
     var payload = {
-      member_id: f.elements.member_id.value,
+      membership_id: membershipId,
+      member_id: membership.member_id,
+      organization_id: membership.organization_id,
+      society_id: membership.society_id,
+      chapter_id: membership.chapter_id,
+      designation: f.elements.designation.value.trim() || null,
       issue_date: f.elements.issue_date.value || null,
       expiry_date: f.elements.expiry_date.value || null,
-      status: f.elements.status.value,
-      issued_by: (await ramdaniAuth.profile() || {}).id || null
+      status: 'draft'
     };
-    if (!payload.member_id) return setNote('memberCardNote', 'Select a member.');
     var res = await sb.from('member_cards').insert(payload);
     if (res.error) return setNote('memberCardNote', res.error.message);
     f.reset();
-    setNote('memberCardNote', 'Saved. Verification code is generated server-side.', true);
+    setNote('memberCardNote', 'Saved as draft. Card number and QR verification code are generated server-side once approved/issued.', true);
     await loadMemberCards();
   }
 
@@ -8940,18 +8983,14 @@ window.ramdaniAuth = {
       $id('memberCancel').hidden = false;
     });
     $id('memberCardForm').addEventListener('submit', saveMemberCard);
-    $id('memberCardBody').addEventListener('click', async function (e) {
+    $id('memberCardStatusFilter').addEventListener('change', loadMemberCards);
+    $id('memberCardBody').addEventListener('click', function (e) {
       var prev = e.target.closest('[data-mc-preview]');
       if (prev) {
         var p = prev.getAttribute('data-mc-preview').split('|');
         var w = window.open('', '_blank', 'noopener,width=420,height=560');
         if (w) w.document.write('<html><head><title>Card preview</title></head><body style="font-family:Georgia,serif;padding:24px"><div style="border:1px solid #333;padding:20px;max-width:320px"><p>Ramdani Law Firm</p><h2>' + p[1] + '</h2><p>' + p[0] + '</p><p>Status: ' + p[3] + '</p><p style="font-size:12px;word-break:break-all">Verify: ' + p[2] + '</p><p style="font-size:12px">QR stores only this verification code.</p></div><p><button onclick="window.print()">Print</button></p></body></html>');
-        return;
       }
-      var b = e.target.closest('[data-mc-revoke]'); if (!b) return;
-      if (!confirm('Revoke this card?')) return;
-      await sb.from('member_cards').update({ status: 'revoked' }).eq('id', b.getAttribute('data-mc-revoke'));
-      await loadMemberCards();
     });
     $id('studentCardForm').addEventListener('submit', saveStudentCard);
     $id('platEventForm').addEventListener('submit', savePlatEvent);
