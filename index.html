@@ -2267,9 +2267,16 @@ window.ramdaniAuth = {
     var res = await sb.from('profiles').select('id, full_name, email, phone, student_id, department, university, session, role, is_active').eq('id', session.user.id).maybeSingle();
     return res.data || null;
   },
+  // Any role considered "staff" for the purpose of signing into the admin
+  // panel. Granular roles are scoped by RLS on the database side (see the
+  // ramdani_can_manage_* functions) — this list only controls who can open
+  // the panel at all; per-table read/write is enforced by RLS regardless
+  // of what this list says, so it can never grant more than the database
+  // already allows.
+  STAFF_ROLES: ['admin', 'editor', 'content_manager', 'education_manager', 'student_manager', 'communications_manager'],
   async requireAdmin() {
     var p = await this.profile();
-    if (!p || p.role !== 'admin' || !p.is_active) {
+    if (!p || this.STAFF_ROLES.indexOf(p.role) === -1 || !p.is_active) {
       throw new Error('Admin access required');
     }
     return p;
@@ -3713,6 +3720,49 @@ window.ramdaniAuth = {
     { id: 'certificates', label: 'Certificates', fields: ['title', 'slug', 'category', 'status'] }
   ];
 
+  // Which granular roles (beyond admin/editor, who always see everything)
+  // may use each sidebar view. This is a UX convenience only — the real
+  // enforcement is the RLS policies in the database (ramdani_can_manage_*),
+  // so a view left off this list, or a stale/incorrect entry here, can
+  // never grant access beyond what RLS already allows; it can only hide
+  // a button that would otherwise fail silently or show empty data.
+  var VIEW_ROLES = {
+    '__dashboard': ['content_manager', 'education_manager', 'student_manager', 'communications_manager'],
+    '__students': ['student_manager'],
+    '__admins': [],
+    'people': ['content_manager'], 'practice_areas': ['content_manager'], 'services': ['content_manager'],
+    'matters': ['content_manager'], 'articles': ['content_manager'], 'news': ['content_manager'],
+    'resources': ['content_manager'], 'careers': ['content_manager'],
+    'modules': ['education_manager'], 'lectures': ['education_manager'], 'quizzes': ['education_manager'],
+    'books': ['education_manager'], 'cases': ['education_manager'], 'statutes': ['education_manager'],
+    'certificates': ['education_manager'], '__certissuances': ['education_manager'],
+    'societies': ['student_manager'], 'chapters': ['student_manager'], 'cabinets': ['student_manager'],
+    'internships': ['student_manager'],
+    '__inquiries': ['communications_manager'],
+    '__applications': ['student_manager', 'communications_manager'],
+    '__joinrequests': ['communications_manager'],
+    'social_posts': ['content_manager'],
+    '__homepagesections': ['content_manager'], '__navigation': ['content_manager'],
+    '__seosettings': ['content_manager'], '__seooverrides': ['content_manager'], '__disclaimers': ['content_manager'],
+    '__orgsettings': [], '__brandinglogo': [], '__brandingtype': [], '__contactinfo': [],
+    '__certtemplates': ['education_manager'],
+    '__systemsettings': [], '__notifications': ['communications_manager'], '__auditlog': []
+  };
+
+  function applyRoleVisibility(role) {
+    var alwaysFull = role === 'admin' || role === 'editor';
+    document.querySelectorAll('[data-table]').forEach(function (btn) {
+      var view = btn.getAttribute('data-table');
+      var allowed = alwaysFull || (VIEW_ROLES[view] || []).indexOf(role) !== -1;
+      btn.hidden = !allowed;
+    });
+    document.querySelectorAll('.admin-nav details.admin-nav-group').forEach(function (group) {
+      var anyVisible = false;
+      group.querySelectorAll('button[data-table]:not([hidden])').forEach(function () { anyVisible = true; });
+      group.hidden = !anyVisible;
+    });
+  }
+
   async function boot() {
     if (window.ramdaniAuth && ramdaniAuth.isRecoveryCallback()) {
       window.ramdaniGo('/reset-password');
@@ -3726,6 +3776,7 @@ window.ramdaniAuth = {
       login.classList.add('hidden');
       app.classList.remove('hidden');
       document.getElementById('staffName').textContent = profile.full_name || profile.role;
+      applyRoleVisibility(profile.role);
       await loadDashboard();
       await loadStudents();
       await loadInquiries();
