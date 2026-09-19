@@ -598,6 +598,7 @@ html[dir="rtl"] .lead {
         <details class="admin-nav-group" open>
           <summary class="admin-nav-group-title">Students &amp; Progress</summary>
           <button type="button" data-table="__enrollments">Enrollments &amp; progress</button>
+          <button type="button" data-table="__studentcards">Student cards</button>
         </details>
         <details class="admin-nav-group" open>
           <summary class="admin-nav-group-title">Legal Learning</summary>
@@ -610,17 +611,22 @@ html[dir="rtl"] .lead {
           <summary class="admin-nav-group-title">Certificates</summary>
           <button type="button" data-table="certificates">Templates &amp; listings</button>
           <button type="button" data-table="__certissuances">Issued certificates</button>
+          <button type="button" data-table="__docscenter">Document center</button>
         </details>
         <details class="admin-nav-group" open>
           <summary class="admin-nav-group-title">Community</summary>
           <button type="button" data-table="societies">Societies</button>
           <button type="button" data-table="chapters">Chapters</button>
           <button type="button" data-table="cabinets">Cabinets</button>
+          <button type="button" data-table="__members">Members</button>
+          <button type="button" data-table="__membercards">Member cards</button>
           <button type="button" data-table="internships">Internships</button>
         </details>
         <details class="admin-nav-group" open>
           <summary class="admin-nav-group-title">Communications</summary>
           <button type="button" data-table="__inquiries">Inquiries</button>
+          <button type="button" data-table="__events">Events</button>
+          <button type="button" data-table="__eventregs">Registrations &amp; attendance</button>
           <button type="button" data-table="__applications">Internship applications</button>
           <button type="button" data-table="__joinrequests">Society / chapter requests</button>
           <button type="button" data-table="social_posts">Social posts</button>
@@ -720,6 +726,14 @@ html[dir="rtl"] .lead {
               <label data-field="deadline"><span>Deadline</span><input name="deadline" type="date" /></label>
               <label data-field="summary" class="field-full"><span>Summary</span><textarea name="summary" rows="4"></textarea></label>
               <label data-field="short_bio" class="field-full"><span>Short bio</span><textarea name="short_bio" rows="4"></textarea></label>
+              <label data-field="photo_url"><span>Photo URL</span><input name="photo_url" /></label>
+              <label data-field="education"><span>Education</span><input name="education" /></label>
+              <label data-field="qualifications"><span>Qualifications</span><input name="qualifications" /></label>
+              <label data-field="languages"><span>Languages</span><input name="languages" /></label>
+              <label data-field="short_name"><span>Short name</span><input name="short_name" /></label>
+              <label data-field="caption" class="field-full"><span>Caption</span><textarea name="caption" rows="3"></textarea></label>
+              <label data-field="thumbnail_url"><span>Thumbnail URL</span><input name="thumbnail_url" /></label>
+              <label data-field="head_name"><span>Cabinet head</span><input name="head_name" /></label>
               <label data-field="status"><span>Publishing status</span><select name="status"><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></label>
               <div class="form-actions"><button class="btn btn-primary" id="saveBtn" type="submit">Save</button><button class="btn" id="cancelEditBtn" type="button" hidden>Cancel edit</button><button class="btn" id="previewContentBtn" type="button" hidden>Preview</button><p id="saveNote" class="form-status"></p></div>
             </form>
@@ -980,9 +994,23 @@ html[dir="rtl"] .lead {
               <form id="mediaUploadForm" class="form admin-form">
                 <label><span>Category</span><select name="category">
                   <option value="Logos">Logos</option>
+                  <option value="Portraits">Portraits</option>
+                  <option value="Founder">Founder</option>
+                  <option value="Society logos">Society logos</option>
+                  <option value="Chapter logos">Chapter logos</option>
+                  <option value="Cabinet images">Cabinet images</option>
+                  <option value="Student/member photos">Student/member photos</option>
+                  <option value="Lawyer photos">Lawyer photos</option>
+                  <option value="About images">About images</option>
+                  <option value="Vision images">Vision images</option>
+                  <option value="Event banners">Event banners</option>
+                  <option value="Social thumbnails">Social thumbnails</option>
+                  <option value="Certificate Assets">Certificate assets</option>
+                  <option value="Document assets">Document assets</option>
+                  <option value="Signatures">Signatures</option>
+                  <option value="Seals/stamps">Seals/stamps</option>
                   <option value="Profile Photos">Profile Photos</option>
                   <option value="Website Images">Website Images</option>
-                  <option value="Certificate Assets">Certificate Assets</option>
                   <option value="Education Materials">Education Materials</option>
                   <option value="PDFs">PDFs</option>
                   <option value="Legal Resources">Legal Resources</option>
@@ -1000,9 +1028,23 @@ html[dir="rtl"] .lead {
               <select id="mediaCategoryFilter" aria-label="Filter by category">
                 <option value="">All categories</option>
                 <option value="Logos">Logos</option>
+                <option value="Portraits">Portraits</option>
+                <option value="Founder">Founder</option>
+                <option value="Society logos">Society logos</option>
+                <option value="Chapter logos">Chapter logos</option>
+                <option value="Cabinet images">Cabinet images</option>
+                <option value="Student/member photos">Student/member photos</option>
+                <option value="Lawyer photos">Lawyer photos</option>
+                <option value="About images">About images</option>
+                <option value="Vision images">Vision images</option>
+                <option value="Event banners">Event banners</option>
+                <option value="Social thumbnails">Social thumbnails</option>
+                <option value="Certificate Assets">Certificate assets</option>
+                <option value="Document assets">Document assets</option>
+                <option value="Signatures">Signatures</option>
+                <option value="Seals/stamps">Seals/stamps</option>
                 <option value="Profile Photos">Profile Photos</option>
                 <option value="Website Images">Website Images</option>
-                <option value="Certificate Assets">Certificate Assets</option>
                 <option value="Education Materials">Education Materials</option>
                 <option value="PDFs">PDFs</option>
                 <option value="Legal Resources">Legal Resources</option>
@@ -1341,6 +1383,105 @@ html[dir="rtl"] .lead {
             <div class="dashboard-grid" id="legalReportStats"></div>
             <p id="legalReportNote" class="form-status"></p>
           </div>
+          <div id="membersPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Members</h2><p class="note">Society/chapter members. Not students and not law-firm clients. Approval is never automatic.</p></div></div>
+            <form id="memberForm" class="form admin-form">
+              <label><span>Full name</span><input name="full_name" required /></label>
+              <label><span>Email</span><input name="email" type="email" /></label>
+              <label><span>Phone</span><input name="phone" /></label>
+              <label><span>Society</span><select name="society_id"><option value="">None</option></select></label>
+              <label><span>Chapter</span><select name="chapter_id"><option value="">None</option></select></label>
+              <label><span>Cabinet</span><select name="cabinet_id"><option value="">None</option></select></label>
+              <label><span>Designation</span><input name="designation" /></label>
+              <label><span>Joined</span><input name="joined_at" type="date" /></label>
+              <label><span>Valid until</span><input name="valid_until" type="date" /></label>
+              <label><span>Status</span><select name="status"><option value="application">Application</option><option value="review">Review</option><option value="approved">Approved</option><option value="active">Active</option><option value="expired">Expired</option><option value="suspended">Suspended</option><option value="revoked">Revoked</option></select></label>
+              <label class="field-full"><span>Bio</span><textarea name="bio" rows="2"></textarea></label>
+              <div class="form-actions"><button class="btn btn-primary" type="submit" id="memberSave">Save member</button><button class="btn" type="button" id="memberCancel" hidden>Cancel</button><p id="memberNote" class="form-status"></p></div>
+            </form>
+            <div class="admin-toolbar"><select id="memberStatusFilter"><option value="">All statuses</option><option value="application">Application</option><option value="review">Review</option><option value="approved">Approved</option><option value="active">Active</option><option value="expired">Expired</option><option value="suspended">Suspended</option><option value="revoked">Revoked</option></select><input type="search" id="memberSearch" placeholder="Search name, email or member number" /></div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Number</th><th>Name</th><th>Society</th><th>Status</th><th></th></tr></thead><tbody id="memberBody"></tbody></table></div>
+          </div>
+
+          <div id="memberCardsPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Member cards</h2><p class="note">QR stores only a verification code. Issue is a staff action — never automatic on application.</p></div></div>
+            <form id="memberCardForm" class="form admin-form">
+              <label><span>Member</span><select name="member_id" required><option value="">Select member…</option></select></label>
+              <label><span>Issue date</span><input name="issue_date" type="date" /></label>
+              <label><span>Expiry</span><input name="expiry_date" type="date" /></label>
+              <label><span>Status</span><select name="status"><option value="draft">Draft</option><option value="approved">Approved</option><option value="issued">Issued</option><option value="active">Active</option><option value="expired">Expired</option><option value="revoked">Revoked</option></select></label>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Save card</button><p id="memberCardNote" class="form-status"></p></div>
+            </form>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Card #</th><th>Member</th><th>Status</th><th>Verify code</th><th></th></tr></thead><tbody id="memberCardBody"></tbody></table></div>
+          </div>
+
+          <div id="studentCardsPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Student cards</h2><p class="note">Issued only by staff after a student is accepted/enrolled.</p></div></div>
+            <form id="studentCardForm" class="form admin-form">
+              <label><span>Student</span><select name="student_id" required><option value="">Select student…</option></select></label>
+              <label><span>Program</span><input name="program" /></label>
+              <label><span>Batch</span><input name="batch" /></label>
+              <label><span>Issue date</span><input name="issue_date" type="date" /></label>
+              <label><span>Expiry</span><input name="expiry_date" type="date" /></label>
+              <label><span>Status</span><select name="status"><option value="draft">Draft</option><option value="approved">Approved</option><option value="issued">Issued</option><option value="active">Active</option><option value="expired">Expired</option><option value="revoked">Revoked</option></select></label>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Save card</button><p id="studentCardNote" class="form-status"></p></div>
+            </form>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Card #</th><th>Student</th><th>Program</th><th>Status</th><th>Verify code</th></tr></thead><tbody id="studentCardBody"></tbody></table></div>
+          </div>
+
+          <div id="eventsPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Events</h2><p class="note">Meeting URLs are stored only. Nothing is created on Zoom/Meet automatically.</p></div></div>
+            <form id="platEventForm" class="form admin-form">
+              <label><span>Title</span><input name="title" required /></label>
+              <label><span>Slug</span><input name="slug" required /></label>
+              <label><span>Type</span><select name="event_type"><option value="offline">Offline</option><option value="online">Online</option><option value="hybrid">Hybrid</option></select></label>
+              <label><span>Starts</span><input name="starts_at" type="datetime-local" /></label>
+              <label><span>Ends</span><input name="ends_at" type="datetime-local" /></label>
+              <label><span>Venue</span><input name="venue" /></label>
+              <label><span>Address</span><input name="address" /></label>
+              <label><span>Meeting URL</span><input name="meeting_url" /></label>
+              <label><span>Society</span><select name="society_id"><option value="">None</option></select></label>
+              <label><span>Capacity</span><input name="capacity" type="number" min="1" /></label>
+              <label><span>Registration open</span><select name="registration_open"><option value="false">No</option><option value="true">Yes</option></select></label>
+              <label><span>Certificate eligible</span><select name="certificate_eligible"><option value="false">No</option><option value="true">Yes</option></select></label>
+              <label><span>Status</span><select name="status"><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></label>
+              <label class="field-full"><span>Summary</span><textarea name="summary" rows="2"></textarea></label>
+              <label class="field-full"><span>Description</span><textarea name="description" rows="3"></textarea></label>
+              <div class="form-actions"><button class="btn btn-primary" type="submit" id="platEventSave">Save event</button><button class="btn" type="button" id="platEventCancel" hidden>Cancel</button><p id="platEventNote" class="form-status"></p></div>
+            </form>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Title</th><th>When</th><th>Type</th><th>Status</th><th></th></tr></thead><tbody id="platEventBody"></tbody></table></div>
+          </div>
+
+          <div id="eventRegsPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Event registrations & attendance</h2><p class="note">Mark attendance from real registrations only.</p></div></div>
+            <div class="admin-toolbar"><select id="regEventFilter"><option value="">All events</option></select></div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Event</th><th>Name</th><th>Email</th><th>Status</th><th></th></tr></thead><tbody id="eventRegBody"></tbody></table></div>
+            <p id="eventRegNote" class="form-status"></p>
+          </div>
+
+          <div id="docsCenterPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Document center</h2><p class="note">Templates use {{name}}, {{member_id}}, {{student_id}}, {{event_name}}, {{date}}, {{organization}}, {{designation}}. Documents are not generated if required data is missing.</p></div></div>
+            <form id="docTplForm" class="form admin-form">
+              <label><span>Template name</span><input name="name" required /></label>
+              <label><span>Category</span><select name="category"><option value="invitation">Invitation</option><option value="acceptance">Acceptance</option><option value="appointment">Appointment</option><option value="membership">Membership</option><option value="internship">Internship</option><option value="participation">Participation</option><option value="recommendation">Recommendation</option><option value="removal">Removal</option><option value="event">Event</option><option value="certificate">Certificate</option><option value="notice">Notice</option><option value="other">Other</option></select></label>
+              <label><span>Status</span><select name="status"><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></label>
+              <label class="field-full"><span>Body</span><textarea name="body" rows="5" required></textarea></label>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Save template</button><p id="docTplNote" class="form-status"></p></div>
+            </form>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Template</th><th>Category</th><th>Status</th></tr></thead><tbody id="docTplBody"></tbody></table></div>
+            <div class="admin-section-head"><h2>Issue document</h2></div>
+            <form id="issueDocForm" class="form admin-form">
+              <label><span>Template</span><select name="template_id" required><option value="">Select…</option></select></label>
+              <label><span>Recipient kind</span><select name="recipient_kind"><option value="member">Member</option><option value="student">Student</option><option value="applicant">Applicant</option><option value="other">Other</option></select></label>
+              <label><span>Recipient name</span><input name="recipient_name" required /></label>
+              <label><span>Member</span><select name="member_id"><option value="">None</option></select></label>
+              <label><span>Student</span><select name="student_id"><option value="">None</option></select></label>
+              <label><span>Event</span><select name="event_id"><option value="">None</option></select></label>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Issue</button><p id="issueDocNote" class="form-status"></p></div>
+            </form>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Recipient</th><th>Category</th><th>Status</th><th>Verify</th></tr></thead><tbody id="issuedDocBody"></tbody></table></div>
+          </div>
+
         </main>
       </section>
     </div>
@@ -1366,7 +1507,7 @@ html[dir="rtl"] .lead {
     <div class="wrap" style="padding:2.5rem 0;max-width:46rem">
 
       <div id="studentLoginPanel" class="auth-box" hidden>
-        <h1>Student sign in</h1>
+        <h1>Welcome, Student</h1>
         <form id="studentLoginForm" class="form">
           <label>Email <input id="stuLoginEmail" type="email" required autocomplete="username" /></label>
           <label>Password <input id="stuLoginPassword" type="password" required minlength="8" autocomplete="current-password" /></label>
@@ -1425,6 +1566,15 @@ html[dir="rtl"] .lead {
 
         <h2>My certificates</h2>
         <div id="myCertificates" class="learning-grid" style="margin-bottom:1rem"></div>
+
+        <h2>Student card</h2>
+        <div id="myStudentCard" class="card" style="margin-bottom:1rem"></div>
+
+        <h2>My documents</h2>
+        <div id="myStudentDocs" style="margin-bottom:1rem"></div>
+
+        <h2>Events &amp; attendance</h2>
+        <div id="myStudentEvents" style="margin-bottom:1rem"></div>
 
         <h2>Update profile</h2>
         <form id="studentProfileForm" class="form">
@@ -1905,7 +2055,19 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
         status.textContent = '';
         result.hidden = false;
         if (!row || !row.certificate_number) {
-          result.innerHTML = '<p class="empty">No valid, currently-issued certificate matches this code.</p>';
+          var card = await sb.rpc('ramdani_verify_card', { p_code: code });
+          if (!card.error && card.data && card.data.ok) {
+            var d = card.data;
+            result.innerHTML = '<h2>' + esc(d.kind === 'student' ? 'Student card verified' : 'Member card verified') + '</h2>' +
+              '<p><strong>Card number:</strong> ' + esc(d.card_number) + '</p>' +
+              (d.name ? '<p><strong>Name:</strong> ' + esc(d.name) + '</p>' : '') +
+              (d.member_number ? '<p><strong>ID:</strong> ' + esc(d.member_number) + '</p>' : '') +
+              (d.designation ? '<p><strong>Program / designation:</strong> ' + esc(d.designation) + '</p>' : '') +
+              (d.issue_date ? '<p><strong>Issue date:</strong> ' + esc(d.issue_date) + '</p>' : '') +
+              '<p><strong>Status:</strong> ' + esc(d.status || '') + '</p>';
+            return;
+          }
+          result.innerHTML = '<p class="empty">No valid, currently-issued certificate or card matches this code.</p>';
           return;
         }
         result.innerHTML = '<h2>Certificate verified</h2>' +
@@ -3219,6 +3381,37 @@ window.ramdaniAuth = {
         }).join('');
       }
     }
+    var cardEl = document.getElementById('myStudentCard');
+    if (cardEl) {
+      var sc = await sb.from('student_cards').select('*').eq('student_id', uid).in('status', ['issued', 'active']).order('created_at', { ascending: false }).limit(1);
+      if (sc.error) cardEl.innerHTML = '<p class="empty">Could not load student card.</p>';
+      else if (!sc.data || !sc.data.length) cardEl.innerHTML = '<p class="empty">No student card has been issued yet.</p>';
+      else {
+        var c = sc.data[0];
+        cardEl.innerHTML = '<p><strong>' + esc(c.card_number) + '</strong> · ' + esc(c.status) + '</p>' +
+          '<p class="note">' + esc([c.program, c.batch].filter(Boolean).join(' · ')) + '</p>' +
+          '<p class="note">Verification code: ' + esc(c.verify_code) + '</p>';
+      }
+    }
+    var docsEl = document.getElementById('myStudentDocs');
+    if (docsEl) {
+      var docs = await sb.from('issued_documents').select('id, category, status, issued_at, recipient_name').eq('student_id', uid).eq('status', 'issued').order('issued_at', { ascending: false });
+      if (docs.error) docsEl.innerHTML = '<p class="empty">Could not load documents.</p>';
+      else if (!docs.data || !docs.data.length) docsEl.innerHTML = '<p class="empty">No documents issued to you yet.</p>';
+      else docsEl.innerHTML = docs.data.map(function (d) {
+        return '<article class="card"><h3>' + esc(d.category) + '</h3><p class="note">' + esc(d.issued_at || '') + '</p></article>';
+      }).join('');
+    }
+    var evEl = document.getElementById('myStudentEvents');
+    if (evEl) {
+      var regs = await sb.from('event_registrations').select('*, events(title, starts_at, status)').eq('profile_id', uid).order('created_at', { ascending: false });
+      if (regs.error) evEl.innerHTML = '<p class="empty">Could not load events.</p>';
+      else if (!regs.data || !regs.data.length) evEl.innerHTML = '<p class="empty">You have not registered for any events.</p>';
+      else evEl.innerHTML = regs.data.map(function (r) {
+        var ev = r.events || {};
+        return '<article class="card"><h3>' + esc(ev.title || 'Event') + '</h3><p class="note">' + esc(r.status) + (ev.starts_at ? ' · ' + esc(ev.starts_at) : '') + '</p></article>';
+      }).join('');
+    }
   }
 
   window.ramdaniStudentBoot = async function (path) {
@@ -4454,7 +4647,7 @@ window.ramdaniAuth = {
 <script>
 (function () {
   var TABLES = [
-    { id: 'people', label: 'People', fields: ['full_name', 'slug', 'role_title', 'short_bio', 'status'] },
+    { id: 'people', label: 'People', fields: ['full_name', 'slug', 'role_title', 'short_bio', 'photo_url', 'education', 'qualifications', 'languages', 'status'] },
     { id: 'practice_areas', label: 'Practice areas', fields: ['title', 'slug', 'summary', 'status'] },
     { id: 'services', label: 'Services', fields: ['title', 'slug', 'summary', 'status'] },
     { id: 'matters', label: 'Matters', fields: ['title', 'slug', 'summary', 'status'] },
@@ -4468,11 +4661,11 @@ window.ramdaniAuth = {
     { id: 'modules', label: 'Modules', fields: ['title', 'slug', 'code', 'category', 'status'] },
     { id: 'cases', label: 'Case notes', fields: ['title', 'slug', 'citation', 'citation_status', 'status'] },
     { id: 'statutes', label: 'Statutes', fields: ['title', 'slug', 'year', 'status'] },
-    { id: 'societies', label: 'Societies', fields: ['title', 'slug', 'category', 'city', 'status'] },
+    { id: 'societies', label: 'Societies', fields: ['title', 'slug', 'short_name', 'category', 'city', 'status'] },
     { id: 'chapters', label: 'Chapters', fields: ['title', 'slug', 'city', 'province', 'status'] },
     { id: 'lectures', label: 'Lectures', fields: ['title', 'slug', 'youtube_url', 'status'] },
-    { id: 'social_posts', label: 'Social posts', fields: ['title', 'slug', 'platform', 'status'] },
-    { id: 'cabinets', label: 'Cabinets', fields: ['title', 'slug', 'parent_kind', 'seat_limit', 'status'] },
+    { id: 'social_posts', label: 'Social posts', fields: ['title', 'slug', 'platform', 'caption', 'thumbnail_url', 'permalink', 'status'] },
+    { id: 'cabinets', label: 'Cabinets', fields: ['title', 'slug', 'parent_kind', 'seat_limit', 'head_name', 'status'] },
     { id: 'certificates', label: 'Certificates', fields: ['title', 'slug', 'category', 'status'] }
   ];
 
@@ -4711,6 +4904,7 @@ window.ramdaniAuth = {
     bindQuizResults();
     bindEduSearch();
     bindLegalOps();
+    bindPlatformOps();
     document.getElementById('certIssuanceForm').addEventListener('submit', saveCertIssuance);
     document.getElementById('certIssuanceSearch').addEventListener('input', renderCertIssuances);
     document.getElementById('certIssuancesBody').addEventListener('click', function (e) {
@@ -7395,6 +7589,364 @@ window.ramdaniAuth = {
     $id('commForm').addEventListener('submit', saveComm);
   }
 
+  var platMembers = [], platEvents = [], platSocieties = [], platChapters = [], platCabinets = [], platStudents = [];
+  var platEditMemberId = null, platEditEventId = null;
+
+  function isoFromLocalPlat(v) { return v ? new Date(v).toISOString() : null; }
+  function fmtWhenPlat(v) { if (!v) return ''; var d = new Date(v); return isNaN(d.getTime()) ? String(v) : d.toLocaleString(); }
+  function slugifyPlat(s) { return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''); }
+
+  async function loadPlatLookups() {
+    var res = await Promise.all([
+      sb.from('societies').select('id, title').order('title'),
+      sb.from('chapters').select('id, title, society_id').order('title'),
+      sb.from('cabinets').select('id, title').order('title'),
+      sb.from('members').select('id, member_number, full_name, status').order('full_name'),
+      sb.from('events').select('id, title, starts_at, status').order('starts_at', { ascending: false }),
+      sb.from('profiles').select('id, full_name, email, student_id').eq('role', 'student').order('full_name')
+    ]);
+    platSocieties = res[0].data || [];
+    platChapters = res[1].data || [];
+    platCabinets = res[2].data || [];
+    platMembers = res[3].data || [];
+    platEvents = res[4].data || [];
+    platStudents = res[5].data || [];
+    function fillSel(sel, rows, labelFn, empty) {
+      if (!sel) return;
+      var cur = sel.value;
+      sel.innerHTML = '<option value="">' + (empty || 'None') + '</option>' + rows.map(function (r) {
+        return '<option value="' + r.id + '">' + escapeHtml(labelFn(r)) + '</option>';
+      }).join('');
+      sel.value = cur;
+    }
+    fillSel($id('memberForm') && $id('memberForm').elements.society_id, platSocieties, function (r) { return r.title; });
+    fillSel($id('memberForm') && $id('memberForm').elements.chapter_id, platChapters, function (r) { return r.title; });
+    fillSel($id('memberForm') && $id('memberForm').elements.cabinet_id, platCabinets, function (r) { return r.title; });
+    fillSel($id('platEventForm') && $id('platEventForm').elements.society_id, platSocieties, function (r) { return r.title; });
+    fillSel($id('memberCardForm') && $id('memberCardForm').elements.member_id, platMembers, function (r) { return r.member_number + ' — ' + r.full_name; }, 'Select member…');
+    fillSel($id('studentCardForm') && $id('studentCardForm').elements.student_id, platStudents, function (r) { return (r.full_name || r.email) + (r.student_id ? ' (' + r.student_id + ')' : ''); }, 'Select student…');
+    fillSel($id('issueDocForm') && $id('issueDocForm').elements.member_id, platMembers, function (r) { return r.member_number + ' — ' + r.full_name; });
+    fillSel($id('issueDocForm') && $id('issueDocForm').elements.student_id, platStudents, function (r) { return r.full_name || r.email; });
+    fillSel($id('issueDocForm') && $id('issueDocForm').elements.event_id, platEvents, function (r) { return r.title; });
+    var rf = $id('regEventFilter');
+    if (rf) {
+      var cur = rf.value;
+      rf.innerHTML = '<option value="">All events</option>' + platEvents.map(function (e) {
+        return '<option value="' + e.id + '">' + escapeHtml(e.title) + '</option>';
+      }).join('');
+      rf.value = cur;
+    }
+  }
+
+  async function loadMembers() {
+    await loadPlatLookups();
+    var res = await sb.from('members').select('*').order('updated_at', { ascending: false });
+    if (res.error) { setNote('memberNote', res.error.message); return; }
+    platMembers = res.data || [];
+    renderMembers();
+  }
+  function renderMembers() {
+    var st = $id('memberStatusFilter').value, q = ($id('memberSearch').value || '').trim().toLowerCase();
+    var rows = platMembers.filter(function (m) {
+      if (st && m.status !== st) return false;
+      if (q && [m.full_name, m.email, m.member_number, m.designation].join(' ').toLowerCase().indexOf(q) === -1) return false;
+      return true;
+    });
+    $id('memberBody').innerHTML = rows.map(function (m) {
+      var soc = platSocieties.find(function (s) { return s.id === m.society_id; });
+      return '<tr><td>' + escapeHtml(m.member_number) + '</td><td>' + escapeHtml(m.full_name) + '</td><td>' + escapeHtml(soc ? soc.title : '') + '</td><td>' + escapeHtml(m.status) + '</td><td><button type="button" class="btn btn-sm" data-mem-edit="' + m.id + '">Edit</button></td></tr>';
+    }).join('') || '<tr><td colspan="5">No members yet.</td></tr>';
+  }
+  function resetMemberForm() {
+    platEditMemberId = null;
+    $id('memberForm').reset();
+    $id('memberSave').textContent = 'Save member';
+    $id('memberCancel').hidden = true;
+    setNote('memberNote', '');
+  }
+  async function saveMember(e) {
+    e.preventDefault();
+    var f = e.target;
+    var payload = {
+      full_name: f.elements.full_name.value.trim(),
+      email: f.elements.email.value.trim() || null,
+      phone: f.elements.phone.value.trim() || null,
+      society_id: f.elements.society_id.value || null,
+      chapter_id: f.elements.chapter_id.value || null,
+      cabinet_id: f.elements.cabinet_id.value || null,
+      designation: f.elements.designation.value.trim() || null,
+      joined_at: f.elements.joined_at.value || null,
+      valid_until: f.elements.valid_until.value || null,
+      status: f.elements.status.value,
+      bio: f.elements.bio.value.trim() || null
+    };
+    if (!payload.full_name) return setNote('memberNote', 'Name is required.');
+    var res = platEditMemberId
+      ? await sb.from('members').update(payload).eq('id', platEditMemberId)
+      : await sb.from('members').insert(payload);
+    if (res.error) return setNote('memberNote', res.error.message);
+    resetMemberForm();
+    setNote('memberNote', 'Saved.', true);
+    await loadMembers();
+  }
+
+  async function loadMemberCards() {
+    await loadPlatLookups();
+    var res = await sb.from('member_cards').select('*, members(full_name, member_number)').order('created_at', { ascending: false });
+    if (res.error) { setNote('memberCardNote', res.error.message); return; }
+    $id('memberCardBody').innerHTML = (res.data || []).map(function (c) {
+      var m = c.members || {};
+      return '<tr><td>' + escapeHtml(c.card_number) + '</td><td>' + escapeHtml((m.member_number || '') + ' ' + (m.full_name || '')) + '</td><td>' + escapeHtml(c.status) + '</td><td><code>' + escapeHtml(c.verify_code) + '</code></td><td>' +
+        (c.status === 'revoked' ? '' : '<button type="button" class="btn btn-sm" data-mc-revoke="' + c.id + '">Revoke</button>') + '</td></tr>';
+    }).join('') || '<tr><td colspan="5">No member cards yet.</td></tr>';
+  }
+  async function saveMemberCard(e) {
+    e.preventDefault();
+    var f = e.target;
+    var payload = {
+      member_id: f.elements.member_id.value,
+      issue_date: f.elements.issue_date.value || null,
+      expiry_date: f.elements.expiry_date.value || null,
+      status: f.elements.status.value,
+      issued_by: (await ramdaniAuth.profile() || {}).id || null
+    };
+    if (!payload.member_id) return setNote('memberCardNote', 'Select a member.');
+    var res = await sb.from('member_cards').insert(payload);
+    if (res.error) return setNote('memberCardNote', res.error.message);
+    f.reset();
+    setNote('memberCardNote', 'Saved. Verification code is generated server-side.', true);
+    await loadMemberCards();
+  }
+
+  async function loadStudentCards() {
+    await loadPlatLookups();
+    var res = await sb.from('student_cards').select('*, profiles(full_name, email, student_id)').order('created_at', { ascending: false });
+    if (res.error) { setNote('studentCardNote', res.error.message); return; }
+    $id('studentCardBody').innerHTML = (res.data || []).map(function (c) {
+      var p = c.profiles || {};
+      return '<tr><td>' + escapeHtml(c.card_number) + '</td><td>' + escapeHtml(p.full_name || p.email || '') + '</td><td>' + escapeHtml(c.program || '') + '</td><td>' + escapeHtml(c.status) + '</td><td><code>' + escapeHtml(c.verify_code) + '</code></td></tr>';
+    }).join('') || '<tr><td colspan="5">No student cards yet.</td></tr>';
+  }
+  async function saveStudentCard(e) {
+    e.preventDefault();
+    var f = e.target;
+    var payload = {
+      student_id: f.elements.student_id.value,
+      program: f.elements.program.value.trim() || null,
+      batch: f.elements.batch.value.trim() || null,
+      issue_date: f.elements.issue_date.value || null,
+      expiry_date: f.elements.expiry_date.value || null,
+      status: f.elements.status.value,
+      issued_by: (await ramdaniAuth.profile() || {}).id || null
+    };
+    if (!payload.student_id) return setNote('studentCardNote', 'Select a student.');
+    var res = await sb.from('student_cards').insert(payload);
+    if (res.error) return setNote('studentCardNote', res.error.message);
+    f.reset();
+    setNote('studentCardNote', 'Saved.', true);
+    await loadStudentCards();
+  }
+
+  async function loadPlatEvents() {
+    await loadPlatLookups();
+    var res = await sb.from('events').select('*').order('starts_at', { ascending: false });
+    if (res.error) { setNote('platEventNote', res.error.message); return; }
+    platEvents = res.data || [];
+    $id('platEventBody').innerHTML = platEvents.map(function (ev) {
+      return '<tr><td>' + escapeHtml(ev.title) + '</td><td>' + escapeHtml(fmtWhenPlat(ev.starts_at)) + '</td><td>' + escapeHtml(ev.event_type) + '</td><td>' + escapeHtml(ev.status) + '</td><td><button type="button" class="btn btn-sm" data-ev-edit="' + ev.id + '">Edit</button></td></tr>';
+    }).join('') || '<tr><td colspan="5">No events yet.</td></tr>';
+  }
+  function resetPlatEventForm() {
+    platEditEventId = null;
+    $id('platEventForm').reset();
+    $id('platEventSave').textContent = 'Save event';
+    $id('platEventCancel').hidden = true;
+    setNote('platEventNote', '');
+  }
+  async function savePlatEvent(e) {
+    e.preventDefault();
+    var f = e.target;
+    var title = f.elements.title.value.trim();
+    var payload = {
+      title: title,
+      slug: f.elements.slug.value.trim() || slugifyPlat(title),
+      event_type: f.elements.event_type.value,
+      starts_at: isoFromLocalPlat(f.elements.starts_at.value),
+      ends_at: isoFromLocalPlat(f.elements.ends_at.value),
+      venue: f.elements.venue.value.trim() || null,
+      address: f.elements.address.value.trim() || null,
+      meeting_url: f.elements.meeting_url.value.trim() || null,
+      society_id: f.elements.society_id.value || null,
+      capacity: f.elements.capacity.value === '' ? null : parseInt(f.elements.capacity.value, 10),
+      registration_open: f.elements.registration_open.value === 'true',
+      certificate_eligible: f.elements.certificate_eligible.value === 'true',
+      status: f.elements.status.value,
+      summary: f.elements.summary.value.trim() || null,
+      description: f.elements.description.value.trim() || null
+    };
+    if (!payload.title) return setNote('platEventNote', 'Title is required.');
+    var res = platEditEventId
+      ? await sb.from('events').update(payload).eq('id', platEditEventId)
+      : await sb.from('events').insert(payload);
+    if (res.error) return setNote('platEventNote', res.error.message);
+    resetPlatEventForm();
+    setNote('platEventNote', 'Saved.', true);
+    await loadPlatEvents();
+  }
+
+  async function loadEventRegs() {
+    await loadPlatLookups();
+    var q = sb.from('event_registrations').select('*, events(title)').order('created_at', { ascending: false }).limit(200);
+    var evId = $id('regEventFilter').value;
+    if (evId) q = q.eq('event_id', evId);
+    var res = await q;
+    if (res.error) { setNote('eventRegNote', res.error.message); return; }
+    $id('eventRegBody').innerHTML = (res.data || []).map(function (r) {
+      return '<tr><td>' + escapeHtml((r.events && r.events.title) || '') + '</td><td>' + escapeHtml(r.full_name) + '</td><td>' + escapeHtml(r.email) + '</td><td>' + escapeHtml(r.status) + '</td><td>' +
+        (r.status === 'attended' ? '' : '<button type="button" class="btn btn-sm" data-reg-attend="' + r.id + '" data-event="' + r.event_id + '" data-profile="' + (r.profile_id || '') + '" data-name="' + escapeHtml(r.full_name) + '">Mark present</button>') + '</td></tr>';
+    }).join('') || '<tr><td colspan="5">No registrations.</td></tr>';
+    setNote('eventRegNote', '');
+  }
+
+  async function loadDocCenter() {
+    await loadPlatLookups();
+    var t = await sb.from('document_templates').select('*').order('updated_at', { ascending: false });
+    if (t.error) { setNote('docTplNote', t.error.message); return; }
+    $id('docTplBody').innerHTML = (t.data || []).map(function (x) {
+      return '<tr><td>' + escapeHtml(x.name) + '</td><td>' + escapeHtml(x.category) + '</td><td>' + escapeHtml(x.status) + '</td></tr>';
+    }).join('') || '<tr><td colspan="3">No templates.</td></tr>';
+    var sel = $id('issueDocForm').elements.template_id;
+    var cur = sel.value;
+    sel.innerHTML = '<option value="">Select…</option>' + (t.data || []).filter(function (x) { return x.status === 'published'; }).map(function (x) {
+      return '<option value="' + x.id + '">' + escapeHtml(x.name) + '</option>';
+    }).join('');
+    sel.value = cur;
+    var d = await sb.from('issued_documents').select('*').order('created_at', { ascending: false }).limit(50);
+    $id('issuedDocBody').innerHTML = (d.data || []).map(function (x) {
+      return '<tr><td>' + escapeHtml(x.recipient_name) + '</td><td>' + escapeHtml(x.category) + '</td><td>' + escapeHtml(x.status) + '</td><td><code>' + escapeHtml(x.verify_code || '') + '</code></td></tr>';
+    }).join('') || '<tr><td colspan="4">No issued documents.</td></tr>';
+  }
+  function renderTemplateVars(body, vars) {
+    return String(body || '').replace(/\{\{(\w+)\}\}/g, function (_, k) { return vars[k] != null ? String(vars[k]) : ''; });
+  }
+  async function saveDocTpl(e) {
+    e.preventDefault();
+    var f = e.target;
+    var payload = { name: f.elements.name.value.trim(), category: f.elements.category.value, status: f.elements.status.value, body: f.elements.body.value };
+    if (!payload.name || !payload.body) return setNote('docTplNote', 'Name and body are required.');
+    var res = await sb.from('document_templates').insert(payload);
+    if (res.error) return setNote('docTplNote', res.error.message);
+    f.reset();
+    setNote('docTplNote', 'Saved.', true);
+    await loadDocCenter();
+  }
+  async function issueDoc(e) {
+    e.preventDefault();
+    var f = e.target;
+    var tplId = f.elements.template_id.value;
+    var name = f.elements.recipient_name.value.trim();
+    if (!tplId || !name) return setNote('issueDocNote', 'Template and recipient name are required.');
+    var tpl = await sb.from('document_templates').select('*').eq('id', tplId).maybeSingle();
+    if (!tpl.data) return setNote('issueDocNote', 'Template not found.');
+    var memberId = f.elements.member_id.value || null;
+    var studentId = f.elements.student_id.value || null;
+    var eventId = f.elements.event_id.value || null;
+    var member = memberId ? platMembers.find(function (m) { return m.id === memberId; }) : null;
+    var student = studentId ? platStudents.find(function (s) { return s.id === studentId; }) : null;
+    var ev = eventId ? platEvents.find(function (x) { return x.id === eventId; }) : null;
+    var org = window.ramdaniSite && ramdaniSite.name;
+    var vars = {
+      name: name,
+      member_id: member ? member.member_number : '',
+      student_id: student ? (student.student_id || '') : '',
+      event_name: ev ? ev.title : '',
+      date: new Date().toISOString().slice(0, 10),
+      organization: org || 'Ramdani Law Firm',
+      designation: member ? (member.designation || '') : ''
+    };
+    if (/\{\{member_id\}\}/.test(tpl.data.body) && !vars.member_id) return setNote('issueDocNote', 'This template needs a member.');
+    if (/\{\{student_id\}\}/.test(tpl.data.body) && !vars.student_id) return setNote('issueDocNote', 'This template needs a student with a student ID.');
+    if (/\{\{event_name\}\}/.test(tpl.data.body) && !vars.event_name) return setNote('issueDocNote', 'This template needs an event.');
+    var payload = {
+      template_id: tplId,
+      category: tpl.data.category,
+      recipient_kind: f.elements.recipient_kind.value,
+      recipient_name: name,
+      member_id: memberId,
+      student_id: studentId,
+      event_id: eventId,
+      body_rendered: renderTemplateVars(tpl.data.body, vars),
+      status: 'issued',
+      issued_at: new Date().toISOString(),
+      issued_by: (await ramdaniAuth.profile() || {}).id || null
+    };
+    var res = await sb.from('issued_documents').insert(payload);
+    if (res.error) return setNote('issueDocNote', res.error.message);
+    f.reset();
+    setNote('issueDocNote', 'Issued. Verification code is generated server-side.', true);
+    await loadDocCenter();
+  }
+
+  function bindPlatformOps() {
+    if (!$id('memberForm')) return;
+    $id('memberForm').addEventListener('submit', saveMember);
+    $id('memberCancel').addEventListener('click', resetMemberForm);
+    $id('memberStatusFilter').addEventListener('change', renderMembers);
+    $id('memberSearch').addEventListener('input', renderMembers);
+    $id('memberBody').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-mem-edit]'); if (!b) return;
+      var m = platMembers.find(function (x) { return x.id === b.getAttribute('data-mem-edit'); }); if (!m) return;
+      var f = $id('memberForm');
+      ['full_name','email','phone','society_id','chapter_id','cabinet_id','designation','joined_at','valid_until','status','bio'].forEach(function (k) {
+        if (f.elements[k]) f.elements[k].value = m[k] == null ? '' : m[k];
+      });
+      platEditMemberId = m.id;
+      $id('memberSave').textContent = 'Update member';
+      $id('memberCancel').hidden = false;
+    });
+    $id('memberCardForm').addEventListener('submit', saveMemberCard);
+    $id('memberCardBody').addEventListener('click', async function (e) {
+      var b = e.target.closest('[data-mc-revoke]'); if (!b) return;
+      if (!confirm('Revoke this card?')) return;
+      await sb.from('member_cards').update({ status: 'revoked' }).eq('id', b.getAttribute('data-mc-revoke'));
+      await loadMemberCards();
+    });
+    $id('studentCardForm').addEventListener('submit', saveStudentCard);
+    $id('platEventForm').addEventListener('submit', savePlatEvent);
+    $id('platEventCancel').addEventListener('click', resetPlatEventForm);
+    $id('platEventBody').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-ev-edit]'); if (!b) return;
+      var ev = platEvents.find(function (x) { return x.id === b.getAttribute('data-ev-edit'); }); if (!ev) return;
+      var f = $id('platEventForm');
+      ['title','slug','event_type','venue','address','meeting_url','society_id','capacity','status','summary','description'].forEach(function (k) {
+        if (f.elements[k]) f.elements[k].value = ev[k] == null ? '' : ev[k];
+      });
+      f.elements.registration_open.value = ev.registration_open ? 'true' : 'false';
+      f.elements.certificate_eligible.value = ev.certificate_eligible ? 'true' : 'false';
+      if (ev.starts_at) f.elements.starts_at.value = dtLocal(ev.starts_at);
+      if (ev.ends_at) f.elements.ends_at.value = dtLocal(ev.ends_at);
+      platEditEventId = ev.id;
+      $id('platEventSave').textContent = 'Update event';
+      $id('platEventCancel').hidden = false;
+    });
+    $id('regEventFilter').addEventListener('change', loadEventRegs);
+    $id('eventRegBody').addEventListener('click', async function (e) {
+      var b = e.target.closest('[data-reg-attend]'); if (!b) return;
+      var id = b.getAttribute('data-reg-attend');
+      await sb.from('event_registrations').update({ status: 'attended' }).eq('id', id);
+      await sb.from('event_attendance').insert({
+        event_id: b.getAttribute('data-event'),
+        registration_id: id,
+        profile_id: b.getAttribute('data-profile') || null,
+        full_name: b.getAttribute('data-name') || null,
+        present: true
+      });
+      await loadEventRegs();
+    });
+    $id('docTplForm').addEventListener('submit', saveDocTpl);
+    $id('issueDocForm').addEventListener('submit', issueDoc);
+  }
+
   function bindEduSearch() {
     $id('esRun').addEventListener('click', runEduSearch);
     $id('esQuery').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); runEduSearch(); } });
@@ -7541,7 +8093,7 @@ window.ramdaniAuth = {
   }
 
   function showAdminView(view) {
-    var panels = ['dashboardPanel','studentsPanel','adminsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','orgSettingsPanel','brandingLogoPanel','brandingTypePanel','contactInfoPanel','seoSettingsPanel','systemSettingsPanel','disclaimersPanel','homepageSectionsPanel','navigationPanel','certTemplatesPanel','mediaLibraryPanel','certIssuancesPanel','courseBuilderPanel','quizBuilderPanel','quizResultsPanel','eduSearchPanel','enrollmentsPanel','seoOverridesPanel','notificationsPanel','auditLogPanel','opsDashPanel','clientsPanel','legalMattersPanel','myTasksPanel','legalCalendarPanel','legalDocsPanel','legalCommsPanel','legalReportsPanel'];
+    var panels = ['dashboardPanel','studentsPanel','adminsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','orgSettingsPanel','brandingLogoPanel','brandingTypePanel','contactInfoPanel','seoSettingsPanel','systemSettingsPanel','disclaimersPanel','homepageSectionsPanel','navigationPanel','certTemplatesPanel','mediaLibraryPanel','certIssuancesPanel','courseBuilderPanel','quizBuilderPanel','quizResultsPanel','eduSearchPanel','enrollmentsPanel','seoOverridesPanel','notificationsPanel','auditLogPanel','opsDashPanel','clientsPanel','legalMattersPanel','myTasksPanel','legalCalendarPanel','legalDocsPanel','legalCommsPanel','legalReportsPanel','membersPanel','memberCardsPanel','studentCardsPanel','eventsPanel','eventRegsPanel','docsCenterPanel'];
     panels.forEach(function(id){ var el=document.getElementById(id); if(el){ el.hidden=true; el.classList.remove('is-active'); }});
     document.querySelectorAll('.admin-nav [data-table]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-table')===view); });
     document.getElementById('adminApp').classList.remove('nav-open');
@@ -7579,6 +8131,12 @@ window.ramdaniAuth = {
     if(view==='__legaldocs') { activate('legalDocsPanel','Documents'); loadDocuments(); return; }
     if(view==='__legalcomms') { activate('legalCommsPanel','Communications'); loadComms(); return; }
     if(view==='__legalreports') { activate('legalReportsPanel','Reports'); loadLegalReports(); return; }
+    if(view==='__members') { activate('membersPanel','Members'); loadMembers(); return; }
+    if(view==='__membercards') { activate('memberCardsPanel','Member cards'); loadMemberCards(); return; }
+    if(view==='__studentcards') { activate('studentCardsPanel','Student cards'); loadStudentCards(); return; }
+    if(view==='__events') { activate('eventsPanel','Events'); loadPlatEvents(); return; }
+    if(view==='__eventregs') { activate('eventRegsPanel','Registrations & attendance'); loadEventRegs(); return; }
+    if(view==='__docscenter') { activate('docsCenterPanel','Document center'); loadDocCenter(); return; }
     activate('contentPanel', (TABLES.find(function(t){return t.id===view;})||{}).label || 'Content');
     loadTable(view);
   }
