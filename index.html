@@ -834,6 +834,175 @@ html[data-theme='dark'] #portalRoot.ramdani-auth-page{
 .ra-admin-preview{position:relative;width:100%;max-width:34rem;aspect-ratio:16/10;overflow:hidden;border-radius:12px;background:var(--forest);border:1px solid var(--line)}
 .ra-admin-preview img,.ra-admin-preview video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .ra-admin-empty{position:absolute;inset:0;display:grid;place-items:center;margin:0;padding:1rem;text-align:center;color:#d9c9a5;font-size:.9rem}
+
+/* ===== Client Portal refinement (Phase 1 patch) ===== */
+/* ---------- Login: loading state on submit ---------- */
+#clientLoginSubmit[data-loading] { position: relative; color: transparent; pointer-events: none; }
+#clientLoginSubmit[data-loading]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: ra-spin 0.7s linear infinite;
+}
+@keyframes ra-spin { to { transform: rotate(360deg); } }
+
+.ra-status.is-error { color: var(--danger); }
+.ra-status.is-success { color: var(--success); }
+.ra-status.is-info { color: var(--muted); }
+.ra-status:empty { display: none; }
+
+/* ---------- Profile panel ---------- */
+.client-profile-panel {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.25rem 0.25rem;
+}
+
+/* ---------- Universal dashboard state contract ---------- */
+.portal-state {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1.5rem 1rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  border-radius: var(--radius-sm);
+}
+
+.portal-state-loading { color: var(--muted); }
+.portal-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border);
+  border-top-color: var(--brass);
+  border-radius: 50%;
+  animation: ra-spin 0.7s linear infinite;
+  flex: none;
+}
+
+.portal-state-empty {
+  border: 1px dashed var(--border);
+  color: var(--muted);
+}
+.portal-state-empty::before { content: "—"; color: var(--brass); font-size: 1.1rem; }
+
+.portal-state-error {
+  border-inline-start: 3px solid var(--danger);
+  background: rgba(138, 43, 43, 0.05);
+  color: var(--ink);
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.portal-retry {
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  background: transparent;
+  border-radius: var(--radius-sm);
+  padding: 0.35rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.portal-retry:hover { background: var(--danger); color: #fff; }
+
+.portal-state-unauthorized,
+.portal-state-session-expired {
+  border-inline-start: 3px solid var(--warning);
+  background: rgba(154, 116, 47, 0.06);
+  color: var(--ink);
+}
+
+/* ---------- Matter cards ---------- */
+.matter-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 0.75rem;
+}
+.matter-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.4rem;
+  gap: 0.75rem;
+}
+.matter-number {
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.matter-status {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: var(--ivory);
+  color: var(--forest);
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+.matter-title {
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0;
+}
+
+/* ---------- Document rows ---------- */
+.doc-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 0.25rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.88rem;
+}
+.doc-row:last-child { border-bottom: 0; }
+.doc-name { font-weight: 500; color: var(--ink); }
+.doc-meta { color: var(--muted); font-size: 0.78rem; white-space: nowrap; }
+.doc-action a,
+.doc-action button {
+  font-size: 0.78rem;
+  color: var(--forest);
+  font-weight: 600;
+}
+
+/* ---------- Communication cards ---------- */
+.comm-card {
+  border-inline-start: 3px solid var(--brass);
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+  background: var(--paper);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.comm-card-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.3rem;
+  flex-wrap: wrap;
+}
+.comm-subject { font-weight: 600; color: var(--ink); font-size: 0.92rem; }
+.comm-date { color: var(--muted); font-size: 0.78rem; white-space: nowrap; }
+.comm-summary { margin: 0; color: var(--muted); font-size: 0.85rem; line-height: 1.55; }
+
+@media (max-width: 640px) {
+  .doc-row { grid-template-columns: 1fr; gap: 0.25rem; }
+  .matter-card-top { flex-wrap: wrap; }
+}
+
 </style>
 </head>
 <body>
@@ -2368,87 +2537,159 @@ html[data-theme='dark'] #portalRoot.ramdani-auth-page{
   </div>
 
   <!-- CLIENT PORTAL: /client/login|dashboard -->
-  <div id="clientRoot" hidden>
-    <div class="wrap">
-      <div id="clientLoginPanel" class="ramdani-auth-page">
-        <div class="ramdani-auth-shell">
-          <section class="ramdani-auth-form" aria-label="Client sign in">
-            <div class="ra-inner">
-              <div class="ra-brand">
-                <img src="/assets/ramdani-logo.png" alt="" width="44" height="44" />
-                <div><strong>Ramdani Law Firm</strong><small>Client Portal</small></div>
+<div id="clientRoot" hidden>
+  <div class="wrap">
+
+    <!-- ============ LOGIN ============ -->
+    <div id="clientLoginPanel" class="ramdani-auth-page">
+      <div class="ramdani-auth-shell">
+        <section class="ramdani-auth-form" aria-label="Client sign in">
+          <div class="ra-inner">
+            <div class="ra-brand">
+              <img src="/assets/ramdani-logo.png" alt="" width="44" height="44" />
+              <div><strong>Ramdani Law Firm</strong><small>Client Portal</small></div>
+            </div>
+            <h1>Client portal</h1>
+            <p class="ra-lead">Only authorized client accounts. Internal notes and private documents are never shown here.</p>
+
+            <form id="clientLoginForm" class="ra-form" novalidate>
+              <div class="ra-field">
+                <label for="cliLoginEmail">Email address</label>
+                <input id="cliLoginEmail" type="email" required autocomplete="username"
+                       inputmode="email" autocapitalize="none" spellcheck="false"
+                       aria-describedby="clientLoginStatus" />
               </div>
-              <h1>Client portal</h1>
-              <p class="ra-lead">Only authorized client accounts. Internal notes and private documents are never shown here.</p>
-              <form id="clientLoginForm" class="ra-form" novalidate>
-                <div class="ra-field">
-                  <label for="cliLoginEmail">Email address</label>
-                  <input id="cliLoginEmail" type="email" required autocomplete="username" inputmode="email" autocapitalize="none" spellcheck="false" />
-                </div>
-                <div class="ra-field">
-                  <label for="cliLoginPassword">Password</label>
-                  <input id="cliLoginPassword" type="password" required minlength="8" autocomplete="current-password" />
-                </div>
-                <button class="ra-btn" type="submit">Sign in</button>
-              </form>
-              <p id="clientLoginStatus" class="ra-status"></p>
-              <p class="ra-foot"><a href="/">← Back to public site</a></p>
-            </div>
-          </section>
-          <aside class="ramdani-auth-media" aria-label="Ramdani Law Firm">
-            <div class="ra-media-stage"></div>
-            <div class="ra-media-overlay" aria-hidden="true"></div>
-            <div class="ra-media-caption">
-              <h2>Your Matters, Securely</h2>
-              <p>Track your case, documents and appointments in one place.</p>
-            </div>
-          </aside>
-        </div>
-      </div>
-      <div id="clientDashPanel" class="portal-dash" hidden>
-        <header class="portal-hero">
-          <div>
-            <p class="kicker">Client portal</p>
-            <h1 id="cliWelcome">Welcome, Client</h1>
-            <p class="note">Only your authorized matters, shared files and visible dates.</p>
+              <div class="ra-field">
+                <label for="cliLoginPassword">Password</label>
+                <input id="cliLoginPassword" type="password" required minlength="8"
+                       autocomplete="current-password" aria-describedby="clientLoginStatus" />
+              </div>
+              <!-- data-loading toggled by JS during submit; CSS shows a spinner + disables clicks -->
+              <button class="ra-btn" type="submit" id="clientLoginSubmit">
+                <span class="ra-btn-label">Sign in</span>
+              </button>
+            </form>
+
+            <!-- js/auth.js writes text + one of: is-error / is-success / is-info as a class here -->
+            <p id="clientLoginStatus" class="ra-status" role="status" aria-live="polite"></p>
+
+            <p class="ra-foot"><a href="/">← Back to public site</a></p>
           </div>
-          <button type="button" class="btn" id="clientSignOutBtn">Logout</button>
-        </header>
-        <section class="portal-section">
-          <h2>Profile</h2>
+        </section>
+
+        <aside class="ramdani-auth-media" aria-label="Ramdani Law Firm">
+          <div class="ra-media-stage"></div>
+          <div class="ra-media-overlay" aria-hidden="true"></div>
+          <div class="ra-media-caption">
+            <h2>Your Matters, Securely</h2>
+            <p>Track your case, documents and appointments in one place.</p>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- ============ DASHBOARD ============ -->
+    <div id="clientDashPanel" class="portal-dash" hidden>
+
+      <header class="portal-hero">
+        <div>
+          <p class="kicker">Client portal</p>
+          <h1 id="cliWelcome">Welcome, Client</h1>
+          <p class="note">Only your authorized matters, shared files and visible dates.</p>
+        </div>
+        <button type="button" class="btn" id="clientSignOutBtn">Logout</button>
+      </header>
+
+      <!-- Profile -->
+      <section class="portal-section">
+        <h2>Profile</h2>
+        <div class="client-profile-panel">
           <dl class="portal-kv">
             <div><dt>Name</dt><dd id="cliDashName">—</dd></div>
             <div><dt>Email</dt><dd id="cliDashEmail">—</dd></div>
           </dl>
-        </section>
-        <section class="portal-section">
-          <h2>My matters</h2>
-          <div id="cliMattersBox"></div>
-        </section>
-        <section class="portal-section">
-          <h2>Shared documents</h2>
-          <p class="note">Internal files never appear here.</p>
-          <div id="cliDocsBox"></div>
-        </section>
-        <section class="portal-section">
-          <h2>Upcoming dates</h2>
-          <div id="cliDatesBox"></div>
-        </section>
-        <section class="portal-section">
-          <h2>My lawyers</h2>
-          <div id="cliLawyersBox"></div>
-        </section>
-        <section class="portal-section">
-          <h2>Appointments</h2>
-          <div id="cliApptBox"></div>
-        </section>
-        <section class="portal-section">
-          <h2>Messages from the firm</h2>
-          <div id="cliCommsBox"></div>
-        </section>
-      </div>
+        </div>
+      </section>
+
+      <!--
+        Contract for every box below (cliMattersBox, cliDocsBox, cliDatesBox,
+        cliLawyersBox, cliApptBox, cliCommsBox): your JS renders exactly ONE
+        of these state markups into the box at a time. Classes below are
+        styled in 05-client-portal.css. This gives each box an isolated
+        failure mode per section 16 — one box erroring never blanks the rest.
+
+        LOADING:  <div class="portal-state portal-state-loading"><span class="portal-spinner"></span> Loading…</div>
+        EMPTY:    <div class="portal-state portal-state-empty">No <thing> yet.</div>
+        ERROR:    <div class="portal-state portal-state-error">Couldn't load <thing>. <button class="portal-retry" data-retry="matters">Retry</button></div>
+        SUCCESS:  actual cards/list markup (see <template> patterns below)
+      -->
+
+      <section class="portal-section">
+        <h2>My matters</h2>
+        <div id="cliMattersBox" aria-live="polite"></div>
+      </section>
+
+      <section class="portal-section">
+        <h2>Shared documents</h2>
+        <p class="note">Internal files never appear here.</p>
+        <div id="cliDocsBox" aria-live="polite"></div>
+      </section>
+
+      <section class="portal-section">
+        <h2>Upcoming dates</h2>
+        <div id="cliDatesBox" aria-live="polite"></div>
+      </section>
+
+      <section class="portal-section">
+        <h2>My lawyers</h2>
+        <div id="cliLawyersBox" aria-live="polite"></div>
+      </section>
+
+      <section class="portal-section">
+        <h2>Appointments</h2>
+        <div id="cliApptBox" aria-live="polite"></div>
+      </section>
+
+      <section class="portal-section">
+        <h2>Messages from the firm</h2>
+        <div id="cliCommsBox" aria-live="polite"></div>
+      </section>
+
     </div>
   </div>
+
+  <!-- OPTIONAL templates — clone these in JS instead of building innerHTML
+       strings, for consistent premium markup. Not required for the patch
+       to work; existing string-based rendering still displays correctly
+       under the new CSS. -->
+  <template id="tpl-matter-card">
+    <article class="matter-card">
+      <div class="matter-card-top">
+        <span class="matter-number" data-field="number"></span>
+        <span class="matter-status" data-field="status"></span>
+      </div>
+      <h3 class="matter-title" data-field="title"></h3>
+    </article>
+  </template>
+
+  <template id="tpl-doc-row">
+    <div class="doc-row">
+      <span class="doc-name" data-field="name"></span>
+      <span class="doc-meta" data-field="meta"></span>
+      <span class="doc-action" data-field="action"></span>
+    </div>
+  </template>
+
+  <template id="tpl-comm-card">
+    <article class="comm-card">
+      <div class="comm-card-top">
+        <span class="comm-subject" data-field="subject"></span>
+        <span class="comm-date" data-field="date"></span>
+      </div>
+      <p class="comm-summary" data-field="summary"></p>
+    </article>
+  </template>
+</div>
 
   <!-- LAWYER PORTAL: /lawyer/login|dashboard -->
   <div id="lawyerRoot" hidden>
@@ -12040,6 +12281,79 @@ window.ramdaniAuth = {
     });
   };
 })();
+</script>
+<script>
+/* ===== Client Portal state helper (Phase 1 patch, optional) ===== */
+(function () {
+  'use strict';
+
+  function box(id) { return document.getElementById(id); }
+
+  var RamdaniPortalState = {
+    loading: function (boxId, label) {
+      var el = box(boxId);
+      if (!el) return;
+      el.innerHTML =
+        '<div class="portal-state portal-state-loading">' +
+        '<span class="portal-spinner" aria-hidden="true"></span>' +
+        '<span>Loading' + (label ? ' ' + label : '') + '…</span>' +
+        '</div>';
+    },
+
+    empty: function (boxId, thing) {
+      var el = box(boxId);
+      if (!el) return;
+      el.innerHTML =
+        '<div class="portal-state portal-state-empty">No ' + (thing || 'items') + ' yet.</div>';
+    },
+
+    error: function (boxId, thing, retryFn) {
+      var el = box(boxId);
+      if (!el) return;
+      var retryId = boxId + 'Retry';
+      el.innerHTML =
+        '<div class="portal-state portal-state-error">' +
+        '<span>Couldn\u2019t load ' + (thing || 'this section') + '. Please try again.</span>' +
+        (retryFn ? '<button type="button" class="portal-retry" id="' + retryId + '">Retry</button>' : '') +
+        '</div>';
+      if (retryFn) {
+        var btn = document.getElementById(retryId);
+        if (btn) btn.addEventListener('click', retryFn);
+      }
+    },
+
+    unauthorized: function (boxId) {
+      var el = box(boxId);
+      if (!el) return;
+      el.innerHTML =
+        '<div class="portal-state portal-state-unauthorized">' +
+        'You don\u2019t have access to this section.</div>';
+    },
+
+    sessionExpired: function (boxId, onSignIn) {
+      var el = box(boxId);
+      if (!el) return;
+      el.innerHTML =
+        '<div class="portal-state portal-state-session-expired">' +
+        '<span>Your session expired.</span>' +
+        '<button type="button" class="portal-retry" id="' + boxId + 'Resignin">Sign in again</button>' +
+        '</div>';
+      var btn = document.getElementById(boxId + 'Resignin');
+      if (btn && onSignIn) btn.addEventListener('click', onSignIn);
+    },
+
+    // For handing off to your existing render function that builds
+    // real markup (cards/rows) — this just clears loading/error state.
+    success: function (boxId, html) {
+      var el = box(boxId);
+      if (!el) return;
+      el.innerHTML = html;
+    }
+  };
+
+  window.RamdaniPortalState = RamdaniPortalState;
+})();
+
 </script>
 </body>
 </html>
