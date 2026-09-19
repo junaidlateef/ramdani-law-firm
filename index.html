@@ -941,6 +941,13 @@ html[dir="rtl"] .lead {
               <label data-field="organization_id"><span>Organization</span><select name="organization_id"><option value="">None</option></select></label>
               <label data-field="caption" class="field-full"><span>Caption</span><textarea name="caption" rows="3"></textarea></label>
               <label data-field="thumbnail_url"><span>Thumbnail URL</span><input name="thumbnail_url" /></label>
+              <label data-field="logo_url"><span>Logo URL <small>(or link from Media library)</small></span><input name="logo_url" placeholder="https://…" /></label>
+              <label data-field="cover_url"><span>Cover image URL <small>(or link from Media library)</small></span><input name="cover_url" placeholder="https://…" /></label>
+              <label data-field="image_url"><span>Post image URL</span><input name="image_url" placeholder="https://…" /></label>
+              <label data-field="facebook_url"><span>Facebook post URL</span><input name="facebook_url" placeholder="https://facebook.com/…" /></label>
+              <label data-field="linkedin_url"><span>LinkedIn post URL</span><input name="linkedin_url" placeholder="https://linkedin.com/…" /></label>
+              <label data-field="instagram_url"><span>Instagram post URL</span><input name="instagram_url" placeholder="https://instagram.com/…" /></label>
+              <label data-field="x_url"><span>X (Twitter) post URL</span><input name="x_url" placeholder="https://x.com/…" /></label>
               <label data-field="head_name"><span>Cabinet head</span><input name="head_name" /></label>
               <label data-field="status"><span>Publishing status</span><select name="status"><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></label>
               <div class="form-actions"><button class="btn btn-primary" id="saveBtn" type="submit">Save</button><button class="btn" id="cancelEditBtn" type="button" hidden>Cancel edit</button><button class="btn" id="previewContentBtn" type="button" hidden>Preview</button><p id="saveNote" class="form-status"></p></div>
@@ -1233,6 +1240,14 @@ html[dir="rtl"] .lead {
                 </select></label>
                 <label><span>Visibility</span><select name="is_public"><option value="true">Public</option><option value="false">Staff only</option></select></label>
                 <label class="field-full"><span>Alt text</span><input name="alt_text" placeholder="Short description for accessibility" /></label>
+                <fieldset class="field-full" style="border:1px solid #d7dee6;border-radius:12px;padding:.7rem .9rem;margin:0">
+                  <legend style="padding:0 .4rem;font-size:.85rem">Link to official field (optional) — the image is applied to that record right away</legend>
+                  <div class="admin-form" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));gap:.6rem">
+                    <label><span>Section</span><select name="entity_type" id="mediaLinkSection"></select></label>
+                    <label><span>Record</span><select name="entity_id" id="mediaLinkRecord" disabled><option value="">—</option></select></label>
+                    <label><span>Field</span><select name="entity_field" id="mediaLinkField" disabled><option value="">—</option></select></label>
+                  </div>
+                </fieldset>
                 <label class="field-full"><span>File</span><input type="file" id="mediaUploadFile" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon,application/pdf,image/*" capture="user" required /></label>
                 <div id="mediaCaptureWrap"></div>
                 <div class="form-actions"><button class="btn btn-primary" type="submit">Upload</button><button class="btn" type="button" id="mediaCaptureBtn">Take photo</button><p id="mediaUploadNote" class="form-status"></p></div>
@@ -1266,9 +1281,22 @@ html[dir="rtl"] .lead {
                 <option value="Legal Resources">Legal Resources</option>
                 <option value="Other">Other</option>
               </select>
+              <select id="mediaSectionFilter" aria-label="Filter by section"></select>
+              <select id="mediaViewMode" aria-label="View mode"><option value="sections">Gallery by section</option><option value="grid">Plain grid</option></select>
             </div>
             <p id="mediaLibraryNote" class="form-status"></p>
+            <div id="mediaLinkPanel" class="admin-card" hidden>
+              <h3 id="mlpTitle">Link asset</h3>
+              <div class="admin-form" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));gap:.6rem">
+                <label><span>Section</span><select id="mlpSection"></select></label>
+                <label><span>Record</span><select id="mlpRecord" disabled><option value="">—</option></select></label>
+                <label><span>Field</span><select id="mlpField" disabled><option value="">—</option></select></label>
+              </div>
+              <div class="form-actions"><button type="button" class="btn btn-primary" id="mlpApply">Link &amp; apply</button><button type="button" class="btn" id="mlpUnlink">Unlink</button><button type="button" class="btn" id="mlpCancel">Cancel</button><p id="mlpNote" class="form-status"></p></div>
+            </div>
             <div id="mediaGrid" class="grid"></div>
+            <div class="admin-section-head" style="margin-top:1.5rem"><div><h3>Social posts</h3><p class="note">Facebook, LinkedIn, Instagram, X and YouTube posts shared by the firm. Each card links to the official post.</p></div><button type="button" class="btn" id="mediaManageSocialBtn">Manage social posts</button></div>
+            <div id="mediaSocialGrid" class="grid"></div>
             <input type="file" id="mediaReplaceFile" class="hidden" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon,application/pdf" />
           </div>
 
@@ -5948,6 +5976,15 @@ window.ramdaniAuth = {
     });
   }
 
+  function entityMediaHtml(r) {
+    var cover = safeHttpUrl(r.cover_url);
+    var logo = safeHttpUrl(r.logo_url);
+    var html = '';
+    if (cover) html += '<img src="' + escape(cover) + '" alt="" loading="lazy" style="width:100%;max-height:11rem;object-fit:cover;border-radius:12px;margin-bottom:.6rem" />';
+    if (logo) html += '<img src="' + escape(logo) + '" alt="' + escape((r.title || '') + ' logo') + '" loading="lazy" style="width:4.5rem;height:4.5rem;object-fit:contain;border-radius:12px;background:#fff;margin-bottom:.4rem" />';
+    return html;
+  }
+
   async function renderSocieties() {
     var el = document.getElementById('list');
     if (!el) return;
@@ -5961,7 +5998,7 @@ window.ramdaniAuth = {
       var cabHtml = cabs.length
         ? '<div class="cabinet-list"><p class="kicker">Cabinets</p>' + cabs.map(function (c) { return paintCabinet(c, pack.seatsByCab, r.slug); }).join('') + '</div>'
         : '<p class="empty">No cabinet is published under this society yet.</p>';
-      return '<article class="card"><p class="kicker">' + escape(meta) + '</p><h3>' + escape(r.title) +
+      return '<article class="card">' + entityMediaHtml(r) + '<p class="kicker">' + escape(meta) + '</p><h3>' + escape(r.title) +
         '</h3><p>' + escape(r.summary || '') + '</p>' +
         (r.body ? '<p class="note">' + escape(r.body).slice(0, 360) + '</p>' : '') +
         cabHtml +
@@ -5986,7 +6023,7 @@ window.ramdaniAuth = {
       var cabHtml = cabs.length
         ? '<div class="cabinet-list"><p class="kicker">Cabinets</p>' + cabs.map(function (c) { return paintCabinet(c, pack.seatsByCab, r.slug); }).join('') + '</div>'
         : '<p class="empty">No cabinet is published under this chapter yet.</p>';
-      return '<article class="card"><p class="kicker">' + escape(meta) + '</p><h3>' + escape(r.title) +
+      return '<article class="card">' + entityMediaHtml(r) + '<p class="kicker">' + escape(meta) + '</p><h3>' + escape(r.title) +
         '</h3><p>' + escape(r.summary || '') + '</p>' +
         (r.body ? '<p class="note">' + escape(r.body).slice(0, 360) + '</p>' : '') +
         cabHtml +
@@ -6839,8 +6876,33 @@ window.ramdaniAuth = {
       return;
     }
     mediaAssetsCache = res.data || [];
+    mediaRecordCache = {};
     note.textContent = '';
+    await loadMediaEntityNames();
     renderMediaGrid();
+    loadMediaSocial();
+  }
+
+  function mediaCardHtml(r) {
+    var url = mediaPublicUrl(r.storage_path);
+    var isImg = /^image\//.test(r.file_type || '') && r.file_type !== 'image/x-icon' && r.file_type !== 'image/vnd.microsoft.icon';
+    var thumb = (isImg && url)
+      ? '<img src="' + escapeHtml(url) + '" alt="" style="max-width:100%;max-height:100%;object-fit:contain" />'
+      : '<span class="asset-empty">' + escapeHtml(((r.file_type || 'file').split('/').pop() || 'file').toUpperCase()) + '</span>';
+    var linked = mediaLinkLabel(r);
+    return '<article class="card" data-media="' + escapeHtml(r.id) + '">' +
+      '<div class="asset-preview" style="height:120px;margin-bottom:.6rem">' + thumb + '</div>' +
+      '<h3 style="font-size:.92rem;word-break:break-all">' + escapeHtml(r.filename) + '</h3>' +
+      '<p class="note">' + escapeHtml([r.category, formatBytes(r.size_bytes)].filter(Boolean).join(' · ')) + '</p>' +
+      (r.alt_text ? '<p class="note">' + escapeHtml(r.alt_text) + '</p>' : '') +
+      '<p class="note">' + (r.is_public ? 'Public' : 'Staff only') + '</p>' +
+      '<p class="note">' + (linked ? '🔗 ' + escapeHtml(linked) : 'Not linked to a record') + '</p>' +
+      '<div class="table-actions">' +
+      '<button type="button" class="btn btn-sm" data-link-media="' + escapeHtml(r.id) + '">' + (r.entity_type ? 'Relink' : 'Link') + '</button>' +
+      '<button type="button" class="btn btn-sm" data-copy-media="' + escapeHtml(r.id) + '">Copy link</button>' +
+      '<button type="button" class="btn btn-sm" data-replace-media="' + escapeHtml(r.id) + '">Replace</button>' +
+      '<button type="button" class="btn btn-sm" data-delete-media="' + escapeHtml(r.id) + '">Delete</button>' +
+      '</div></article>';
   }
 
   function renderMediaGrid() {
@@ -6848,34 +6910,36 @@ window.ramdaniAuth = {
     if (!grid) return;
     var q = (document.getElementById('mediaSearch').value || '').trim().toLowerCase();
     var cat = document.getElementById('mediaCategoryFilter').value || '';
+    var secEl = document.getElementById('mediaSectionFilter');
+    var sec = secEl ? secEl.value : '';
+    var modeEl = document.getElementById('mediaViewMode');
+    var mode = modeEl ? modeEl.value : 'grid';
     var rows = mediaAssetsCache.filter(function (r) {
       if (cat && r.category !== cat) return false;
+      if (sec === '__none' && r.entity_type) return false;
+      if (sec && sec !== '__none' && r.entity_type !== sec) return false;
       if (!q) return true;
-      var hay = [r.filename, r.alt_text, r.category].filter(Boolean).join(' ').toLowerCase();
+      var hay = [r.filename, r.alt_text, r.category, mediaLinkLabel(r)].filter(Boolean).join(' ').toLowerCase();
       return hay.indexOf(q) !== -1;
     });
     if (!rows.length) {
+      grid.className = '';
       grid.innerHTML = '<p class="empty">No media assets match. Upload one above.</p>';
       return;
     }
-    grid.innerHTML = rows.map(function (r) {
-      var url = mediaPublicUrl(r.storage_path);
-      var isImg = /^image\//.test(r.file_type || '') && r.file_type !== 'image/x-icon' && r.file_type !== 'image/vnd.microsoft.icon';
-      var thumb = (isImg && url)
-        ? '<img src="' + escapeHtml(url) + '" alt="" style="max-width:100%;max-height:100%;object-fit:contain" />'
-        : '<span class="asset-empty">' + escapeHtml(((r.file_type || 'file').split('/').pop() || 'file').toUpperCase()) + '</span>';
-      return '<article class="card" data-media="' + escapeHtml(r.id) + '">' +
-        '<div class="asset-preview" style="height:120px;margin-bottom:.6rem">' + thumb + '</div>' +
-        '<h3 style="font-size:.92rem;word-break:break-all">' + escapeHtml(r.filename) + '</h3>' +
-        '<p class="note">' + escapeHtml([r.category, formatBytes(r.size_bytes)].filter(Boolean).join(' · ')) + '</p>' +
-        (r.alt_text ? '<p class="note">' + escapeHtml(r.alt_text) + '</p>' : '') +
-        '<p class="note">' + (r.is_public ? 'Public' : 'Staff only') + '</p>' +
-        '<div class="table-actions">' +
-        '<button type="button" class="btn btn-sm" data-copy-media="' + escapeHtml(r.id) + '">Copy link</button>' +
-        '<button type="button" class="btn btn-sm" data-replace-media="' + escapeHtml(r.id) + '">Replace</button>' +
-        '<button type="button" class="btn btn-sm" data-delete-media="' + escapeHtml(r.id) + '">Delete</button>' +
-        '</div></article>';
-    }).join('');
+    if (mode === 'sections') {
+      grid.className = '';
+      grid.innerHTML = MEDIA_SECTION_ORDER.concat(['__none']).map(function (g) {
+        var items = rows.filter(function (r) { return g === '__none' ? !r.entity_type : r.entity_type === g; });
+        if (!items.length) return '';
+        var title = g === '__none' ? 'General library (not linked)' : MEDIA_LINK_TARGETS[g].label;
+        return '<section class="media-group" style="margin-bottom:1.25rem"><h3 style="margin:.2rem 0 .6rem">' + escapeHtml(title) +
+          ' <span class="note">(' + items.length + ')</span></h3><div class="grid">' + items.map(mediaCardHtml).join('') + '</div></section>';
+      }).join('');
+    } else {
+      grid.className = 'grid';
+      grid.innerHTML = rows.map(mediaCardHtml).join('');
+    }
   }
 
   async function submitMediaUpload(e) {
@@ -6894,6 +6958,13 @@ window.ramdaniAuth = {
     var category = fd.get('category') || 'Other';
     var isPublic = fd.get('is_public') === 'true';
     var altText = (fd.get('alt_text') || '').trim();
+    var linkType = fd.get('entity_type') || '';
+    var linkRecord = fd.get('entity_id') || '';
+    var linkField = fd.get('entity_field') || '';
+    if (linkType && MEDIA_LINK_TARGETS[linkType]) {
+      if (!/^image\//.test(file.type)) { note.className = 'form-status err'; note.textContent = 'Only image files can be linked to an image field.'; return; }
+      if (!MEDIA_LINK_TARGETS[linkType].singleton && !linkRecord) { note.className = 'form-status err'; note.textContent = 'Select the record to link to (or set Section to “Not linked”).'; return; }
+    }
     var ext = (file.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin';
     var path = 'media/' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.' + ext;
     var upRes = await sb.storage.from('site-assets').upload(path, file, { upsert: false, contentType: file.type });
@@ -6909,14 +6980,24 @@ window.ramdaniAuth = {
       is_public: isPublic,
       uploaded_by: session ? session.user.id : null
     };
-    var insRes = await sb.from('media_assets').insert(payload);
+    var insRes = await sb.from('media_assets').insert(payload).select('*').single();
     if (insRes.error) {
       try { await sb.storage.from('site-assets').remove([path]); } catch (e2) { /* best-effort cleanup of the orphaned object */ }
       note.className = 'form-status err'; note.textContent = insRes.error.message; return;
     }
+    if (linkType && MEDIA_LINK_TARGETS[linkType]) {
+      var linkErr = await applyMediaLink(insRes.data, linkType, linkRecord, linkField);
+      if (linkErr) {
+        note.className = 'form-status err';
+        note.textContent = 'Uploaded to the library, but not linked: ' + linkErr;
+        form.reset(); resetMediaUploadLinkPicker(); loadMediaLibrary();
+        return;
+      }
+    }
     note.className = 'form-status ok';
-    note.textContent = 'Uploaded.';
+    note.textContent = linkType ? 'Uploaded and applied to the official field.' : 'Uploaded.';
     form.reset();
+    resetMediaUploadLinkPicker();
     loadMediaLibrary();
   }
 
@@ -6963,12 +7044,18 @@ window.ramdaniAuth = {
       try { await sb.storage.from('site-assets').remove([newPath]); } catch (e2) { /* best-effort cleanup */ }
       note.className = 'form-status err'; note.textContent = updRes.error.message; return;
     }
+    var keepOld = false;
+    var reErr = '';
+    if (row.entity_type) {
+      reErr = await applyMediaLink(Object.assign({}, row, { storage_path: newPath, file_type: file.type }), row.entity_type, row.entity_id || '', row.entity_field);
+      if (reErr) keepOld = true;
+    }
     var oldPath = row.storage_path;
-    if (oldPath && oldPath !== newPath) {
+    if (oldPath && oldPath !== newPath && !keepOld) {
       try { await sb.storage.from('site-assets').remove([oldPath]); } catch (e3) { /* best-effort; DB already points at the new object */ }
     }
-    note.className = 'form-status ok';
-    note.textContent = 'Replaced.';
+    if (reErr) { note.className = 'form-status err'; note.textContent = 'Replaced, but the linked record was not updated (' + reErr + '). The old file was kept so the record keeps working.'; }
+    else { note.className = 'form-status ok'; note.textContent = row.entity_type ? 'Replaced and updated on the linked record.' : 'Replaced.'; }
     loadMediaLibrary();
   }
 
@@ -6976,6 +7063,10 @@ window.ramdaniAuth = {
     if (!confirm('Permanently delete this media asset? This cannot be undone.')) return;
     var row = mediaAssetsCache.find(function (r) { return r.id === id; });
     var note = document.getElementById('mediaLibraryNote');
+    if (row && row.entity_type) {
+      var clrErr = await clearMediaLinkedField(row);
+      if (clrErr) { note.className = 'form-status err'; note.textContent = 'Could not clear the linked record field: ' + clrErr; return; }
+    }
     var res = await sb.from('media_assets').delete().eq('id', id);
     if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; return; }
     if (row && row.storage_path) {
@@ -6986,6 +7077,212 @@ window.ramdaniAuth = {
     loadMediaLibrary();
   }
 
+  // ---- Module 14: every image belongs to an official record + field ----
+  var MEDIA_LINK_TARGETS = {
+    society: { label: 'Societies', table: 'societies', title: 'title', fields: [['logo_url', 'Logo', 'Society logos'], ['cover_url', 'Cover image', 'Society logos']] },
+    chapter: { label: 'Chapters', table: 'chapters', title: 'title', fields: [['logo_url', 'Logo', 'Chapter logos'], ['cover_url', 'Cover image', 'Chapter logos']] },
+    cabinet: { label: 'Cabinets', table: 'cabinets', title: 'title', fields: [['logo_url', 'Logo', 'Cabinet images'], ['cover_url', 'Cover image', 'Cabinet images']] },
+    branding: { label: 'Branding', table: 'branding_settings', singleton: true, fields: [
+      ['logo_primary_url', 'Primary logo', 'Logos'], ['logo_light_url', 'Logo (light)', 'Logos'], ['logo_dark_url', 'Logo (dark)', 'Logos'],
+      ['logo_mobile_url', 'Mobile logo', 'Logos'], ['favicon_url', 'Favicon', 'Logos'], ['social_share_image_url', 'Social share image', 'Social thumbnails'],
+      ['certificate_logo_url', 'Certificate logo', 'Certificate Assets'], ['education_logo_url', 'Education logo', 'Logos']] },
+    organization: { label: 'Personal branding & about', table: 'organization_settings', singleton: true, fields: [
+      ['founder_portrait_url', 'Founder portrait', 'Founder'], ['founder_signature_url', 'Founder signature', 'Signatures'],
+      ['about_image_url', 'About image', 'About images'], ['vision_image_url', 'Vision image', 'Vision images']] },
+    person: { label: 'People', table: 'people', title: 'full_name', fields: [['photo_url', 'Photo', 'Portraits']] },
+    social_post: { label: 'Social posts', table: 'social_posts', title: 'title', fields: [['thumbnail_url', 'Thumbnail', 'Social thumbnails'], ['image_url', 'Post image', 'Social thumbnails']] },
+    book: { label: 'Library books', table: 'books', title: 'title', fields: [['cover_url', 'Cover', 'Education Materials']] }
+  };
+  var MEDIA_SECTION_ORDER = ['society', 'chapter', 'cabinet', 'branding', 'organization', 'person', 'social_post', 'book'];
+  var mediaRecordCache = {};
+  var mediaEntityNames = {};
+  var mediaLinkingId = null;
+
+  function mEl(id) { return document.getElementById(id); }
+  function mediaSafeUrl(u) { return /^https?:\/\//i.test(u || '') ? u : ''; }
+
+  function mediaFieldMeta(type, field) {
+    var t = MEDIA_LINK_TARGETS[type];
+    if (!t) return null;
+    for (var i = 0; i < t.fields.length; i++) { if (t.fields[i][0] === field) return t.fields[i]; }
+    return null;
+  }
+
+  function fillSectionSelect(sel, blankLabel) {
+    if (!sel) return;
+    sel.innerHTML = (blankLabel ? '<option value="">' + escapeHtml(blankLabel) + '</option>' : '') +
+      MEDIA_SECTION_ORDER.map(function (k) { return '<option value="' + k + '">' + escapeHtml(MEDIA_LINK_TARGETS[k].label) + '</option>'; }).join('');
+  }
+
+  async function loadRecordOptions(type, recordSel, fieldSel, selectedId, selectedField) {
+    var t = MEDIA_LINK_TARGETS[type];
+    if (!t) {
+      recordSel.innerHTML = '<option value="">—</option>'; recordSel.disabled = true;
+      fieldSel.innerHTML = '<option value="">—</option>'; fieldSel.disabled = true;
+      return;
+    }
+    fieldSel.innerHTML = t.fields.map(function (f) { return '<option value="' + f[0] + '">' + escapeHtml(f[1]) + '</option>'; }).join('');
+    fieldSel.disabled = false;
+    if (selectedField) fieldSel.value = selectedField;
+    if (t.singleton) { recordSel.innerHTML = '<option value="">Site-wide settings</option>'; recordSel.disabled = true; return; }
+    recordSel.disabled = true;
+    recordSel.innerHTML = '<option value="">Loading…</option>';
+    if (!mediaRecordCache[type]) {
+      var res = await sb.from(t.table).select('id, ' + t.title).order(t.title);
+      mediaRecordCache[type] = res.error ? [] : (res.data || []);
+    }
+    var rows = mediaRecordCache[type];
+    recordSel.innerHTML = rows.length
+      ? '<option value="">Select record…</option>' + rows.map(function (r) { return '<option value="' + escapeHtml(r.id) + '">' + escapeHtml(r[t.title] || r.id) + '</option>'; }).join('')
+      : '<option value="">No records yet — create one first</option>';
+    recordSel.disabled = !rows.length;
+    if (selectedId) recordSel.value = selectedId;
+  }
+
+  // Sets the record's field to this asset's public URL and stamps the link on the asset.
+  // Returns '' on success or a human-readable error.
+  async function applyMediaLink(asset, type, recordId, field) {
+    var t = MEDIA_LINK_TARGETS[type];
+    var fm = mediaFieldMeta(type, field);
+    if (!t || !fm) return 'Choose a section and a field.';
+    if (!/^image\//.test(asset.file_type || '')) return 'Only image files can be applied to an image field.';
+    var url = mediaPublicUrl(asset.storage_path);
+    if (!url) return 'Could not resolve a public link for this asset.';
+    var rowId = recordId;
+    if (t.singleton) {
+      var one = await sb.from(t.table).select('id').order('updated_at', { ascending: false }).limit(1).maybeSingle();
+      if (one.error || !one.data) return 'No ' + t.label.toLowerCase() + ' settings row exists yet. Open that section once and save it first.';
+      rowId = one.data.id;
+    }
+    if (!rowId) return 'Select the record first.';
+    var patch = {}; patch[field] = url;
+    var up = await sb.from(t.table).update(patch).eq('id', rowId).select('id');
+    if (up.error) return up.error.message;
+    if (!up.data || !up.data.length) return 'You do not have permission to change this record.';
+    // one asset per field: detach any other asset that was linked here before
+    var detach = sb.from('media_assets').update({ entity_type: null, entity_id: null, entity_field: null })
+      .eq('entity_type', type).eq('entity_field', field).neq('id', asset.id);
+    detach = t.singleton ? detach.is('entity_id', null) : detach.eq('entity_id', rowId);
+    await detach;
+    var link = await sb.from('media_assets').update({ entity_type: type, entity_id: t.singleton ? null : rowId, entity_field: field, category: fm[2] }).eq('id', asset.id);
+    if (link.error) return link.error.message;
+    return '';
+  }
+
+  // Clears the record's field, but only while it still points at this asset.
+  async function clearMediaLinkedField(asset) {
+    var t = MEDIA_LINK_TARGETS[asset.entity_type];
+    if (!t || !asset.entity_field) return '';
+    var url = mediaPublicUrl(asset.storage_path);
+    var patch = {}; patch[asset.entity_field] = null;
+    var q = sb.from(t.table).update(patch).eq(asset.entity_field, url);
+    if (!t.singleton) q = q.eq('id', asset.entity_id);
+    var res = await q;
+    return res.error ? res.error.message : '';
+  }
+
+  async function loadMediaEntityNames() {
+    mediaEntityNames = {};
+    var byType = {};
+    mediaAssetsCache.forEach(function (r) {
+      if (r.entity_type && r.entity_id) { (byType[r.entity_type] = byType[r.entity_type] || []).push(r.entity_id); }
+    });
+    await Promise.all(Object.keys(byType).map(async function (type) {
+      var t = MEDIA_LINK_TARGETS[type];
+      if (!t) return;
+      var res = await sb.from(t.table).select('id, ' + t.title).in('id', byType[type]);
+      (res.data || []).forEach(function (row) { mediaEntityNames[type + ':' + row.id] = row[t.title]; });
+    }));
+  }
+
+  function mediaLinkLabel(r) {
+    var t = MEDIA_LINK_TARGETS[r.entity_type];
+    if (!t) return '';
+    var fm = mediaFieldMeta(r.entity_type, r.entity_field);
+    var who = t.singleton ? '' : (mediaEntityNames[r.entity_type + ':' + r.entity_id] || 'record');
+    return t.label + (who ? ' › ' + who : '') + (fm ? ' › ' + fm[1] : '');
+  }
+
+  function resetMediaUploadLinkPicker() {
+    var sec = mEl('mediaLinkSection');
+    if (!sec) return;
+    sec.value = '';
+    loadRecordOptions('', mEl('mediaLinkRecord'), mEl('mediaLinkField'));
+  }
+
+  function openMediaLinkPanel(id) {
+    var row = mediaAssetsCache.find(function (r) { return r.id === id; });
+    if (!row) return;
+    mediaLinkingId = id;
+    var panel = mEl('mediaLinkPanel');
+    panel.hidden = false;
+    mEl('mlpTitle').textContent = 'Link “' + row.filename + '” to its official field';
+    mEl('mlpNote').textContent = /^image\//.test(row.file_type || '') ? '' : 'Only image files can be applied to a field.';
+    var sec = mEl('mlpSection');
+    fillSectionSelect(sec, 'Choose section…');
+    sec.value = row.entity_type || '';
+    mEl('mlpUnlink').hidden = !row.entity_type;
+    loadRecordOptions(sec.value, mEl('mlpRecord'), mEl('mlpField'), row.entity_id, row.entity_field);
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function closeMediaLinkPanel() { mediaLinkingId = null; mEl('mediaLinkPanel').hidden = true; mEl('mlpNote').textContent = ''; }
+
+  async function submitMediaLinkPanel() {
+    var row = mediaAssetsCache.find(function (r) { return r.id === mediaLinkingId; });
+    var note = mEl('mlpNote');
+    if (!row) return;
+    var type = mEl('mlpSection').value;
+    note.className = 'form-status';
+    if (!type) { note.className = 'form-status err'; note.textContent = 'Choose a section.'; return; }
+    note.textContent = 'Applying…';
+    var err = await applyMediaLink(row, type, mEl('mlpRecord').value, mEl('mlpField').value);
+    if (err) { note.className = 'form-status err'; note.textContent = err; return; }
+    closeMediaLinkPanel();
+    var libNote = mEl('mediaLibraryNote');
+    libNote.className = 'form-status ok';
+    libNote.textContent = 'Linked and applied to the official field.';
+    loadMediaLibrary();
+  }
+
+  async function unlinkMediaPanel() {
+    var row = mediaAssetsCache.find(function (r) { return r.id === mediaLinkingId; });
+    var note = mEl('mlpNote');
+    if (!row || !row.entity_type) return;
+    if (!confirm('Remove this image from the record (' + mediaLinkLabel(row) + ') and unlink it?')) return;
+    var err = await clearMediaLinkedField(row);
+    if (err) { note.className = 'form-status err'; note.textContent = err; return; }
+    var res = await sb.from('media_assets').update({ entity_type: null, entity_id: null, entity_field: null }).eq('id', row.id);
+    if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; return; }
+    closeMediaLinkPanel();
+    var libNote = mEl('mediaLibraryNote');
+    libNote.className = 'form-status ok';
+    libNote.textContent = 'Unlinked.';
+    loadMediaLibrary();
+  }
+
+  async function loadMediaSocial() {
+    var box = mEl('mediaSocialGrid');
+    if (!box) return;
+    var res = await sb.from('social_posts')
+      .select('id, title, platform, permalink, facebook_url, linkedin_url, instagram_url, x_url, youtube_url, thumbnail_url, image_url, status')
+      .order('created_at', { ascending: false }).limit(24);
+    if (res.error) { box.className = ''; box.innerHTML = '<p class="empty">Could not load social posts.</p>'; return; }
+    if (!res.data || !res.data.length) { box.className = ''; box.innerHTML = '<p class="empty">No social posts yet. Use “Manage social posts” to add Facebook, LinkedIn or other posts.</p>'; return; }
+    box.className = 'grid';
+    box.innerHTML = res.data.map(function (p) {
+      var img = mediaSafeUrl(p.thumbnail_url) || mediaSafeUrl(p.image_url);
+      var thumb = img ? '<img src="' + escapeHtml(img) + '" alt="" style="max-width:100%;max-height:100%;object-fit:cover" />' : '<span class="asset-empty">' + escapeHtml((p.platform || 'post').toUpperCase()) + '</span>';
+      var links = [['Post', p.permalink], ['Facebook', p.facebook_url], ['LinkedIn', p.linkedin_url], ['Instagram', p.instagram_url], ['X', p.x_url], ['YouTube', p.youtube_url]]
+        .filter(function (l) { return mediaSafeUrl(l[1]); })
+        .map(function (l) { return '<a class="btn btn-sm" href="' + escapeHtml(l[1]) + '" target="_blank" rel="noopener noreferrer">' + l[0] + '</a>'; }).join(' ');
+      return '<article class="card"><div class="asset-preview" style="height:120px;margin-bottom:.6rem">' + thumb + '</div>' +
+        '<h3 style="font-size:.92rem">' + escapeHtml(p.title || 'Untitled post') + '</h3>' +
+        '<p class="note">' + escapeHtml([p.platform, p.status].filter(Boolean).join(' · ')) + '</p>' +
+        (links ? '<div class="table-actions">' + links + '</div>' : '<p class="note">No link yet.</p>') + '</article>';
+    }).join('');
+  }
+
   function bindMediaLibrary() {
     var form = document.getElementById('mediaUploadForm');
     if (!form || form.dataset.bound === '1') return;
@@ -6994,11 +7291,25 @@ window.ramdaniAuth = {
     document.getElementById('mediaSearch').addEventListener('input', renderMediaGrid);
     document.getElementById('mediaCategoryFilter').addEventListener('change', renderMediaGrid);
     document.getElementById('mediaReplaceFile').addEventListener('change', handleMediaReplaceChange);
+    fillSectionSelect(mEl('mediaLinkSection'), 'Not linked (general library)');
+    mEl('mediaLinkSection').addEventListener('change', function () { loadRecordOptions(this.value, mEl('mediaLinkRecord'), mEl('mediaLinkField')); });
+    resetMediaUploadLinkPicker();
+    var secFilter = mEl('mediaSectionFilter');
+    secFilter.innerHTML = '<option value="">All sections</option>' + MEDIA_SECTION_ORDER.map(function (k) { return '<option value="' + k + '">' + escapeHtml(MEDIA_LINK_TARGETS[k].label) + '</option>'; }).join('') + '<option value="__none">Not linked</option>';
+    secFilter.addEventListener('change', renderMediaGrid);
+    mEl('mediaViewMode').addEventListener('change', renderMediaGrid);
+    mEl('mlpSection').addEventListener('change', function () { loadRecordOptions(this.value, mEl('mlpRecord'), mEl('mlpField')); });
+    mEl('mlpApply').addEventListener('click', submitMediaLinkPanel);
+    mEl('mlpUnlink').addEventListener('click', unlinkMediaPanel);
+    mEl('mlpCancel').addEventListener('click', closeMediaLinkPanel);
+    mEl('mediaManageSocialBtn').addEventListener('click', function () { var b = document.querySelector('[data-table="social_posts"]'); if (b) b.click(); });
     document.getElementById('mediaGrid').addEventListener('click', function (e) {
       var copyBtn = e.target.closest('[data-copy-media]');
       if (copyBtn) { copyMediaLink(copyBtn.getAttribute('data-copy-media')); return; }
       var replaceBtn = e.target.closest('[data-replace-media]');
       if (replaceBtn) { startMediaReplace(replaceBtn.getAttribute('data-replace-media')); return; }
+      var linkBtn = e.target.closest('[data-link-media]');
+      if (linkBtn) { openMediaLinkPanel(linkBtn.getAttribute('data-link-media')); return; }
       var delBtn = e.target.closest('[data-delete-media]');
       if (delBtn) { deleteMediaAsset(delBtn.getAttribute('data-delete-media')); }
     });
@@ -10604,6 +10915,14 @@ window.ramdaniAuth = {
   }
   function activate(id,title){ var p=document.getElementById(id); if(p){p.hidden=false;p.classList.add('is-active');} document.getElementById('tableTitle').textContent=title; }
 
+  // Extra columns edited in the generic form but not shown as list columns.
+  var EXTRA_FORM_FIELDS = {
+    societies: ['logo_url', 'cover_url'],
+    chapters: ['logo_url', 'cover_url'],
+    cabinets: ['logo_url', 'cover_url'],
+    social_posts: ['image_url', 'facebook_url', 'linkedin_url', 'instagram_url', 'x_url', 'youtube_url']
+  };
+
   function configureForm(name) {
     var meta = TABLES.find(function(t){return t.id===name;});
     if(!meta) return;
@@ -10612,6 +10931,7 @@ window.ramdaniAuth = {
     if(name==='certificates') fields = fields.concat(['module_code']);
     var special = {cases:['citation','citation_status','court','year','official_url','jurisdiction'], modules:['code','category'], societies:['category','city'], chapters:['city','province'], lectures:['youtube_url','youtube_id'], social_posts:['platform','permalink'], internships:['location','duration','stipend_note','mode','deadline'], people:['full_name','role_title','short_bio'], certificates:['category','module_code'], cabinets:['parent_kind','society_slug','chapter_slug','seat_limit']};
     (special[name]||[]).forEach(function(f){ if(fields.indexOf(f)<0) fields.push(f); });
+    (EXTRA_FORM_FIELDS[name]||[]).forEach(function(f){ if(fields.indexOf(f)<0) fields.push(f); });
     var form=document.getElementById('createForm');
     form.querySelectorAll('[data-field]').forEach(function(label){
       var f=label.getAttribute('data-field');
@@ -10697,6 +11017,7 @@ window.ramdaniAuth = {
     e.preventDefault(); var form=e.target, table=form.dataset.table; var meta=TABLES.find(function(t){return t.id===table;}); if(!meta)return;
     var payload={};
     meta.fields.forEach(function(f){var el=form.querySelector('[name="'+f+'"]');if(el&&el.value!=='')payload[f]=el.value.trim?el.value.trim():el.value;});
+    (EXTRA_FORM_FIELDS[table]||[]).forEach(function(f){var el=form.querySelector('[name="'+f+'"]');if(!el)return;var v=(el.value||'').trim();if(v!==''){payload[f]=v;}else if(editingId){payload[f]=null;}});
     if(table==='cabinets'){
       var limit=Number((form.querySelector('[name="seat_limit"]')||{}).value||10); if(!limit||limit<1)limit=1;if(limit>10)limit=10;payload.seat_limit=limit;
       var pk=payload.parent_kind, ss=(form.querySelector('[name="society_slug"]')||{}).value, cs=(form.querySelector('[name="chapter_slug"]')||{}).value;
