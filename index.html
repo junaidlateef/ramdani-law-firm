@@ -561,18 +561,32 @@ html[dir="rtl"] .lead {
           <button type="button" data-table="careers">Careers</button>
         </details>
         <details class="admin-nav-group" open>
-          <summary class="admin-nav-group-title">Education</summary>
-          <button type="button" data-table="modules">Modules</button>
-          <button type="button" data-table="__coursebuilder">Course builder</button>
-          <button type="button" data-table="__enrollments">Enrollments &amp; progress</button>
+          <summary class="admin-nav-group-title">Courses &amp; Programs</summary>
+          <button type="button" data-table="modules">Courses</button>
+          <button type="button" data-table="__coursebuilder">Sections &amp; lessons</button>
           <button type="button" data-table="lectures">Lectures</button>
+        </details>
+        <details class="admin-nav-group" open>
+          <summary class="admin-nav-group-title">Assessments</summary>
           <button type="button" data-table="quizzes">Quizzes</button>
-          <button type="button" data-table="__quizbuilder">Quiz builder</button>
+          <button type="button" data-table="__quizbuilder">Questions (quiz builder)</button>
+          <button type="button" data-table="__quizresults">Results</button>
+        </details>
+        <details class="admin-nav-group" open>
+          <summary class="admin-nav-group-title">Students &amp; Progress</summary>
+          <button type="button" data-table="__enrollments">Enrollments &amp; progress</button>
+        </details>
+        <details class="admin-nav-group" open>
+          <summary class="admin-nav-group-title">Legal Learning</summary>
           <button type="button" data-table="books">Library</button>
           <button type="button" data-table="cases">Case notes</button>
           <button type="button" data-table="statutes">Statutes</button>
-          <button type="button" data-table="certificates">Certificates</button>
-          <button type="button" data-table="__certissuances">Certificate issuances</button>
+          <button type="button" data-table="__edusearch">Search all content</button>
+        </details>
+        <details class="admin-nav-group" open>
+          <summary class="admin-nav-group-title">Certificates</summary>
+          <button type="button" data-table="certificates">Templates &amp; listings</button>
+          <button type="button" data-table="__certissuances">Issued certificates</button>
         </details>
         <details class="admin-nav-group" open>
           <summary class="admin-nav-group-title">Community</summary>
@@ -631,6 +645,8 @@ html[dir="rtl"] .lead {
             </div>
             <div class="admin-section-head"><h2>Education overview</h2></div>
             <div class="dashboard-grid" id="eduStats"></div>
+            <div class="admin-section-head"><h2>Education analytics</h2><p class="note">Calculated from real enrollment, completion and quiz-attempt records.</p></div>
+            <div class="dashboard-grid" id="eduAnalytics"></div>
             <div class="admin-card"><div class="admin-section-head"><h2>Quick access</h2></div><div class="admin-toolbar">
               <button class="btn" type="button" data-table="practice_areas">Practice areas</button><button class="btn" type="button" data-table="services">Services</button><button class="btn" type="button" data-table="articles">Insights</button><button class="btn" type="button" data-table="modules">Modules</button><button class="btn" type="button" data-table="__students">Students</button><button class="btn" type="button" data-table="__inquiries">Inquiries</button>
             </div></div>
@@ -996,6 +1012,14 @@ html[dir="rtl"] .lead {
             <p id="cbNote" class="form-status"></p>
             <div id="cbArea" hidden>
               <div class="admin-card">
+                <h3>Module details</h3>
+                <form id="cbModuleMetaForm" class="form admin-form">
+                  <label><span>Instructor</span><select name="instructor_id"><option value="">No instructor assigned</option></select></label>
+                  <div class="form-actions"><button class="btn btn-primary" type="submit">Save instructor</button><p id="cbModuleMetaNote" class="form-status"></p></div>
+                </form>
+              </div>
+              <div style="height:1rem"></div>
+              <div class="admin-card">
                 <h3 id="cbSectionHeading">Sections</h3>
                 <form id="cbSectionForm" class="form admin-form">
                   <label><span>Section title</span><input name="title" required /></label>
@@ -1072,6 +1096,37 @@ html[dir="rtl"] .lead {
                 <div class="table-wrap"><table class="data"><thead><tr><th>#</th><th>Prompt</th><th>Choices</th><th>Correct</th><th>Actions</th></tr></thead><tbody id="qbQuestionsBody"></tbody></table></div>
               </div>
             </div>
+          </div>
+
+          <div id="quizResultsPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Assessment results <span id="qrTotal" class="note"></span></h2><p class="note">Every quiz attempt, scored server-side. Students only ever see their own results.</p></div></div>
+            <div class="admin-toolbar">
+              <select id="qrQuiz" aria-label="Filter by quiz"><option value="">All quizzes</option></select>
+              <select id="qrOutcome" aria-label="Filter by outcome"><option value="">Pass &amp; fail</option><option value="pass">Pass only</option><option value="fail">Fail only</option></select>
+              <input type="search" id="qrSearch" placeholder="Search student name, email or ID" aria-label="Search results" />
+            </div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Student</th><th>Quiz</th><th>Module</th><th>Score</th><th>%</th><th>Result</th><th>Attempt</th><th>Date</th></tr></thead><tbody id="qrBody"></tbody></table></div>
+            <p id="qrNote" class="form-status"></p>
+          </div>
+
+          <div id="eduSearchPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Content search</h2><p class="note">Search across courses, lessons, lectures, case notes, statutes and the library in one place.</p></div></div>
+            <div class="admin-toolbar">
+              <input type="search" id="esQuery" placeholder="Search title…" aria-label="Search education content" />
+              <select id="esType" aria-label="Filter by type">
+                <option value="">All types</option>
+                <option value="modules">Courses</option>
+                <option value="lessons">Lessons</option>
+                <option value="lectures">Lectures</option>
+                <option value="cases">Case notes</option>
+                <option value="statutes">Statutes</option>
+                <option value="books">Library</option>
+              </select>
+              <select id="esStatus" aria-label="Filter by status"><option value="">All statuses</option><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select>
+              <button type="button" class="btn btn-primary" id="esRun">Search</button>
+            </div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Type</th><th>Title</th><th>Details</th><th>Status</th><th>Actions</th></tr></thead><tbody id="esBody"></tbody></table></div>
+            <p id="esNote" class="form-status"></p>
           </div>
 
           <div id="enrollmentsPanel" class="admin-panel" hidden>
@@ -3555,7 +3610,7 @@ window.ramdaniAuth = {
   async function renderModule() {
     var slug = qs('slug');
     if (!slug || !window.sb) return;
-    var res = await sb.from('modules').select('*').eq('slug', slug).eq('status', 'published').maybeSingle();
+    var res = await sb.from('modules').select('*, people:instructor_id(full_name, role_title, slug)').eq('slug', slug).eq('status', 'published').maybeSingle();
     var m = res.data;
     if (!m) {
       document.getElementById('modTitle').textContent = 'Module not available';
@@ -3574,6 +3629,9 @@ window.ramdaniAuth = {
     cases = cRes.data || [];
     var html = '';
     html += '<p class="note">' + escape([m.code, catLabel(m.category), m.semester ? ('Semester ' + m.semester) : '', m.credit_hours ? (m.credit_hours + ' credit hours') : ''].filter(Boolean).join(' · ')) + '</p>';
+    if (m.people && m.people.full_name) {
+      html += '<p class="note">Instructor: ' + escape(m.people.full_name) + (m.people.role_title ? ' — ' + escape(m.people.role_title) : '') + '</p>';
+    }
     if (m.description) html += '<p>' + escape(m.description) + '</p>';
     if (outcomes.length) {
       html += '<h2>Learning outcomes</h2><ul>' + outcomes.map(function (o) { return '<li>' + escape(typeof o === 'string' ? o : (o.text || JSON.stringify(o))) + '</li>'; }).join('') + '</ul>';
@@ -4161,7 +4219,7 @@ window.ramdaniAuth = {
     'modules': ['education_manager'], 'lectures': ['education_manager'], 'quizzes': ['education_manager'],
     'books': ['education_manager'], 'cases': ['education_manager'], 'statutes': ['education_manager'],
     'certificates': ['education_manager'], '__certissuances': ['education_manager'],
-    '__coursebuilder': ['education_manager'], '__quizbuilder': ['education_manager'], '__enrollments': ['education_manager', 'student_manager'],
+    '__coursebuilder': ['education_manager'], '__quizbuilder': ['education_manager'], '__quizresults': ['education_manager'], '__edusearch': ['education_manager'], '__enrollments': ['education_manager', 'student_manager'],
     'societies': ['student_manager'], 'chapters': ['student_manager'], 'cabinets': ['student_manager'],
     'internships': ['student_manager'],
     '__inquiries': ['communications_manager'],
@@ -4329,6 +4387,8 @@ window.ramdaniAuth = {
     });
     bindCourseBuilder();
     bindQuizBuilder();
+    bindQuizResults();
+    bindEduSearch();
     document.getElementById('certIssuanceForm').addEventListener('submit', saveCertIssuance);
     document.getElementById('certIssuanceSearch').addEventListener('input', renderCertIssuances);
     document.getElementById('certIssuancesBody').addEventListener('click', function (e) {
@@ -5733,7 +5793,7 @@ window.ramdaniAuth = {
 
   // ---- Phase 3: Course builder, enrollments & progress, education stats ----
   var certPrefill = null;
-  var cbModuleId = '', cbSections = [], cbLessons = [], cbEditSectionId = null, cbEditLessonId = null, cbRulesLoaded = false;
+  var cbModuleId = '', cbSections = [], cbLessons = [], cbEditSectionId = null, cbEditLessonId = null, cbRulesLoaded = false, cbInstructors = [];
   var qbQuizId = '', qbQuizzes = [], qbModules = [], qbQuestions = [], qbEditQuestionId = null, qbChoiceCount = 0;
   var enRows = [], enProfiles = {}, enModules = {}, enCompletions = {}, enIssued = {};
 
@@ -5756,6 +5816,9 @@ window.ramdaniAuth = {
       $id('cbRulesForm').querySelector('[name="required_quiz_id"]').innerHTML = '<option value="">No quiz required</option>' + (q.data || []).map(function (x) { return '<option value="' + x.id + '">' + escapeHtml(x.title) + '</option>'; }).join('');
       var c = await sb.from('certificates').select('id, title').order('title');
       $id('cbRulesForm').querySelector('[name="certificate_id"]').innerHTML = '<option value="">None</option>' + (c.data || []).map(function (x) { return '<option value="' + x.id + '">' + escapeHtml(x.title) + '</option>'; }).join('');
+      var ppl = await sb.from('people').select('id, full_name, role_title').eq('status', 'published').order('full_name');
+      cbInstructors = ppl.data || [];
+      $id('cbModuleMetaForm').querySelector('[name="instructor_id"]').innerHTML = '<option value="">No instructor assigned</option>' + cbInstructors.map(function (x) { return '<option value="' + x.id + '">' + escapeHtml(x.full_name) + (x.role_title ? ' — ' + escapeHtml(x.role_title) : '') + '</option>'; }).join('');
       cbRulesLoaded = true;
     }
     await loadCourseBuilderData();
@@ -5773,6 +5836,9 @@ window.ramdaniAuth = {
     area.hidden = false;
     renderCbSections();
     renderCbLessons();
+    var modRes = await sb.from('modules').select('instructor_id').eq('id', cbModuleId).maybeSingle();
+    $id('cbModuleMetaForm').elements.instructor_id.value = (modRes.data && modRes.data.instructor_id) || '';
+    setNote('cbModuleMetaNote', '');
     var r = await sb.from('course_completion_rules').select('*').eq('module_id', cbModuleId).maybeSingle();
     var f = $id('cbRulesForm');
     var rule = r.data || {};
@@ -5919,8 +5985,17 @@ window.ramdaniAuth = {
     setNote('cbRulesNote', res.error ? res.error.message : 'Rules saved.', !res.error);
   }
 
+  async function saveCbModuleMeta(e) {
+    e.preventDefault();
+    if (!cbModuleId) return;
+    var f = e.target;
+    var res = await sb.from('modules').update({ instructor_id: f.elements.instructor_id.value || null, updated_at: new Date().toISOString() }).eq('id', cbModuleId);
+    setNote('cbModuleMetaNote', res.error ? res.error.message : 'Instructor saved.', !res.error);
+  }
+
   function bindCourseBuilder() {
     $id('cbModule').addEventListener('change', function () { cbModuleId = this.value; resetSectionForm(); resetLessonForm(); loadCourseBuilderData(); });
+    $id('cbModuleMetaForm').addEventListener('submit', saveCbModuleMeta);
     $id('cbSectionForm').addEventListener('submit', saveCbSection);
     $id('cbLessonForm').addEventListener('submit', saveCbLesson);
     $id('cbRulesForm').addEventListener('submit', saveCbRules);
@@ -6244,6 +6319,134 @@ window.ramdaniAuth = {
     });
   }
 
+  var qrRows = [], qrProfiles = {}, qrQuizzes = {}, qrModules = {};
+
+  async function loadQuizResults() {
+    setNote('qrNote', 'Loading…', true);
+    var res = await Promise.all([
+      sb.from('quiz_attempts').select('*').order('created_at', { ascending: true }),
+      sb.from('profiles').select('id, full_name, email, student_id').eq('role', 'student'),
+      sb.from('quizzes').select('id, title, pass_percent, module_id'),
+      sb.from('modules').select('id, title, code')
+    ]);
+    if (res[0].error) { setNote('qrNote', 'Could not load results: ' + res[0].error.message); $id('qrBody').innerHTML = ''; return; }
+    qrProfiles = {}; (res[1].data || []).forEach(function (p) { qrProfiles[p.id] = p; });
+    qrQuizzes = {}; (res[2].data || []).forEach(function (q) { qrQuizzes[q.id] = q; });
+    qrModules = {}; (res[3].data || []).forEach(function (m) { qrModules[m.id] = m; });
+    // Attempt number = rank of this attempt among the same student+quiz, oldest first.
+    var seen = {};
+    qrRows = (res[0].data || []).map(function (a) {
+      var key = (a.student_id || a.email || '') + '|' + a.quiz_id;
+      seen[key] = (seen[key] || 0) + 1;
+      var row = {}; for (var k in a) { if (a.hasOwnProperty(k)) row[k] = a[k]; }
+      row.attempt_no = seen[key];
+      return row;
+    }).reverse();
+    var qsel = $id('qrQuiz'); var cur = qsel.value;
+    qsel.innerHTML = '<option value="">All quizzes</option>' + Object.keys(qrQuizzes).map(function (id) { return '<option value="' + id + '">' + escapeHtml(qrQuizzes[id].title) + '</option>'; }).join('');
+    qsel.value = cur;
+    setNote('qrNote', '');
+    renderQuizResults();
+  }
+
+  function renderQuizResults() {
+    var qf = $id('qrQuiz').value, of = $id('qrOutcome').value, q = ($id('qrSearch').value || '').trim().toLowerCase();
+    var rows = qrRows.filter(function (a) {
+      if (qf && a.quiz_id !== qf) return false;
+      var quiz = qrQuizzes[a.quiz_id] || {};
+      var pct = a.total ? (a.score / a.total) * 100 : 0;
+      var pass = pct >= (quiz.pass_percent == null ? 50 : quiz.pass_percent);
+      if (of === 'pass' && !pass) return false;
+      if (of === 'fail' && pass) return false;
+      if (q) {
+        var p = qrProfiles[a.student_id] || {};
+        var hay = [p.full_name, p.email, p.student_id, a.email].filter(Boolean).join(' ').toLowerCase();
+        if (hay.indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+    $id('qrTotal').textContent = '(' + rows.length + ')';
+    $id('qrBody').innerHTML = rows.map(function (a) {
+      var p = qrProfiles[a.student_id] || {};
+      var quiz = qrQuizzes[a.quiz_id] || {};
+      var mod = qrModules[quiz.module_id] || {};
+      var pct = a.total ? Math.round((a.score / a.total) * 100) : 0;
+      var pass = pct >= (quiz.pass_percent == null ? 50 : quiz.pass_percent);
+      var d = new Date(a.created_at);
+      var who = p.full_name || a.email || 'Anonymous';
+      return '<tr><td>' + escapeHtml(who) + (p.student_id ? '<br><small>' + escapeHtml(p.student_id) + '</small>' : '') + '</td>' +
+        '<td>' + escapeHtml(quiz.title || '') + '</td><td>' + escapeHtml(mod.title || mod.code || '—') + '</td>' +
+        '<td>' + escapeHtml(a.score == null ? '' : a.score) + ' / ' + escapeHtml(a.total == null ? '' : a.total) + '</td>' +
+        '<td>' + pct + '%</td><td><span class="status-badge status-' + (pass ? 'published' : 'draft') + '">' + (pass ? 'Pass' : 'Fail') + '</span></td>' +
+        '<td>' + a.attempt_no + '</td><td>' + escapeHtml(isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-PK')) + '</td></tr>';
+    }).join('') || '<tr><td colspan="8">No attempts match.</td></tr>';
+  }
+
+  function bindQuizResults() {
+    $id('qrQuiz').addEventListener('change', renderQuizResults);
+    $id('qrOutcome').addEventListener('change', renderQuizResults);
+    $id('qrSearch').addEventListener('input', renderQuizResults);
+  }
+
+  var esEditId = null, esEditTable = null;
+  var ES_SOURCES = [
+    { table: 'modules', type: 'Course', titleField: 'title', detail: function (r) { return r.code || ''; } },
+    { table: 'lessons', type: 'Lesson', titleField: 'title', detail: function (r) { return r.description || ''; } },
+    { table: 'lectures', type: 'Lecture', titleField: 'title', detail: function (r) { return ''; } },
+    { table: 'cases', type: 'Case note', titleField: 'title', detail: function (r) { return r.citation || ''; } },
+    { table: 'statutes', type: 'Statute', titleField: 'title', detail: function (r) { return r.year || ''; } },
+    { table: 'books', type: 'Library', titleField: 'title', detail: function (r) { return ''; } }
+  ];
+
+  async function runEduSearch() {
+    var q = ($id('esQuery').value || '').trim();
+    var typeFilter = $id('esType').value;
+    var statusFilter = $id('esStatus').value;
+    var body = $id('esBody');
+    setNote('esNote', 'Searching…', true);
+    var sources = typeFilter ? ES_SOURCES.filter(function (s) { return s.table === typeFilter; }) : ES_SOURCES;
+    var jobs = sources.map(function (s) {
+      var query = sb.from(s.table).select('*').order('updated_at', { ascending: false }).limit(25);
+      if (q) query = query.ilike(s.titleField, '%' + q + '%');
+      if (statusFilter) query = query.eq('status', statusFilter);
+      return query.then(function (res) { return { source: s, rows: res.data || [], error: res.error }; });
+    });
+    var results = await Promise.all(jobs);
+    var bad = results.find(function (r) { return r.error; });
+    if (bad) { setNote('esNote', 'Search error: ' + bad.error.message); body.innerHTML = ''; return; }
+    var rows = [];
+    results.forEach(function (r) {
+      r.rows.forEach(function (row) { rows.push({ source: r.source, row: row }); });
+    });
+    if (!rows.length) { body.innerHTML = '<tr><td colspan="5">No matching content.</td></tr>'; setNote('esNote', ''); return; }
+    body.innerHTML = rows.map(function (item) {
+      var s = item.source, row = item.row;
+      return '<tr><td>' + escapeHtml(s.type) + '</td><td>' + escapeHtml(row[s.titleField] || '') + '</td><td>' + escapeHtml(s.detail(row)) + '</td><td>' + escapeHtml(row.status || '') + '</td>' +
+        '<td><button type="button" class="btn" data-es-edit="' + s.table + '|' + row.id + '">Open</button></td></tr>';
+    }).join('');
+    setNote('esNote', rows.length + ' result(s).', true);
+  }
+
+  function bindEduSearch() {
+    $id('esRun').addEventListener('click', runEduSearch);
+    $id('esQuery').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); runEduSearch(); } });
+    $id('esBody').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-es-edit]'); if (!b) return;
+      var parts = b.getAttribute('data-es-edit').split('|');
+      var table = parts[0], id = parts[1];
+      if (table === 'lessons') {
+        var row = null;
+        // Lessons are edited inside Course Builder against their parent module.
+        sb.from('lessons').select('module_id').eq('id', id).maybeSingle().then(function (res) {
+          if (res.data && res.data.module_id) { cbModuleId = res.data.module_id; showAdminView('__coursebuilder'); }
+        });
+        return;
+      }
+      esEditId = id; esEditTable = table;
+      showAdminView(table);
+    });
+  }
+
   async function loadEnrollments() {
     setNote('enNote', 'Loading…', true);
     var res = await Promise.all([
@@ -6314,10 +6517,47 @@ window.ramdaniAuth = {
       ['Pending applications', v('pending_applications')]
     ];
     grid.innerHTML = cards.map(function (c) { return '<div class="stat-card"><div class="label">' + c[0] + '</div><div class="value">' + escapeHtml(c[1]) + '</div></div>'; }).join('');
+    await loadEducationAnalytics();
+  }
+
+  // Real analytics computed from actual records — no fabricated numbers.
+  // Completion rate (eligible/enrolled), quiz pass rate (attempts meeting each
+  // quiz's own pass_percent), and the most-enrolled course.
+  async function loadEducationAnalytics() {
+    var grid = $id('eduAnalytics');
+    if (!grid) return;
+    var res = await Promise.all([
+      sb.from('enrollments').select('module_id'),
+      sb.from('course_completions').select('is_eligible_for_certificate'),
+      sb.from('quiz_attempts').select('quiz_id, score, total'),
+      sb.from('quizzes').select('id, pass_percent'),
+      sb.from('modules').select('id, title, code')
+    ]);
+    if (res.some(function (r) { return r.error; })) { grid.innerHTML = '<p class="empty">Could not load analytics.</p>'; return; }
+    var enrollments = res[0].data || [], completions = res[1].data || [], attempts = res[2].data || [], quizzes = res[3].data || [], modules = res[4].data || [];
+
+    var completionRate = enrollments.length ? Math.round((completions.filter(function (c) { return c.is_eligible_for_certificate; }).length / enrollments.length) * 100) + '%' : '—';
+
+    var passMarkByQuiz = {}; quizzes.forEach(function (q) { passMarkByQuiz[q.id] = q.pass_percent == null ? 50 : q.pass_percent; });
+    var scored = attempts.filter(function (a) { return a.total; });
+    var passed = scored.filter(function (a) { return (a.score / a.total) * 100 >= (passMarkByQuiz[a.quiz_id] == null ? 50 : passMarkByQuiz[a.quiz_id]); });
+    var passRate = scored.length ? Math.round((passed.length / scored.length) * 100) + '%' : '—';
+
+    var counts = {}; enrollments.forEach(function (e) { if (e.module_id) counts[e.module_id] = (counts[e.module_id] || 0) + 1; });
+    var topId = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; })[0];
+    var topModule = topId ? modules.find(function (m) { return m.id === topId; }) : null;
+    var topLabel = topModule ? (topModule.title || topModule.code) + ' (' + counts[topId] + ')' : '—';
+
+    var cards = [
+      ['Completion rate', completionRate],
+      ['Quiz pass rate', passRate],
+      ['Most-enrolled course', topLabel]
+    ];
+    grid.innerHTML = cards.map(function (c) { return '<div class="stat-card"><div class="label">' + c[0] + '</div><div class="value">' + escapeHtml(c[1]) + '</div></div>'; }).join('');
   }
 
   function showAdminView(view) {
-    var panels = ['dashboardPanel','studentsPanel','adminsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','orgSettingsPanel','brandingLogoPanel','brandingTypePanel','contactInfoPanel','seoSettingsPanel','systemSettingsPanel','disclaimersPanel','homepageSectionsPanel','navigationPanel','certTemplatesPanel','mediaLibraryPanel','certIssuancesPanel','courseBuilderPanel','quizBuilderPanel','enrollmentsPanel','seoOverridesPanel','notificationsPanel','auditLogPanel'];
+    var panels = ['dashboardPanel','studentsPanel','adminsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','orgSettingsPanel','brandingLogoPanel','brandingTypePanel','contactInfoPanel','seoSettingsPanel','systemSettingsPanel','disclaimersPanel','homepageSectionsPanel','navigationPanel','certTemplatesPanel','mediaLibraryPanel','certIssuancesPanel','courseBuilderPanel','quizBuilderPanel','quizResultsPanel','eduSearchPanel','enrollmentsPanel','seoOverridesPanel','notificationsPanel','auditLogPanel'];
     panels.forEach(function(id){ var el=document.getElementById(id); if(el){ el.hidden=true; el.classList.remove('is-active'); }});
     document.querySelectorAll('.admin-nav [data-table]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-table')===view); });
     document.getElementById('adminApp').classList.remove('nav-open');
@@ -6340,6 +6580,8 @@ window.ramdaniAuth = {
     if(view==='__medialibrary') { activate('mediaLibraryPanel','Media library'); loadMediaLibrary(); return; }
     if(view==='__coursebuilder') { activate('courseBuilderPanel','Course builder'); loadCourseBuilder(); return; }
     if(view==='__quizbuilder') { activate('quizBuilderPanel','Quiz builder'); loadQuizBuilder(); return; }
+    if(view==='__quizresults') { activate('quizResultsPanel','Assessment results'); loadQuizResults(); return; }
+    if(view==='__edusearch') { activate('eduSearchPanel','Content search'); return; }
     if(view==='__enrollments') { activate('enrollmentsPanel','Enrollments & progress'); loadEnrollments(); return; }
     if(view==='__certissuances') { activate('certIssuancesPanel','Certificate issuances'); loadCertIssuances(); return; }
     if(view==='__seooverrides') { activate('seoOverridesPanel','SEO overrides'); populateSeoOverrideEntitySelect(); loadSeoOverrideRecords().then(loadSeoOverrideForRecord); loadSeoOverridesList(); return; }
@@ -6411,6 +6653,11 @@ window.ramdaniAuth = {
     var res=await sb.from(name).select('*').order('updated_at',{ascending:false});
     currentRows=res.data||[];
     renderContentRows();
+    if (esEditId && esEditTable === name) {
+      var row = currentRows.find(function (r) { return r.id === esEditId; });
+      esEditId = null; esEditTable = null;
+      if (row) fillForm(row);
+    }
   }
 
   function renderContentRows(){
