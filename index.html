@@ -1189,8 +1189,7 @@ html[data-theme='dark'] .ramdani-auth-page{
         </details>
         <details class="admin-nav-group" open>
           <summary class="admin-nav-group-title">Branding</summary>
-          <button type="button" data-table="__orgsettings">Organization settings</button>
-          <button type="button" data-table="__brandinglogo">Logo &amp; colors</button>
+          <button type="button" data-table="__brandinglogo">Branding</button>
           <button type="button" data-table="__brandingtype">Typography</button>
           <button type="button" data-table="__contactinfo">Contact info</button>
           <button type="button" data-table="__certtemplates">Certificate templates</button>
@@ -1345,33 +1344,9 @@ html[data-theme='dark'] .ramdani-auth-page{
           <div id="applicationsPanel" class="admin-panel" hidden><div class="admin-section-head"><div><h2>Internship applications</h2><p class="note">Public application submissions. Status changes are staff-only.</p></div></div><div class="table-wrap"><table class="data"><thead><tr><th>Listing</th><th>Name</th><th>Email</th><th>Education</th><th>Status</th><th>Internal notes</th></tr></thead><tbody id="internAppBody"></tbody></table></div></div>
           <div id="joinrequestsPanel" class="admin-panel" hidden><div class="admin-section-head"><div><h2>Society / chapter requests</h2><p class="note">Public join-form inquiries, not memberships.</p></div></div><div class="table-wrap"><table class="data"><thead><tr><th>Kind</th><th>Listing</th><th>Name</th><th>Email</th><th>Message</th></tr></thead><tbody id="joinReqBody"></tbody></table></div></div>
 
-          <div id="orgSettingsPanel" class="admin-panel" hidden>
-            <div class="admin-section-head"><div><h2>Organization settings</h2><p class="note">Identity fields shown on the public site (About, footer, structured data). Edit and save below.</p></div></div>
-            <form id="orgSettingsForm" class="form admin-form">
-              <label><span>Organization name</span><input name="org_name" /></label>
-              <label><span>Legal / business name</span><input name="legal_name" /></label>
-              <label><span>Short name</span><input name="short_name" /></label>
-              <label><span>Established year</span><input name="established_year" type="number" /></label>
-              <label><span>Organization type</span><input name="org_type" placeholder="Law firm / Legal education organization" /></label>
-              <label class="field-full"><span>Tagline</span><input name="tagline" placeholder="Law. Strategy. Results." /></label>
-              <label class="field-full"><span>Description</span><textarea name="description" rows="3"></textarea></label>
-              <label class="field-full"><span>About text</span><textarea name="about_text" rows="5"></textarea></label>
-              <label class="field-full"><span>Mission</span><textarea name="mission" rows="3"></textarea></label>
-              <label class="field-full"><span>Vision</span><textarea name="vision" rows="3"></textarea></label>
-              <label class="field-full"><span>Values (comma-separated)</span><input name="values_csv" placeholder="Accuracy, Confidentiality, Integrity" /></label>
-              <label><span>Founder name</span><input name="founder_name" /></label>
-              <label><span>Founder title</span><input name="founder_title" /></label>
-              <label class="field-full"><span>Founder message</span><textarea name="founder_message" rows="4"></textarea></label>
-              <label class="field-full"><span>Founder portrait URL</span><input name="founder_portrait_url" /></label>
-              <label class="field-full"><span>Founder signature URL</span><input name="founder_signature_url" /></label>
-              <label class="field-full"><span>About image URL</span><input name="about_image_url" /></label>
-              <label class="field-full"><span>Vision image URL</span><input name="vision_image_url" /></label>
-              <div class="form-actions"><button class="btn btn-primary" type="submit">Save changes</button><p id="orgSettingsNote" class="form-status"></p></div>
-            </form>
-          </div>
-
           <div id="brandingLogoPanel" class="admin-panel" hidden>
-            <div class="admin-section-head"><div><h2>Logo &amp; colors</h2><p class="note">Logo URLs and brand colors. Publish to make this the live brand shown on the public site.</p></div></div>
+            <div class="admin-section-head"><div><h2>Branding</h2><p class="note">Everything about how the firm's identity appears on the public site — logo, official seal, homepage hero image, brand colors, and the About / Vision / Founder content — in one place. Publish to make this the live brand shown on the public site.</p></div></div>
+            <h3 style="margin:0 0 .5rem">Logo &amp; official seal</h3>
             <form id="brandingLogoForm" class="form admin-form">
               <label><span>Status</span><select name="status"><option value="draft">Draft</option><option value="published">Published</option></select></label>
               <label class="field-full asset-field"><span>Primary logo</span>
@@ -1446,6 +1421,19 @@ html[data-theme='dark'] .ramdani-auth-page{
                   <p class="form-status asset-status" id="status_education_logo_url"></p>
                 </div>
               </label>
+              <label class="asset-field"><span>Official seal / stamp</span>
+                <div class="asset-upload">
+                  <div class="asset-preview" id="preview_official_seal_url"><img id="img_official_seal_url" alt="" hidden /><span class="asset-empty" id="empty_official_seal_url">No file uploaded</span></div>
+                  <input type="hidden" name="official_seal_url" />
+                  <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" class="asset-file-input" data-target="official_seal_url" />
+                  <div class="asset-actions"><button type="button" class="btn btn-sm asset-remove-btn" data-target="official_seal_url">Remove</button></div>
+                  <p class="form-status asset-status" id="status_official_seal_url"></p>
+                  <p class="note" style="margin-top:.3rem">Note: this needs one new column in Supabase — see the note below the form.</p>
+                </div>
+              </label>
+              <p class="note" style="grid-column:1/-1">Official seal needs one new column in Supabase — see the setup note at the bottom of this panel. Every other field above already saves normally.</p>
+
+              <h3 style="grid-column:1/-1;margin:1.5rem 0 0">Brand colors</h3>
               <label><span>Primary color</span><input name="color_primary" type="color" /></label>
               <label><span>Secondary color</span><input name="color_secondary" type="color" /></label>
               <label><span>Accent color</span><input name="color_accent" type="color" /></label>
@@ -1457,9 +1445,83 @@ html[data-theme='dark'] .ramdani-auth-page{
               <label><span>Success color</span><input name="color_success" type="color" /></label>
               <label><span>Warning color</span><input name="color_warning" type="color" /></label>
               <label><span>Error color</span><input name="color_error" type="color" /></label>
-              <div class="form-actions"><button class="btn btn-primary" type="submit">Save changes</button><button class="btn" id="previewBrandColorsBtn" type="button">Preview colors</button><button class="btn" id="resetBrandColorsPreviewBtn" type="button" hidden>Reset preview</button><p id="brandingLogoNote" class="form-status"></p></div>
-              <p class="note">Preview applies the colors above to this admin panel only, in your browser, until you reload the page or click Save changes. It does not affect the public site or other staff until saved.</p>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Save logo, seal &amp; colors</button><button class="btn" id="previewBrandColorsBtn" type="button">Preview colors</button><button class="btn" id="resetBrandColorsPreviewBtn" type="button" hidden>Reset preview</button><p id="brandingLogoNote" class="form-status"></p></div>
+              <p class="note" style="grid-column:1/-1">Preview applies the colors above to this admin panel only, in your browser, until you reload the page or click Save changes. It does not affect the public site or other staff until saved.</p>
             </form>
+
+            <h3 style="margin:2rem 0 .5rem">Homepage hero image</h3>
+            <p class="note">The large image shown on the right side of the homepage banner. Upload a large, high-quality image (landscape works best) — it publishes immediately, no separate save button needed.</p>
+            <div id="heroImageForm" class="form admin-form">
+              <label class="field-full asset-field"><span>Hero image</span>
+                <div class="asset-upload">
+                  <div class="asset-preview" id="preview_heroBrandImage"><img id="img_heroBrandImage" alt="" hidden /><span class="asset-empty" id="empty_heroBrandImage">No file uploaded</span></div>
+                  <input type="file" id="heroBrandFileInput" accept="image/png,image/jpeg,image/webp" class="asset-file-input" />
+                  <div class="asset-actions"><button type="button" class="btn btn-sm" id="heroBrandRemoveBtn">Remove</button></div>
+                  <p class="form-status asset-status" id="status_heroBrandImage"></p>
+                </div>
+              </label>
+            </div>
+
+            <h3 style="margin:2rem 0 .5rem">About, vision &amp; founder</h3>
+            <p class="note">Text and images shown on the public About page — organization identity, mission/vision, and the founder's message and portrait.</p>
+            <form id="orgSettingsForm" class="form admin-form">
+              <label><span>Organization name</span><input name="org_name" /></label>
+              <label><span>Legal / business name</span><input name="legal_name" /></label>
+              <label><span>Short name</span><input name="short_name" /></label>
+              <label><span>Established year</span><input name="established_year" type="number" /></label>
+              <label><span>Organization type</span><input name="org_type" placeholder="Law firm / Legal education organization" /></label>
+              <label class="field-full"><span>Tagline</span><input name="tagline" placeholder="Law. Strategy. Results." /></label>
+              <label class="field-full"><span>Description</span><textarea name="description" rows="3"></textarea></label>
+              <label class="field-full"><span>About text</span><textarea name="about_text" rows="5"></textarea></label>
+              <label class="field-full asset-field"><span>About image</span>
+                <div class="asset-upload">
+                  <div class="asset-preview" id="preview_about_image_url"><img id="img_about_image_url" alt="" hidden /><span class="asset-empty" id="empty_about_image_url">No file uploaded</span></div>
+                  <input type="hidden" name="about_image_url" />
+                  <input type="file" accept="image/png,image/jpeg,image/webp" class="asset-file-input" data-target="about_image_url" />
+                  <div class="asset-actions"><button type="button" class="btn btn-sm asset-remove-btn" data-target="about_image_url">Remove</button></div>
+                  <p class="form-status asset-status" id="status_about_image_url"></p>
+                </div>
+              </label>
+              <label class="field-full"><span>Mission</span><textarea name="mission" rows="3"></textarea></label>
+              <label class="field-full"><span>Vision</span><textarea name="vision" rows="3"></textarea></label>
+              <label class="field-full asset-field"><span>Vision image</span>
+                <div class="asset-upload">
+                  <div class="asset-preview" id="preview_vision_image_url"><img id="img_vision_image_url" alt="" hidden /><span class="asset-empty" id="empty_vision_image_url">No file uploaded</span></div>
+                  <input type="hidden" name="vision_image_url" />
+                  <input type="file" accept="image/png,image/jpeg,image/webp" class="asset-file-input" data-target="vision_image_url" />
+                  <div class="asset-actions"><button type="button" class="btn btn-sm asset-remove-btn" data-target="vision_image_url">Remove</button></div>
+                  <p class="form-status asset-status" id="status_vision_image_url"></p>
+                </div>
+              </label>
+              <label class="field-full"><span>Values (comma-separated)</span><input name="values_csv" placeholder="Accuracy, Confidentiality, Integrity" /></label>
+              <label><span>Founder name</span><input name="founder_name" /></label>
+              <label><span>Founder title</span><input name="founder_title" /></label>
+              <label class="field-full"><span>Founder message</span><textarea name="founder_message" rows="4"></textarea></label>
+              <label class="field-full asset-field"><span>Founder portrait</span>
+                <div class="asset-upload">
+                  <div class="asset-preview" id="preview_founder_portrait_url"><img id="img_founder_portrait_url" alt="" hidden /><span class="asset-empty" id="empty_founder_portrait_url">No file uploaded</span></div>
+                  <input type="hidden" name="founder_portrait_url" />
+                  <input type="file" accept="image/png,image/jpeg,image/webp" class="asset-file-input" data-target="founder_portrait_url" />
+                  <div class="asset-actions"><button type="button" class="btn btn-sm asset-remove-btn" data-target="founder_portrait_url">Remove</button></div>
+                  <p class="form-status asset-status" id="status_founder_portrait_url"></p>
+                </div>
+              </label>
+              <label class="field-full asset-field"><span>Founder signature</span>
+                <div class="asset-upload">
+                  <div class="asset-preview" id="preview_founder_signature_url"><img id="img_founder_signature_url" alt="" hidden /><span class="asset-empty" id="empty_founder_signature_url">No file uploaded</span></div>
+                  <input type="hidden" name="founder_signature_url" />
+                  <input type="file" accept="image/png,image/jpeg,image/webp" class="asset-file-input" data-target="founder_signature_url" />
+                  <div class="asset-actions"><button type="button" class="btn btn-sm asset-remove-btn" data-target="founder_signature_url">Remove</button></div>
+                  <p class="form-status asset-status" id="status_founder_signature_url"></p>
+                </div>
+              </label>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Save about, vision &amp; founder</button><p id="orgSettingsNote" class="form-status"></p></div>
+            </form>
+
+            <p class="note" style="margin-top:2rem;border-inline-start:3px solid var(--gold);padding-inline-start:.75rem">
+              <strong>One-time Supabase setup needed:</strong> the "Official seal" field above needs a new column. Run this once in the Supabase SQL editor:<br/>
+              <code>ALTER TABLE branding_settings ADD COLUMN IF NOT EXISTS official_seal_url text;</code>
+            </p>
           </div>
 
           <div id="brandingTypePanel" class="admin-panel" hidden>
@@ -7638,6 +7700,7 @@ window.ramdaniAuth = {
     document.getElementById('createForm').addEventListener('submit', saveRow);
     document.getElementById('orgSettingsForm').addEventListener('submit', saveOrgSettings);
     document.getElementById('brandingLogoForm').addEventListener('submit', saveBrandingLogo);
+    initHeroBrandingUpload();
     document.getElementById('previewBrandColorsBtn').addEventListener('click', function () {
       var form = document.getElementById('brandingLogoForm');
       var fd = new FormData(form);
@@ -7850,10 +7913,14 @@ window.ramdaniAuth = {
         if (el) el.value = row[k] == null ? '' : row[k];
       });
       if (Array.isArray(row.values)) form.querySelector('[name="values_csv"]').value = row.values.join(', ');
+      ORG_ASSET_FIELDS.forEach(function (f) { setAssetPreview('orgSettingsForm', f, row[f] || ''); });
       note.textContent = '';
     } else {
+      ORG_ASSET_FIELDS.forEach(function (f) { setAssetPreview('orgSettingsForm', f, ''); });
       note.textContent = 'No settings saved yet — fill in the form and save to create the first record.';
     }
+    initAssetUploads('orgSettingsForm');
+    loadHeroBrandingImage();
   }
 
   async function saveOrgSettings(e) {
@@ -7902,12 +7969,13 @@ window.ramdaniAuth = {
   var brandingId = null;
   var brandingRow = null;
 
-  var ASSET_FIELDS = ['logo_primary_url','logo_light_url','logo_dark_url','logo_mobile_url','favicon_url','social_share_image_url','certificate_logo_url','education_logo_url'];
+  var ASSET_FIELDS = ['logo_primary_url','logo_light_url','logo_dark_url','logo_mobile_url','favicon_url','social_share_image_url','certificate_logo_url','education_logo_url','official_seal_url'];
+  var ORG_ASSET_FIELDS = ['about_image_url','vision_image_url','founder_portrait_url','founder_signature_url'];
 
-  function setAssetPreview(fieldName, url) {
+  function setAssetPreview(formId, fieldName, url) {
     var img = document.getElementById('img_' + fieldName);
     var empty = document.getElementById('empty_' + fieldName);
-    var hidden = document.querySelector('#brandingLogoForm [name="' + fieldName + '"]');
+    var hidden = document.querySelector('#' + formId + ' [name="' + fieldName + '"]');
     if (!img || !empty) return;
     if (url) {
       img.src = url;
@@ -7931,7 +7999,7 @@ window.ramdaniAuth = {
     return url.slice(idx + marker.length);
   }
 
-  async function uploadBrandingAsset(fieldName, file) {
+  async function uploadBrandingAsset(formId, fieldName, file) {
     var status = document.getElementById('status_' + fieldName);
     if (!file) return;
     var maxBytes = 10 * 1024 * 1024;
@@ -7963,16 +8031,16 @@ window.ramdaniAuth = {
       status.textContent = 'Uploaded, but could not resolve a public URL.';
       return;
     }
-    setAssetPreview(fieldName, publicUrl);
+    setAssetPreview(formId, fieldName, publicUrl);
     status.className = 'form-status asset-status ok';
     status.textContent = 'Uploaded. Click "Save changes" to publish this to the record.';
   }
 
-  async function removeBrandingAsset(fieldName) {
-    var hidden = document.querySelector('#brandingLogoForm [name="' + fieldName + '"]');
+  async function removeBrandingAsset(formId, fieldName) {
+    var hidden = document.querySelector('#' + formId + ' [name="' + fieldName + '"]');
     var status = document.getElementById('status_' + fieldName);
     var oldUrl = hidden ? hidden.value : null;
-    setAssetPreview(fieldName, '');
+    setAssetPreview(formId, fieldName, '');
     if (status) { status.className = 'form-status asset-status'; status.textContent = 'Removed. Click "Save changes" to apply.'; }
     var path = assetStoragePathFromUrl(oldUrl);
     if (path) {
@@ -7988,12 +8056,12 @@ window.ramdaniAuth = {
       input.addEventListener('change', function () {
         var field = input.getAttribute('data-target');
         var file = input.files && input.files[0];
-        if (file) uploadBrandingAsset(field, file);
+        if (file) uploadBrandingAsset(formId, field, file);
         input.value = '';
       });
     });
     form.querySelectorAll('.asset-remove-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () { removeBrandingAsset(btn.getAttribute('data-target')); });
+      btn.addEventListener('click', function () { removeBrandingAsset(formId, btn.getAttribute('data-target')); });
     });
   }
 
@@ -8475,7 +8543,7 @@ window.ramdaniAuth = {
       if (el) el.value = brandingRow[k] == null ? '' : brandingRow[k];
     });
     if (formId === 'brandingLogoForm') {
-      ASSET_FIELDS.forEach(function (f) { setAssetPreview(f, brandingRow[f] || ''); });
+      ASSET_FIELDS.forEach(function (f) { setAssetPreview(formId, f, brandingRow[f] || ''); });
     }
   }
 
@@ -8494,7 +8562,7 @@ window.ramdaniAuth = {
       fillBrandingForm(formId);
       note.textContent = '';
     } else if (formId === 'brandingLogoForm') {
-      ASSET_FIELDS.forEach(function (f) { setAssetPreview(f, ''); });
+      ASSET_FIELDS.forEach(function (f) { setAssetPreview(formId, f, ''); });
       note.textContent = 'No branding saved yet — fill in the form and save to create the first record.';
     } else {
       note.textContent = 'No branding saved yet — fill in the form and save to create the first record.';
@@ -8532,9 +8600,82 @@ window.ramdaniAuth = {
     note.textContent = 'Saved.';
   }
 
+  // ---- Homepage hero image (reuses homepage_sections.section_key='hero' + site-assets — no new table) ----
+  var HERO_KEY = 'hero';
+  var HERO_FIELD = 'heroBrandImage';
+  var heroBrandRow = null;
+
+  async function loadHeroBrandingImage() {
+    var status = document.getElementById('status_' + HERO_FIELD);
+    if (window.sb) {
+      var res = await sb.from('homepage_sections').select('*').eq('section_key', HERO_KEY).maybeSingle();
+      if (!res.error) {
+        heroBrandRow = res.data;
+        setAssetPreview('heroImageForm', HERO_FIELD, (heroBrandRow && heroBrandRow.image_url) || '');
+        if (status) status.textContent = '';
+        return;
+      }
+    }
+    if (status) { status.className = 'form-status asset-status err'; status.textContent = 'Could not load — has the homepage_sections table been created yet?'; }
+  }
+
+  async function uploadHeroBrandingImage(file) {
+    var status = document.getElementById('status_' + HERO_FIELD);
+    if (!file) return;
+    var maxBytes = 10 * 1024 * 1024;
+    var allowed = ['image/png', 'image/jpeg', 'image/webp'];
+    if (file.size > maxBytes) { status.className = 'form-status asset-status err'; status.textContent = 'File is too large (max 10 MB).'; return; }
+    if (allowed.indexOf(file.type) === -1) { status.className = 'form-status asset-status err'; status.textContent = 'Unsupported file type. Use PNG, JPEG or WebP.'; return; }
+    status.className = 'form-status asset-status uploading';
+    status.textContent = 'Uploading…';
+    var ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+    var path = 'branding/hero-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.' + ext;
+    var up = await sb.storage.from('site-assets').upload(path, file, { upsert: false, contentType: file.type });
+    if (up.error) { status.className = 'form-status asset-status err'; status.textContent = 'Upload failed: ' + up.error.message; return; }
+    var pub = sb.storage.from('site-assets').getPublicUrl(path);
+    var publicUrl = pub && pub.data ? pub.data.publicUrl : null;
+    if (!publicUrl) { status.className = 'form-status asset-status err'; status.textContent = 'Uploaded, but could not resolve a public URL.'; return; }
+    var payload = { section_key: HERO_KEY, image_url: publicUrl, is_enabled: true };
+    var res = heroBrandRow
+      ? await sb.from('homepage_sections').update(payload).eq('id', heroBrandRow.id).select().single()
+      : await sb.from('homepage_sections').upsert(Object.assign({ sort_order: 0 }, payload), { onConflict: 'section_key' }).select().single();
+    if (res.error) { status.className = 'form-status asset-status err'; status.textContent = 'Saved file, but could not update the record: ' + res.error.message; return; }
+    heroBrandRow = res.data;
+    setAssetPreview('heroImageForm', HERO_FIELD, publicUrl);
+    status.className = 'form-status asset-status ok';
+    status.textContent = 'Uploaded and published to the homepage.';
+  }
+
+  async function removeHeroBrandingImage() {
+    var status = document.getElementById('status_' + HERO_FIELD);
+    var oldUrl = heroBrandRow && heroBrandRow.image_url;
+    setAssetPreview('heroImageForm', HERO_FIELD, '');
+    if (heroBrandRow) {
+      var res = await sb.from('homepage_sections').update({ image_url: null }).eq('id', heroBrandRow.id).select().single();
+      if (!res.error) heroBrandRow = res.data;
+    }
+    if (status) { status.className = 'form-status asset-status'; status.textContent = 'Removed from the homepage.'; }
+    var path = assetStoragePathFromUrl(oldUrl);
+    if (path) { try { await sb.storage.from('site-assets').remove([path]); } catch (e) {} }
+  }
+
+  function initHeroBrandingUpload() {
+    var form = document.getElementById('heroImageForm');
+    if (!form || form.dataset.assetBound === '1') return;
+    form.dataset.assetBound = '1';
+    var input = document.getElementById('heroBrandFileInput');
+    if (input) input.addEventListener('change', function () {
+      var file = input.files && input.files[0];
+      if (file) uploadHeroBrandingImage(file);
+      input.value = '';
+    });
+    var removeBtn = document.getElementById('heroBrandRemoveBtn');
+    if (removeBtn) removeBtn.addEventListener('click', removeHeroBrandingImage);
+  }
+
   async function saveBrandingLogo(e) {
     await saveBranding(e, ['status','logo_primary_url','logo_light_url','logo_dark_url','logo_mobile_url',
-      'favicon_url','social_share_image_url','certificate_logo_url','education_logo_url',
+      'favicon_url','social_share_image_url','certificate_logo_url','education_logo_url','official_seal_url',
       'color_primary','color_secondary','color_accent','color_background','color_surface',
       'color_text','color_text_muted','color_border','color_success','color_warning','color_error']);
     var note = document.getElementById('brandingLogoNote');
@@ -12012,7 +12153,7 @@ window.ramdaniAuth = {
   }
 
   function showAdminView(view) {
-    var panels = ['dashboardPanel','studentsPanel','adminsPanel','staffAccountsPanel','lawyerAppsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','orgSettingsPanel','brandingLogoPanel','brandingTypePanel','contactInfoPanel','seoSettingsPanel','systemSettingsPanel','disclaimersPanel','homepageSectionsPanel','authMediaPanel','navigationPanel','certTemplatesPanel','mediaLibraryPanel','certIssuancesPanel','courseBuilderPanel','quizBuilderPanel','quizResultsPanel','eduSearchPanel','enrollmentsPanel','seoOverridesPanel','notificationsPanel','auditLogPanel','opsDashPanel','clientsPanel','legalMattersPanel','myTasksPanel','legalCalendarPanel','legalDocsPanel','legalCommsPanel','legalReportsPanel','legalSearchPanel','organizationsPanel','membershipsPanel','membersPanel','memberProfilePanel','memberCardsPanel','studentCardsPanel','eventsPanel','eventRegsPanel','eventGuestsPanel','docsCenterPanel'];
+    var panels = ['dashboardPanel','studentsPanel','adminsPanel','staffAccountsPanel','lawyerAppsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','brandingLogoPanel','brandingTypePanel','contactInfoPanel','seoSettingsPanel','systemSettingsPanel','disclaimersPanel','homepageSectionsPanel','authMediaPanel','navigationPanel','certTemplatesPanel','mediaLibraryPanel','certIssuancesPanel','courseBuilderPanel','quizBuilderPanel','quizResultsPanel','eduSearchPanel','enrollmentsPanel','seoOverridesPanel','notificationsPanel','auditLogPanel','opsDashPanel','clientsPanel','legalMattersPanel','myTasksPanel','legalCalendarPanel','legalDocsPanel','legalCommsPanel','legalReportsPanel','legalSearchPanel','organizationsPanel','membershipsPanel','membersPanel','memberProfilePanel','memberCardsPanel','studentCardsPanel','eventsPanel','eventRegsPanel','eventGuestsPanel','docsCenterPanel'];
     panels.forEach(function(id){ var el=document.getElementById(id); if(el){ el.hidden=true; el.classList.remove('is-active'); }});
     document.querySelectorAll('.admin-nav [data-table]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-table')===view); });
     document.getElementById('adminApp').classList.remove('nav-open');
@@ -12024,8 +12165,7 @@ window.ramdaniAuth = {
     if(view==='__inquiries') { activate('inquiriesPanel','Inquiries'); loadInquiries(); return; }
     if(view==='__applications') { activate('applicationsPanel','Internship applications'); loadInternshipApps(); return; }
     if(view==='__joinrequests') { activate('joinrequestsPanel','Society / chapter requests'); loadJoinRequests(); return; }
-    if(view==='__orgsettings') { activate('orgSettingsPanel','Organization settings'); loadOrgSettings(); return; }
-    if(view==='__brandinglogo') { activate('brandingLogoPanel','Logo & colors'); loadBranding('brandingLogoForm','brandingLogoNote'); return; }
+    if(view==='__orgsettings' || view==='__brandinglogo') { activate('brandingLogoPanel','Branding'); loadBranding('brandingLogoForm','brandingLogoNote'); loadOrgSettings(); return; }
     if(view==='__brandingtype') { activate('brandingTypePanel','Typography'); loadBranding('brandingTypeForm','brandingTypeNote'); return; }
     if(view==='__contactinfo') { activate('contactInfoPanel','Contact info'); loadContactInfo(); return; }
     if(view==='__seosettings') { activate('seoSettingsPanel','SEO settings'); loadSeoSettings(); return; }
