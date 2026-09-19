@@ -1946,10 +1946,10 @@ if (window.ramdaniEducation) ramdaniEducation.renderCertificates();
       <div id="list" class="grid"></div>
     </div></section>
   
-    <dialog class="inquiry-dialog" id="joinDialog">
-      <form class="form" id="joinForm">
-        <h2 id="joinTitle">Join inquiry</h2>
-        <p class="note" id="joinHint">Staff will reply. This does not create membership.</p>
+    <dialog class="inquiry-dialog" id="chapterJoinDialog">
+      <form class="form" id="chapterJoinForm">
+        <h2 id="chapterJoinTitle">Join inquiry</h2>
+        <p class="note" id="chapterJoinHint">Staff will reply. This does not create membership.</p>
         <input type="hidden" name="kind" value="chapter" />
         <input type="hidden" name="listing_slug" />
         <input type="hidden" name="cabinet_id" />
@@ -1960,7 +1960,7 @@ if (window.ramdaniEducation) ramdaniEducation.renderCertificates();
         <label>Message (optional)<textarea name="message" rows="4"></textarea></label>
         <div class="hero-actions">
           <button class="btn btn-primary" type="submit">Send inquiry</button>
-          <button class="btn" type="button" id="joinCancel">Cancel</button>
+          <button class="btn" type="button" id="chapterJoinCancel">Cancel</button>
         </div>
         <p class="form-status"></p>
       </form>
@@ -2267,10 +2267,10 @@ var rows = await ramdaniApi.listPublished('services', 'sort_order'); ramdaniUi.r
       <div id="list" class="grid"></div>
     </div></section>
   
-    <dialog class="inquiry-dialog" id="joinDialog">
-      <form class="form" id="joinForm">
-        <h2 id="joinTitle">Join inquiry</h2>
-        <p class="note" id="joinHint">Staff will reply. This does not create membership.</p>
+    <dialog class="inquiry-dialog" id="societyJoinDialog">
+      <form class="form" id="societyJoinForm">
+        <h2 id="societyJoinTitle">Join inquiry</h2>
+        <p class="note" id="societyJoinHint">Staff will reply. This does not create membership.</p>
         <input type="hidden" name="kind" value="society" />
         <input type="hidden" name="listing_slug" />
         <input type="hidden" name="cabinet_id" />
@@ -2281,7 +2281,7 @@ var rows = await ramdaniApi.listPublished('services', 'sort_order'); ramdaniUi.r
         <label>Message (optional)<textarea name="message" rows="4"></textarea></label>
         <div class="hero-actions">
           <button class="btn btn-primary" type="submit">Send inquiry</button>
-          <button class="btn" type="button" id="joinCancel">Cancel</button>
+          <button class="btn" type="button" id="societyJoinCancel">Cancel</button>
         </div>
         <p class="form-status"></p>
       </form>
@@ -4790,9 +4790,23 @@ window.ramdaniAuth = {
     return '';
   }
 
+  function joinRoot() {
+    return document.getElementById('viewRoot') || document;
+  }
+  function joinEls() {
+    var root = joinRoot();
+    return {
+      dialog: root.querySelector('dialog.inquiry-dialog'),
+      form: root.querySelector('dialog.inquiry-dialog form'),
+      title: root.querySelector('dialog.inquiry-dialog h2'),
+      hint: root.querySelector('dialog.inquiry-dialog .note'),
+      cancel: root.querySelector('dialog.inquiry-dialog [type="button"]')
+    };
+  }
   function bindJoinForm(kind) {
-    var form = document.getElementById('joinForm');
-    var dialog = document.getElementById('joinDialog');
+    var els = joinEls();
+    var form = els.form;
+    var dialog = els.dialog;
     if (!form || form.dataset.bound) return;
     form.dataset.bound = '1';
     form.addEventListener('submit', async function (e) {
@@ -4829,14 +4843,15 @@ window.ramdaniAuth = {
         setTimeout(function () { if (dialog && dialog.close) dialog.close(); }, 900);
       }
     });
-    var cancel = document.getElementById('joinCancel');
+    var cancel = els.cancel;
     if (cancel) cancel.addEventListener('click', function () { if (dialog && dialog.close) dialog.close(); });
   }
 
   function openJoin(kind, slug, title, extra) {
     extra = extra || {};
-    var dialog = document.getElementById('joinDialog');
-    var form = document.getElementById('joinForm');
+    var els = joinEls();
+    var dialog = els.dialog;
+    var form = els.form;
     if (!dialog || !form) return;
     form.querySelector('[name="kind"]').value = kind;
     form.querySelector('[name="listing_slug"]').value = slug || '';
@@ -4844,9 +4859,9 @@ window.ramdaniAuth = {
     var seat = form.querySelector('[name="seat_no"]');
     if (cab) cab.value = extra.cabinet_id || '';
     if (seat) seat.value = extra.seat_no || '';
-    var h = document.getElementById('joinTitle');
+    var h = els.title;
     if (h) h.textContent = extra.seat_no ? ('Seat ' + extra.seat_no + ' — ' + (title || kind)) : ('Inquiry — ' + (title || kind));
-    var hint = document.getElementById('joinHint');
+    var hint = els.hint;
     if (hint) hint.textContent = extra.seat_no
       ? 'Inquiry for one published seat (1–10). Staff review it. This does not enrol you or issue a student card.'
       : 'Staff will reply. This does not create membership, a chapter, or a lawyer–client relationship.';
