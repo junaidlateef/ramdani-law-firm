@@ -1661,6 +1661,7 @@ html[dir="rtl"] .lead {
               <label><span>Event</span><select name="event_id"><option value="">None</option></select></label>
               <label><span>Membership (optional)</span><select name="membership_id"><option value="">None</option></select></label>
               <label><span>Initial status</span><select name="status"><option value="draft">Draft (not issued yet)</option><option value="approved">Approved (not issued yet)</option><option value="issued" selected>Issued</option></select></label>
+              <label class="field-full"><span>Attach signed file (optional PDF/scan)</span><input name="file" type="file" accept=".pdf,image/*" /></label>
               <div class="form-actions"><button class="btn btn-primary" type="submit">Save</button><p id="issueDocNote" class="form-status"></p></div>
             </form>
             <div class="table-wrap"><table class="data"><thead><tr><th>Doc #</th><th>Recipient</th><th>Category</th><th>Status</th><th>Verify</th><th></th></tr></thead><tbody id="issuedDocBody"></tbody></table></div>
@@ -8959,8 +8960,18 @@ window.ramdaniAuth = {
       if (x.status === 'draft') actions += '<button type="button" class="btn btn-sm" data-doc-approve="' + x.id + '">Approve</button> ';
       if (x.status === 'approved') actions += '<button type="button" class="btn btn-sm" data-doc-issue="' + x.id + '">Issue</button> ';
       if (x.status === 'issued') actions += '<button type="button" class="btn btn-sm" data-doc-revoke="' + x.id + '">Revoke</button> ';
+      if (x.storage_path) actions += '<button type="button" class="btn btn-sm" data-doc-file="' + x.id + '">Download</button> ';
       return '<tr><td>' + escapeHtml(x.document_number || '') + '</td><td>' + escapeHtml(x.recipient_name) + '</td><td>' + escapeHtml(x.category) + '</td><td><span class="status-badge status-' + escapeHtml(x.status) + '">' + escapeHtml(x.status) + '</span></td><td><code>' + escapeHtml(x.verify_code || '') + '</code></td><td><div class="table-actions">' + actions + '</div></td></tr>';
     }).join('') || '<tr><td colspan="6">No issued documents.</td></tr>';
+    docCenterCache = d.data || [];
+  }
+  var docCenterCache = [];
+  async function downloadIssuedDocFile(id) {
+    var row = docCenterCache.find(function (x) { return x.id === id; });
+    if (!row || !row.storage_path) return;
+    var signed = await sb.storage.from('private-docs').createSignedUrl(row.storage_path, 300);
+    if (signed.error) return setNote('issueDocNote', signed.error.message);
+    window.open(signed.data.signedUrl, '_blank', 'noopener');
   }
   async function approveIssuedDoc(id) {
     var uid = (await ramdaniAuth.profile() || {}).id || null;
@@ -9041,6 +9052,15 @@ window.ramdaniAuth = {
       issued_at: chosenStatus === 'issued' ? new Date().toISOString() : null,
       issued_by: (await ramdaniAuth.profile() || {}).id || null
     };
+    var fileInput = f.elements.file;
+    var file = fileInput && fileInput.files && fileInput.files[0];
+    if (file) {
+      var storagePath = 'issued-documents/' + Date.now() + '-' + file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      var up = await sb.storage.from('private-docs').upload(storagePath, file, { upsert: false, contentType: file.type });
+      if (up.error) return setNote('issueDocNote', 'File upload failed: ' + up.error.message);
+      payload.storage_path = storagePath;
+      payload.file_name = file.name;
+    }
     var res = await sb.from('issued_documents').insert(payload);
     if (res.error) return setNote('issueDocNote', res.error.message);
     f.reset();
@@ -9123,6 +9143,7 @@ window.ramdaniAuth = {
       var ap = e.target.closest('[data-doc-approve]'); if (ap) return approveIssuedDoc(ap.getAttribute('data-doc-approve'));
       var is = e.target.closest('[data-doc-issue]'); if (is) return markIssuedDocIssued(is.getAttribute('data-doc-issue'));
       var rv = e.target.closest('[data-doc-revoke]'); if (rv) return revokeIssuedDoc(rv.getAttribute('data-doc-revoke'));
+      var dl = e.target.closest('[data-doc-file]'); if (dl) return downloadIssuedDocFile(dl.getAttribute('data-doc-file'));
     });
     var idf = $id('issueDocForm');
     if (idf && !idf.dataset.linked) {
