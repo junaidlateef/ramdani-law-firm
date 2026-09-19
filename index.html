@@ -572,6 +572,36 @@ html[dir="rtl"] .lead {
 #studentRoot .portal-kv dt,#memberRoot .portal-kv dt,#clientRoot .portal-kv dt{font-size:.7rem;letter-spacing:.04em;text-transform:uppercase;color:#5b6b7a;margin:0}
 #studentRoot .portal-kv dd,#memberRoot .portal-kv dd,#clientRoot .portal-kv dd{margin:.15rem 0 0;font-weight:600;color:#0B1F33}
 #studentRoot .portal-photo-form,#memberRoot .portal-photo-form{margin-top:.6rem;display:grid;gap:.4rem}
+/* Lawyer portal — same portal design language as student/member/client */
+#lawyerRoot{background:linear-gradient(180deg,#0B1F33 0 18rem,#eef3f7 18rem);min-height:100vh}
+#lawyerRoot>.wrap{max-width:64rem!important;padding:1.5rem 1rem 3rem}
+#lawyerRoot .portal-dash{width:100%;max-width:none;margin:0;background:transparent;border:0;box-shadow:none;padding:0;border-radius:0}
+#lawyerRoot .portal-hero{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:1rem;color:#f7f1e4;margin-bottom:1.25rem}
+#lawyerRoot .portal-hero h1{margin:.15rem 0 0;color:#fff;font-size:clamp(1.6rem,3vw,2.2rem)}
+#lawyerRoot .portal-hero .note{color:#d9c9a5}
+#lawyerRoot .portal-section{background:#fff;border:1px solid #d7dee6;border-radius:16px;padding:1.1rem 1.15rem;margin-bottom:1rem;box-shadow:0 10px 30px rgba(11,31,51,.06)}
+#lawyerRoot .portal-section h2{margin:0 0 .75rem;font-size:1.05rem;color:#0B1F33;border-bottom:2px solid #c9a227;padding-bottom:.4rem}
+#lawyerRoot .portal-identity{display:grid;grid-template-columns:9.5rem 1fr;gap:1.1rem;align-items:start}
+@media (max-width:640px){#lawyerRoot .portal-identity{grid-template-columns:1fr}}
+#lawyerRoot .portal-photo{width:9.5rem;height:9.5rem;border-radius:18px;object-fit:cover;background:#0B1F33;border:3px solid #c9a227;display:block}
+#lawyerRoot .portal-photo.is-empty{display:grid;place-items:center;color:#d9c9a5;font-size:.8rem;text-align:center;padding:.6rem}
+#lawyerRoot .portal-kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.55rem .9rem;margin:0}
+@media (max-width:640px){#lawyerRoot .portal-kv{grid-template-columns:1fr}}
+#lawyerRoot .portal-kv div{background:#f6f8fb;border-radius:10px;padding:.55rem .7rem}
+#lawyerRoot .portal-kv dt{font-size:.7rem;letter-spacing:.04em;text-transform:uppercase;color:#5b6b7a;margin:0}
+#lawyerRoot .portal-kv dd{margin:.15rem 0 0;font-weight:600;color:#0B1F33}
+#lawyerRoot .portal-photo-form{margin-top:.6rem;display:grid;gap:.4rem}
+#lawyerRoot .matter-card{border:1px solid #e2e8ef;border-radius:12px;padding:.8rem;margin-bottom:.7rem}
+#lawyerRoot .matter-card h3{margin:0 0 .25rem;font-size:1rem;color:#0B1F33}
+#lawyerRoot .matter-detail{display:none;margin-top:.7rem;border-top:1px dashed #d7dee6;padding-top:.7rem}
+#lawyerRoot .matter-detail.open{display:block}
+#lawyerRoot .matter-tabs{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.6rem}
+#lawyerRoot .matter-tabs button{border:1px solid #d7dee6;background:#f6f8fb;border-radius:999px;padding:.3rem .8rem;font-size:.8rem;cursor:pointer}
+#lawyerRoot .matter-tabs button.active{background:#0B1F33;color:#fff;border-color:#0B1F33}
+#lawyerRoot .matter-pane{display:none}
+#lawyerRoot .matter-pane.active{display:block}
+#lawyerRoot .mini-list{list-style:none;padding:0;margin:0}
+#lawyerRoot .mini-list li{padding:.4rem 0;border-bottom:1px solid #eef1f5;font-size:.9rem}
 .people-card{display:grid;grid-template-columns:5.5rem 1fr;gap:.9rem;align-items:start}
 .people-card img{width:5.5rem;height:5.5rem;border-radius:14px;object-fit:cover;background:#0B1F33;border:2px solid #c9a227}
 @media (max-width:640px){.people-card{grid-template-columns:1fr}}
@@ -591,7 +621,7 @@ html[dir="rtl"] .lead {
   <footer class="site-footer">
     <div class="wrap">
       <p>Dera Ghazi Khan, Pakistan</p>
-      <p class="note"><a href="/student/login">Student portal</a> · <a href="/member/login">Member portal</a> · <a href="/client/login">Client portal</a></p>
+      <p class="note"><a href="/student/login">Student portal</a> · <a href="/member/login">Member portal</a> · <a href="/client/login">Client portal</a> · <a href="/lawyer/login">Lawyer portal</a></p>
     </div>
   </footer>
   </div>
@@ -1965,6 +1995,127 @@ html[dir="rtl"] .lead {
     </div>
   </div>
 
+  <!-- LAWYER PORTAL: /lawyer/login|dashboard -->
+  <div id="lawyerRoot" hidden>
+    <div class="wrap">
+      <div id="lawyerLoginPanel" class="auth-box">
+        <h1>Lawyer portal</h1>
+        <form id="lawyerLoginForm" class="form">
+          <label>Email <input id="lawLoginEmail" type="email" required autocomplete="username" /></label>
+          <label>Password <input id="lawLoginPassword" type="password" required minlength="8" autocomplete="current-password" /></label>
+          <button class="btn btn-primary" type="submit">Sign in</button>
+        </form>
+        <p id="lawyerLoginStatus" class="form-status"></p>
+        <p class="note">Accounts are created by firm admin. Contact the office if you need access.</p>
+        <p class="note"><a href="/">Back to public site</a></p>
+      </div>
+
+      <div id="lawyerDashPanel" class="portal-dash" hidden>
+        <header class="portal-hero">
+          <div>
+            <p class="kicker">Lawyer portal</p>
+            <h1 id="lawWelcome">Welcome, Advocate</h1>
+            <p class="note" id="lawDashEmail"></p>
+          </div>
+          <button type="button" class="btn" id="lawyerSignOutBtn">Logout</button>
+        </header>
+
+        <section class="portal-section portal-identity" aria-labelledby="lawProfileHeading">
+          <div>
+            <img id="lawDashPhoto" class="portal-photo is-empty" alt="Lawyer photo" />
+            <form id="lawyerPhotoForm" class="portal-photo-form">
+              <label><span class="note">Upload your photo</span><input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required /></label>
+              <button class="btn btn-primary" type="submit">Save photo</button>
+            </form>
+            <p id="lawyerPhotoStatus" class="form-status"></p>
+          </div>
+          <div>
+            <h2 id="lawProfileHeading">Profile</h2>
+            <dl class="portal-kv">
+              <div><dt>Reference ID</dt><dd id="lawDashRefId">—</dd></div>
+              <div><dt>Status</dt><dd id="lawDashStatus">—</dd></div>
+              <div><dt>Phone</dt><dd id="lawDashPhone">—</dd></div>
+              <div><dt>Active matters</dt><dd id="lawDashMatterCount">—</dd></div>
+            </dl>
+          </div>
+        </section>
+
+        <section class="portal-section">
+          <h2>Update profile</h2>
+          <form id="lawyerProfileForm" class="form">
+            <label>Full name <input name="full_name" required /></label>
+            <label>Phone number <input name="phone" /></label>
+            <button class="btn btn-primary" type="submit">Save changes</button>
+          </form>
+          <p id="lawyerProfileStatus" class="form-status"></p>
+        </section>
+
+        <section class="portal-section">
+          <h2>Change password</h2>
+          <form id="lawyerPasswordForm" class="form">
+            <label>New password <input id="lawNewPassword" type="password" required minlength="8" autocomplete="new-password" /></label>
+            <label>Confirm new password <input id="lawNewPasswordConfirm" type="password" required minlength="8" autocomplete="new-password" /></label>
+            <button class="btn" type="submit">Update password</button>
+          </form>
+          <p id="lawyerPasswordStatus" class="form-status"></p>
+        </section>
+
+        <section class="portal-section">
+          <h2>Notifications</h2>
+          <div id="lawNotifications"></div>
+        </section>
+
+        <section class="portal-section">
+          <h2>Membership card</h2>
+          <p class="note">Only shown if a society/chapter membership is linked to this login.</p>
+          <div id="lawMemberCardBox"></div>
+        </section>
+
+        <section class="portal-section">
+          <h2>Certificates</h2>
+          <div id="lawCertificates" class="learning-grid"></div>
+        </section>
+
+        <section class="portal-section">
+          <h2>Documents</h2>
+          <div id="lawDocuments"></div>
+        </section>
+
+        <section class="portal-section">
+          <h2>Courses</h2>
+          <div id="lawCourses" class="learning-grid"></div>
+        </section>
+
+        <section class="portal-section">
+          <h2>Quizzes</h2>
+          <div id="lawQuizResults"></div>
+        </section>
+
+        <section class="portal-section">
+          <h2>My clients</h2>
+          <div id="lawClientsBox"></div>
+        </section>
+
+        <section class="portal-section">
+          <h2>My case files</h2>
+          <p class="note">Only matters where you are lead lawyer or an assigned team member.</p>
+          <form id="lawyerMatterFilterForm" class="form" style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:flex-end;margin-bottom:.8rem">
+            <label style="flex:1;min-width:10rem">Status <select id="lawMatterStatusFilter">
+              <option value="">All</option>
+              <option value="intake">Intake</option>
+              <option value="open">Open</option>
+              <option value="active">Active</option>
+              <option value="on_hold">On hold</option>
+              <option value="pending">Pending</option>
+              <option value="closed">Closed</option>
+            </select></label>
+          </form>
+          <div id="lawMattersBox"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- PUBLIC PAGES: pages/*.html inlined as RAMDANI_PAGES -->
 <script>
@@ -2524,6 +2675,7 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
     if (path === '/student') path = '/student/login';
     if (path === '/member') path = '/member/login';
     if (path === '/client') path = '/client/login';
+    if (path === '/lawyer') path = '/lawyer/login';
     return { path: path, search: search, raw: h };
   }
 
@@ -2574,6 +2726,7 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
     studentRoot.hidden = true;
     var mr = document.getElementById('memberRoot'); if (mr) mr.hidden = true;
     var cr = document.getElementById('clientRoot'); if (cr) cr.hidden = true;
+    var lr = document.getElementById('lawyerRoot'); if (lr) lr.hidden = true;
   }
 
   async function showPublic(path) {
@@ -2804,6 +2957,38 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
     if (window.ramdaniStudentBoot) window.ramdaniStudentBoot(path);
   }
 
+  async function showLawyerPortal(path) {
+    hideAllRoots();
+    var root = document.getElementById('lawyerRoot');
+    if (root) root.hidden = false;
+    document.title = 'Lawyer portal — Ramdani Law Firm';
+    window.scrollTo(0, 0);
+    await bootLawyerPortal(path);
+  }
+
+  async function bootLawyerPortal(path) {
+    var login = document.getElementById('lawyerLoginPanel');
+    var dash = document.getElementById('lawyerDashPanel');
+    function setSt(msg) { var el = document.getElementById('lawyerLoginStatus'); if (el) el.textContent = msg || ''; }
+    if (!document.getElementById('lawyerLoginForm').dataset.bound) {
+      document.getElementById('lawyerLoginForm').dataset.bound = '1';
+      document.getElementById('lawyerLoginForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var res = await ramdaniAuth.signInPassword(document.getElementById('lawLoginEmail').value.trim(), document.getElementById('lawLoginPassword').value);
+        if (res.error) return setSt(res.error.message);
+        var p = await ramdaniAuth.profile();
+        if (!p || p.role !== 'lawyer') { await ramdaniAuth.signOut(); return setSt('This account is not a lawyer account.'); }
+        window.ramdaniGo('/lawyer/dashboard');
+      });
+      document.getElementById('lawyerSignOutBtn').addEventListener('click', async function () { await ramdaniAuth.signOut(); window.ramdaniGo('/lawyer/login'); });
+    }
+    var p = await ramdaniAuth.profile();
+    if (path.indexOf('/dashboard') < 0) { login.hidden = false; dash.hidden = true; return; }
+    if (!p || p.role !== 'lawyer') { window.ramdaniGo('/lawyer/login'); return; }
+    login.hidden = true; dash.hidden = false;
+    if (window.ramdaniLawyerBoot) await window.ramdaniLawyerBoot(p);
+  }
+
   async function render() {
     var r = parseHash();
     if (r.path.indexOf('/admin') === 0) return showAdmin();
@@ -2811,6 +2996,7 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
     if (r.path.indexOf('/student') === 0) return showStudent(r.path);
     if (r.path.indexOf('/member') === 0) return showMemberPortal(r.path);
     if (r.path.indexOf('/client') === 0) return showClientPortal(r.path);
+    if (r.path.indexOf('/lawyer') === 0) return showLawyerPortal(r.path);
     await showPublic(r.path);
   }
 
@@ -4159,6 +4345,283 @@ window.ramdaniAuth = {
       if (p && p.role === 'student') { window.ramdaniGo('/student/dashboard'); return; }
     }
     showPanel('studentLoginPanel');
+  };
+})();
+</script>
+<!-- LAWYER PORTAL LOGIC: js/lawyer-portal.js -->
+<script>
+(function () {
+  'use strict';
+
+  function esc(v) { return ramdaniUi.escape(v == null ? '' : String(v)); }
+  function note(id, msg, ok) { var el = document.getElementById(id); if (!el) return; el.className = 'form-status ' + (ok ? 'ok' : 'err'); el.textContent = msg || ''; }
+  function setDd(id, v) { var el = document.getElementById(id); if (el) el.textContent = (v === null || v === undefined || v === '') ? '—' : v; }
+
+  async function showLawPhoto(path) {
+    var img = document.getElementById('lawDashPhoto');
+    if (!img) return;
+    if (!path) { img.removeAttribute('src'); img.classList.add('is-empty'); return; }
+    var signed = await sb.storage.from('private-docs').createSignedUrl(path, 3600);
+    if (signed.error || !signed.data || !signed.data.signedUrl) { img.classList.add('is-empty'); return; }
+    img.src = signed.data.signedUrl; img.classList.remove('is-empty'); img.alt = 'Lawyer photo';
+  }
+
+  function bindOnce(id, evt, fn) {
+    var el = document.getElementById(id);
+    if (!el || el.dataset.bound) return;
+    el.dataset.bound = '1';
+    el.addEventListener(evt, fn);
+  }
+
+  async function loadMembershipCard(p) {
+    var box = document.getElementById('lawMemberCardBox');
+    var mem = await sb.from('members').select('*').eq('profile_id', p.id).maybeSingle();
+    if (!mem.data) { box.innerHTML = '<p class="empty">No membership record is linked to this login.</p>'; return; }
+    var m = mem.data;
+    var card = await sb.from('member_cards').select('*').eq('member_id', m.id).in('status', ['issued', 'active']).order('created_at', { ascending: false }).limit(1);
+    var c = card.data && card.data[0];
+    box.innerHTML = c
+      ? '<div class="id-card"><p class="note">Member card — ' + esc(m.status) + '</p><h3>' + esc(m.full_name) + '</h3><p>' + esc(c.card_number) + '</p><p class="qr">Verify: ' + esc(c.verify_code) + '</p></div>'
+      : '<p class="empty">Membership status: ' + esc(m.status) + '. No card issued yet.</p>';
+  }
+
+  async function loadCertificates(p) {
+    var box = document.getElementById('lawCertificates');
+    var res = await sb.from('certificate_issuances').select('*').or('student_id.eq.' + p.id + ',profile_id.eq.' + p.id).eq('status', 'issued').order('created_at', { ascending: false });
+    box.innerHTML = (res.data || []).map(function (c) {
+      return '<article class="card"><h3>Certificate ' + esc(c.certificate_number) + '</h3><p class="note">' + esc(c.issue_date || '') + '</p><p class="qr">Verify: ' + esc(c.verification_code) + '</p></article>';
+    }).join('') || '<p class="empty">No certificates issued yet.</p>';
+  }
+
+  async function loadDocuments(p) {
+    var box = document.getElementById('lawDocuments');
+    var res = await sb.from('issued_documents').select('document_number, category, issued_at, status').eq('student_id', p.id).eq('status', 'issued');
+    box.innerHTML = (res.data || []).map(function (d) {
+      return '<article class="card"><h3>' + esc(d.category) + '</h3><p class="note">' + esc(d.document_number || '') + (d.issued_at ? ' · ' + esc(d.issued_at) : '') + '</p></article>';
+    }).join('') || '<p class="empty">No documents issued.</p>';
+  }
+
+  async function loadCourses(p) {
+    var box = document.getElementById('lawCourses');
+    var res = await sb.from('enrollments').select('id, status, enrolled_at, modules(title, code, category)').eq('student_id', p.id).order('enrolled_at', { ascending: false });
+    box.innerHTML = (res.data || []).map(function (e) {
+      var mod = e.modules || {};
+      return '<article class="card"><h3>' + esc(mod.title || 'Course') + '</h3><p class="note">' + esc(mod.code || '') + ' · ' + esc(e.status) + '</p></article>';
+    }).join('') || '<p class="empty">Not enrolled in any course yet.</p>';
+  }
+
+  async function loadQuizzes(p) {
+    var box = document.getElementById('lawQuizResults');
+    var res = await sb.from('quiz_attempts').select('score, total, created_at, quizzes(title)').eq('student_id', p.id).order('created_at', { ascending: false }).limit(20);
+    box.innerHTML = (res.data || []).map(function (a) {
+      var q = a.quizzes || {};
+      return '<p><strong>' + esc(q.title || 'Quiz') + '</strong> — ' + esc(a.score) + '/' + esc(a.total) + ' <span class="note">' + esc((a.created_at || '').slice(0, 10)) + '</span></p>';
+    }).join('') || '<p class="empty">No quiz attempts yet.</p>';
+  }
+
+  async function loadNotifications(p) {
+    var box = document.getElementById('lawNotifications');
+    var res = await sb.from('notifications').select('*').eq('user_id', p.id).order('created_at', { ascending: false }).limit(15);
+    box.innerHTML = (res.data || []).map(function (n) {
+      return '<p' + (n.read_at ? '' : ' style="font-weight:600"') + '>' + esc(n.title) + (n.message ? ' — <span class="note">' + esc(n.message) + '</span>' : '') + '</p>';
+    }).join('') || '<p class="empty">No notifications.</p>';
+  }
+
+  async function loadClients() {
+    var box = document.getElementById('lawClientsBox');
+    var res = await sb.from('clients').select('id, reference_id, legal_name, client_type, email, phone, status').order('legal_name');
+    box.innerHTML = (res.data || []).map(function (c) {
+      return '<article class="card"><h3>' + esc(c.legal_name) + '</h3><p class="note">' + esc(c.reference_id || '') + ' · ' + esc(c.client_type) + ' · ' + esc(c.status) + '</p>' +
+        (c.email ? '<p class="note">' + esc(c.email) + '</p>' : '') + (c.phone ? '<p class="note">' + esc(c.phone) + '</p>' : '') + '</article>';
+    }).join('') || '<p class="empty">No clients on your matters yet.</p>';
+  }
+
+  var MATTER_TABS = ['dates', 'notes', 'tasks', 'documents'];
+
+  async function loadMatterTab(matterId, tab) {
+    var pane = document.getElementById('mp-' + tab + '-' + matterId);
+    if (!pane) return;
+    if (tab === 'dates') {
+      var evs = await sb.from('matter_events').select('*').eq('matter_id', matterId).order('starts_at');
+      pane.innerHTML = (evs.data || []).map(function (e) {
+        return '<li><strong>' + esc(e.title) + '</strong> — ' + esc(e.event_type) + ' · ' + esc((e.starts_at || '').replace('T', ' ').slice(0, 16)) + (e.venue ? ' · ' + esc(e.venue) : '') + '</li>';
+      }).join('') || '<li class="empty">No dates yet.</li>';
+      pane.className = 'mini-list';
+    } else if (tab === 'notes') {
+      var ns = await sb.from('matter_notes').select('*').eq('matter_id', matterId).order('created_at', { ascending: false });
+      pane.innerHTML = (ns.data || []).map(function (n) {
+        return '<li>' + esc(n.content) + ' <span class="note">' + esc((n.created_at || '').slice(0, 10)) + '</span></li>';
+      }).join('') || '<li class="empty">No notes yet.</li>';
+      pane.className = 'mini-list';
+    } else if (tab === 'tasks') {
+      var ts = await sb.from('matter_tasks').select('*').eq('matter_id', matterId).order('due_at');
+      pane.innerHTML = (ts.data || []).map(function (t) {
+        return '<li>' + esc(t.title) + ' — ' + esc(t.status) + (t.due_at ? ' · due ' + esc(t.due_at.slice(0, 10)) : '') + '</li>';
+      }).join('') || '<li class="empty">No tasks yet.</li>';
+      pane.className = 'mini-list';
+    } else if (tab === 'documents') {
+      var ds = await sb.from('matter_documents').select('*').eq('matter_id', matterId).eq('is_current', true).order('uploaded_at', { ascending: false });
+      pane.innerHTML = (ds.data || []).map(function (d) {
+        return '<li>' + esc(d.file_name) + ' <span class="note">' + esc(d.category) + ' · v' + (d.version || 1) + '</span> <button type="button" class="btn btn-sm" data-open-doc="' + esc(d.storage_path) + '">Open</button></li>';
+      }).join('') || '<li class="empty">No documents yet.</li>';
+      pane.className = 'mini-list';
+    }
+  }
+
+  function matterCardHtml(m) {
+    var tabs = MATTER_TABS.map(function (t, i) {
+      return '<button type="button" class="' + (i === 0 ? 'active' : '') + '" data-mtab="' + t + '" data-matter="' + m.id + '">' + t.charAt(0).toUpperCase() + t.slice(1) + '</button>';
+    }).join('');
+    var panes = MATTER_TABS.map(function (t, i) {
+      return '<div class="matter-pane' + (i === 0 ? ' active' : '') + '" data-mpane="' + t + '" data-matter="' + m.id + '"><ul id="mp-' + t + '-' + m.id + '" class="mini-list"><li class="empty">Loading…</li></ul></div>';
+    }).join('');
+    return '<div class="matter-card" data-matter-card="' + m.id + '">' +
+      '<h3>' + esc(m.matter_number) + ' — ' + esc(m.title) + '</h3>' +
+      '<p class="note">' + esc(m.status) + ' · ' + esc(m.priority) + (m.opened_at ? ' · opened ' + esc(m.opened_at) : '') + (m.target_close_at ? ' · target close ' + esc(m.target_close_at) : '') + '</p>' +
+      (m.description ? '<p>' + esc(m.description) + '</p>' : '') +
+      '<button type="button" class="btn btn-sm" data-toggle-matter="' + m.id + '">Open case file</button>' +
+      '<div class="matter-detail" id="matter-detail-' + m.id + '">' +
+        '<form class="form" data-note-form="' + m.id + '" style="display:flex;gap:.5rem;margin-bottom:.6rem"><input name="content" placeholder="Add an internal note…" required style="flex:1" /><button class="btn btn-sm" type="submit">Add note</button></form>' +
+        '<form class="form" data-doc-form="' + m.id + '" style="display:flex;gap:.5rem;margin-bottom:.8rem;flex-wrap:wrap"><input type="file" name="file" required /><select name="category"><option value="drafts">Drafts</option><option value="client_documents">Client documents</option><option value="court_documents">Court documents</option><option value="correspondence">Correspondence</option><option value="evidence">Evidence</option><option value="final">Final</option><option value="other">Other</option></select><button class="btn btn-sm" type="submit">Upload document</button></form>' +
+        '<div class="matter-tabs">' + tabs + '</div>' + panes +
+      '</div>' +
+    '</div>';
+  }
+
+  async function loadMatters(statusFilter) {
+    var box = document.getElementById('lawMattersBox');
+    var q = sb.from('legal_matters').select('*').order('updated_at', { ascending: false });
+    if (statusFilter) q = q.eq('status', statusFilter);
+    var res = await q;
+    var list = res.data || [];
+    document.getElementById('lawDashMatterCount').textContent = list.length;
+    box.innerHTML = list.map(matterCardHtml).join('') || '<p class="empty">No matters assigned to you yet.</p>';
+
+    if (!box.dataset.bound) {
+      box.dataset.bound = '1';
+      box.addEventListener('click', async function (e) {
+        var toggle = e.target.closest('[data-toggle-matter]');
+        if (toggle) {
+          var id = toggle.getAttribute('data-toggle-matter');
+          var det = document.getElementById('matter-detail-' + id);
+          var opening = !det.classList.contains('open');
+          det.classList.toggle('open');
+          if (opening) MATTER_TABS.forEach(function (t) { loadMatterTab(id, t); });
+          return;
+        }
+        var tabBtn = e.target.closest('[data-mtab]');
+        if (tabBtn) {
+          var mid = tabBtn.getAttribute('data-matter');
+          var tab = tabBtn.getAttribute('data-mtab');
+          var card = tabBtn.closest('.matter-detail');
+          card.querySelectorAll('[data-mtab]').forEach(function (b) { b.classList.toggle('active', b === tabBtn); });
+          card.querySelectorAll('.matter-pane').forEach(function (p) { p.classList.toggle('active', p.getAttribute('data-mpane') === tab); });
+          loadMatterTab(mid, tab);
+          return;
+        }
+        var openDoc = e.target.closest('[data-open-doc]');
+        if (openDoc) {
+          var path = openDoc.getAttribute('data-open-doc');
+          var signed = await sb.storage.from('matter-documents').createSignedUrl(path, 120);
+          if (signed.data && signed.data.signedUrl) window.open(signed.data.signedUrl, '_blank');
+          return;
+        }
+      });
+      box.addEventListener('submit', async function (e) {
+        var noteForm = e.target.closest('[data-note-form]');
+        if (noteForm) {
+          e.preventDefault();
+          var mid1 = noteForm.getAttribute('data-note-form');
+          var content = noteForm.elements.content.value.trim();
+          if (!content) return;
+          var ins = await sb.from('matter_notes').insert({ matter_id: mid1, content: content });
+          if (!ins.error) { noteForm.reset(); loadMatterTab(mid1, 'notes'); }
+          return;
+        }
+        var docForm = e.target.closest('[data-doc-form]');
+        if (docForm) {
+          e.preventDefault();
+          var mid2 = docForm.getAttribute('data-doc-form');
+          var file = docForm.elements.file.files[0];
+          if (!file) return;
+          var safe = file.name.replace(/[^A-Za-z0-9._-]/g, '_');
+          var storagePath = mid2 + '/' + crypto.randomUUID() + '-' + safe;
+          var up = await sb.storage.from('matter-documents').upload(storagePath, file, { upsert: false });
+          if (up.error) { alert(up.error.message); return; }
+          var ins2 = await sb.from('matter_documents').insert({
+            matter_id: mid2, file_name: file.name, storage_path: storagePath, file_type: file.type || null,
+            category: docForm.elements.category.value, access_level: 'matter_team'
+          });
+          if (!ins2.error) { docForm.reset(); loadMatterTab(mid2, 'documents'); }
+          return;
+        }
+      });
+    }
+
+    bindOnce('lawMatterStatusFilter', 'change', function () { loadMatters(this.value); });
+  }
+
+  window.ramdaniLawyerBoot = async function (p) {
+    document.getElementById('lawWelcome').textContent = 'Welcome, ' + (p.full_name || 'Advocate');
+    document.getElementById('lawDashEmail').textContent = p.email || '';
+    setDd('lawDashRefId', p.reference_id);
+    setDd('lawDashStatus', p.status);
+    setDd('lawDashPhone', p.phone);
+    await showLawPhoto(p.photo_path);
+
+    bindOnce('lawyerPhotoForm', 'submit', async function (e) {
+      e.preventDefault();
+      var file = e.target.elements.photo.files[0];
+      if (!file) return note('lawyerPhotoStatus', 'Choose a photo first.');
+      if (!/^image\/(jpeg|png|webp)$/i.test(file.type)) return note('lawyerPhotoStatus', 'Use a JPG, PNG or WebP image.');
+      if (file.size > 4 * 1024 * 1024) return note('lawyerPhotoStatus', 'Photo must be under 4 MB.');
+      note('lawyerPhotoStatus', 'Uploading…', true);
+      var ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+      if (['jpeg', 'jpg', 'png', 'webp'].indexOf(ext) === -1) ext = 'jpg';
+      var storagePath = 'lawyers/' + p.id + '/photo.' + ext;
+      var up = await sb.storage.from('private-docs').upload(storagePath, file, { upsert: true, contentType: file.type, cacheControl: '3600' });
+      if (up.error) return note('lawyerPhotoStatus', up.error.message);
+      var upd = await sb.from('profiles').update({ photo_path: storagePath }).eq('id', p.id);
+      if (upd.error) return note('lawyerPhotoStatus', upd.error.message);
+      await showLawPhoto(storagePath);
+      e.target.reset();
+      note('lawyerPhotoStatus', 'Photo saved.', true);
+    });
+
+    bindOnce('lawyerProfileForm', 'submit', async function (e) {
+      e.preventDefault();
+      var f = e.target;
+      var payload = { full_name: f.elements.full_name.value.trim(), phone: f.elements.phone.value.trim() || null };
+      if (!payload.full_name) return note('lawyerProfileStatus', 'Full name is required.');
+      var upd = await sb.from('profiles').update(payload).eq('id', p.id);
+      if (upd.error) return note('lawyerProfileStatus', upd.error.message);
+      note('lawyerProfileStatus', 'Saved.', true);
+      document.getElementById('lawWelcome').textContent = 'Welcome, ' + payload.full_name;
+      setDd('lawDashPhone', payload.phone);
+    });
+    var pf = document.getElementById('lawyerProfileForm');
+    if (pf) { pf.elements.full_name.value = p.full_name || ''; pf.elements.phone.value = p.phone || ''; }
+
+    bindOnce('lawyerPasswordForm', 'submit', async function (e) {
+      e.preventDefault();
+      var pw = document.getElementById('lawNewPassword').value;
+      var pw2 = document.getElementById('lawNewPasswordConfirm').value;
+      if (pw.length < 8) return note('lawyerPasswordStatus', 'Password must be at least 8 characters.');
+      if (pw !== pw2) return note('lawyerPasswordStatus', 'Passwords do not match.');
+      var res = await sb.auth.updateUser({ password: pw });
+      if (res.error) return note('lawyerPasswordStatus', res.error.message);
+      e.target.reset();
+      note('lawyerPasswordStatus', 'Password updated.', true);
+    });
+
+    await loadNotifications(p);
+    await loadMembershipCard(p);
+    await loadCertificates(p);
+    await loadDocuments(p);
+    await loadCourses(p);
+    await loadQuizzes(p);
+    await loadClients();
+    await loadMatters('');
   };
 })();
 </script>
