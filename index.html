@@ -760,6 +760,7 @@ html[dir="rtl"] .lead {
           <summary class="admin-nav-group-title">System</summary>
           <button type="button" data-table="__admins">Admin accounts</button>
           <button type="button" data-table="__staffaccounts">Staff &amp; portal accounts</button>
+          <button type="button" data-table="__lawyerapps">Lawyer applications</button>
           <button type="button" data-table="__systemsettings">System settings</button>
           <button type="button" data-table="__notifications">Notifications</button>
           <button type="button" data-table="__auditlog">Audit log</button>
@@ -794,6 +795,13 @@ html[dir="rtl"] .lead {
             <div class="admin-section-head"><div><h2>Students <span id="studentTotal" class="note"></span></h2><p class="note">Search, review and manage registered student accounts.</p></div></div>
             <div class="admin-toolbar"><input type="search" id="studentSearch" placeholder="Search name, email or student ID" aria-label="Search students" /></div>
             <div class="table-wrap"><table class="data"><thead><tr><th>Name</th><th>Email</th><th>Student ID</th><th>Department</th><th>University</th><th>Session</th><th>Status</th><th>Actions</th></tr></thead><tbody id="studentsBody"></tbody></table></div><p id="studentsNote" class="form-status"></p>
+          </div>
+
+          <div id="lawyerAppsPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Lawyer applications</h2><p class="note">Lawyers who registered themselves. They cannot sign in or see any data until you approve them. Check the bar licence before approving.</p></div>
+              <select id="lawAppFilter" aria-label="Filter"><option value="pending">Awaiting approval</option><option value="active">Approved</option><option value="suspended">Rejected / suspended</option><option value="all">All</option></select></div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Photo</th><th>Lawyer</th><th>Bar / licence</th><th>District, province</th><th>Contact</th><th>Status</th><th>Actions</th></tr></thead><tbody id="lawAppBody"></tbody></table></div>
+            <p id="lawAppNote" class="form-status"></p>
           </div>
 
           <div id="staffAccountsPanel" class="admin-panel" hidden>
@@ -2059,7 +2067,33 @@ html[dir="rtl"] .lead {
           <button class="btn btn-primary" type="submit">Sign in</button>
         </form>
         <p id="lawyerLoginStatus" class="form-status"></p>
-        <p class="note">Accounts are created by firm admin. Contact the office if you need access.</p>
+        <p>New lawyer? <a href="/lawyer/signup">Register here</a>. Your registration is reviewed and approved by the firm admin before you can sign in.</p>
+        <p class="note"><a href="/">Back to public site</a></p>
+      </div>
+
+      <div id="lawyerSignupPanel" class="auth-box" hidden>
+        <h1>Lawyer registration</h1>
+        <form id="lawyerSignupForm" class="form">
+          <label>Full name <input name="full_name" required /></label>
+          <label>Email <input name="email" type="email" required autocomplete="username" /></label>
+          <label>Password <input name="password" type="password" required minlength="8" autocomplete="new-password" /></label>
+          <label>Confirm password <input name="confirm_password" type="password" required minlength="8" autocomplete="new-password" /></label>
+          <label>Phone number <input name="phone" required /></label>
+          <label>Bar association (e.g. Dera Ghazi Khan District Bar, Lahore High Court Bar) <input name="bar_association" required /></label>
+          <label>Bar licence / enrolment number <input name="bar_license_no" required /></label>
+          <label>District <input name="district" required /></label>
+          <label>Province <select name="province" required>
+            <option value="">Select province</option>
+            <option>Punjab</option><option>Sindh</option><option>Khyber Pakhtunkhwa</option><option>Balochistan</option>
+            <option>Islamabad Capital Territory</option><option>Gilgit-Baltistan</option><option>Azad Jammu &amp; Kashmir</option>
+          </select></label>
+          <label>Profile photo (JPG, PNG or WebP) <input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required /></label>
+          <img id="lawSignupPhotoPreview" class="portal-photo is-empty" alt="Photo preview" hidden />
+          <input name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;height:0;width:0;opacity:0" aria-hidden="true" />
+          <button class="btn btn-primary" type="submit">Submit registration</button>
+        </form>
+        <p id="lawyerSignupStatus" class="form-status"></p>
+        <p>Already approved? <a href="/lawyer/login">Sign in</a></p>
         <p class="note"><a href="/">Back to public site</a></p>
       </div>
 
@@ -2088,6 +2122,10 @@ html[dir="rtl"] .lead {
               <div><dt>Reference ID</dt><dd id="lawDashRefId">—</dd></div>
               <div><dt>Status</dt><dd id="lawDashStatus">—</dd></div>
               <div><dt>Phone</dt><dd id="lawDashPhone">—</dd></div>
+              <div><dt>Bar association</dt><dd id="lawDashBar">—</dd></div>
+              <div><dt>Bar licence no.</dt><dd id="lawDashLicense">—</dd></div>
+              <div><dt>District</dt><dd id="lawDashDistrict">—</dd></div>
+              <div><dt>Province</dt><dd id="lawDashProvince">—</dd></div>
               <div><dt>Active matters</dt><dd id="lawDashMatterCount">—</dd></div>
             </dl>
           </div>
@@ -3032,6 +3070,64 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
     await bootLawyerPortal(path);
   }
 
+  // Photo -> downscaled JPEG data URL (keeps phone photos under the 2 MB server limit).
+  function lawyerPhotoToDataUrl(file) {
+    return new Promise(function (resolve, reject) {
+      var fr = new FileReader();
+      fr.onerror = function () { reject(new Error('Photo could not be read.')); };
+      fr.onload = function () {
+        var img = new Image();
+        img.onerror = function () { reject(new Error('Photo could not be read.')); };
+        img.onload = function () {
+          var max = 900, w = img.width, h = img.height, k = Math.min(1, max / Math.max(w, h));
+          var c = document.createElement('canvas'); c.width = Math.round(w * k); c.height = Math.round(h * k);
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          resolve(c.toDataURL('image/jpeg', 0.86));
+        };
+        img.src = fr.result;
+      };
+      fr.readAsDataURL(file);
+    });
+  }
+  function bindLawyerSignup() {
+    var form = document.getElementById('lawyerSignupForm');
+    if (!form || form.dataset.bound) return;
+    form.dataset.bound = '1';
+    var st = document.getElementById('lawyerSignupStatus');
+    function say(msg, ok) { st.className = 'form-status' + (msg ? (ok ? ' ok' : ' err') : ''); st.textContent = msg || ''; }
+    form.elements.photo.addEventListener('change', function () {
+      var f = this.files[0], pv = document.getElementById('lawSignupPhotoPreview');
+      if (f && /^image\//.test(f.type)) { pv.src = URL.createObjectURL(f); pv.hidden = false; pv.classList.remove('is-empty'); } else { pv.hidden = true; }
+    });
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault(); say('');
+      var f = form.elements;
+      if (f.password.value.length < 8) return say('Password must be at least 8 characters.');
+      if (f.password.value !== f.confirm_password.value) return say('Passwords do not match.');
+      var file = f.photo.files[0];
+      if (!file || !/^image\/(jpeg|png|webp)$/i.test(file.type)) return say('Choose a JPG, PNG or WebP photo.');
+      var btn = form.querySelector('button[type="submit"]'); btn.disabled = true; say('Submitting…');
+      try {
+        var photo = await lawyerPhotoToDataUrl(file);
+        var cfg = window.RAMDANI_CONFIG;
+        var res = await fetch(cfg.supabaseUrl + '/functions/v1/lawyer-signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': cfg.supabaseAnonKey, 'Authorization': 'Bearer ' + cfg.supabaseAnonKey },
+          body: JSON.stringify({
+            full_name: f.full_name.value.trim(), email: f.email.value.trim(), password: f.password.value,
+            phone: f.phone.value.trim(), bar_association: f.bar_association.value.trim(), bar_license_no: f.bar_license_no.value.trim(),
+            district: f.district.value.trim(), province: f.province.value, website: f.website.value, photo_base64: photo
+          })
+        });
+        var data = {}; try { data = await res.json(); } catch (x) {}
+        if (!res.ok) { btn.disabled = false; return say(data.error || ('Registration failed (' + res.status + ')')); }
+        form.reset(); document.getElementById('lawSignupPhotoPreview').hidden = true;
+        say('Registration submitted. The firm admin will review it; you can sign in once it is approved.' + (data.warning ? ' ' + data.warning : ''), true);
+      } catch (err) { say(err.message || 'Registration failed.'); }
+      btn.disabled = false;
+    });
+  }
+
   async function bootLawyerPortal(path) {
     var login = document.getElementById('lawyerLoginPanel');
     var dash = document.getElementById('lawyerDashPanel');
@@ -3044,13 +3140,23 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
         if (res.error) return setSt(res.error.message);
         var p = await ramdaniAuth.profile();
         if (!p || p.role !== 'lawyer') { await ramdaniAuth.signOut(); return setSt('This account is not a lawyer account.'); }
+        if (!p.is_active) {
+          await ramdaniAuth.signOut();
+          return setSt(p.status === 'suspended'
+            ? 'Your registration was not approved or your account is suspended. Please contact the office.'
+            : 'Your registration is awaiting admin approval. You can sign in once it is approved.');
+        }
         window.ramdaniGo('/lawyer/dashboard');
       });
       document.getElementById('lawyerSignOutBtn').addEventListener('click', async function () { await ramdaniAuth.signOut(); window.ramdaniGo('/lawyer/login'); });
     }
+    var signup = document.getElementById('lawyerSignupPanel');
+    bindLawyerSignup();
+    if (path.indexOf('/signup') >= 0) { login.hidden = true; dash.hidden = true; signup.hidden = false; return; }
+    signup.hidden = true;
     var p = await ramdaniAuth.profile();
     if (path.indexOf('/dashboard') < 0) { login.hidden = false; dash.hidden = true; return; }
-    if (!p || p.role !== 'lawyer') { window.ramdaniGo('/lawyer/login'); return; }
+    if (!p || p.role !== 'lawyer' || !p.is_active) { window.ramdaniGo('/lawyer/login'); return; }
     login.hidden = true; dash.hidden = false;
     if (window.ramdaniLawyerBoot) await window.ramdaniLawyerBoot(p);
   }
@@ -3782,7 +3888,7 @@ window.ramdaniAuth = {
   async profile() {
     var session = await this.session();
     if (!session) return null;
-    var res = await sb.from('profiles').select('id, full_name, email, phone, student_id, department, university, session, role, is_active, status, photo_path, program, batch').eq('id', session.user.id).maybeSingle();
+    var res = await sb.from('profiles').select('id, full_name, email, phone, student_id, department, university, session, role, is_active, status, photo_path, program, batch, bar_association, bar_license_no, district, province, rejection_reason').eq('id', session.user.id).maybeSingle();
     return res.data || null;
   },
   // Any role considered "staff" for the purpose of signing into the admin
@@ -4636,6 +4742,10 @@ window.ramdaniAuth = {
     setDd('lawDashRefId', p.reference_id);
     setDd('lawDashStatus', p.status);
     setDd('lawDashPhone', p.phone);
+    setDd('lawDashBar', p.bar_association);
+    setDd('lawDashLicense', p.bar_license_no);
+    setDd('lawDashDistrict', p.district);
+    setDd('lawDashProvince', p.province);
     await showLawPhoto(p.photo_path);
 
     bindOnce('lawyerPhotoForm', 'submit', async function (e) {
@@ -5998,6 +6108,7 @@ window.ramdaniAuth = {
     '__students': ['student_manager'],
     '__admins': [],
     '__staffaccounts': [],
+    '__lawyerapps': [],
     'people': ['content_manager'], 'practice_areas': ['content_manager'], 'services': ['content_manager'],
     'matters': ['content_manager'], 'articles': ['content_manager'], 'news': ['content_manager'],
     'resources': ['content_manager'], 'careers': ['content_manager'],
@@ -6065,6 +6176,17 @@ window.ramdaniAuth = {
       app.classList.add('hidden');
     }
 
+    // If this browser's session ends (for example another portal on the same
+    // browser signed out, or the session expired), go back to the sign-in form
+    // instead of showing raw "permission denied" errors from an anonymous session.
+    sb.auth.onAuthStateChange(function (event) {
+      if (event === 'SIGNED_OUT' && !app.classList.contains('hidden')) {
+        app.classList.add('hidden');
+        login.classList.remove('hidden');
+        err.textContent = 'Your session ended. Please sign in again.';
+      }
+    });
+
     document.getElementById('passwordForm').addEventListener('submit', async function (e) {
       e.preventDefault();
       err.textContent = '';
@@ -6100,6 +6222,21 @@ window.ramdaniAuth = {
 
     document.getElementById('studentSearch').addEventListener('input', function () {
       renderStudentRows(allStudents, this.value.trim().toLowerCase());
+    });
+
+    document.getElementById('lawAppFilter').addEventListener('change', loadLawyerApps);
+    document.getElementById('lawAppBody').addEventListener('click', async function (e) {
+      var b = e.target.closest('[data-law-act]'); if (!b) return;
+      var id = b.getAttribute('data-id'), act = b.getAttribute('data-law-act'), payload;
+      var note = document.getElementById('lawAppNote');
+      if (act === 'approve') payload = { status: 'active' };
+      else if (act === 'reject') { var why = window.prompt('Reason for rejection (shown to the lawyer):', ''); if (why === null) return; payload = { status: 'suspended', rejection_reason: why.trim() || null }; }
+      else { if (!window.confirm('Suspend this lawyer? They will lose access immediately.')) return; payload = { status: 'suspended' }; }
+      b.disabled = true;
+      var r = await sb.from('profiles').update(payload).eq('id', id);
+      if (r.error) { note.className = 'form-status err'; note.textContent = r.error.message; b.disabled = false; return; }
+      note.className = 'form-status ok'; note.textContent = act === 'approve' ? 'Lawyer approved. They can now sign in.' : 'Updated.';
+      loadLawyerApps();
     });
 
     document.getElementById('createStaffForm').addEventListener('submit', async function (e) {
@@ -6310,6 +6447,33 @@ window.ramdaniAuth = {
   }
 
   var STAFF_ROLE_LABELS = { lawyer: 'Lawyer', firm_admin: 'Firm admin', operations_staff: 'Operations staff', member: 'Member', client: 'Client', society_admin: 'Society admin', education_manager: 'Education manager', student_manager: 'Student manager', content_manager: 'Content manager', communications_manager: 'Communications manager', editor: 'Editor' };
+
+  async function loadLawyerApps() {
+    var body = document.getElementById('lawAppBody'), note = document.getElementById('lawAppNote');
+    note.textContent = '';
+    var f = document.getElementById('lawAppFilter').value;
+    var q = sb.from('profiles').select('id, full_name, email, phone, reference_id, status, is_active, photo_path, bar_association, bar_license_no, district, province, rejection_reason, created_at').eq('role', 'lawyer').order('created_at', { ascending: false });
+    if (f !== 'all') q = q.eq('status', f);
+    var res = await q;
+    if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; return; }
+    var rows = res.data || [];
+    body.innerHTML = rows.map(function (r) {
+      var act = r.status === 'active'
+        ? '<button type="button" class="btn btn-sm" data-law-act="suspend" data-id="' + r.id + '">Suspend</button>'
+        : '<button type="button" class="btn btn-sm btn-primary" data-law-act="approve" data-id="' + r.id + '">Approve</button>' + (r.status === 'pending' ? ' <button type="button" class="btn btn-sm" data-law-act="reject" data-id="' + r.id + '">Reject</button>' : '');
+      return '<tr><td><img data-law-photo="' + escapeHtml(r.photo_path || '') + '" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:8px" hidden /></td>' +
+        '<td>' + escapeHtml(r.full_name) + '<br><span class="note">' + escapeHtml(r.reference_id || '') + '</span></td>' +
+        '<td>' + escapeHtml(r.bar_association || '—') + '<br><span class="note">' + escapeHtml(r.bar_license_no || '—') + '</span></td>' +
+        '<td>' + escapeHtml((r.district || '—') + ', ' + (r.province || '—')) + '</td>' +
+        '<td>' + escapeHtml(r.email || '') + '<br><span class="note">' + escapeHtml(r.phone || '') + '</span></td>' +
+        '<td>' + escapeHtml(r.status) + (r.rejection_reason ? '<br><span class="note">' + escapeHtml(r.rejection_reason) + '</span>' : '') + '</td><td>' + act + '</td></tr>';
+    }).join('') || '<tr><td colspan="7">No lawyer applications in this view.</td></tr>';
+    body.querySelectorAll('img[data-law-photo]').forEach(async function (img) {
+      var path = img.getAttribute('data-law-photo'); if (!path) return;
+      var s = await sb.storage.from('private-docs').createSignedUrl(path, 600);
+      if (s.data && s.data.signedUrl) { img.src = s.data.signedUrl; img.hidden = false; }
+    });
+  }
 
   async function loadStaffAccounts() {
     var body = document.getElementById('staffAccountsBody');
@@ -8583,9 +8747,17 @@ window.ramdaniAuth = {
     document.querySelectorAll('#cwTabs [data-cw-tab]').forEach(function (b) { b.classList.toggle('btn-primary', b.getAttribute('data-cw-tab') === cwTab); });
     var ids = cwMatters.map(function (m) { return m.id; });
     if (cwTab === 'overview') {
-      body.innerHTML = '<dl class="portal-kv"><div><dt>Email</dt><dd>' + escapeHtml(c.email || '—') + '</dd></div><div><dt>Phone</dt><dd>' + escapeHtml(c.phone || '—') + '</dd></div><div><dt>Type</dt><dd>' + escapeHtml(c.client_type) + '</dd></div><div><dt>Address</dt><dd>' + escapeHtml(c.address || '—') + '</dd></div><div><dt>Preferred contact</dt><dd>' + escapeHtml(c.preferred_contact_method || '—') + '</dd></div></dl>' +
+      var ownerOpts = '<option value="">— none —</option>' + Object.keys(cwNames).map(function (k) { return '<option value="' + k + '"' + (k === c.owner_id ? ' selected' : '') + '>' + escapeHtml(cwNames[k]) + '</option>'; }).join('');
+      body.innerHTML = '<form id="cwOwnerForm" class="form admin-form"><label><span>Responsible lawyer (this client appears in that lawyer\'s portal)</span><select name="owner_id">' + ownerOpts + '</select></label><div class="form-actions"><button class="btn btn-primary" type="submit">Save lawyer link</button></div></form>' +
+        '<dl class="portal-kv"><div><dt>Email</dt><dd>' + escapeHtml(c.email || '—') + '</dd></div><div><dt>Phone</dt><dd>' + escapeHtml(c.phone || '—') + '</dd></div><div><dt>Type</dt><dd>' + escapeHtml(c.client_type) + '</dd></div><div><dt>Address</dt><dd>' + escapeHtml(c.address || '—') + '</dd></div><div><dt>Preferred contact</dt><dd>' + escapeHtml(c.preferred_contact_method || '—') + '</dd></div></dl>' +
         (c.profile_id ? '<p class="note">This client already has a portal login. Deactivate or reactivate it from Staff &amp; portal accounts.</p>' :
         '<h4>Give this client a portal login</h4><form id="cwLoginForm" class="form admin-form"><label><span>Email</span><input name="email" type="email" required value="' + escapeHtml(c.email || '') + '" /></label><label><span>Temporary password</span><input name="password" type="text" required minlength="8" autocomplete="off" /></label><div class="form-actions"><button class="btn btn-primary" type="submit">Create login</button></div></form>');
+      $id('cwOwnerForm').addEventListener('submit', async function (e) {
+        e.preventDefault(); var v = e.target.owner_id.value || null;
+        var r = await sb.from('clients').update({ owner_id: v }).eq('id', c.id);
+        if (r.error) return setNote('cwNote', r.error.message);
+        c.owner_id = v; setNote('cwNote', 'Lawyer link saved.', true);
+      });
       var f = $id('cwLoginForm');
       if (f) f.addEventListener('submit', async function (e) {
         e.preventDefault(); setNote('cwNote', 'Creating…');
@@ -10232,13 +10404,14 @@ window.ramdaniAuth = {
   }
 
   function showAdminView(view) {
-    var panels = ['dashboardPanel','studentsPanel','adminsPanel','staffAccountsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','orgSettingsPanel','brandingLogoPanel','brandingTypePanel','contactInfoPanel','seoSettingsPanel','systemSettingsPanel','disclaimersPanel','homepageSectionsPanel','navigationPanel','certTemplatesPanel','mediaLibraryPanel','certIssuancesPanel','courseBuilderPanel','quizBuilderPanel','quizResultsPanel','eduSearchPanel','enrollmentsPanel','seoOverridesPanel','notificationsPanel','auditLogPanel','opsDashPanel','clientsPanel','legalMattersPanel','myTasksPanel','legalCalendarPanel','legalDocsPanel','legalCommsPanel','legalReportsPanel','legalSearchPanel','organizationsPanel','membershipsPanel','membersPanel','memberProfilePanel','memberCardsPanel','studentCardsPanel','eventsPanel','eventRegsPanel','eventGuestsPanel','docsCenterPanel'];
+    var panels = ['dashboardPanel','studentsPanel','adminsPanel','staffAccountsPanel','lawyerAppsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','orgSettingsPanel','brandingLogoPanel','brandingTypePanel','contactInfoPanel','seoSettingsPanel','systemSettingsPanel','disclaimersPanel','homepageSectionsPanel','navigationPanel','certTemplatesPanel','mediaLibraryPanel','certIssuancesPanel','courseBuilderPanel','quizBuilderPanel','quizResultsPanel','eduSearchPanel','enrollmentsPanel','seoOverridesPanel','notificationsPanel','auditLogPanel','opsDashPanel','clientsPanel','legalMattersPanel','myTasksPanel','legalCalendarPanel','legalDocsPanel','legalCommsPanel','legalReportsPanel','legalSearchPanel','organizationsPanel','membershipsPanel','membersPanel','memberProfilePanel','memberCardsPanel','studentCardsPanel','eventsPanel','eventRegsPanel','eventGuestsPanel','docsCenterPanel'];
     panels.forEach(function(id){ var el=document.getElementById(id); if(el){ el.hidden=true; el.classList.remove('is-active'); }});
     document.querySelectorAll('.admin-nav [data-table]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-table')===view); });
     document.getElementById('adminApp').classList.remove('nav-open');
     if(view==='__dashboard') { activate('dashboardPanel','Dashboard'); loadDashboard(); return; }
     if(view==='__students') { activate('studentsPanel','Students'); loadStudents(); return; }
     if(view==='__admins') { activate('adminsPanel','Admin accounts'); loadAdmins(); return; }
+    if(view==='__lawyerapps') { activate('lawyerAppsPanel','Lawyer applications'); loadLawyerApps(); return; }
     if(view==='__staffaccounts') { activate('staffAccountsPanel','Staff & portal accounts'); loadStaffAccounts(); return; }
     if(view==='__inquiries') { activate('inquiriesPanel','Inquiries'); loadInquiries(); return; }
     if(view==='__applications') { activate('applicationsPanel','Internship applications'); loadInternshipApps(); return; }
