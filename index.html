@@ -780,7 +780,8 @@ html[dir="rtl"] .lead {
               <label><span>Success color</span><input name="color_success" type="color" /></label>
               <label><span>Warning color</span><input name="color_warning" type="color" /></label>
               <label><span>Error color</span><input name="color_error" type="color" /></label>
-              <div class="form-actions"><button class="btn btn-primary" type="submit">Save changes</button><p id="brandingLogoNote" class="form-status"></p></div>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Save changes</button><button class="btn" id="previewBrandColorsBtn" type="button">Preview colors</button><button class="btn" id="resetBrandColorsPreviewBtn" type="button" hidden>Reset preview</button><p id="brandingLogoNote" class="form-status"></p></div>
+              <p class="note">Preview applies the colors above to this admin panel only, in your browser, until you reload the page or click Save changes. It does not affect the public site or other staff until saved.</p>
             </form>
           </div>
 
@@ -1970,6 +1971,54 @@ window.ramdaniSite = Object.freeze({
   var theme = document.getElementById('themeBtn');
   function syncTheme() { if (theme) theme.setAttribute('aria-pressed', String(document.documentElement.getAttribute('data-theme') === 'dark')); }
   new MutationObserver(syncTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] }); syncTheme();
+
+  // Live brand colors: branding_settings (color_primary etc.) maps onto the CSS
+  // custom properties brand.css already themes everything with. A field left
+  // blank in the DB simply leaves that variable at its brand.css default, so a
+  // partially-filled record never blanks anything out.
+  var BRAND_COLOR_VARS = {
+    color_primary: ['--navy', '--accent'],
+    color_secondary: ['--deep-navy'],
+    color_accent: ['--gold', '--accent-dark'],
+    color_background: ['--paper', '--ivory'],
+    color_surface: ['--card', '--white'],
+    color_text: ['--ink'],
+    color_text_muted: ['--muted'],
+    color_border: ['--line'],
+    color_success: ['--ok'],
+    color_warning: ['--warning'],
+    color_error: ['--danger']
+  };
+  function applyBrandColorFields(fields, root) {
+    root = root || document.documentElement;
+    Object.keys(BRAND_COLOR_VARS).forEach(function (field) {
+      var value = fields && fields[field];
+      if (!value) return;
+      BRAND_COLOR_VARS[field].forEach(function (cssVar) { root.style.setProperty(cssVar, value); });
+    });
+  }
+  function clearBrandColorOverrides(root) {
+    root = root || document.documentElement;
+    Object.keys(BRAND_COLOR_VARS).forEach(function (field) {
+      BRAND_COLOR_VARS[field].forEach(function (cssVar) { root.style.removeProperty(cssVar); });
+    });
+  }
+  async function loadPublishedBrandColors() {
+    try {
+      if (!window.sb) return;
+      var res = await sb.from('branding_settings').select('color_primary,color_secondary,color_accent,color_background,color_surface,color_text,color_text_muted,color_border,color_success,color_warning,color_error')
+        .eq('status', 'published').order('updated_at', { ascending: false }).limit(1).maybeSingle();
+      if (res.error || !res.data) return; // no published record yet — keep brand.css defaults
+      clearBrandColorOverrides();
+      applyBrandColorFields(res.data);
+    } catch (e) { /* network hiccup or RLS denial — keep brand.css defaults */ }
+  }
+  window.ramdaniBranding = {
+    applyColors: applyBrandColorFields,
+    clearColorOverrides: clearBrandColorOverrides,
+    reloadPublishedColors: loadPublishedBrandColors
+  };
+  loadPublishedBrandColors();
 })();
 
 </script>
@@ -3936,6 +3985,20 @@ window.ramdaniAuth = {
     document.getElementById('createForm').addEventListener('submit', saveRow);
     document.getElementById('orgSettingsForm').addEventListener('submit', saveOrgSettings);
     document.getElementById('brandingLogoForm').addEventListener('submit', saveBrandingLogo);
+    document.getElementById('previewBrandColorsBtn').addEventListener('click', function () {
+      var form = document.getElementById('brandingLogoForm');
+      var fd = new FormData(form);
+      var fields = {};
+      ['color_primary','color_secondary','color_accent','color_background','color_surface','color_text','color_text_muted','color_border','color_success','color_warning','color_error'].forEach(function (f) {
+        fields[f] = fd.get(f) || null;
+      });
+      if (window.ramdaniBranding) window.ramdaniBranding.applyColors(fields);
+      document.getElementById('resetBrandColorsPreviewBtn').hidden = false;
+    });
+    document.getElementById('resetBrandColorsPreviewBtn').addEventListener('click', function () {
+      if (window.ramdaniBranding) window.ramdaniBranding.reloadPublishedColors();
+      document.getElementById('resetBrandColorsPreviewBtn').hidden = true;
+    });
     document.getElementById('brandingTypeForm').addEventListener('submit', saveBrandingType);
     document.getElementById('contactInfoForm').addEventListener('submit', saveContactInfo);
     document.getElementById('seoSettingsForm').addEventListener('submit', saveSeoSettings);
@@ -4486,11 +4549,20 @@ window.ramdaniAuth = {
     note.textContent = 'Saved.';
   }
 
-  function saveBrandingLogo(e) {
-    return saveBranding(e, ['status','logo_primary_url','logo_light_url','logo_dark_url','logo_mobile_url',
+  async function saveBrandingLogo(e) {
+    await saveBranding(e, ['status','logo_primary_url','logo_light_url','logo_dark_url','logo_mobile_url',
       'favicon_url','social_share_image_url','certificate_logo_url','education_logo_url',
       'color_primary','color_secondary','color_accent','color_background','color_surface',
       'color_text','color_text_muted','color_border','color_success','color_warning','color_error']);
+    var note = document.getElementById('brandingLogoNote');
+    if (note && note.classList.contains('ok') && window.ramdaniBranding) {
+      // Re-fetch from the DB rather than trusting this save's payload directly —
+      // if this save was a draft, the live site should keep showing whatever
+      // record is actually status='published', which may be a different row.
+      window.ramdaniBranding.reloadPublishedColors();
+      var resetBtn = document.getElementById('resetBrandColorsPreviewBtn');
+      if (resetBtn) resetBtn.hidden = true;
+    }
   }
 
   function saveBrandingType(e) {
