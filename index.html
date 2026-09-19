@@ -478,7 +478,16 @@ html[dir="rtl"] .lead {
 .ramdani-view[hidden], #adminRoot[hidden], #resetRoot[hidden], #publicShell[hidden], #studentRoot[hidden] { display: none !important; }
 #adminRoot, #resetRoot { min-height: 100vh; }
 
-  </style>
+  
+/* Phase 3: student learning (progress, lessons) */
+.progress-bar{background:rgba(0,0,0,.08);border-radius:999px;height:8px;overflow:hidden;margin:.5rem 0}
+.progress-fill{background:var(--gold);height:100%}
+.lesson-list{list-style:none;padding:0;margin:.5rem 0 1rem}
+.lesson-list li{padding:.35rem 0}
+#studentRoot .learning-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:1rem}
+#studentRoot .learning-table{width:100%;border-collapse:collapse}
+#studentRoot .learning-table th,#studentRoot .learning-table td{text-align:start;padding:.5rem;border-bottom:1px solid var(--line)}
+</style>
 </head>
 <body>
   <!-- WEBSITE STRUCTURE -->
@@ -1021,7 +1030,7 @@ html[dir="rtl"] .lead {
 
   <!-- STUDENT PORTAL -->
   <div id="studentRoot" hidden>
-    <div class="wrap" style="padding:2.5rem 0;max-width:36rem">
+    <div class="wrap" style="padding:2.5rem 0;max-width:46rem">
 
       <div id="studentLoginPanel" class="auth-box" hidden>
         <h1>Student sign in</h1>
@@ -1074,6 +1083,15 @@ html[dir="rtl"] .lead {
           <p>University: <span id="stuDashUni"></span></p>
           <p>Session: <span id="stuDashSession"></span></p>
         </div>
+
+        <h2>My courses</h2>
+        <div id="myCourses" class="learning-grid" style="margin-bottom:1rem"></div>
+
+        <h2>Quiz results</h2>
+        <div id="myQuizResults" style="margin-bottom:1rem"></div>
+
+        <h2>My certificates</h2>
+        <div id="myCertificates" class="learning-grid" style="margin-bottom:1rem"></div>
 
         <h2>Update profile</h2>
         <form id="studentProfileForm" class="form">
@@ -1394,6 +1412,8 @@ var rows = await ramdaniApi.listPublished('matters', null); ramdaniUi.renderList
       <h1 id="modTitle">Module</h1>
       <p class="lead" id="modSummary"></p>
       <div id="modBody"></div>
+      <h2>Your enrollment &amp; lessons</h2>
+      <div id="modLearning"></div>
     </div></section>`, init: async function () {
 if (window.ramdaniEducation) ramdaniEducation.renderModule();
   } },
@@ -1749,7 +1769,8 @@ window.ramdaniSite = Object.freeze({
     ['/pages/quizzes.html', 'nav_quizzes', 'Study LAT/GAT'],
     ['/pages/library.html', 'nav_library', 'Library'],
     ['/pages/internships.html', 'nav_internships', 'Internships'],
-    ['/pages/practice-areas.html', 'nav_practice', 'Practice Areas']
+    ['/pages/practice-areas.html', 'nav_practice', 'Practice Areas'],
+    ['/student/login', 'nav_student', 'Student portal']
   ],
   navigation: [
     ['/', 'nav_home', 'Home'], ['/pages/about.html', 'nav_about', 'About'],
@@ -1760,7 +1781,7 @@ window.ramdaniSite = Object.freeze({
     ['/pages/internships.html', 'nav_internships', 'Internships'], ['/pages/quizzes.html', 'nav_quizzes', 'LAT / GAT'],
     ['/pages/modules.html', 'nav_modules', 'Study modules'], ['/pages/cases.html', 'nav_cases', 'Case notes'],
     ['/pages/statutes.html', 'nav_statutes', 'Pakistan laws'], ['/pages/library.html', 'nav_library', 'Library'], ['/pages/learning.html', 'nav_learning', 'Lectures'], ['/pages/societies.html', 'nav_societies', 'Societies'], ['/pages/chapters.html', 'nav_chapters', 'Chapters'], ['/pages/certificates.html', 'nav_certificates', 'Certificates'], ['/pages/faq.html', 'nav_faq', 'FAQ'],
-    ['/pages/contact.html', 'nav_contact', 'Contact']
+    ['/pages/contact.html', 'nav_contact', 'Contact'], ['/student/login', 'nav_student', 'Student portal']
   ]
 });
 
@@ -2048,6 +2069,7 @@ window.ramdaniSite = Object.freeze({
       nav_societies: 'Societies',
       nav_chapters: 'Chapters',
       nav_certificates: 'Certificates',
+      nav_student: 'Student portal',
       nav_faq: 'FAQ',
       nav_contact: 'Contact',
       nav_consult: 'Consultation',
@@ -2160,6 +2182,7 @@ window.ramdaniSite = Object.freeze({
       nav_societies: 'سوسائٹیز',
       nav_chapters: 'چیپٹرز',
       nav_certificates: 'سرٹیفکیٹس',
+      nav_student: 'اسٹوڈنٹ پورٹل',
       nav_faq: 'سوالات',
       nav_contact: '\u0631\u0627\u0628\u0637\u06c1',
       nav_consult: '\u0645\u0634\u0627\u0648\u0631\u06c1',
@@ -2749,6 +2772,108 @@ window.ramdaniAuth = {
     });
   }
 
+  // ---- Phase 3: enrollment, lesson progress, learning dashboard ----
+  function esc(v) { var d = document.createElement('div'); d.textContent = v == null ? '' : String(v); return d.innerHTML; }
+  async function learnSession() { return window.ramdaniAuth ? ramdaniAuth.session() : null; }
+
+  window.ramdaniStudent = {
+    session: learnSession,
+    async enroll(moduleId) {
+      var s = await learnSession();
+      if (!s) throw new Error('Please sign in first.');
+      return sb.from('enrollments').insert({ student_id: s.user.id, module_id: moduleId, status: 'active' });
+    },
+    async myEnrollment(moduleId) {
+      var s = await learnSession();
+      if (!s) return null;
+      var res = await sb.from('enrollments').select('*').eq('student_id', s.user.id).eq('module_id', moduleId).maybeSingle();
+      return res.data || null;
+    },
+    async toggleLessonComplete(lessonId, moduleId, done) {
+      var s = await learnSession();
+      if (!s) throw new Error('Please sign in first.');
+      return sb.from('lesson_progress').upsert({
+        student_id: s.user.id,
+        lesson_id: lessonId,
+        module_id: moduleId,
+        is_completed: done,
+        completed_at: done ? new Date().toISOString() : null
+      }, { onConflict: 'student_id,lesson_id' });
+    }
+  };
+
+  async function renderLearning() {
+    var s = await learnSession();
+    if (!s) return;
+    var uid = s.user.id;
+
+    var coursesEl = document.getElementById('myCourses');
+    if (coursesEl) {
+      var enrRes = await sb.from('enrollments').select('*, modules(title, slug)').eq('student_id', uid).order('enrolled_at', { ascending: false });
+      var enrollments = enrRes.data || [];
+      var compRes = await sb.from('course_completions').select('*').eq('student_id', uid);
+      var completions = {};
+      (compRes.data || []).forEach(function (c) { completions[c.module_id] = c; });
+      if (enrRes.error) {
+        coursesEl.innerHTML = '<p class="empty">Could not load your courses.</p>';
+      } else if (!enrollments.length) {
+        coursesEl.innerHTML = '<p class="empty">You are not enrolled in any course yet. Browse <a href="/pages/modules.html">study modules</a> to get started.</p>';
+      } else {
+        coursesEl.innerHTML = enrollments.map(function (e) {
+          var m = e.modules || {};
+          var comp = completions[e.module_id];
+          var pct = comp ? Math.round(comp.lesson_percent || 0) : 0;
+          var badge = e.status === 'completed' ? 'Completed' : (e.status === 'active' ? 'In progress' : e.status);
+          return '<article class="card"><p class="kicker">' + esc(badge) + '</p><h3>' + esc(m.title || 'Course') + '</h3>' +
+            '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
+            '<p class="note">' + pct + '% of published lessons completed' +
+            (comp && comp.is_eligible_for_certificate ? ' · Eligible for certificate' : '') + '</p>' +
+            '<a class="btn btn-primary" href="/pages/module.html?slug=' + encodeURIComponent(m.slug || '') + '">Continue</a></article>';
+        }).join('');
+      }
+    }
+
+    var quizEl = document.getElementById('myQuizResults');
+    if (quizEl) {
+      var qaRes = await sb.from('quiz_attempts').select('score, total, created_at, quizzes(title)').eq('student_id', uid).order('created_at', { ascending: false }).limit(20);
+      var attempts = qaRes.data || [];
+      if (qaRes.error) {
+        quizEl.innerHTML = '<p class="empty">Could not load quiz results.</p>';
+      } else if (!attempts.length) {
+        quizEl.innerHTML = '<p class="empty">No quiz attempts yet.</p>';
+      } else {
+        quizEl.innerHTML = '<div class="table-wrap"><table class="learning-table"><thead><tr><th>Quiz</th><th>Score</th><th>Date</th></tr></thead><tbody>' +
+          attempts.map(function (a) {
+            var d = new Date(a.created_at);
+            return '<tr><td>' + esc((a.quizzes || {}).title || '') + '</td><td>' + esc(a.score) + ' / ' + esc(a.total) + '</td><td>' + esc(isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-PK')) + '</td></tr>';
+          }).join('') + '</tbody></table></div>';
+      }
+    }
+
+    var certEl = document.getElementById('myCertificates');
+    if (certEl) {
+      var certRes = await sb.from('certificate_issuances').select('*').eq('student_id', uid).eq('status', 'issued').order('created_at', { ascending: false });
+      var certs = certRes.data || [];
+      if (certRes.error) {
+        certEl.innerHTML = '<p class="empty">Could not load certificates.</p>';
+      } else if (!certs.length) {
+        certEl.innerHTML = '<p class="empty">No certificates issued yet. Complete a course\'s required lessons and quiz to become eligible; staff then issue the certificate.</p>';
+      } else {
+        var ids = certs.map(function (c) { return c.module_id; }).filter(Boolean);
+        var titles = {};
+        if (ids.length) {
+          var mr = await sb.from('modules').select('id, title').in('id', ids);
+          (mr.data || []).forEach(function (m) { titles[m.id] = m.title; });
+        }
+        certEl.innerHTML = certs.map(function (c) {
+          return '<article class="card"><h3>' + esc(titles[c.module_id] || 'Certificate') + '</h3>' +
+            '<p class="note">No. ' + esc(c.certificate_number) + ' · Issued ' + esc(c.issue_date || '') + '</p>' +
+            '<p class="note">Verification code: ' + esc(c.verification_code) + '</p></article>';
+        }).join('');
+      }
+    }
+  }
+
   window.ramdaniStudentBoot = async function (path) {
     bindForms();
     if (path === '/student/signup') return showPanel('studentSignupPanel');
@@ -2759,7 +2884,9 @@ window.ramdaniAuth = {
       try { profile = await ramdaniAuth.requireStudent(); } catch (e) { profile = null; }
       if (!profile) { window.ramdaniGo('/student/login'); return; }
       fillDashboard(profile);
-      return showPanel('studentDashboardPanel');
+      showPanel('studentDashboardPanel');
+      renderLearning();
+      return;
     }
 
     // default: /student/login
@@ -3399,6 +3526,63 @@ window.ramdaniAuth = {
         { name: m.title, url: window.ramdaniSeo.origin + '/pages/module.html?slug=' + encodeURIComponent(m.slug) }
       ]);
     }
+    await renderEnrollmentAndLessons(m);
+  }
+
+  // Phase 3: enrollment + lesson checklist shown under the module outline.
+  // Anonymous visitors see a sign-in prompt; signed-in students can enroll and
+  // mark published lessons complete. Progress % is computed server-side.
+  async function renderEnrollmentAndLessons(m) {
+    var box = document.getElementById('modLearning');
+    if (!box || !window.ramdaniStudent) return;
+    var session = await ramdaniStudent.session();
+    if (!session) {
+      box.innerHTML = '<div class="card"><p>Sign in as a student to enroll in this course and track your progress.</p>' +
+        '<a class="btn btn-primary" href="/student/login">Student sign in</a></div>';
+      return;
+    }
+    var enr = await ramdaniStudent.myEnrollment(m.id);
+    var secRes = await sb.from('course_sections').select('*').eq('module_id', m.id).eq('status', 'published').order('sort_order');
+    var sections = secRes.data || [];
+    var lesRes = await sb.from('lessons').select('*').eq('module_id', m.id).eq('status', 'published').order('sort_order');
+    var lessons = lesRes.data || [];
+    var progRes = await sb.from('lesson_progress').select('lesson_id, is_completed').eq('student_id', session.user.id).eq('module_id', m.id);
+    var doneMap = {};
+    (progRes.data || []).forEach(function (r) { doneMap[r.lesson_id] = r.is_completed; });
+
+    var html = '';
+    if (!enr) {
+      html += '<div class="card"><p>You are not enrolled in this course yet.</p><button type="button" class="btn btn-primary" id="enrollBtn">Enroll now</button></div>';
+    } else {
+      html += '<p class="note">Enrollment status: ' + escape(enr.status) + '</p>';
+      if (!sections.length) {
+        html += '<p class="empty">No lessons published yet for this course.</p>';
+      } else {
+        sections.forEach(function (sec) {
+          var secLessons = lessons.filter(function (l) { return l.section_id === sec.id; });
+          html += '<h3>' + escape(sec.title) + '</h3><ul class="lesson-list">' + secLessons.map(function (l) {
+            var done = !!doneMap[l.id];
+            return '<li><label><input type="checkbox" data-lesson="' + l.id + '"' + (done ? ' checked' : '') + ' /> ' + escape(l.title) + '</label></li>';
+          }).join('') + '</ul>';
+        });
+      }
+    }
+    box.innerHTML = html;
+    var enrollBtn = document.getElementById('enrollBtn');
+    if (enrollBtn) {
+      enrollBtn.addEventListener('click', async function () {
+        enrollBtn.disabled = true;
+        var res = await ramdaniStudent.enroll(m.id);
+        if (res.error) { alert(res.error.message); enrollBtn.disabled = false; return; }
+        renderEnrollmentAndLessons(m);
+      });
+    }
+    box.querySelectorAll('[data-lesson]').forEach(function (cb) {
+      cb.addEventListener('change', async function () {
+        var res = await ramdaniStudent.toggleLessonComplete(cb.getAttribute('data-lesson'), m.id, cb.checked);
+        if (res && res.error) { alert(res.error.message); cb.checked = !cb.checked; }
+      });
+    });
   }
 
   async function renderCases() {
