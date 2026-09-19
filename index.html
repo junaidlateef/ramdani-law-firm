@@ -661,6 +661,116 @@ html[dir="rtl"] .lead {
 .people-card{display:grid;grid-template-columns:5.5rem 1fr;gap:.9rem;align-items:start}
 .people-card img{width:5.5rem;height:5.5rem;border-radius:14px;object-fit:cover;background:#0B1F33;border:2px solid #c9a227}
 @media (max-width:640px){.people-card{grid-template-columns:1fr}}
+
+/* ===== Ramdani authentication page — ALL rules scoped to .ramdani-auth-page / .ra-* (nothing global is changed) ===== */
+#portalRoot.ramdani-auth-page{
+  --ra-bg:#F7F4ED;--ra-card:#fff;--ra-field:#fff;--ra-ink:#17212B;--ra-muted:#4a5866;--ra-line:#b9c2ca;
+  --ra-navy:#0B1F33;--ra-gold:#B08D57;--ra-link:#7a5c2e;--ra-err:#8a2b2b;--ra-ok:#2d5a3d;
+  --ra-tab-on-bg:#0B1F33;--ra-tab-on-ink:#fff;
+  background:var(--ra-bg);color:var(--ra-ink);min-height:100vh;min-height:100dvh;overflow-x:hidden;
+}
+html[data-theme='dark'] #portalRoot.ramdani-auth-page{
+  --ra-bg:#071521;--ra-card:#0B1F33;--ra-field:#0f2a42;--ra-ink:#F7F4ED;--ra-muted:#c3ced6;--ra-line:#4a5d6f;
+  --ra-link:#d2b482;--ra-err:#ff9d9d;--ra-ok:#8fd1a8;--ra-tab-on-bg:#B08D57;--ra-tab-on-ink:#0B1F33;
+}
+#portalRoot.ramdani-auth-page>.wrap{max-width:none!important;width:100%;margin:0;padding:0!important}
+.ramdani-auth-page *,.ramdani-auth-page *::before,.ramdani-auth-page *::after{box-sizing:border-box}
+
+.ramdani-auth-page .ramdani-auth-shell{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  width:100%;max-width:100%;min-height:100vh;min-height:100dvh;margin:0;padding:0;background:transparent;border:0;box-shadow:none}
+.ramdani-auth-page .ramdani-auth-form{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:center;min-width:0;
+  padding:clamp(1.25rem,4vw,3rem) clamp(1.25rem,5vw,4rem);background:var(--ra-bg);color:var(--ra-ink)}
+.ramdani-auth-page .ra-inner{width:100%;max-width:32rem;margin-inline:auto;min-width:0}
+.ramdani-auth-page .ra-brand{display:flex;align-items:center;gap:.8rem;margin:0 0 1.5rem}
+.ramdani-auth-page .ra-brand img{width:44px;height:44px;border-radius:10px;background:#fff;object-fit:contain;flex:none}
+.ramdani-auth-page .ra-brand strong{display:block;font-family:var(--serif);font-size:1.35rem;line-height:1.1;color:var(--ra-ink)}
+.ramdani-auth-page .ra-brand small{display:block;color:var(--ra-muted);font-size:.75rem}
+
+.ramdani-auth-page .ra-tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;margin:0 0 1.5rem;border:1px solid var(--ra-line);border-radius:12px;background:var(--ra-card)}
+.ramdani-auth-page .ra-tab{min-height:44px;padding:.55rem .8rem;border:0;border-radius:9px;background:transparent;color:var(--ra-ink);font:inherit;font-weight:600;cursor:pointer}
+.ramdani-auth-page .ra-tab:hover{background:rgba(176,141,87,.16)}
+.ramdani-auth-page .ra-tab[aria-selected="true"]{background:var(--ra-tab-on-bg);color:var(--ra-tab-on-ink)}
+
+.ramdani-auth-page .ra-pane h1{margin:0 0 .35rem;font-family:var(--serif);font-size:clamp(1.7rem,3vw,2.15rem);line-height:1.15;color:var(--ra-ink)}
+.ramdani-auth-page .ra-lead{margin:0 0 1.25rem;color:var(--ra-muted)}
+.ramdani-auth-page .ra-form{display:grid;gap:1rem;max-width:none}
+.ramdani-auth-page .ra-field{display:grid;gap:.35rem}
+.ramdani-auth-page .ra-field>label,.ramdani-auth-page .ra-label{font-weight:600;font-size:.9rem;color:var(--ra-ink)}
+.ramdani-auth-page .ra-field input{width:100%;min-height:46px;padding:.65rem .8rem;border:1px solid var(--ra-line);border-radius:10px;background:var(--ra-field);color:var(--ra-ink);font:inherit}
+.ramdani-auth-page .ra-row{display:flex;justify-content:flex-end;margin-top:-.4rem}
+.ramdani-auth-page .ra-pw{position:relative;display:block;width:100%}
+.ramdani-auth-page .ra-pw input{padding-inline-end:4.5rem}
+.ramdani-auth-page .ra-pw-toggle{position:absolute;inset-block:4px;inset-inline-end:4px;min-height:0;padding:0 .7rem;border:0;border-radius:7px;background:transparent;color:var(--ra-link);font:inherit;font-size:.85rem;font-weight:600;cursor:pointer}
+.ramdani-auth-page .ra-pw-toggle:hover{background:rgba(176,141,87,.16)}
+.ramdani-auth-page .ra-btn{display:inline-flex;align-items:center;justify-content:center;width:100%;min-height:48px;padding:.75rem 1.15rem;border:1px solid var(--ra-tab-on-bg);border-radius:10px;background:var(--ra-tab-on-bg);color:var(--ra-tab-on-ink);font:inherit;font-weight:700;cursor:pointer}
+.ramdani-auth-page .ra-btn:hover{filter:brightness(1.12)}
+.ramdani-auth-page .ra-btn[disabled]{opacity:.65;cursor:progress}
+.ramdani-auth-page .ra-status{min-height:1.4rem;margin:.75rem 0 0;font-weight:600;color:var(--ra-muted)}
+.ramdani-auth-page .ra-status.err{color:var(--ra-err)}
+.ramdani-auth-page .ra-status.ok{color:var(--ra-ok)}
+.ramdani-auth-page .ra-foot{margin:1.25rem 0 0;color:var(--ra-muted);font-size:.9rem}
+.ramdani-auth-page a{color:var(--ra-link);text-decoration:underline;text-underline-offset:2px}
+.ramdani-auth-page :focus-visible{outline:3px solid var(--ra-gold);outline-offset:2px}
+
+.ramdani-auth-page .ra-roles{display:grid;gap:.85rem;margin:0 0 1rem}
+.ramdani-auth-page .ra-role{display:block;padding:1rem 1.1rem;border:1px solid var(--ra-line);border-radius:12px;background:var(--ra-card);color:var(--ra-ink);text-decoration:none}
+.ramdani-auth-page .ra-role:hover{border-color:var(--ra-gold);box-shadow:0 6px 18px rgba(11,31,51,.12)}
+.ramdani-auth-page .ra-role strong{display:block;font-size:1.05rem;color:var(--ra-ink)}
+.ramdani-auth-page .ra-role span{display:block;margin-top:.2rem;color:var(--ra-muted);font-size:.9rem}
+.ramdani-auth-page .ra-back{display:inline-block;margin:0 0 1rem;font-weight:600}
+
+/* existing student / lawyer / reset panels, re-homed inside the shell — restyled only within this scope */
+.ramdani-auth-page .ra-host .auth-box{width:100%;max-width:none;margin:0;padding:0;background:transparent;border:0;border-radius:0;box-shadow:none;color:var(--ra-ink)}
+.ramdani-auth-page .ra-host h1{margin:0 0 1rem;font-family:var(--serif);font-size:1.4rem;color:var(--ra-ink)}
+.ramdani-auth-page .ra-host .form{max-width:none;gap:1rem;padding:0;margin:0;background:transparent;border:0;border-radius:0;box-shadow:none}
+.ramdani-auth-page .ra-host label{display:grid;gap:.35rem;font-weight:600;font-size:.9rem;color:var(--ra-ink)}
+.ramdani-auth-page .ra-host input:not([type="checkbox"]):not([type="hidden"]):not([aria-hidden="true"]),.ramdani-auth-page .ra-host select{width:100%;min-height:46px;padding:.65rem .8rem;border:1px solid var(--ra-line);border-radius:10px;background:var(--ra-field);color:var(--ra-ink);font:inherit}
+.ramdani-auth-page .ra-host input[type="file"]{padding:.5rem}
+.ramdani-auth-page .ra-host .btn{width:100%;min-height:48px;border-radius:10px;border:1px solid var(--ra-tab-on-bg);background:var(--ra-tab-on-bg);color:var(--ra-tab-on-ink);font-weight:700}
+.ramdani-auth-page .ra-host .btn:hover{filter:brightness(1.12);color:var(--ra-tab-on-ink)}
+.ramdani-auth-page .ra-host .btn[disabled]{opacity:.65}
+.ramdani-auth-page .ra-host [data-captcha] .btn{width:auto;min-height:44px;margin-top:.5rem;background:transparent;color:var(--ra-ink);border-color:var(--ra-line)}
+.ramdani-auth-page .ra-host [data-captcha] .btn:hover{color:var(--ra-ink)}
+.ramdani-auth-page .ra-host .form-status{margin:.5rem 0 0;font-weight:600;color:var(--ra-muted)}
+.ramdani-auth-page .ra-host .form-status.ok{color:var(--ra-ok)}
+.ramdani-auth-page .ra-host .form-status.err{color:var(--ra-err)}
+.ramdani-auth-page .ra-host .note,.ramdani-auth-page .ra-host p{color:var(--ra-muted)}
+.ramdani-auth-page .ra-host .portal-photo{max-width:9.5rem}
+.ramdani-auth-page .ra-strength{display:flex;align-items:center;gap:.6rem;font-size:.8rem;font-weight:600;color:var(--ra-muted)}
+.ramdani-auth-page .ra-strength-bar{flex:1;height:6px;border-radius:99px;background:var(--ra-line);overflow:hidden}
+.ramdani-auth-page .ra-strength-bar i{display:block;height:100%;width:0;background:var(--ra-err);transition:width .15s}
+.ramdani-auth-page .ra-strength[data-level="2"] i{background:#b7791f}
+.ramdani-auth-page .ra-strength[data-level="3"] i{background:#6a8f3a}
+.ramdani-auth-page .ra-strength[data-level="4"] i{background:var(--ra-ok)}
+
+/* media panel — self-contained stacking context; media can never sit above the form */
+.ramdani-auth-page .ramdani-auth-media{position:sticky;top:0;align-self:start;z-index:1;height:100vh;height:100dvh;min-width:0;overflow:hidden;
+  background:linear-gradient(160deg,#0B1F33 0%,#071521 60%,#12304a 100%);color:#fff}
+.ramdani-auth-page .ra-media-stage{position:absolute;inset:0;z-index:0}
+.ramdani-auth-page .ra-media-stage img,.ramdani-auth-page .ra-media-stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.ramdani-auth-page .ra-media-mark{position:absolute;inset:0;display:grid;place-items:center;opacity:.14}
+.ramdani-auth-page .ra-media-mark img{width:min(46%,240px);height:auto;filter:grayscale(1) brightness(2)}
+.ramdani-auth-page .ra-media-overlay{position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(7,21,33,.10) 0%,rgba(7,21,33,.10) 40%,rgba(7,21,33,.88) 100%)}
+.ramdani-auth-page .ra-media-caption{position:absolute;inset-inline:0;bottom:0;z-index:2;padding:clamp(1.25rem,4vw,3rem)}
+.ramdani-auth-page .ra-media-caption::before{content:"";display:block;width:3.5rem;height:3px;margin-bottom:1rem;background:var(--ra-gold)}
+.ramdani-auth-page .ra-media-caption h2{margin:0 0 .5rem;font-family:var(--serif);font-size:clamp(1.6rem,3vw,2.6rem);line-height:1.15;color:#fff;border:0;padding:0}
+.ramdani-auth-page .ra-media-caption p{margin:0;max-width:32rem;color:#e6ebef;font-size:1rem}
+
+@media (max-width:899px){
+  .ramdani-auth-page .ramdani-auth-shell{grid-template-columns:minmax(0,1fr);min-height:0}
+  .ramdani-auth-page .ramdani-auth-media{position:relative;order:-1;align-self:stretch;height:clamp(11rem,28vh,16rem)}
+  .ramdani-auth-page .ra-media-caption{padding:1rem 1.25rem}
+  .ramdani-auth-page .ra-media-caption::before{margin-bottom:.6rem;width:2.5rem}
+  .ramdani-auth-page .ra-media-caption h2{font-size:1.3rem;margin-bottom:.25rem}
+  .ramdani-auth-page .ra-media-caption p{font-size:.85rem}
+  .ramdani-auth-page .ramdani-auth-form{justify-content:flex-start;padding-block:1.5rem 2.5rem}
+}
+@media (prefers-reduced-motion:reduce){.ramdani-auth-page *{transition:none!important}}
+
+/* admin: Authentication page → Side media (namespaced) */
+.ra-admin-preview{position:relative;width:100%;max-width:34rem;aspect-ratio:16/10;overflow:hidden;border-radius:12px;background:#0B1F33;border:1px solid var(--line)}
+.ra-admin-preview img,.ra-admin-preview video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.ra-admin-empty{position:absolute;inset:0;display:grid;place-items:center;margin:0;padding:1rem;text-align:center;color:#d9c9a5;font-size:.9rem}
 </style>
 </head>
 <body>
@@ -798,6 +908,7 @@ html[dir="rtl"] .lead {
         <details class="admin-nav-group" open>
           <summary class="admin-nav-group-title">Website</summary>
           <button type="button" data-table="__homepagesections">Homepage sections</button>
+          <button type="button" data-table="__authmedia">Authentication page · Side media</button>
           <button type="button" data-table="__navigation">Navigation</button>
           <button type="button" data-table="__seosettings">SEO settings</button>
           <button type="button" data-table="__seooverrides">SEO overrides</button>
@@ -1168,6 +1279,18 @@ html[dir="rtl"] .lead {
             </form>
             <div style="height:1rem"></div>
             <div class="table-wrap"><table class="data"><thead><tr><th>Key</th><th>Title</th><th>Order</th><th>Enabled</th><th>Actions</th></tr></thead><tbody id="homepageSectionsBody"></tbody></table></div>
+          </div>
+
+          <div id="authMediaPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Authentication page — Side media</h2><p class="note">Image or video shown beside the Sign In / Create Account forms on the portal page. Files use the existing site-assets storage; text is stored in Homepage sections under the key <code>auth_side_media</code> — please do not delete that entry.</p></div></div>
+            <form id="authMediaForm" class="form admin-form" novalidate>
+              <div class="field-full"><span class="note" style="display:block;margin-bottom:.35rem">Preview</span><div id="authMediaPreview" class="ra-admin-preview"><p class="ra-admin-empty">No media set — the default navy panel is shown.</p></div></div>
+              <label class="field-full"><span>Upload image or video — JPG, PNG, WEBP (max 8 MB) · MP4, WebM (max 25 MB)</span><input id="authMediaFile" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" /></label>
+              <label><span>Media type (detected from the file)</span><input id="authMediaType" value="—" readonly /></label>
+              <label class="field-full"><span>Heading</span><input name="heading" maxlength="80" autocomplete="off" /></label>
+              <label class="field-full"><span>Description</span><textarea name="description" rows="3" maxlength="200"></textarea></label>
+              <div class="form-actions field-full"><button class="btn btn-primary" type="submit" id="authMediaSave">Save changes</button> <button class="btn" type="button" id="authMediaRemove">Remove media</button> <button class="btn" type="button" id="authMediaCancel" hidden>Discard selected file</button><p id="authMediaNote" class="form-status" role="status" aria-live="polite"></p></div>
+            </form>
           </div>
 
           <div id="navigationPanel" class="admin-panel" hidden>
@@ -1867,17 +1990,70 @@ html[dir="rtl"] .lead {
   <!-- UNIFIED PORTAL: /portal/login|dashboard (student, member, lawyer share one sign-in and one dashboard route) -->
   <div id="portalRoot" hidden>
     <div class="wrap">
-      <div id="portalLoginPanel" class="auth-box" hidden>
-        <h1>Portal sign in</h1>
-        <p class="note">One sign-in for students, members and lawyers.</p>
-        <form id="portalLoginForm" class="form">
-          <label>Email <input id="portalLoginEmail" type="email" required autocomplete="username" /></label>
-          <label>Password <input id="portalLoginPassword" type="password" required minlength="8" autocomplete="current-password" /></label>
-          <button class="btn btn-primary" type="submit">Sign in</button>
-        </form>
-        <p id="portalLoginStatus" class="form-status"></p>
-        <p>Create an account: <a href="/join">Join</a> (<a href="/student/signup">Student</a> · <a href="/lawyer/signup">Lawyer</a>) · <a href="/student/forgot-password">Forgot password?</a></p>
-        <p class="note">Member and client accounts are created by the firm. <a href="/">Back to public site</a></p>
+      <div id="portalLoginPanel" class="ramdani-auth-shell" hidden>
+        <section class="ramdani-auth-form" aria-label="Account access">
+          <div class="ra-inner">
+            <div class="ra-brand">
+              <img src="/assets/ramdani-logo.png" alt="" width="44" height="44" />
+              <div><strong>Ramdani Law Firm</strong><small>Student, member &amp; lawyer portal</small></div>
+            </div>
+
+            <div class="ra-tabs" role="tablist" aria-label="Sign in or create an account">
+              <button type="button" class="ra-tab" role="tab" id="raTabSignin" aria-controls="raPaneSignin" aria-selected="true">Sign In</button>
+              <button type="button" class="ra-tab" role="tab" id="raTabSignup" aria-controls="raPaneSignup" aria-selected="false" tabindex="-1">Create Account</button>
+            </div>
+
+            <div id="raPaneSignin" class="ra-pane" role="tabpanel" aria-labelledby="raTabSignin">
+              <h1>Sign in</h1>
+              <p class="ra-lead">One sign-in for students, members, lawyers and clients.</p>
+              <form id="portalLoginForm" class="ra-form" novalidate>
+                <div class="ra-field">
+                  <label for="portalLoginEmail">Email address</label>
+                  <input id="portalLoginEmail" type="email" required autocomplete="username" inputmode="email" autocapitalize="none" spellcheck="false" />
+                </div>
+                <div class="ra-field">
+                  <label for="portalLoginPassword">Password</label>
+                  <span class="ra-pw">
+                    <input id="portalLoginPassword" type="password" required minlength="8" autocomplete="current-password" />
+                    <button type="button" class="ra-pw-toggle" id="raPwToggle" aria-controls="portalLoginPassword" aria-pressed="false" aria-label="Show password">Show</button>
+                  </span>
+                </div>
+                <div class="ra-row"><a href="/portal/forgot">Forgot password?</a></div>
+                <button class="ra-btn" type="submit">Sign in</button>
+              </form>
+              <p id="portalLoginStatus" class="ra-status" role="status" aria-live="polite"></p>
+              <p class="ra-foot">Member and client accounts are created by the firm. Staff? <a href="/admin/">Admin sign in</a> · <a href="/">Back to public site</a></p>
+            </div>
+
+            <div id="raPaneSignup" class="ra-pane" role="tabpanel" aria-labelledby="raTabSignup" hidden>
+              <h1>Create your account</h1>
+              <div id="raRoleChooser">
+                <p class="ra-lead">Choose the type of account you need.</p>
+                <div class="ra-roles">
+                  <a class="ra-role" href="/portal/signup?role=student"><strong>Student</strong><span>Study modules, quizzes, enrolments and your student card.</span></a>
+                  <a class="ra-role" href="/portal/signup?role=lawyer"><strong>Lawyer</strong><span>Requires review and approval by the firm before you can sign in.</span></a>
+                </div>
+                <p class="ra-foot">Member and client accounts are created by the firm — to join a society or chapter, send a request on the <a href="/join">Join page</a>. By creating an account you accept the <a href="/pages/privacy.html">privacy notice</a>.</p>
+              </div>
+              <a id="raRoleBack" class="ra-back" href="/portal/signup" hidden>← Choose a different account type</a>
+              <div id="raSignupHost" class="ra-host"></div>
+              <p class="ra-foot">Already have an account? <a href="/portal/login">Sign in</a></p>
+            </div>
+
+            <div id="raPaneForgot" class="ra-pane" role="tabpanel" aria-labelledby="raTabSignin" hidden>
+              <div id="raForgotHost" class="ra-host"></div>
+            </div>
+          </div>
+        </section>
+
+        <aside id="raMedia" class="ramdani-auth-media" aria-label="Ramdani Law Firm">
+          <div class="ra-media-stage" data-ra-stage></div>
+          <div class="ra-media-overlay" aria-hidden="true"></div>
+          <div class="ra-media-caption">
+            <h2 data-ra-heading>Trusted Legal Professionals</h2>
+            <p data-ra-desc>Professional legal services you can rely on.</p>
+          </div>
+        </aside>
       </div>
       <div id="portalDashHost"></div>
     </div>
@@ -2902,6 +3078,10 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
     if (path === '/member') path = '/member/login';
     if (path === '/client') path = '/client/login';
     if (path === '/lawyer') path = '/lawyer/login';
+    // Sign-up / recovery now live inside the unified authentication shell (same existing forms, same handlers)
+    if (path === '/student/signup') { path = '/portal/signup'; search = '?role=student'; }
+    if (path === '/lawyer/signup') { path = '/portal/signup'; search = '?role=lawyer'; }
+    if (path === '/student/forgot-password') path = '/portal/forgot';
     // Unified portal: student / member / lawyer login + dashboard routes all land on /portal/*
     if (path === '/portal' || path === '/portal/') path = '/portal/login';
     if (/^\/(student|member|lawyer)\/login$/.test(path)) path = '/portal/login';
@@ -2950,6 +3130,7 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
   var studentRoot = document.getElementById('studentRoot');
 
   function hideAllRoots() {
+    restoreAuthPanels();
     publicShell.hidden = true;
     adminRoot.hidden = true;
     resetRoot.hidden = true;
@@ -3221,21 +3402,195 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
     }
     return '';
   }
+  // ---- Authentication page (portal shell): re-homes the EXISTING student-signup / lawyer-signup / reset panels
+  //      inside the unified shell so their existing handlers, validation, captcha and approval flow are reused as-is.
+  var AUTH_HOME_PANELS = ['studentSignupPanel', 'lawyerSignupPanel', 'studentForgotPanel'];
+  var STAFF_ONLY_ROLES = ['admin', 'editor', 'content_manager', 'education_manager', 'student_manager', 'communications_manager', 'firm_admin', 'operations_staff'];
+
+  function restoreAuthPanels() {
+    AUTH_HOME_PANELS.forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el && el.__ramdaniHome && el.parentNode !== el.__ramdaniHome) {
+        el.hidden = true;
+        el.__ramdaniHome.appendChild(el);
+      }
+    });
+  }
+  function mountAuthPanel(id, hostId) {
+    var el = document.getElementById(id), host = document.getElementById(hostId);
+    if (!el || !host) return null;
+    if (!el.__ramdaniHome) el.__ramdaniHome = el.parentNode;
+    if (el.parentNode !== host) host.appendChild(el);
+    // one <h1> per screen: the shell's pane heading is the h1
+    el.querySelectorAll('h1').forEach(function (h) { h.setAttribute('role', 'heading'); h.setAttribute('aria-level', '2'); });
+    return el;
+  }
+
+  function friendlyAuthError(err) {
+    var m = String((err && err.message) || err || '').toLowerCase();
+    if (/invalid login credentials|invalid_credentials/.test(m)) return 'Incorrect email or password.';
+    if (/email not confirmed/.test(m)) return 'Please confirm your email address before signing in.';
+    if (/rate limit|too many/.test(m)) return 'Too many attempts. Please wait a moment and try again.';
+    if (/failed to fetch|network|load failed/.test(m)) return 'Network problem. Check your connection and try again.';
+    return 'We could not sign you in. Please try again.';
+  }
+
+  function passwordScore(v) {
+    var s = 0;
+    if (v.length >= 8) s++;
+    if (v.length >= 12) s++;
+    if (/[a-z]/.test(v) && /[A-Z]/.test(v)) s++;
+    if (/\d/.test(v)) s++;
+    if (/[^A-Za-z0-9]/.test(v)) s++;
+    return Math.min(4, s);
+  }
+  function enhancePasswordFields(scope) {
+    if (!scope) return;
+    scope.querySelectorAll('input[type="password"]').forEach(function (inp) {
+      if (inp.dataset.raEnhanced) return;
+      inp.dataset.raEnhanced = '1';
+      var lab = inp.closest('label');
+      if (lab) {
+        var t = '';
+        lab.childNodes.forEach(function (n) { if (n.nodeType === 3) t += n.textContent; });
+        t = t.trim();
+        if (t) inp.setAttribute('aria-label', t);
+      }
+      var wrap = document.createElement('span');
+      wrap.className = 'ra-pw';
+      inp.parentNode.insertBefore(wrap, inp);
+      wrap.appendChild(inp);
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'ra-pw-toggle'; b.textContent = 'Show';
+      b.setAttribute('aria-pressed', 'false'); b.setAttribute('aria-label', 'Show password');
+      b.addEventListener('click', function () {
+        var show = inp.type === 'password';
+        inp.type = show ? 'text' : 'password';
+        b.textContent = show ? 'Hide' : 'Show';
+        b.setAttribute('aria-pressed', String(show));
+        b.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+      });
+      wrap.appendChild(b);
+      if (inp.name === 'password') {
+        var meter = document.createElement('span');
+        meter.className = 'ra-strength'; meter.hidden = true;
+        meter.innerHTML = '<span class="ra-strength-bar"><i></i></span><span class="ra-strength-text"></span>';
+        wrap.parentNode.insertBefore(meter, wrap.nextSibling);
+        inp.addEventListener('input', function () {
+          var v = inp.value;
+          if (!v) { meter.hidden = true; return; }
+          var lvl = Math.max(1, passwordScore(v));
+          meter.hidden = false; meter.setAttribute('data-level', String(lvl));
+          meter.querySelector('i').style.width = (lvl * 25) + '%';
+          meter.querySelector('.ra-strength-text').textContent = ['', 'Weak', 'Fair', 'Good', 'Strong'][lvl];
+        });
+      }
+    });
+  }
+
+  function setPortalStatus(msg, kind) {
+    var el = document.getElementById('portalLoginStatus');
+    if (!el) return;
+    el.className = 'ra-status' + (kind ? ' ' + kind : '');
+    el.textContent = msg || '';
+  }
+
+  function bindAuthShell() {
+    var shell = document.getElementById('portalLoginPanel');
+    if (!shell || shell.dataset.raBound) return;
+    shell.dataset.raBound = '1';
+    var tabIn = document.getElementById('raTabSignin'), tabUp = document.getElementById('raTabSignup');
+    tabIn.addEventListener('click', function () { window.ramdaniGo('/portal/login'); });
+    tabUp.addEventListener('click', function () { window.ramdaniGo('/portal/signup'); });
+    [tabIn, tabUp].forEach(function (t) {
+      t.addEventListener('keydown', function (e) {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'Home' && e.key !== 'End') return;
+        e.preventDefault();
+        var target = (e.key === 'ArrowLeft' || e.key === 'Home') ? tabIn : tabUp;
+        if (document.documentElement.dir === 'rtl' && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) target = (target === tabIn) ? tabUp : tabIn;
+        target.focus(); target.click();
+      });
+    });
+    var pw = document.getElementById('portalLoginPassword'), tg = document.getElementById('raPwToggle');
+    tg.addEventListener('click', function () {
+      var show = pw.type === 'password';
+      pw.type = show ? 'text' : 'password';
+      tg.textContent = show ? 'Hide' : 'Show';
+      tg.setAttribute('aria-pressed', String(show));
+      tg.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+    });
+  }
+
+  function signupRoleFromRoute() {
+    try {
+      var q = new URLSearchParams(String((window.ramdaniRoute && ramdaniRoute.search()) || '').replace(/^\?/, ''));
+      var r = q.get('role');
+      return (r === 'student' || r === 'lawyer') ? r : '';
+    } catch (e) { return ''; }
+  }
+
+  async function showAuthPane(pane) {
+    var ids = { signin: 'raPaneSignin', signup: 'raPaneSignup', forgot: 'raPaneForgot' };
+    Object.keys(ids).forEach(function (k) { var el = document.getElementById(ids[k]); if (el) el.hidden = (k !== pane); });
+    var tabIn = document.getElementById('raTabSignin'), tabUp = document.getElementById('raTabSignup');
+    var upOn = pane === 'signup';
+    tabUp.setAttribute('aria-selected', String(upOn)); tabUp.tabIndex = upOn ? 0 : -1;
+    tabIn.setAttribute('aria-selected', String(!upOn)); tabIn.tabIndex = upOn ? -1 : 0;
+    document.title = (upOn ? 'Create account' : (pane === 'forgot' ? 'Reset password' : 'Sign in')) + ' — Ramdani Law Firm';
+
+    if (pane === 'forgot') {
+      if (window.ramdaniStudentBoot) await window.ramdaniStudentBoot('/student/forgot-password');
+      var fp = mountAuthPanel('studentForgotPanel', 'raForgotHost');
+      if (fp) fp.hidden = false;
+      enhancePasswordFields(document.getElementById('raForgotHost'));
+      return;
+    }
+    if (pane !== 'signup') return;
+
+    var role = signupRoleFromRoute();
+    document.getElementById('raRoleChooser').hidden = !!role;
+    document.getElementById('raRoleBack').hidden = !role;
+    if (role === 'student' && window.ramdaniStudentBoot) await window.ramdaniStudentBoot('/student/signup');
+    if (role === 'lawyer') bindLawyerSignup();
+    var stu = mountAuthPanel('studentSignupPanel', 'raSignupHost');
+    var law = mountAuthPanel('lawyerSignupPanel', 'raSignupHost');
+    if (stu) stu.hidden = (role !== 'student');
+    if (law) law.hidden = (role !== 'lawyer');
+    enhancePasswordFields(document.getElementById('raSignupHost'));
+  }
+
   async function bootPortal(path) {
+    var root = document.getElementById('portalRoot');
     var login = document.getElementById('portalLoginPanel');
     var host = document.getElementById('portalDashHost');
-    function setSt(msg) { var el = document.getElementById('portalLoginStatus'); if (el) el.textContent = msg || ''; }
+    var isDash = path.indexOf('/dashboard') >= 0;
+    if (root) root.classList.toggle('ramdani-auth-page', !isDash);
+    bindAuthShell();
     var form = document.getElementById('portalLoginForm');
     if (!form.dataset.bound) {
       form.dataset.bound = '1';
       form.addEventListener('submit', async function (e) {
-        e.preventDefault(); setSt('');
-        var res = await ramdaniAuth.signInPassword(document.getElementById('portalLoginEmail').value.trim(), document.getElementById('portalLoginPassword').value);
-        if (res.error) return setSt(res.error.message);
-        var prof = await ramdaniAuth.profile();
-        var msg = portalBlockMessage(prof);
-        if (msg) { await ramdaniAuth.signOut(); return setSt(msg); }
-        window.ramdaniGo(prof.role === 'client' ? '/client/dashboard' : '/portal/dashboard');
+        e.preventDefault(); setPortalStatus('');
+        var email = document.getElementById('portalLoginEmail').value.trim();
+        var pwd = document.getElementById('portalLoginPassword').value;
+        if (!email || !pwd) return setPortalStatus('Enter your email address and password.', 'err');
+        if (!/^\S+@\S+\.\S+$/.test(email)) return setPortalStatus('Enter a valid email address.', 'err');
+        var btn = form.querySelector('button[type="submit"]');
+        if (btn.disabled) return;
+        var label = btn.textContent;
+        btn.disabled = true; btn.textContent = 'Signing in…'; form.setAttribute('aria-busy', 'true');
+        try {
+          var res = await ramdaniAuth.signInPassword(email, pwd);
+          if (res.error) return setPortalStatus(friendlyAuthError(res.error), 'err');
+          var prof = await ramdaniAuth.profile();
+          var msg = portalBlockMessage(prof);
+          if (msg) { await ramdaniAuth.signOut(); return setPortalStatus(msg, 'err'); }
+          window.ramdaniGo(prof.role === 'client' ? '/client/dashboard' : '/portal/dashboard');
+        } catch (err) {
+          setPortalStatus(friendlyAuthError(err), 'err');
+        } finally {
+          btn.disabled = false; btn.textContent = label; form.removeAttribute('aria-busy');
+        }
       });
     }
     // Bring the three existing dashboards under the one portal root, all hidden until a role claims one.
@@ -3248,7 +3603,7 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
     var p = null;
     try { p = await ramdaniAuth.profile(); } catch (e) { p = null; }
     var canEnter = !!(p && ['student', 'member', 'lawyer'].indexOf(p.role) >= 0 && !(p.role === 'lawyer' && !p.is_active));
-    if (path.indexOf('/dashboard') >= 0) {
+    if (isDash) {
       if (p && p.role === 'client') { window.ramdaniGo('/client/dashboard'); return; }
       if (!canEnter) { window.ramdaniGo('/portal/login'); return; }
       login.hidden = true;
@@ -3257,8 +3612,17 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
       await bootLawyerPortal('/lawyer/dashboard');
       return;
     }
+    // Already signed in: never show the form — send each role where the existing routing sends it.
     if (canEnter) { window.ramdaniGo('/portal/dashboard'); return; }
+    if (p && p.role === 'client') { window.ramdaniGo('/client/dashboard'); return; }
+    if (p && p.is_active && STAFF_ONLY_ROLES.indexOf(p.role) >= 0) {
+      // The admin panel reads the session once at page load, so it needs a fresh load.
+      location.hash = '#/admin/'; location.reload(); return;
+    }
+    var pane = path === '/portal/signup' ? 'signup' : (path === '/portal/forgot' ? 'forgot' : 'signin');
+    await showAuthPane(pane);
     login.hidden = false;
+    if (window.ramdaniAuthMedia) window.ramdaniAuthMedia.mount(document.getElementById('raMedia'));
   }
 
   async function showLawyerPortal(path) {
@@ -4386,6 +4750,226 @@ window.ramdaniAuth = {
     return sb.auth.signOut();
   }
 };
+</script>
+<!-- APPLICATION LOGIC: js/auth-media.js (authentication page side media; reuses homepage_sections + site-assets — no new table or bucket) -->
+<script>
+(function () {
+  'use strict';
+  var KEY = 'auth_side_media';            // homepage_sections.section_key
+  var BUCKET = 'site-assets';             // existing public bucket
+  var PREFIX = 'branding/auth-side-';     // only objects with this prefix are ever deleted by this module
+  var MARKER = '/storage/v1/object/public/' + BUCKET + '/';
+  var IMAGE = { max: 8 * 1024 * 1024 };
+  var VIDEO = { max: 25 * 1024 * 1024 };
+  var MIME_EXT = { 'image/jpeg': ['jpg', 'jpeg'], 'image/png': ['png'], 'image/webp': ['webp'], 'video/mp4': ['mp4'], 'video/webm': ['webm'] };
+  var MSG_TYPE = 'Unsupported file type. Please upload JPG, PNG, WEBP, MP4 or WebM.';
+  var MSG_SIZE = 'File is too large. Images must be 8 MB or smaller and videos 25 MB or smaller.';
+  var DEFAULT_HEADING = 'Trusted Legal Professionals';
+  var DEFAULT_DESC = 'Professional legal services you can rely on.';
+
+  function extOf(name) { var m = /\.([a-z0-9]+)$/i.exec(name || ''); return m ? m[1].toLowerCase() : ''; }
+  function safeUrl(u) { return /^https:\/\//i.test(u || '') ? u : ''; }
+  function kindFromUrl(u) {
+    var m = /\.([a-z0-9]+)(?:[?#].*)?$/i.exec(u || ''); var e = m ? m[1].toLowerCase() : '';
+    if (e === 'mp4' || e === 'webm') return 'video';
+    if (e === 'jpg' || e === 'jpeg' || e === 'png' || e === 'webp') return 'image';
+    return '';
+  }
+  function pathFromUrl(u) { var i = (u || '').indexOf(MARKER); return i < 0 ? null : decodeURIComponent(u.slice(i + MARKER.length).split('?')[0]); }
+
+  // ---------- public side: render into the authentication page ----------
+  function build(kind, url, host, onFail) {
+    if (kind === 'video') {
+      var v = document.createElement('video');
+      v.muted = true; v.defaultMuted = true; v.autoplay = true; v.loop = true; v.playsInline = true;
+      v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.preload = 'metadata';
+      v.setAttribute('aria-hidden', 'true'); v.tabIndex = -1; v.disablePictureInPicture = true;
+      v.addEventListener('error', function () { if (v.parentNode) v.parentNode.removeChild(v); if (onFail) onFail(); });
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { v.autoplay = false; v.loop = false; }
+      v.src = url;
+      host.appendChild(v);
+      if (v.autoplay) { var pr = v.play && v.play(); if (pr && pr.catch) pr.catch(function () {}); }
+    } else {
+      var i = document.createElement('img');
+      i.alt = ''; i.decoding = 'async';
+      i.addEventListener('error', function () { if (i.parentNode) i.parentNode.removeChild(i); if (onFail) onFail(); });
+      i.src = url;
+      host.appendChild(i);
+    }
+  }
+  function render(root, row) {
+    if (!root) return;
+    var stage = root.querySelector('[data-ra-stage]');
+    var h = root.querySelector('[data-ra-heading]'), d = root.querySelector('[data-ra-desc]');
+    stage.textContent = '';
+    var url = safeUrl(row && row.image_url);
+    if (url) {
+      build(kindFromUrl(url) || (row.content === 'video' ? 'video' : 'image'), url, stage);
+    } else {
+      var mark = document.createElement('div'); mark.className = 'ra-media-mark';
+      var logo = document.createElement('img'); logo.src = '/assets/ramdani-logo.png'; logo.alt = '';
+      mark.appendChild(logo); stage.appendChild(mark);
+    }
+    h.textContent = (row && row.title) || DEFAULT_HEADING;   // textContent only — never innerHTML
+    d.textContent = (row && row.subtitle) || DEFAULT_DESC;
+  }
+  async function fetchPublic() {
+    try {
+      if (!window.sb) return null;
+      var res = await sb.from('homepage_sections').select('title,subtitle,content,image_url').eq('section_key', KEY).eq('is_enabled', true).maybeSingle();
+      return (res.error || !res.data) ? null : res.data;
+    } catch (e) { return null; }
+  }
+  async function loadInto(root) { var row = await fetchPublic(); if (row) render(root, row); }
+  function mount(root) {
+    if (!root || root.dataset.raLoaded) return;
+    root.dataset.raLoaded = '1';
+    render(root, null);          // branded default immediately, so nothing waits on the network
+    loadInto(root);
+  }
+  function reload() { var root = document.getElementById('raMedia'); if (root) { render(root, null); loadInto(root); } }
+
+  // ---------- admin side ----------
+  var A = { row: null, pending: null, objUrl: null, busy: false, bound: false };
+  function $(id) { return document.getElementById(id); }
+  function say(msg, kind) { var el = $('authMediaNote'); if (!el) return; el.className = 'form-status' + (kind ? ' ' + kind : ''); el.textContent = msg || ''; }
+
+  async function sniff(file) {
+    var b = new Uint8Array(await file.slice(0, 16).arrayBuffer());
+    function at(o, s) { for (var i = 0; i < s.length; i++) if (b[o + i] !== s.charCodeAt(i)) return false; return true; }
+    if (b[0] === 0xFF && b[1] === 0xD8 && b[2] === 0xFF) return 'image/jpeg';
+    if (b[0] === 0x89 && at(1, 'PNG')) return 'image/png';
+    if (at(0, 'RIFF') && at(8, 'WEBP')) return 'image/webp';
+    if (at(4, 'ftyp')) return 'video/mp4';
+    if (b[0] === 0x1A && b[1] === 0x45 && b[2] === 0xDF && b[3] === 0xA3) return 'video/webm';
+    return '';
+  }
+  async function validateFile(file) {
+    var mime = (file.type || '').toLowerCase(), ext = extOf(file.name);
+    if (!MIME_EXT[mime] || MIME_EXT[mime].indexOf(ext) < 0) return { ok: false, error: MSG_TYPE };
+    var kind = mime.indexOf('video/') === 0 ? 'video' : 'image';
+    if (!file.size) return { ok: false, error: 'This file is empty.' };
+    if (file.size > (kind === 'video' ? VIDEO.max : IMAGE.max)) return { ok: false, error: MSG_SIZE };
+    if ((await sniff(file)) !== mime) return { ok: false, error: MSG_TYPE };
+    return { ok: true, kind: kind, ext: ext };
+  }
+  function friendlyStorage(err) {
+    var m = String((err && (err.message || err.error)) || '').toLowerCase();
+    if (/exceed|too large|payload|size/.test(m)) return 'File is too large for the storage limit.';
+    if (/mime|not supported|unsupported|invalid/.test(m)) return 'The storage bucket does not accept this file type yet. Ask the developer to allow MP4/WebM uploads on the site-assets bucket.';
+    if (/row-level security|unauthori|forbidden|403|permission/.test(m)) return 'You do not have permission to upload authentication media.';
+    return 'Upload failed. Please try again.';
+  }
+  function friendlyDb(err) {
+    var m = String((err && (err.message || '')) || '').toLowerCase();
+    if (/row-level security|permission denied|42501|jwt|unauthori/.test(m)) return 'You do not have permission to change the authentication page.';
+    return 'Could not save. Please try again.';
+  }
+  function preview(url, kind) {
+    var box = $('authMediaPreview'); if (!box) return;
+    box.textContent = '';
+    if (!url) { var p = document.createElement('p'); p.className = 'ra-admin-empty'; p.textContent = 'No media set — the default navy panel is shown.'; box.appendChild(p); return; }
+    build(kind, url, box, function () {
+      var m = document.createElement('p'); m.className = 'ra-admin-empty';
+      m.textContent = 'This browser cannot preview this file. Visitors may not be able to play it either — use an H.264 MP4, a VP9 WebM, or a JPG/PNG/WEBP image.';
+      box.appendChild(m);
+    });
+  }
+  function showType(kind) { var t = $('authMediaType'); if (t) t.value = kind ? (kind === 'video' ? 'Video' : 'Image') : '—'; }
+  function clearPending() {
+    if (A.objUrl) { URL.revokeObjectURL(A.objUrl); A.objUrl = null; }
+    A.pending = null; var f = $('authMediaFile'); if (f) f.value = ''; var c = $('authMediaCancel'); if (c) c.hidden = true;
+    var url = A.row && safeUrl(A.row.image_url); var k = url ? (kindFromUrl(url) || 'image') : '';
+    preview(url, k); showType(k);
+  }
+  async function removeStored(url) {
+    var path = pathFromUrl(url);
+    if (path && path.indexOf(PREFIX) === 0) { try { await sb.storage.from(BUCKET).remove([path]); } catch (e) { /* best effort */ } }
+  }
+  function busy(on) { A.busy = on; ['authMediaSave', 'authMediaRemove', 'authMediaCancel', 'authMediaFile'].forEach(function (id) { var el = $(id); if (el) el.disabled = on; }); }
+
+  async function onFile() {
+    var f = $('authMediaFile').files[0];
+    if (!f) return clearPending();
+    var v = await validateFile(f);
+    if (!v.ok) { $('authMediaFile').value = ''; say(v.error, 'err'); return; }
+    if (A.objUrl) URL.revokeObjectURL(A.objUrl);
+    A.objUrl = URL.createObjectURL(f); A.pending = { file: f, kind: v.kind, ext: v.ext };
+    preview(A.objUrl, v.kind); showType(v.kind); $('authMediaCancel').hidden = false;
+    say('Preview only. Click “Save changes” to upload and publish it.', '');
+  }
+  async function onSave(e) {
+    e.preventDefault();
+    if (A.busy) return;
+    var form = $('authMediaForm');
+    var heading = form.elements.heading.value.trim(), desc = form.elements.description.value.trim();
+    if (heading.length > 80) return say('Heading must be 80 characters or fewer.', 'err');
+    if (desc.length > 200) return say('Description must be 200 characters or fewer.', 'err');
+    busy(true);
+    var uploaded = null;
+    try {
+      var url = A.row ? A.row.image_url : null, kind = url ? (kindFromUrl(url) || 'image') : '';
+      if (A.pending) {
+        say('Uploading…', 'uploading');
+        var path = PREFIX + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.' + A.pending.ext;
+        var up = await sb.storage.from(BUCKET).upload(path, A.pending.file, { upsert: false, contentType: A.pending.file.type, cacheControl: '3600' });
+        if (up.error) { console.error(up.error); throw { friendly: friendlyStorage(up.error) }; }
+        uploaded = path;
+        var pub = sb.storage.from(BUCKET).getPublicUrl(path);
+        url = pub && pub.data ? pub.data.publicUrl : null;
+        if (!url) throw { friendly: 'Uploaded, but the public link could not be created.' };
+        kind = A.pending.kind;
+      }
+      say('Saving…', 'uploading');
+      var payload = { title: heading || null, subtitle: desc || null, content: url ? kind : null, image_url: url || null, is_enabled: true };
+      var res = A.row
+        ? await sb.from('homepage_sections').update(payload).eq('id', A.row.id).select().single()
+        : await sb.from('homepage_sections').insert(Object.assign({ section_key: KEY, sort_order: 0 }, payload)).select().single();
+      if (res.error) { console.error(res.error); if (uploaded) await removeStored(sb.storage.from(BUCKET).getPublicUrl(uploaded).data.publicUrl); throw { friendly: friendlyDb(res.error) }; }
+      var old = A.row && A.row.image_url; A.row = res.data;
+      if (uploaded && old && old !== url) await removeStored(old);
+      clearPending(); reload();
+      say('Saved. The authentication page now uses this content.', 'ok');
+    } catch (err) {
+      say((err && err.friendly) || 'Could not save. Please try again.', 'err');
+    } finally { busy(false); }
+  }
+  async function onRemove() {
+    if (A.busy) return;
+    if (A.pending) return clearPending();
+    if (!A.row || !A.row.image_url) return say('There is no media to remove.', '');
+    if (!window.confirm('Remove the current image/video from the authentication page?')) return;
+    busy(true);
+    try {
+      var old = A.row.image_url;
+      var res = await sb.from('homepage_sections').update({ image_url: null, content: null }).eq('id', A.row.id).select().single();
+      if (res.error) { console.error(res.error); throw { friendly: friendlyDb(res.error) }; }
+      A.row = res.data; await removeStored(old); clearPending(); reload(); say('Media removed.', 'ok');
+    } catch (err) { say((err && err.friendly) || 'Could not remove the media.', 'err'); }
+    finally { busy(false); }
+  }
+  async function adminOpen() {
+    if (!A.bound) {
+      A.bound = true;
+      $('authMediaFile').addEventListener('change', onFile);
+      $('authMediaForm').addEventListener('submit', onSave);
+      $('authMediaRemove').addEventListener('click', onRemove);
+      $('authMediaCancel').addEventListener('click', function () { clearPending(); say('Selection discarded.', ''); });
+    }
+    say('Loading…', 'uploading');
+    var res = await sb.from('homepage_sections').select('*').eq('section_key', KEY).maybeSingle();
+    if (res.error) { console.error(res.error); say('Could not load the current settings.', 'err'); return; }
+    A.row = res.data || null;
+    var f = $('authMediaForm');
+    f.elements.heading.value = (A.row && A.row.title) || '';
+    f.elements.description.value = (A.row && A.row.subtitle) || '';
+    f.elements.heading.placeholder = DEFAULT_HEADING; f.elements.description.placeholder = DEFAULT_DESC;
+    clearPending();
+    say(A.row ? '' : 'Nothing saved yet — the default panel is shown to visitors.', '');
+  }
+
+  window.ramdaniAuthMedia = { mount: mount, reload: reload, adminOpen: adminOpen, validateFile: validateFile };
+})();
 </script>
 <!-- APPLICATION LOGIC: js/student.js -->
 <script>
@@ -6441,7 +7025,7 @@ window.ramdaniAuth = {
     '__applications': ['student_manager', 'communications_manager'],
     '__joinrequests': ['communications_manager'],
     'social_posts': ['content_manager'],
-    '__homepagesections': ['content_manager'], '__navigation': ['content_manager'],
+    '__homepagesections': ['content_manager'], '__authmedia': ['content_manager'], '__navigation': ['content_manager'],
     '__seosettings': ['content_manager'], '__seooverrides': ['content_manager'], '__disclaimers': ['content_manager'],
     '__orgsettings': [], '__brandinglogo': [], '__brandingtype': [], '__contactinfo': [],
     '__certtemplates': ['education_manager'],
@@ -10989,7 +11573,7 @@ window.ramdaniAuth = {
   }
 
   function showAdminView(view) {
-    var panels = ['dashboardPanel','studentsPanel','adminsPanel','staffAccountsPanel','lawyerAppsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','orgSettingsPanel','brandingLogoPanel','brandingTypePanel','contactInfoPanel','seoSettingsPanel','systemSettingsPanel','disclaimersPanel','homepageSectionsPanel','navigationPanel','certTemplatesPanel','mediaLibraryPanel','certIssuancesPanel','courseBuilderPanel','quizBuilderPanel','quizResultsPanel','eduSearchPanel','enrollmentsPanel','seoOverridesPanel','notificationsPanel','auditLogPanel','opsDashPanel','clientsPanel','legalMattersPanel','myTasksPanel','legalCalendarPanel','legalDocsPanel','legalCommsPanel','legalReportsPanel','legalSearchPanel','organizationsPanel','membershipsPanel','membersPanel','memberProfilePanel','memberCardsPanel','studentCardsPanel','eventsPanel','eventRegsPanel','eventGuestsPanel','docsCenterPanel'];
+    var panels = ['dashboardPanel','studentsPanel','adminsPanel','staffAccountsPanel','lawyerAppsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','orgSettingsPanel','brandingLogoPanel','brandingTypePanel','contactInfoPanel','seoSettingsPanel','systemSettingsPanel','disclaimersPanel','homepageSectionsPanel','authMediaPanel','navigationPanel','certTemplatesPanel','mediaLibraryPanel','certIssuancesPanel','courseBuilderPanel','quizBuilderPanel','quizResultsPanel','eduSearchPanel','enrollmentsPanel','seoOverridesPanel','notificationsPanel','auditLogPanel','opsDashPanel','clientsPanel','legalMattersPanel','myTasksPanel','legalCalendarPanel','legalDocsPanel','legalCommsPanel','legalReportsPanel','legalSearchPanel','organizationsPanel','membershipsPanel','membersPanel','memberProfilePanel','memberCardsPanel','studentCardsPanel','eventsPanel','eventRegsPanel','eventGuestsPanel','docsCenterPanel'];
     panels.forEach(function(id){ var el=document.getElementById(id); if(el){ el.hidden=true; el.classList.remove('is-active'); }});
     document.querySelectorAll('.admin-nav [data-table]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-table')===view); });
     document.getElementById('adminApp').classList.remove('nav-open');
@@ -11009,6 +11593,7 @@ window.ramdaniAuth = {
     if(view==='__systemsettings') { activate('systemSettingsPanel','System settings'); loadSystemSettings(); return; }
     if(view==='__disclaimers') { activate('disclaimersPanel','Disclaimers'); loadDisclaimers(); return; }
     if(view==='__homepagesections') { activate('homepageSectionsPanel','Homepage sections'); loadHomepageSections(); return; }
+    if(view==='__authmedia') { activate('authMediaPanel','Authentication page — Side media'); if (window.ramdaniAuthMedia) window.ramdaniAuthMedia.adminOpen(); return; }
     if(view==='__navigation') { activate('navigationPanel','Navigation'); loadNavigation(); return; }
     if(view==='__certtemplates') { activate('certTemplatesPanel','Certificate templates'); loadCertTemplates(); return; }
     if(view==='__medialibrary') { activate('mediaLibraryPanel','Media library'); loadMediaLibrary(); return; }
