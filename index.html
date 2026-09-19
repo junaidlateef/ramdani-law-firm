@@ -895,7 +895,10 @@ html[dir="rtl"] .lead {
           </div>
 
           <div id="inquiriesPanel" class="admin-panel" hidden><div class="admin-section-head"><div><h2>Inquiries</h2><p class="note">Workflow: New → Reviewing → Contacted → In progress → Closed → Archived. Internal notes never appear publicly.</p></div></div><div class="table-wrap"><table class="data"><thead><tr><th>Kind</th><th>Type</th><th>Name</th><th>Email</th><th>Subject</th><th>Assigned</th><th>Status</th><th>Internal notes</th></tr></thead><tbody id="inqBody"></tbody></table></div></div>
-          <div id="applicationsPanel" class="admin-panel" hidden><div class="admin-section-head"><div><h2>Internship applications</h2><p class="note">Public application submissions. Status changes are staff-only.</p></div></div><div class="table-wrap"><table class="data"><thead><tr><th>Listing</th><th>Name</th><th>Email</th><th>Education</th><th>Status</th><th>Internal notes</th></tr></thead><tbody id="internAppBody"></tbody></table></div></div>
+          <div id="applicationsPanel" class="admin-panel" hidden><div class="admin-section-head"><div><h2>Internship applications</h2><p class="note">Public application submissions. Status changes and internal notes are staff-only and never shown to applicants.</p></div></div>
+            <div class="admin-toolbar" id="internAppTabs"></div>
+            <div class="admin-toolbar"><input type="search" id="internAppSearch" placeholder="Search name or email" aria-label="Search applications" /></div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Ref</th><th>Photo</th><th>Listing</th><th>Name</th><th>Email</th><th>Education</th><th>CV</th><th>Status</th><th>Internal notes</th></tr></thead><tbody id="internAppBody"></tbody></table></div></div>
           <div id="joinrequestsPanel" class="admin-panel" hidden><div class="admin-section-head"><div><h2>Society / chapter requests</h2><p class="note">Public join-form inquiries, not memberships.</p></div></div><div class="table-wrap"><table class="data"><thead><tr><th>Kind</th><th>Listing</th><th>Name</th><th>Email</th><th>Message</th></tr></thead><tbody id="joinReqBody"></tbody></table></div></div>
 
           <div id="orgSettingsPanel" class="admin-panel" hidden>
@@ -1792,7 +1795,7 @@ html[dir="rtl"] .lead {
           <button class="btn btn-primary" type="submit">Sign in</button>
         </form>
         <p id="studentLoginStatus" class="form-status"></p>
-        <p><a href="/student/signup">Create a student account</a> · <a href="/student/forgot-password">Forgot password?</a></p>
+        <p><a href="/join">Create an account</a> · <a href="/student/forgot-password">Forgot password?</a></p>
         <p class="note"><a href="/">Back to public site</a></p>
       </div>
 
@@ -1809,6 +1812,8 @@ html[dir="rtl"] .lead {
           <label>University <input name="university" required /></label>
           <label>Session <input name="session" placeholder="e.g. 2023–2027" required /></label>
           <label>Photo <input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required /></label>
+          <label>CV / resume (PDF, optional) <input name="cv" type="file" accept="application/pdf" /></label>
+          <div id="studentCaptcha"></div>
           <button class="btn btn-primary" type="submit">Create account</button>
         </form>
         <p id="studentSignupStatus" class="form-status"></p>
@@ -2068,7 +2073,7 @@ html[dir="rtl"] .lead {
           <button class="btn btn-primary" type="submit">Sign in</button>
         </form>
         <p id="lawyerLoginStatus" class="form-status"></p>
-        <p>New lawyer? <a href="/lawyer/signup">Register here</a>. Your registration is reviewed and approved by the firm admin before you can sign in.</p>
+        <p>New here? <a href="/join">Create an account</a>. Registration is reviewed and approved by the firm admin before you can sign in.</p>
         <p class="note"><a href="/">Back to public site</a></p>
       </div>
 
@@ -2090,6 +2095,9 @@ html[dir="rtl"] .lead {
           </select></label>
           <label>Profile photo (JPG, PNG or WebP) <input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required /></label>
           <img id="lawSignupPhotoPreview" class="portal-photo is-empty" alt="Photo preview" hidden />
+          <label>Bar licence card (photo or PDF) <input name="license_card" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" required /></label>
+          <label>CV (PDF, or a scanned image) <input name="cv" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" required /></label>
+          <div id="lawyerCaptcha"></div>
           <input name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;height:0;width:0;opacity:0" aria-hidden="true" />
           <button class="btn btn-primary" type="submit">Submit registration</button>
         </form>
@@ -2454,7 +2462,9 @@ var rows = await ramdaniApi.listPublished('articles', null); ramdaniUi.renderLis
         <label>Preferred duration <input name="preferred_duration" /></label>
         <label>Preferred location <input name="preferred_location" /></label>
         <label>Cover letter <textarea name="cover_letter" rows="6" required></textarea></label>
-        <label>CV / portfolio URL (https only) <input name="cv_url" type="url" placeholder="https://" /></label>
+        <label>Photo <input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required /></label>
+        <label>CV / resume file (PDF, optional) <input name="cv_file" type="file" accept="application/pdf" /></label>
+        <label>Or CV / portfolio URL (https only) <input name="cv_url" type="url" placeholder="https://" /></label>
         <input type="hidden" name="internship_slug" />
         <button class="btn btn-primary" type="submit" data-i18n="form_send"></button>
         <p class="form-status"></p>
@@ -2462,6 +2472,37 @@ var rows = await ramdaniApi.listPublished('articles', null); ramdaniUi.renderLis
     </div></section>`, init: async function () {
 if (window.ramdaniEducation) ramdaniEducation.bindInternshipApply();
   } },
+  '/pages/join.html': { title: 'Create an account — Ramdani Law Firm', desc: 'Create a lawyer or student account with Ramdani Law Firm, Dera Ghazi Khan, Pakistan.', html: `<section class="section"><div class="wrap">
+      <h1>Create an account</h1>
+      <p class="note">Choose the account type that applies to you. Each type asks for the documents needed to review your application.</p>
+      <form class="form" id="joinTypeForm">
+        <label>I am a…
+          <select id="joinTypeSelect" required>
+            <option value="">Select account type</option>
+            <option value="student">Student</option>
+            <option value="lawyer">Lawyer</option>
+          </select>
+        </label>
+        <button class="btn btn-primary" type="submit">Continue</button>
+      </form>
+      <p class="note" id="joinTypeHint" hidden></p>
+    </div></section>`, init: async function () {
+      var form = document.getElementById('joinTypeForm');
+      var hint = document.getElementById('joinTypeHint');
+      var routes = { student: { path: '/student/signup', label: 'Student sign up asks for your student ID, department, university, photo and (optionally) your CV.' }, lawyer: { path: '/lawyer/signup', label: 'Lawyer registration asks for your bar association details, a photo, your bar licence card and your CV. It is reviewed by the firm admin before you can sign in.' } };
+      var sel = document.getElementById('joinTypeSelect');
+      sel.addEventListener('change', function () {
+        var r = routes[sel.value];
+        if (r) { hint.hidden = false; hint.textContent = r.label; } else { hint.hidden = true; }
+      });
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var r = routes[sel.value];
+        if (!r) return;
+        window.ramdaniGo(r.path);
+      });
+    } },
+
   '/pages/internships.html': { title: 'Internships — Ramdani Law Firm', desc: 'Internships — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section"><div class="wrap">
       <h1 data-i18n="internships_title"></h1>
       <p class="lead" data-i18n="internships_lead"></p>
@@ -3090,12 +3131,33 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
       fr.readAsDataURL(file);
     });
   }
+  function fileToDataUrlRaw(file) {
+    return new Promise(function (resolve, reject) {
+      var fr = new FileReader();
+      fr.onerror = function () { reject(new Error('File could not be read.')); };
+      fr.onload = function () { resolve(fr.result); };
+      fr.readAsDataURL(file);
+    });
+  }
+  // Simple arithmetic captcha: rendered client-side, verified again server-side
+  // (lawyer-signup edge function) where applicable, and client-side for the
+  // student flow which has no dedicated edge function to check it against.
+  function mountMathCaptcha(container) {
+    var a = 2 + Math.floor(Math.random() * 8);
+    var b = 1 + Math.floor(Math.random() * 8);
+    container.innerHTML = '<label><span>Security check: what is ' + a + ' + ' + b + '?</span>' +
+      '<input type="text" inputmode="numeric" name="captcha_answer_display" autocomplete="off" required /></label>' +
+      '<input type="hidden" name="captcha_expected" value="' + (a + b) + '" />';
+  }
+  window.ramdaniMountMathCaptcha = mountMathCaptcha;
   function bindLawyerSignup() {
     var form = document.getElementById('lawyerSignupForm');
     if (!form || form.dataset.bound) return;
     form.dataset.bound = '1';
     var st = document.getElementById('lawyerSignupStatus');
     function say(msg, ok) { st.className = 'form-status' + (msg ? (ok ? ' ok' : ' err') : ''); st.textContent = msg || ''; }
+    var captchaEl = document.getElementById('lawyerCaptcha');
+    if (captchaEl) mountMathCaptcha(captchaEl);
     form.elements.photo.addEventListener('change', function () {
       var f = this.files[0], pv = document.getElementById('lawSignupPhotoPreview');
       if (f && /^image\//.test(f.type)) { pv.src = URL.createObjectURL(f); pv.hidden = false; pv.classList.remove('is-empty'); } else { pv.hidden = true; }
@@ -3107,9 +3169,20 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
       if (f.password.value !== f.confirm_password.value) return say('Passwords do not match.');
       var file = f.photo.files[0];
       if (!file || !/^image\/(jpeg|png|webp)$/i.test(file.type)) return say('Choose a JPG, PNG or WebP photo.');
+      var cardFile = f.license_card.files[0];
+      if (!cardFile) return say('Upload your bar licence card.');
+      if (cardFile.size > 6 * 1024 * 1024) return say('Licence card must be under 6 MB.');
+      var cvFile = f.cv.files[0];
+      if (!cvFile) return say('Upload your CV.');
+      if (cvFile.size > 6 * 1024 * 1024) return say('CV must be under 6 MB.');
+      var expected = Number((f.captcha_expected || {}).value);
+      var answer = Number((f.captcha_answer_display || {}).value);
+      if (!Number.isFinite(answer) || answer !== expected) return say('Security check answer is incorrect.');
       var btn = form.querySelector('button[type="submit"]'); btn.disabled = true; say('Submitting…');
       try {
         var photo = await lawyerPhotoToDataUrl(file);
+        var licenseCard = await fileToDataUrlRaw(cardFile);
+        var cv = await fileToDataUrlRaw(cvFile);
         var cfg = window.RAMDANI_CONFIG;
         var res = await fetch(cfg.supabaseUrl + '/functions/v1/lawyer-signup', {
           method: 'POST',
@@ -3117,12 +3190,14 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
           body: JSON.stringify({
             full_name: f.full_name.value.trim(), email: f.email.value.trim(), password: f.password.value,
             phone: f.phone.value.trim(), bar_association: f.bar_association.value.trim(), bar_license_no: f.bar_license_no.value.trim(),
-            district: f.district.value.trim(), province: f.province.value, website: f.website.value, photo_base64: photo
+            district: f.district.value.trim(), province: f.province.value, website: f.website.value, photo_base64: photo,
+            license_card_base64: licenseCard, cv_base64: cv, captcha_expected: expected, captcha_answer: answer
           })
         });
         var data = {}; try { data = await res.json(); } catch (x) {}
-        if (!res.ok) { btn.disabled = false; return say(data.error || ('Registration failed (' + res.status + ')')); }
+        if (!res.ok) { btn.disabled = false; if (captchaEl) mountMathCaptcha(captchaEl); return say(data.error || ('Registration failed (' + res.status + ')')); }
         form.reset(); document.getElementById('lawSignupPhotoPreview').hidden = true;
+        if (captchaEl) mountMathCaptcha(captchaEl);
         say('Registration submitted. The firm admin will review it; you can sign in once it is approved.' + (data.warning ? ' ' + data.warning : ''), true);
       } catch (err) { say(err.message || 'Registration failed.'); }
       btn.disabled = false;
@@ -4215,12 +4290,20 @@ window.ramdaniAuth = {
         session: form.session.value.trim()
       };
       var photoFile = form.photo.files[0];
+      var cvFile = form.cv.files[0];
       if (!/^\S+@\S+\.\S+$/.test(fields.email)) return setStatus('studentSignupStatus', 'Enter a valid email address.');
       if (fields.password.length < 8) return setStatus('studentSignupStatus', 'Password must be at least 8 characters.');
       if (fields.password !== fields.confirm_password) return setStatus('studentSignupStatus', 'Passwords do not match.');
       if (!photoFile) return setStatus('studentSignupStatus', 'Upload a photo.');
       if (!/^image\/(jpeg|png|webp)$/i.test(photoFile.type)) return setStatus('studentSignupStatus', 'Use a JPG, PNG or WebP image.');
       if (photoFile.size > 4 * 1024 * 1024) return setStatus('studentSignupStatus', 'Photo must be under 4 MB.');
+      if (cvFile) {
+        if (cvFile.type !== 'application/pdf') return setStatus('studentSignupStatus', 'CV must be a PDF.');
+        if (cvFile.size > 8 * 1024 * 1024) return setStatus('studentSignupStatus', 'CV must be under 8 MB.');
+      }
+      var expected = Number((form.captcha_expected || {}).value);
+      var answer = Number((form.captcha_answer_display || {}).value);
+      if (!Number.isFinite(answer) || answer !== expected) return setStatus('studentSignupStatus', 'Security check answer is incorrect.');
       var res = await ramdaniAuth.signUpStudent(fields);
       if (res.error) {
         var msg = /already registered|already exists/i.test(res.error.message)
@@ -4231,17 +4314,22 @@ window.ramdaniAuth = {
       if (res.data && res.data.session) {
         // Email confirmation is off on this project: session issued immediately.
         setStatus('studentSignupStatus', 'Uploading photo…', true);
+        var uid = res.data.session.user.id;
         var ext = (photoFile.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
         if (['jpeg', 'jpg', 'png', 'webp'].indexOf(ext) === -1) ext = 'jpg';
-        var storagePath = 'students/' + res.data.session.user.id + '/photo.' + ext;
+        var storagePath = 'students/' + uid + '/photo.' + ext;
         var up = await sb.storage.from('private-docs').upload(storagePath, photoFile, { upsert: true, contentType: photoFile.type, cacheControl: '3600' });
-        if (up.error) {
-          // Account exists but photo upload failed; let them retry from the dashboard.
-          setStatus('studentSignupStatus', 'Account created, but the photo upload failed: ' + up.error.message + ' You can upload it from your dashboard.', false);
-          window.ramdaniGo('/student/dashboard');
-          return;
+        var profileUpdate = {};
+        if (!up.error) profileUpdate.photo_path = storagePath;
+        if (cvFile) {
+          var cvPath = 'students/' + uid + '/cv.pdf';
+          var cvUp = await sb.storage.from('private-docs').upload(cvPath, cvFile, { upsert: true, contentType: 'application/pdf', cacheControl: '3600' });
+          if (!cvUp.error) profileUpdate.cv_path = cvPath;
         }
-        await sb.from('profiles').update({ photo_path: storagePath }).eq('id', res.data.session.user.id);
+        if (Object.keys(profileUpdate).length) await sb.from('profiles').update(profileUpdate).eq('id', uid);
+        if (up.error) {
+          setStatus('studentSignupStatus', 'Account created, but the photo upload failed: ' + up.error.message + ' You can upload it from your dashboard.', false);
+        }
         window.ramdaniGo('/student/dashboard');
         return;
       }
@@ -4515,7 +4603,11 @@ window.ramdaniAuth = {
 
   window.ramdaniStudentBoot = async function (path) {
     bindForms();
-    if (path === '/student/signup') return showPanel('studentSignupPanel');
+    if (path === '/student/signup') {
+      var capEl = document.getElementById('studentCaptcha');
+      if (capEl && window.ramdaniMountMathCaptcha) window.ramdaniMountMathCaptcha(capEl);
+      return showPanel('studentSignupPanel');
+    }
     if (path === '/student/forgot-password') return showPanel('studentForgotPanel');
 
     if (path === '/student/dashboard') {
@@ -4997,6 +5089,15 @@ window.ramdaniAuth = {
       var status = form.querySelector('.form-status');
       var hp = form.querySelector('[name="company_website"]');
       if (hp && hp.value) return;
+      var photoFile = (form.querySelector('[name="photo"]') || {}).files && form.querySelector('[name="photo"]').files[0];
+      var cvFile = (form.querySelector('[name="cv_file"]') || {}).files && form.querySelector('[name="cv_file"]').files[0];
+      if (!photoFile) { status.className = 'form-status err'; status.textContent = 'Upload a photo.'; return; }
+      if (!/^image\/(jpeg|png|webp)$/i.test(photoFile.type)) { status.className = 'form-status err'; status.textContent = 'Use a JPG, PNG or WebP image for the photo.'; return; }
+      if (photoFile.size > 4 * 1024 * 1024) { status.className = 'form-status err'; status.textContent = 'Photo must be under 4 MB.'; return; }
+      if (cvFile) {
+        if (cvFile.type !== 'application/pdf') { status.className = 'form-status err'; status.textContent = 'CV file must be a PDF.'; return; }
+        if (cvFile.size > 8 * 1024 * 1024) { status.className = 'form-status err'; status.textContent = 'CV file must be under 8 MB.'; return; }
+      }
       var internId = null;
       if (slug) {
         var found = await sb.from('internships').select('id').eq('slug', slug).eq('status', 'published').maybeSingle();
@@ -5037,10 +5138,28 @@ window.ramdaniAuth = {
         status.textContent = ramdaniT('form_err');
         return;
       }
-      var res = await sb.from('internship_applications').insert(payload);
-      status.className = res.error ? 'form-status err' : 'form-status ok';
-      status.textContent = res.error ? ramdaniT('form_err') : ramdaniT('form_ok');
-      if (!res.error) form.reset();
+      var res = await sb.from('internship_applications').insert(payload).select('id').single();
+      if (res.error || !res.data) {
+        status.className = 'form-status err';
+        status.textContent = ramdaniT('form_err');
+        return;
+      }
+      var appId = res.data.id;
+      var updates = {};
+      var photoExt = (photoFile.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+      if (['jpeg', 'jpg', 'png', 'webp'].indexOf(photoExt) === -1) photoExt = 'jpg';
+      var photoPath = 'internship-applications/' + appId + '/photo.' + photoExt;
+      var photoUp = await sb.storage.from('private-docs').upload(photoPath, photoFile, { upsert: true, contentType: photoFile.type, cacheControl: '3600' });
+      if (!photoUp.error) updates.photo_path = photoPath;
+      if (cvFile) {
+        var cvPath = 'internship-applications/' + appId + '/cv.pdf';
+        var cvUp = await sb.storage.from('private-docs').upload(cvPath, cvFile, { upsert: true, contentType: 'application/pdf', cacheControl: '3600' });
+        if (!cvUp.error) updates.supporting_docs_path = cvPath;
+      }
+      if (Object.keys(updates).length) await sb.from('internship_applications').update(updates).eq('id', appId);
+      status.className = 'form-status ok';
+      status.textContent = ramdaniT('form_ok');
+      form.reset();
     });
   }
 
@@ -10624,28 +10743,101 @@ window.ramdaniAuth = {
     }).join('') || '<tr><td colspan="8">No inquiries.</td></tr>';
   }
 
-  async function loadInternshipApps() {
+  var internAppRows = [];
+  var internAppFilter = '__all';
+  var INTERN_APP_STATUSES = ['submitted','under_review','shortlisted','interview','accepted','rejected','withdrawn'];
+  var INTERN_APP_TABS = [
+    { key: '__all', label: 'All' },
+    { key: 'submitted', label: 'New' },
+    { key: 'under_review', label: 'Under review' },
+    { key: 'shortlisted', label: 'Shortlisted' },
+    { key: 'interview', label: 'Interview' },
+    { key: 'accepted', label: 'Accepted' },
+    { key: 'rejected', label: 'Rejected' },
+    { key: 'withdrawn', label: 'Withdrawn' }
+  ];
+
+  function renderInternAppTabs() {
+    var tabsEl = document.getElementById('internAppTabs');
+    if (!tabsEl) return;
+    tabsEl.innerHTML = INTERN_APP_TABS.map(function (t) {
+      var count = t.key === '__all' ? internAppRows.length : internAppRows.filter(function (r) { return r.status === t.key; }).length;
+      var active = internAppFilter === t.key ? ' active' : '';
+      return '<button type="button" class="btn btn-sm' + active + '" data-intern-tab="' + t.key + '">' + t.label + ' (' + count + ')</button>';
+    }).join('');
+    tabsEl.querySelectorAll('[data-intern-tab]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        internAppFilter = btn.getAttribute('data-intern-tab');
+        renderInternAppTabs();
+        renderInternAppBody();
+      });
+    });
+  }
+
+  function renderInternAppBody() {
     var body = document.getElementById('internAppBody');
     if (!body) return;
-    var res = await sb.from('internship_applications').select('id, full_name, email, phone, education, status, reviewer_notes, created_at, internships(title)').order('created_at', { ascending: false }).limit(50);
-    var rows = res.data || [];
+    var search = ((document.getElementById('internAppSearch') || {}).value || '').trim().toLowerCase();
+    var rows = internAppRows.filter(function (r) {
+      if (internAppFilter !== '__all' && r.status !== internAppFilter) return false;
+      if (!search) return true;
+      var hay = [r.full_name, r.email].join(' ').toLowerCase();
+      return hay.indexOf(search) !== -1;
+    });
     body.innerHTML = rows.map(function (r) {
       var listing = r.internships && r.internships.title ? r.internships.title : 'General';
-      return '<tr><td>' + ramdaniUi.escape(listing) + '</td><td>' + ramdaniUi.escape(r.full_name) +
-        '</td><td>' + ramdaniUi.escape(r.email) + '</td><td>' + ramdaniUi.escape(r.education) +
+      var photoCell = r._photoUrl ? '<img src="' + r._photoUrl + '" alt="" style="width:40px;height:40px;object-fit:cover;border-radius:6px" />' : '—';
+      var cvBits = [];
+      if (r._cvFileUrl) cvBits.push('<a href="' + r._cvFileUrl + '" target="_blank" rel="noopener">CV file</a>');
+      if (r.cv_url) cvBits.push('<a href="' + ramdaniUi.escape(r.cv_url) + '" target="_blank" rel="noopener">Link</a>');
+      var cvCell = cvBits.length ? cvBits.join(' · ') : '—';
+      return '<tr><td>' + ramdaniUi.escape(r.reference_id || '') + '</td><td>' + photoCell + '</td><td>' + ramdaniUi.escape(listing) + '</td><td>' + ramdaniUi.escape(r.full_name) +
+        '</td><td>' + ramdaniUi.escape(r.email) + '</td><td>' + ramdaniUi.escape(r.education) + '</td><td>' + cvCell +
         '</td><td><select data-app="' + ramdaniUi.escape(r.id) + '" data-field="status">' +
-        ['submitted','under_review','shortlisted','interview','accepted','rejected','withdrawn','new','reviewed','closed'].map(function (s) {
-          return '<option value="' + s + '"' + (r.status === s ? ' selected' : '') + '>' + s + '</option>';
-        }).join('') + '</select></td><td><input data-app="' + ramdaniUi.escape(r.id) + '" data-field="reviewer_notes" value="' + ramdaniUi.escape(r.reviewer_notes || '') + '" placeholder="Staff only" aria-label="Internal notes" /></td></tr>';
-    }).join('') || '<tr><td colspan="6">No applications.</td></tr>';
+        (function () {
+          var opts = INTERN_APP_STATUSES.slice();
+          if (r.status && opts.indexOf(r.status) === -1) opts.push(r.status);
+          return opts.map(function (s) {
+            return '<option value="' + s + '"' + (r.status === s ? ' selected' : '') + '>' + s.replace('_', ' ') + '</option>';
+          }).join('');
+        })() + '</select></td><td><input data-app="' + ramdaniUi.escape(r.id) + '" data-field="reviewer_notes" value="' + ramdaniUi.escape(r.reviewer_notes || '') + '" placeholder="Staff only" aria-label="Internal notes" /></td></tr>';
+    }).join('') || '<tr><td colspan="9">No applications match this filter.</td></tr>';
     body.querySelectorAll('[data-app]').forEach(function (el) {
       el.addEventListener('change', async function () {
         var payload = {};
         var field = el.getAttribute('data-field') || 'status';
         payload[field] = el.value || null;
-        await sb.from('internship_applications').update(payload).eq('id', el.getAttribute('data-app'));
+        var id = el.getAttribute('data-app');
+        await sb.from('internship_applications').update(payload).eq('id', id);
+        var row = internAppRows.filter(function (r) { return r.id === id; })[0];
+        if (row) row[field] = payload[field];
+        if (field === 'status') { renderInternAppTabs(); renderInternAppBody(); }
       });
     });
+  }
+
+  async function loadInternshipApps() {
+    var body = document.getElementById('internAppBody');
+    if (!body) return;
+    var res = await sb.from('internship_applications').select('id, full_name, email, phone, education, status, reviewer_notes, photo_path, supporting_docs_path, cv_url, reference_id, created_at, internships(title)').order('created_at', { ascending: false }).limit(200);
+    internAppRows = res.data || [];
+    await Promise.all(internAppRows.map(async function (r) {
+      if (r.photo_path) {
+        var s = await sb.storage.from('private-docs').createSignedUrl(r.photo_path, 600);
+        r._photoUrl = s.data && s.data.signedUrl;
+      }
+      if (r.supporting_docs_path) {
+        var s2 = await sb.storage.from('private-docs').createSignedUrl(r.supporting_docs_path, 600);
+        r._cvFileUrl = s2.data && s2.data.signedUrl;
+      }
+    }));
+    renderInternAppTabs();
+    renderInternAppBody();
+    var searchEl = document.getElementById('internAppSearch');
+    if (searchEl && !searchEl._bound) {
+      searchEl._bound = true;
+      searchEl.addEventListener('input', renderInternAppBody);
+    }
   }
 
   async function loadJoinRequests() {
