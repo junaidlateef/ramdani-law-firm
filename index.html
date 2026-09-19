@@ -741,13 +741,13 @@ html[dir="rtl"] .lead {
 @media (max-width:640px){.people-card{grid-template-columns:1fr}}
 
 /* ===== Ramdani authentication page — ALL rules scoped to .ramdani-auth-page / .ra-* (nothing global is changed) ===== */
-#portalRoot.ramdani-auth-page{
+.ramdani-auth-page{
   --ra-bg:#F7F4ED;--ra-card:#fff;--ra-field:#fff;--ra-ink:var(--ink);--ra-muted:#4a5866;--ra-line:#b9c2ca;
   --ra-navy:var(--forest);--ra-gold:var(--brass);--ra-link:#7a5c2e;--ra-err:#8a2b2b;--ra-ok:#2d5a3d;
   --ra-tab-on-bg:var(--forest);--ra-tab-on-ink:#fff;
   background:var(--ra-bg);color:var(--ra-ink);min-height:100vh;min-height:100dvh;overflow-x:hidden;
 }
-html[data-theme='dark'] #portalRoot.ramdani-auth-page{
+html[data-theme='dark'] .ramdani-auth-page{
   --ra-bg:var(--forest-deep);--ra-card:var(--forest);--ra-field:#0f2a42;--ra-ink:#F7F4ED;--ra-muted:#c3ced6;--ra-line:#4a5d6f;
   --ra-link:#d2b482;--ra-err:#ff9d9d;--ra-ok:#8fd1a8;--ra-tab-on-bg:var(--brass);--ra-tab-on-ink:var(--forest);
 }
@@ -769,7 +769,8 @@ html[data-theme='dark'] #portalRoot.ramdani-auth-page{
 .ramdani-auth-page .ra-tab:hover{background:rgba(176,141,87,.16)}
 .ramdani-auth-page .ra-tab[aria-selected="true"]{background:var(--ra-tab-on-bg);color:var(--ra-tab-on-ink)}
 
-.ramdani-auth-page .ra-pane h1{margin:0 0 .35rem;font-family:var(--serif);font-size:clamp(1.7rem,3vw,2.15rem);line-height:1.15;color:var(--ra-ink)}
+.ramdani-auth-page .ra-pane h1,
+.ramdani-auth-page .ra-inner h1{margin:0 0 .35rem;font-family:var(--serif);font-size:clamp(1.7rem,3vw,2.15rem);line-height:1.15;color:var(--ra-ink)}
 .ramdani-auth-page .ra-lead{margin:0 0 1.25rem;color:var(--ra-muted)}
 .ramdani-auth-page .ra-form{display:grid;gap:1rem;max-width:none}
 .ramdani-auth-page .ra-field{display:grid;gap:.35rem}
