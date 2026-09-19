@@ -263,6 +263,12 @@ table.data tbody tr:hover { background:color-mix(in srgb,var(--accent) 5%,transp
 .status-draft,.status-inactive { color:var(--muted); }
 .status-archived,.status-closed { color:var(--danger); }
 .staff-preview-banner { background:#8a6a2a; color:#fff; padding:.7rem 1rem; font-size:.88rem; font-weight:600; text-align:center; margin:0 0 1rem; border-radius:8px; letter-spacing:.01em; }
+.matter-tabs { display:flex; flex-wrap:wrap; gap:.35rem; margin:0 0 1rem; }
+.matter-tabs button[aria-selected="true"] { background:var(--deep-navy,#0B1F33); color:#fff; }
+.ops-workspace { display:none; }
+.ops-workspace.is-open { display:block; }
+.ops-header-meta { display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; margin:.35rem 0 1rem; }
+.ops-header-meta span { font-size:.78rem; }
 .staff-preview-banner[hidden] { display:none; }
 .auth-screen { min-height:100vh; display:grid; place-items:center; padding:2rem 1rem; background:linear-gradient(135deg,var(--deep-navy,#0B1F33),#162f46); }
 .auth-box { width:min(460px,100%); margin:0; background:var(--card); border:1px solid var(--line); border-top:4px solid var(--accent); border-radius:18px; padding:1.5rem; box-shadow:0 24px 70px rgba(0,0,0,.22); }
@@ -560,11 +566,22 @@ html[dir="rtl"] .lead {
           <button type="button" data-table="people">People</button>
           <button type="button" data-table="practice_areas">Practice areas</button>
           <button type="button" data-table="services">Services</button>
-          <button type="button" data-table="matters">Matters</button>
+          <button type="button" data-table="matters">Representative matters</button>
           <button type="button" data-table="articles">Insights</button>
           <button type="button" data-table="news">News</button>
           <button type="button" data-table="resources">Resources</button>
           <button type="button" data-table="careers">Careers</button>
+        </details>
+        <details class="admin-nav-group" open>
+          <summary class="admin-nav-group-title">Private Legal Operations</summary>
+          <button type="button" data-table="__opsdash">Operations dashboard</button>
+          <button type="button" data-table="__clients">Clients</button>
+          <button type="button" data-table="__legalmatters">Matters / Cases</button>
+          <button type="button" data-table="__mytasks">My tasks</button>
+          <button type="button" data-table="__legalcalendar">Calendar / dates</button>
+          <button type="button" data-table="__legaldocs">Documents</button>
+          <button type="button" data-table="__legalcomms">Communications</button>
+          <button type="button" data-table="__legalreports">Reports</button>
         </details>
         <details class="admin-nav-group" open>
           <summary class="admin-nav-group-title">Courses &amp; Programs</summary>
@@ -1178,6 +1195,151 @@ html[dir="rtl"] .lead {
             <div class="admin-section-head"><div><h2>Audit log</h2><p class="note">Read-only record of staff actions across the admin panel. Newest first, limited to the most recent 200 entries.</p></div></div>
             <div class="admin-toolbar"><input type="search" id="auditLogSearch" placeholder="Search action, entity or staff name" aria-label="Search audit log" /></div>
             <div class="table-wrap"><table class="data"><thead><tr><th>When</th><th>Staff</th><th>Action</th><th>Entity</th><th>Entity ID</th></tr></thead><tbody id="auditLogBody"></tbody></table></div>
+          </div>
+          <div id="opsDashPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Operations dashboard</h2><p class="note">Private law-firm data only. Empty counts mean no records yet — never invented.</p></div></div>
+            <div class="dashboard-grid" id="opsStats"></div>
+            <div class="admin-card"><div class="admin-section-head"><h2>Quick actions</h2></div><div class="admin-toolbar">
+              <button class="btn btn-primary" type="button" data-table="__clients">New client</button>
+              <button class="btn" type="button" data-table="__legalmatters">New matter</button>
+              <button class="btn" type="button" data-table="__mytasks">New task</button>
+              <button class="btn" type="button" data-table="__legalcalendar">Add important date</button>
+              <button class="btn" type="button" data-table="__legaldocs">Upload document</button>
+              <button class="btn" type="button" data-table="__inquiries">Review inquiries</button>
+            </div></div>
+            <div class="admin-section-head"><h2>Needs attention</h2></div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Type</th><th>Record</th><th>Detail</th></tr></thead><tbody id="opsAttentionBody"></tbody></table></div>
+            <p id="opsDashNote" class="form-status"></p>
+          </div>
+
+          <div id="clientsPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Clients</h2><p class="note">Private client records. Not students. Not shown on the public website.</p></div></div>
+            <form id="clientForm" class="form admin-form">
+              <label><span>Legal name</span><input name="legal_name" required /></label>
+              <label><span>Type</span><select name="client_type"><option value="individual">Individual</option><option value="organization">Organization</option><option value="other">Other</option></select></label>
+              <label><span>Email</span><input name="email" type="email" /></label>
+              <label><span>Phone</span><input name="phone" /></label>
+              <label class="field-full"><span>Address</span><input name="address" /></label>
+              <label><span>Preferred contact</span><select name="preferred_contact_method"><option value="">Not set</option><option value="email">Email</option><option value="phone">Phone</option><option value="in_person">In person</option><option value="other">Other</option></select></label>
+              <label><span>Status</span><select name="status"><option value="active">Active</option><option value="inactive">Inactive</option><option value="archived">Archived</option></select></label>
+              <label class="field-full"><span>Internal notes</span><textarea name="notes" rows="3"></textarea></label>
+              <div class="form-actions"><button class="btn btn-primary" type="submit" id="clientSave">Save client</button><button class="btn" type="button" id="clientCancel" hidden>Cancel edit</button><p id="clientNote" class="form-status"></p></div>
+            </form>
+            <div class="admin-toolbar"><input type="search" id="clientSearch" placeholder="Search name, email, phone or client number" aria-label="Search clients" /></div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Number</th><th>Name</th><th>Type</th><th>Email</th><th>Status</th><th>Actions</th></tr></thead><tbody id="clientBody"></tbody></table></div>
+          </div>
+
+          <div id="legalMattersPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Matters / Cases</h2><p class="note">Private operational matters. Public representative matters stay under Law Firm → Representative matters.</p></div></div>
+            <form id="legalMatterForm" class="form admin-form">
+              <label><span>Title</span><input name="title" required /></label>
+              <label><span>Client</span><select name="client_id" required><option value="">Select client…</option></select></label>
+              <label><span>Type</span><select name="matter_type"><option value="litigation">Litigation</option><option value="corporate">Corporate</option><option value="family">Family</option><option value="property">Property</option><option value="employment">Employment</option><option value="advisory">Advisory</option><option value="other">Other</option></select></label>
+              <label><span>Practice area</span><select name="practice_area_id"><option value="">None</option></select></label>
+              <label><span>Lead lawyer</span><select name="lead_lawyer_id"><option value="">Unassigned</option></select></label>
+              <label><span>Status</span><select name="status"><option value="intake">Intake</option><option value="open">Open</option><option value="active">Active</option><option value="on_hold">On hold</option><option value="pending">Pending</option><option value="closed">Closed</option><option value="archived">Archived</option></select></label>
+              <label><span>Priority</span><select name="priority"><option value="low">Low</option><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option></select></label>
+              <label><span>Opened</span><input name="opened_at" type="date" /></label>
+              <label><span>Target close</span><input name="target_close_at" type="date" /></label>
+              <label><span>Confidentiality</span><select name="confidentiality_level"><option value="standard">Standard</option><option value="restricted">Restricted</option><option value="high">High</option></select></label>
+              <label><span>Flag for human review</span><select name="confidentiality_flag"><option value="false">No</option><option value="true">Yes — review needed</option></select></label>
+              <label><span>Internal reference</span><input name="internal_reference" /></label>
+              <label class="field-full"><span>Description</span><textarea name="description" rows="3"></textarea></label>
+              <div class="form-actions"><button class="btn btn-primary" type="submit" id="legalMatterSave">Save matter</button><button class="btn" type="button" id="legalMatterCancel" hidden>Cancel edit</button><p id="legalMatterNote" class="form-status"></p></div>
+            </form>
+            <div class="admin-toolbar">
+              <select id="lmStatus"><option value="">All statuses</option><option value="intake">Intake</option><option value="open">Open</option><option value="active">Active</option><option value="on_hold">On hold</option><option value="pending">Pending</option><option value="closed">Closed</option><option value="archived">Archived</option></select>
+              <select id="lmType"><option value="">All types</option><option value="litigation">Litigation</option><option value="corporate">Corporate</option><option value="family">Family</option><option value="property">Property</option><option value="employment">Employment</option><option value="advisory">Advisory</option><option value="other">Other</option></select>
+              <select id="lmPriority"><option value="">All priorities</option><option value="low">Low</option><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option></select>
+              <input type="search" id="lmSearch" placeholder="Search number, title or client" aria-label="Search matters" />
+            </div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Number</th><th>Title</th><th>Client</th><th>Lead</th><th>Status</th><th>Priority</th><th>Actions</th></tr></thead><tbody id="legalMatterBody"></tbody></table></div>
+            <div id="matterWorkspace" class="ops-workspace admin-card" style="margin-top:1rem">
+              <div class="admin-section-head"><div><h3 id="mwTitle">Matter</h3><p class="ops-header-meta" id="mwMeta"></p></div><button type="button" class="btn" id="mwClose">Close workspace</button></div>
+              <div class="matter-tabs" role="tablist">
+                <button type="button" class="btn" data-mw-tab="overview" aria-selected="true">Overview</button>
+                <button type="button" class="btn" data-mw-tab="people">People</button>
+                <button type="button" class="btn" data-mw-tab="tasks">Tasks</button>
+                <button type="button" class="btn" data-mw-tab="dates">Dates</button>
+                <button type="button" class="btn" data-mw-tab="documents">Documents</button>
+                <button type="button" class="btn" data-mw-tab="comms">Communications</button>
+                <button type="button" class="btn" data-mw-tab="notes">Notes</button>
+                <button type="button" class="btn" data-mw-tab="activity">Activity</button>
+              </div>
+              <div id="mwPane"></div>
+            </div>
+          </div>
+
+          <div id="myTasksPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>My tasks</h2><p class="note">Matter-linked work. Statuses: to do, in progress, completed, cancelled.</p></div></div>
+            <form id="taskForm" class="form admin-form">
+              <label><span>Title</span><input name="title" required /></label>
+              <label><span>Matter</span><select name="matter_id" required><option value="">Select matter…</option></select></label>
+              <label><span>Assign to</span><select name="assigned_to"><option value="">Unassigned</option></select></label>
+              <label><span>Priority</span><select name="priority"><option value="low">Low</option><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option></select></label>
+              <label><span>Due</span><input name="due_at" type="datetime-local" /></label>
+              <label><span>Status</span><select name="status"><option value="todo">To do</option><option value="in_progress">In progress</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></label>
+              <label class="field-full"><span>Description</span><textarea name="description" rows="2"></textarea></label>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Save task</button><p id="taskNote" class="form-status"></p></div>
+            </form>
+            <div class="admin-toolbar">
+              <select id="taskFilter"><option value="mine">My tasks</option><option value="overdue">Overdue</option><option value="today">Due today</option><option value="upcoming">Upcoming</option><option value="completed">Completed</option><option value="all">All I can see</option></select>
+            </div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Title</th><th>Matter</th><th>Assignee</th><th>Due</th><th>Status</th><th></th></tr></thead><tbody id="taskBody"></tbody></table></div>
+          </div>
+
+          <div id="legalCalendarPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Calendar / important dates</h2><p class="note">Only dates staff enter. The system never invents hearings.</p></div></div>
+            <form id="eventForm" class="form admin-form">
+              <label><span>Title</span><input name="title" required /></label>
+              <label><span>Matter</span><select name="matter_id" required><option value="">Select matter…</option></select></label>
+              <label><span>Type</span><select name="event_type"><option value="hearing">Hearing</option><option value="filing_deadline">Filing deadline</option><option value="meeting">Meeting</option><option value="appointment">Appointment</option><option value="internal_deadline">Internal deadline</option><option value="other">Other</option></select></label>
+              <label><span>Starts</span><input name="starts_at" type="datetime-local" required /></label>
+              <label><span>Location</span><input name="location" /></label>
+              <label><span>Venue / court</span><input name="venue" /></label>
+              <label><span>Reminder (minutes)</span><input name="reminder_minutes" type="number" min="0" /></label>
+              <label><span>Client can see</span><select name="client_visible"><option value="false">No</option><option value="true">Yes</option></select></label>
+              <label class="field-full"><span>Notes</span><textarea name="notes" rows="2"></textarea></label>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Save date</button><p id="eventNote" class="form-status"></p></div>
+            </form>
+            <div class="admin-toolbar">
+              <select id="eventFilter"><option value="upcoming">Upcoming</option><option value="soon">Due soon (7 days)</option><option value="overdue">Overdue</option><option value="all">All</option></select>
+            </div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>When</th><th>Title</th><th>Type</th><th>Matter</th><th>Location</th></tr></thead><tbody id="eventBody"></tbody></table></div>
+          </div>
+
+          <div id="legalDocsPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Matter documents</h2><p class="note">Private bucket. Public URLs are not used. Client-shared files are the only ones a client may later see.</p></div></div>
+            <form id="docForm" class="form admin-form">
+              <label><span>Matter</span><select name="matter_id" required><option value="">Select matter…</option></select></label>
+              <label><span>Category</span><select name="category"><option value="client_documents">Client documents</option><option value="court_documents">Court documents</option><option value="agreements">Agreements</option><option value="correspondence">Correspondence</option><option value="evidence">Evidence</option><option value="drafts">Drafts</option><option value="final">Final</option><option value="other">Other</option></select></label>
+              <label><span>Access</span><select name="access_level"><option value="matter_team">Matter team</option><option value="private">Private</option><option value="client_shared">Client shared</option></select></label>
+              <label class="field-full"><span>File</span><input name="file" type="file" required /></label>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Upload</button><p id="docNote" class="form-status"></p></div>
+            </form>
+            <div class="table-wrap"><table class="data"><thead><tr><th>File</th><th>Matter</th><th>Category</th><th>Access</th><th>Version</th><th></th></tr></thead><tbody id="docBody"></tbody></table></div>
+          </div>
+
+          <div id="legalCommsPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Communications log</h2><p class="note">Manual records only. Nothing here is sent by email, WhatsApp or SMS.</p></div></div>
+            <form id="commForm" class="form admin-form">
+              <label><span>Matter</span><select name="matter_id" required><option value="">Select matter…</option></select></label>
+              <label><span>Type</span><select name="comm_type"><option value="email">Email</option><option value="phone">Phone</option><option value="meeting">Meeting</option><option value="letter">Letter</option><option value="whatsapp">WhatsApp (manual)</option><option value="sms">SMS (manual)</option><option value="other">Other</option></select></label>
+              <label><span>Direction</span><select name="direction"><option value="inbound">Inbound</option><option value="outbound">Outbound</option><option value="internal">Internal</option></select></label>
+              <label><span>When</span><input name="occurred_at" type="datetime-local" /></label>
+              <label><span>Subject</span><input name="subject" /></label>
+              <label><span>Related person</span><input name="related_person" /></label>
+              <label><span>Client can see</span><select name="client_visible"><option value="false">No</option><option value="true">Yes</option></select></label>
+              <label class="field-full"><span>Summary</span><textarea name="summary" rows="3" required></textarea></label>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Save record</button><p id="commNote" class="form-status"></p></div>
+            </form>
+            <div class="table-wrap"><table class="data"><thead><tr><th>When</th><th>Matter</th><th>Type</th><th>Subject</th><th>Visible to client</th></tr></thead><tbody id="commBody"></tbody></table></div>
+          </div>
+
+          <div id="legalReportsPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Operational reports</h2><p class="note">Counts from live private records. No outcome statistics.</p></div></div>
+            <div class="dashboard-grid" id="legalReportStats"></div>
+            <p id="legalReportNote" class="form-status"></p>
           </div>
         </main>
       </section>
@@ -2610,7 +2772,7 @@ window.ramdaniAuth = {
   // the panel at all; per-table read/write is enforced by RLS regardless
   // of what this list says, so it can never grant more than the database
   // already allows.
-  STAFF_ROLES: ['admin', 'editor', 'content_manager', 'education_manager', 'student_manager', 'communications_manager'],
+  STAFF_ROLES: ['admin', 'editor', 'content_manager', 'education_manager', 'student_manager', 'communications_manager', 'firm_admin', 'lawyer', 'operations_staff'],
   async requireAdmin() {
     var p = await this.profile();
     if (!p || this.STAFF_ROLES.indexOf(p.role) === -1 || !p.is_active) {
@@ -4548,6 +4710,7 @@ window.ramdaniAuth = {
     bindQuizBuilder();
     bindQuizResults();
     bindEduSearch();
+    bindLegalOps();
     document.getElementById('certIssuanceForm').addEventListener('submit', saveCertIssuance);
     document.getElementById('certIssuanceSearch').addEventListener('input', renderCertIssuances);
     document.getElementById('certIssuancesBody').addEventListener('click', function (e) {
@@ -6682,6 +6845,556 @@ window.ramdaniAuth = {
     setNote('esNote', rows.length + ' result(s).', true);
   }
 
+  var legalClients = [], legalMatters = [], legalPeople = [], legalPractice = [], legalStaff = [];
+  var legalEditClientId = null, legalEditMatterId = null, mwMatterId = null, mwTab = 'overview';
+  var myProfileId = null;
+
+  function dtLocal(v) {
+    if (!v) return '';
+    var d = new Date(v);
+    if (isNaN(d.getTime())) return '';
+    var p = function (n) { return String(n).padStart(2, '0'); };
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes());
+  }
+  function isoFromLocal(v) { return v ? new Date(v).toISOString() : null; }
+  function fmtWhen(v) { if (!v) return ''; var d = new Date(v); return isNaN(d.getTime()) ? String(v) : d.toLocaleString(); }
+  function clientName(id) { var c = legalClients.find(function (x) { return x.id === id; }); return c ? (c.legal_name + ' (' + c.client_number + ')') : ''; }
+  function staffName(id) { var p = legalStaff.find(function (x) { return x.id === id; }); return p ? (p.full_name || p.email || id) : ''; }
+  function matterLabel(id) { var m = legalMatters.find(function (x) { return x.id === id; }); return m ? (m.matter_number + ' — ' + m.title) : ''; }
+
+  async function loadLegalLookups() {
+    var res = await Promise.all([
+      sb.from('clients').select('id, client_number, legal_name, status').order('legal_name'),
+      sb.from('legal_matters').select('id, matter_number, title, client_id, status, priority, lead_lawyer_id').order('updated_at', { ascending: false }),
+      sb.from('practice_areas').select('id, title').order('title'),
+      sb.from('profiles').select('id, full_name, email, role').in('role', ['admin', 'firm_admin', 'lawyer', 'operations_staff'])
+    ]);
+    legalClients = res[0].data || [];
+    legalMatters = res[1].data || [];
+    legalPractice = res[2].data || [];
+    legalStaff = res[3].data || [];
+    var p = await ramdaniAuth.profile();
+    myProfileId = p && p.id;
+    var html = '<option value="">Select matter…</option>' + legalMatters.map(function (m) {
+      return '<option value="' + m.id + '">' + escapeHtml(m.matter_number + ' — ' + m.title) + '</option>';
+    }).join('');
+    ['taskForm', 'eventForm', 'docForm', 'commForm'].forEach(function (fid) {
+      var sel = $id(fid) && $id(fid).elements.matter_id;
+      if (sel) { var cur = sel.value; sel.innerHTML = html; sel.value = cur; }
+    });
+    var asg = $id('taskForm') && $id('taskForm').elements.assigned_to;
+    if (asg) {
+      var cur = asg.value;
+      asg.innerHTML = '<option value="">Unassigned</option>' + legalStaff.map(function (s) {
+        return '<option value="' + s.id + '">' + escapeHtml(s.full_name || s.email) + '</option>';
+      }).join('');
+      asg.value = cur;
+    }
+  }
+
+  async function loadOpsDash() {
+    setNote('opsDashNote', 'Loading…', true);
+    await loadLegalLookups();
+    var now = new Date();
+    var jobs = await Promise.all([
+      sb.from('clients').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+      sb.from('legal_matters').select('id', { count: 'exact', head: true }).in('status', ['intake', 'open', 'active', 'on_hold', 'pending']),
+      sb.from('inquiries').select('id', { count: 'exact', head: true }).in('status', ['new', 'reviewed']),
+      sb.from('profiles').select('id', { count: 'exact', head: true }).in('role', ['lawyer', 'firm_admin', 'operations_staff', 'admin']).eq('is_active', true),
+      sb.from('matter_tasks').select('id, title, due_at, status, matter_id').neq('status', 'completed').neq('status', 'cancelled').order('due_at', { ascending: true }).limit(50),
+      sb.from('matter_events').select('id, title, starts_at, event_type, matter_id').gte('starts_at', now.toISOString()).order('starts_at').limit(20),
+      sb.from('legal_matters').select('id, matter_number, title, status, priority, updated_at').order('updated_at', { ascending: false }).limit(8)
+    ]);
+    var err = jobs.find(function (r) { return r.error; });
+    if (err) { setNote('opsDashNote', err.error.message); return; }
+    function n(r) { return typeof r.count === 'number' ? r.count : 0; }
+    var tasks = jobs[4].data || [];
+    var overdue = tasks.filter(function (t) { return t.due_at && new Date(t.due_at) < now && t.status !== 'completed'; });
+    $id('opsStats').innerHTML = [
+      ['Active clients', n(jobs[0])],
+      ['Open matters', n(jobs[1])],
+      ['Overdue tasks', overdue.length],
+      ['Upcoming dates', (jobs[5].data || []).length],
+      ['Pending inquiries', n(jobs[2])],
+      ['Active legal staff', n(jobs[3])]
+    ].map(function (x) {
+      return '<div class="stat-card"><div class="label">' + escapeHtml(x[0]) + '</div><div class="value">' + x[1] + '</div></div>';
+    }).join('');
+    var attn = overdue.slice(0, 8).map(function (t) {
+      return '<tr><td>Overdue task</td><td>' + escapeHtml(t.title) + '</td><td>' + escapeHtml(fmtWhen(t.due_at)) + '</td></tr>';
+    });
+    (jobs[6].data || []).filter(function (m) { return m.priority === 'urgent' || m.status === 'intake'; }).forEach(function (m) {
+      attn.push('<tr><td>Matter</td><td>' + escapeHtml(m.matter_number + ' — ' + m.title) + '</td><td>' + escapeHtml(m.status + ' / ' + m.priority) + '</td></tr>');
+    });
+    $id('opsAttentionBody').innerHTML = attn.join('') || '<tr><td colspan="3">Nothing needs attention.</td></tr>';
+    setNote('opsDashNote', '');
+  }
+
+  async function loadClients() {
+    await loadLegalLookups();
+    var res = await sb.from('clients').select('*').order('updated_at', { ascending: false });
+    if (res.error) { setNote('clientNote', res.error.message); return; }
+    legalClients = res.data || [];
+    renderClients();
+  }
+  function renderClients() {
+    var q = ($id('clientSearch').value || '').trim().toLowerCase();
+    var rows = legalClients.filter(function (c) {
+      if (!q) return true;
+      return [c.legal_name, c.email, c.phone, c.client_number].join(' ').toLowerCase().indexOf(q) !== -1;
+    });
+    $id('clientBody').innerHTML = rows.map(function (c) {
+      return '<tr><td>' + escapeHtml(c.client_number) + '</td><td>' + escapeHtml(c.legal_name) + '</td><td>' + escapeHtml(c.client_type) + '</td><td>' + escapeHtml(c.email || '') + '</td><td>' + escapeHtml(c.status) + '</td><td>' +
+        '<button type="button" class="btn btn-sm" data-cl-edit="' + c.id + '">Edit</button></td></tr>';
+    }).join('') || '<tr><td colspan="6">No clients yet.</td></tr>';
+  }
+  function resetClientForm() {
+    legalEditClientId = null;
+    $id('clientForm').reset();
+    $id('clientSave').textContent = 'Save client';
+    $id('clientCancel').hidden = true;
+    setNote('clientNote', '');
+  }
+  async function saveClient(e) {
+    e.preventDefault();
+    var f = e.target;
+    var payload = {
+      legal_name: f.elements.legal_name.value.trim(),
+      client_type: f.elements.client_type.value,
+      email: f.elements.email.value.trim() || null,
+      phone: f.elements.phone.value.trim() || null,
+      address: f.elements.address.value.trim() || null,
+      preferred_contact_method: f.elements.preferred_contact_method.value || null,
+      status: f.elements.status.value,
+      notes: f.elements.notes.value.trim() || null
+    };
+    if (!payload.legal_name) return setNote('clientNote', 'Legal name is required.');
+    var res = legalEditClientId
+      ? await sb.from('clients').update(payload).eq('id', legalEditClientId)
+      : await sb.from('clients').insert(payload);
+    if (res.error) return setNote('clientNote', res.error.message);
+    resetClientForm();
+    setNote('clientNote', 'Saved.', true);
+    await loadClients();
+  }
+
+  async function loadLegalMatters() {
+    await loadLegalLookups();
+    var res = await sb.from('legal_matters').select('*').order('updated_at', { ascending: false });
+    if (res.error) { setNote('legalMatterNote', res.error.message); return; }
+    legalMatters = res.data || [];
+    var cf = $id('legalMatterForm');
+    cf.elements.client_id.innerHTML = '<option value="">Select client…</option>' + legalClients.map(function (c) {
+      return '<option value="' + c.id + '">' + escapeHtml(c.legal_name + ' (' + c.client_number + ')') + '</option>';
+    }).join('');
+    cf.elements.practice_area_id.innerHTML = '<option value="">None</option>' + legalPractice.map(function (p) {
+      return '<option value="' + p.id + '">' + escapeHtml(p.title) + '</option>';
+    }).join('');
+    cf.elements.lead_lawyer_id.innerHTML = '<option value="">Unassigned</option>' + legalStaff.filter(function (s) {
+      return s.role === 'lawyer' || s.role === 'admin' || s.role === 'firm_admin';
+    }).map(function (s) {
+      return '<option value="' + s.id + '">' + escapeHtml(s.full_name || s.email) + '</option>';
+    }).join('');
+    renderLegalMatters();
+  }
+  function renderLegalMatters() {
+    var st = $id('lmStatus').value, ty = $id('lmType').value, pr = $id('lmPriority').value, q = ($id('lmSearch').value || '').trim().toLowerCase();
+    var rows = legalMatters.filter(function (m) {
+      if (st && m.status !== st) return false;
+      if (ty && m.matter_type !== ty) return false;
+      if (pr && m.priority !== pr) return false;
+      if (q && [m.matter_number, m.title, clientName(m.client_id)].join(' ').toLowerCase().indexOf(q) === -1) return false;
+      return true;
+    });
+    $id('legalMatterBody').innerHTML = rows.map(function (m) {
+      return '<tr><td>' + escapeHtml(m.matter_number) + '</td><td>' + escapeHtml(m.title) + '</td><td>' + escapeHtml(clientName(m.client_id)) + '</td><td>' + escapeHtml(staffName(m.lead_lawyer_id)) + '</td><td>' + escapeHtml(m.status) + '</td><td>' + escapeHtml(m.priority) + '</td><td>' +
+        '<button type="button" class="btn btn-sm" data-lm-open="' + m.id + '">Open</button> ' +
+        '<button type="button" class="btn btn-sm" data-lm-edit="' + m.id + '">Edit</button></td></tr>';
+    }).join('') || '<tr><td colspan="7">No private matters yet.</td></tr>';
+  }
+  function resetMatterForm() {
+    legalEditMatterId = null;
+    $id('legalMatterForm').reset();
+    $id('legalMatterSave').textContent = 'Save matter';
+    $id('legalMatterCancel').hidden = true;
+    setNote('legalMatterNote', '');
+  }
+  async function saveLegalMatter(e) {
+    e.preventDefault();
+    var f = e.target;
+    var payload = {
+      title: f.elements.title.value.trim(),
+      client_id: f.elements.client_id.value,
+      matter_type: f.elements.matter_type.value,
+      practice_area_id: f.elements.practice_area_id.value || null,
+      lead_lawyer_id: f.elements.lead_lawyer_id.value || null,
+      status: f.elements.status.value,
+      priority: f.elements.priority.value,
+      opened_at: f.elements.opened_at.value || null,
+      target_close_at: f.elements.target_close_at.value || null,
+      confidentiality_level: f.elements.confidentiality_level.value,
+      confidentiality_flag: f.elements.confidentiality_flag.value === 'true',
+      internal_reference: f.elements.internal_reference.value.trim() || null,
+      description: f.elements.description.value.trim() || null
+    };
+    if (!payload.title || !payload.client_id) return setNote('legalMatterNote', 'Title and client are required.');
+    var res = legalEditMatterId
+      ? await sb.from('legal_matters').update(payload).eq('id', legalEditMatterId)
+      : await sb.from('legal_matters').insert(payload);
+    if (res.error) return setNote('legalMatterNote', res.error.message);
+    resetMatterForm();
+    setNote('legalMatterNote', 'Saved.', true);
+    await loadLegalMatters();
+  }
+
+  async function openMatterWorkspace(id) {
+    mwMatterId = id;
+    mwTab = 'overview';
+    $id('matterWorkspace').classList.add('is-open');
+    await renderMatterWorkspace();
+    $id('matterWorkspace').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  async function renderMatterWorkspace() {
+    if (!mwMatterId) return;
+    var mRes = await sb.from('legal_matters').select('*').eq('id', mwMatterId).maybeSingle();
+    var m = mRes.data;
+    if (!m) { $id('mwPane').innerHTML = '<p class="empty">Matter not available.</p>'; return; }
+    $id('mwTitle').textContent = m.matter_number + ' — ' + m.title;
+    $id('mwMeta').innerHTML = ['<span class="status-badge">' + escapeHtml(m.status) + '</span>',
+      '<span>' + escapeHtml(clientName(m.client_id) || '') + '</span>',
+      '<span>Lead: ' + escapeHtml(staffName(m.lead_lawyer_id) || 'unassigned') + '</span>',
+      '<span>' + escapeHtml(m.priority) + '</span>'].join('');
+    document.querySelectorAll('[data-mw-tab]').forEach(function (b) { b.setAttribute('aria-selected', b.getAttribute('data-mw-tab') === mwTab ? 'true' : 'false'); });
+    var pane = $id('mwPane');
+    if (mwTab === 'overview') {
+      var next = await sb.from('matter_events').select('title, starts_at').eq('matter_id', m.id).gte('starts_at', new Date().toISOString()).order('starts_at').limit(1);
+      var openT = await sb.from('matter_tasks').select('id', { count: 'exact', head: true }).eq('matter_id', m.id).in('status', ['todo', 'in_progress']);
+      pane.innerHTML = '<p>' + escapeHtml(m.description || 'No description.') + '</p>' +
+        '<p class="note">Next date: ' + escapeHtml(next.data && next.data[0] ? (next.data[0].title + ' — ' + fmtWhen(next.data[0].starts_at)) : 'none recorded') +
+        ' · Open tasks: ' + (typeof openT.count === 'number' ? openT.count : '—') + '</p>' +
+        '<p class="note">Confidentiality: ' + escapeHtml(m.confidentiality_level) + (m.confidentiality_flag ? ' — flagged for human review (not an automated conflict finding).' : '') + '</p>';
+      return;
+    }
+    if (mwTab === 'people') {
+      var team = await sb.from('matter_team').select('*').eq('matter_id', m.id);
+      var rows = (team.data || []).map(function (t) {
+        return '<tr><td>' + escapeHtml(staffName(t.profile_id)) + '</td><td>' + escapeHtml(t.team_role) + '</td><td><button type="button" class="btn btn-sm" data-team-del="' + t.id + '">Remove</button></td></tr>';
+      }).join('') || '<tr><td colspan="3">No team yet. Saving a lead lawyer adds them automatically.</td></tr>';
+      pane.innerHTML = '<form id="mwTeamForm" class="form admin-form"><label><span>Staff</span><select name="profile_id" required>' +
+        legalStaff.map(function (s) { return '<option value="' + s.id + '">' + escapeHtml(s.full_name || s.email) + '</option>'; }).join('') +
+        '</select></label><label><span>Role</span><select name="team_role"><option value="supporting">Supporting</option><option value="operations">Operations</option><option value="lead">Lead</option></select></label>' +
+        '<div class="form-actions"><button class="btn btn-primary" type="submit">Add to team</button></div></form>' +
+        '<div class="table-wrap"><table class="data"><thead><tr><th>Person</th><th>Role</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+      $id('mwTeamForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var payload = { matter_id: m.id, profile_id: this.elements.profile_id.value, team_role: this.elements.team_role.value };
+        var r = await sb.from('matter_team').insert(payload);
+        if (r.error) return setNote('legalMatterNote', r.error.message);
+        if (payload.team_role === 'lead') await sb.from('legal_matters').update({ lead_lawyer_id: payload.profile_id }).eq('id', m.id);
+        await renderMatterWorkspace();
+      });
+      pane.querySelectorAll('[data-team-del]').forEach(function (b) {
+        b.addEventListener('click', async function () {
+          await sb.from('matter_team').delete().eq('id', b.getAttribute('data-team-del'));
+          await renderMatterWorkspace();
+        });
+      });
+      return;
+    }
+    if (mwTab === 'tasks') {
+      var t = await sb.from('matter_tasks').select('*').eq('matter_id', m.id).order('due_at', { ascending: true });
+      pane.innerHTML = '<div class="table-wrap"><table class="data"><thead><tr><th>Title</th><th>Due</th><th>Status</th></tr></thead><tbody>' +
+        ((t.data || []).map(function (x) { return '<tr><td>' + escapeHtml(x.title) + '</td><td>' + escapeHtml(fmtWhen(x.due_at)) + '</td><td>' + escapeHtml(x.status) + '</td></tr>'; }).join('') || '<tr><td colspan="3">No tasks. Add them under My tasks.</td></tr>') +
+        '</tbody></table></div>';
+      return;
+    }
+    if (mwTab === 'dates') {
+      var ev = await sb.from('matter_events').select('*').eq('matter_id', m.id).order('starts_at');
+      pane.innerHTML = '<div class="table-wrap"><table class="data"><thead><tr><th>When</th><th>Title</th><th>Type</th><th>Client sees</th></tr></thead><tbody>' +
+        ((ev.data || []).map(function (x) { return '<tr><td>' + escapeHtml(fmtWhen(x.starts_at)) + '</td><td>' + escapeHtml(x.title) + '</td><td>' + escapeHtml(x.event_type) + '</td><td>' + (x.client_visible ? 'Yes' : 'No') + '</td></tr>'; }).join('') || '<tr><td colspan="4">No dates recorded.</td></tr>') +
+        '</tbody></table></div>';
+      return;
+    }
+    if (mwTab === 'documents') {
+      var d = await sb.from('matter_documents').select('*').eq('matter_id', m.id).eq('is_current', true).order('uploaded_at', { ascending: false });
+      pane.innerHTML = '<div class="table-wrap"><table class="data"><thead><tr><th>File</th><th>Category</th><th>Access</th><th>v</th></tr></thead><tbody>' +
+        ((d.data || []).map(function (x) { return '<tr><td>' + escapeHtml(x.file_name) + '</td><td>' + escapeHtml(x.category) + '</td><td>' + escapeHtml(x.access_level) + '</td><td>' + x.version + '</td></tr>'; }).join('') || '<tr><td colspan="4">No documents. Upload from Documents.</td></tr>') +
+        '</tbody></table></div>';
+      return;
+    }
+    if (mwTab === 'comms') {
+      var c = await sb.from('matter_communications').select('*').eq('matter_id', m.id).order('occurred_at', { ascending: false });
+      pane.innerHTML = '<div class="table-wrap"><table class="data"><thead><tr><th>When</th><th>Type</th><th>Subject</th><th>Manual</th></tr></thead><tbody>' +
+        ((c.data || []).map(function (x) { return '<tr><td>' + escapeHtml(fmtWhen(x.occurred_at)) + '</td><td>' + escapeHtml(x.comm_type) + '</td><td>' + escapeHtml(x.subject || x.summary || '') + '</td><td>' + (x.is_automated ? 'automated' : 'manual') + '</td></tr>'; }).join('') || '<tr><td colspan="4">No communication records.</td></tr>') +
+        '</tbody></table></div>';
+      return;
+    }
+    if (mwTab === 'notes') {
+      var n = await sb.from('matter_notes').select('*').eq('matter_id', m.id).order('created_at', { ascending: false });
+      pane.innerHTML = '<form id="mwNoteForm" class="form admin-form"><label class="field-full"><span>Private note</span><textarea name="content" rows="3" required></textarea></label><div class="form-actions"><button class="btn btn-primary" type="submit">Add note</button></div></form>' +
+        ((n.data || []).map(function (x) { return '<article class="card"><p class="note">' + escapeHtml(fmtWhen(x.created_at)) + ' · ' + escapeHtml(staffName(x.author_id)) + '</p><p>' + escapeHtml(x.content) + '</p></article>'; }).join('') || '<p class="empty">No notes.</p>');
+      $id('mwNoteForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var r = await sb.from('matter_notes').insert({ matter_id: m.id, content: this.elements.content.value.trim() });
+        if (r.error) return setNote('legalMatterNote', r.error.message);
+        await renderMatterWorkspace();
+      });
+      return;
+    }
+    if (mwTab === 'activity') {
+      var hist = await sb.from('matter_status_history').select('*').eq('matter_id', m.id).order('changed_at', { ascending: false });
+      var aud = await sb.from('audit_events').select('*').eq('entity_id', m.id).order('created_at', { ascending: false }).limit(40);
+      pane.innerHTML = '<h4>Status history</h4><div class="table-wrap"><table class="data"><thead><tr><th>When</th><th>From</th><th>To</th></tr></thead><tbody>' +
+        ((hist.data || []).map(function (x) { return '<tr><td>' + escapeHtml(fmtWhen(x.changed_at)) + '</td><td>' + escapeHtml(x.old_status || '—') + '</td><td>' + escapeHtml(x.new_status) + '</td></tr>'; }).join('') || '<tr><td colspan="3">No status changes.</td></tr>') +
+        '</tbody></table></div><h4>Audit</h4><div class="table-wrap"><table class="data"><thead><tr><th>When</th><th>Action</th></tr></thead><tbody>' +
+        ((aud.data || []).map(function (x) { return '<tr><td>' + escapeHtml(fmtWhen(x.created_at)) + '</td><td>' + escapeHtml(x.action) + '</td></tr>'; }).join('') || '<tr><td colspan="2">No audit rows yet.</td></tr>') +
+        '</tbody></table></div>';
+    }
+  }
+
+  async function loadTasks() {
+    await loadLegalLookups();
+    var res = await sb.from('matter_tasks').select('*').order('due_at', { ascending: true });
+    if (res.error) { setNote('taskNote', res.error.message); return; }
+    window._legalTasks = res.data || [];
+    renderTasks();
+  }
+  function renderTasks() {
+    var rows = window._legalTasks || [];
+    var f = $id('taskFilter').value;
+    var now = new Date();
+    var start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    var end = new Date(start.getTime() + 86400000);
+    rows = rows.filter(function (t) {
+      if (f === 'mine') return t.assigned_to === myProfileId;
+      if (f === 'overdue') return t.due_at && new Date(t.due_at) < now && t.status !== 'completed' && t.status !== 'cancelled';
+      if (f === 'today') return t.due_at && new Date(t.due_at) >= start && new Date(t.due_at) < end;
+      if (f === 'upcoming') return t.due_at && new Date(t.due_at) >= now && t.status !== 'completed';
+      if (f === 'completed') return t.status === 'completed';
+      return true;
+    });
+    $id('taskBody').innerHTML = rows.map(function (t) {
+      return '<tr><td>' + escapeHtml(t.title) + '</td><td>' + escapeHtml(matterLabel(t.matter_id)) + '</td><td>' + escapeHtml(staffName(t.assigned_to)) + '</td><td>' + escapeHtml(fmtWhen(t.due_at)) + '</td><td>' + escapeHtml(t.status) + '</td><td>' +
+        (t.status === 'completed' ? '' : '<button type="button" class="btn btn-sm" data-task-done="' + t.id + '">Complete</button>') + '</td></tr>';
+    }).join('') || '<tr><td colspan="6">No tasks in this view.</td></tr>';
+  }
+  async function saveTask(e) {
+    e.preventDefault();
+    var f = e.target;
+    var payload = {
+      title: f.elements.title.value.trim(),
+      matter_id: f.elements.matter_id.value,
+      assigned_to: f.elements.assigned_to.value || null,
+      priority: f.elements.priority.value,
+      due_at: isoFromLocal(f.elements.due_at.value),
+      status: f.elements.status.value,
+      description: f.elements.description.value.trim() || null
+    };
+    if (!payload.title || !payload.matter_id) return setNote('taskNote', 'Title and matter are required.');
+    var res = await sb.from('matter_tasks').insert(payload);
+    if (res.error) return setNote('taskNote', res.error.message);
+    f.reset();
+    setNote('taskNote', 'Saved.', true);
+    await loadTasks();
+  }
+
+  async function loadEvents() {
+    await loadLegalLookups();
+    var res = await sb.from('matter_events').select('*').order('starts_at');
+    if (res.error) { setNote('eventNote', res.error.message); return; }
+    window._legalEvents = res.data || [];
+    renderEvents();
+  }
+  function renderEvents() {
+    var rows = window._legalEvents || [];
+    var f = $id('eventFilter').value;
+    var now = new Date();
+    var week = new Date(now.getTime() + 7 * 86400000);
+    rows = rows.filter(function (ev) {
+      var t = ev.starts_at ? new Date(ev.starts_at) : null;
+      if (f === 'upcoming') return t && t >= now;
+      if (f === 'soon') return t && t >= now && t <= week;
+      if (f === 'overdue') return t && t < now;
+      return true;
+    });
+    $id('eventBody').innerHTML = rows.map(function (ev) {
+      return '<tr><td>' + escapeHtml(fmtWhen(ev.starts_at)) + '</td><td>' + escapeHtml(ev.title) + '</td><td>' + escapeHtml(ev.event_type) + '</td><td>' + escapeHtml(matterLabel(ev.matter_id)) + '</td><td>' + escapeHtml(ev.location || ev.venue || '') + '</td></tr>';
+    }).join('') || '<tr><td colspan="5">No dates in this view.</td></tr>';
+  }
+  async function saveEvent(e) {
+    e.preventDefault();
+    var f = e.target;
+    var payload = {
+      title: f.elements.title.value.trim(),
+      matter_id: f.elements.matter_id.value,
+      event_type: f.elements.event_type.value,
+      starts_at: isoFromLocal(f.elements.starts_at.value),
+      location: f.elements.location.value.trim() || null,
+      venue: f.elements.venue.value.trim() || null,
+      reminder_minutes: f.elements.reminder_minutes.value === '' ? null : parseInt(f.elements.reminder_minutes.value, 10),
+      client_visible: f.elements.client_visible.value === 'true',
+      notes: f.elements.notes.value.trim() || null
+    };
+    if (!payload.title || !payload.matter_id || !payload.starts_at) return setNote('eventNote', 'Title, matter and start time are required.');
+    var res = await sb.from('matter_events').insert(payload);
+    if (res.error) return setNote('eventNote', res.error.message);
+    f.reset();
+    setNote('eventNote', 'Saved.', true);
+    await loadEvents();
+  }
+
+  async function loadDocuments() {
+    await loadLegalLookups();
+    var res = await sb.from('matter_documents').select('*').eq('is_current', true).order('uploaded_at', { ascending: false });
+    if (res.error) { setNote('docNote', res.error.message); return; }
+    window._legalDocs = res.data || [];
+    $id('docBody').innerHTML = (window._legalDocs).map(function (d) {
+      return '<tr><td>' + escapeHtml(d.file_name) + '</td><td>' + escapeHtml(matterLabel(d.matter_id)) + '</td><td>' + escapeHtml(d.category) + '</td><td>' + escapeHtml(d.access_level) + '</td><td>' + d.version + '</td><td>' +
+        '<button type="button" class="btn btn-sm" data-doc-open="' + escapeHtml(d.storage_path) + '">Open</button></td></tr>';
+    }).join('') || '<tr><td colspan="6">No documents yet.</td></tr>';
+  }
+  async function saveDocument(e) {
+    e.preventDefault();
+    var f = e.target;
+    var file = f.elements.file.files[0];
+    var matterId = f.elements.matter_id.value;
+    if (!file || !matterId) return setNote('docNote', 'Matter and file are required.');
+    var safe = file.name.replace(/[^A-Za-z0-9._-]/g, '_');
+    var storagePath = matterId + '/' + crypto.randomUUID() + '-' + safe;
+    var up = await sb.storage.from('matter-documents').upload(storagePath, file, { upsert: false });
+    if (up.error) return setNote('docNote', up.error.message);
+    var payload = {
+      matter_id: matterId,
+      file_name: file.name,
+      storage_path: storagePath,
+      file_type: file.type || null,
+      size_bytes: file.size,
+      category: f.elements.category.value,
+      access_level: f.elements.access_level.value
+    };
+    var res = await sb.from('matter_documents').insert(payload);
+    if (res.error) return setNote('docNote', res.error.message);
+    f.reset();
+    setNote('docNote', 'Uploaded to private storage.', true);
+    await loadDocuments();
+  }
+
+  async function loadComms() {
+    await loadLegalLookups();
+    var res = await sb.from('matter_communications').select('*').order('occurred_at', { ascending: false }).limit(100);
+    if (res.error) { setNote('commNote', res.error.message); return; }
+    $id('commBody').innerHTML = (res.data || []).map(function (c) {
+      return '<tr><td>' + escapeHtml(fmtWhen(c.occurred_at)) + '</td><td>' + escapeHtml(matterLabel(c.matter_id)) + '</td><td>' + escapeHtml(c.comm_type) + '</td><td>' + escapeHtml(c.subject || '') + '</td><td>' + (c.client_visible ? 'Yes' : 'No') + '</td></tr>';
+    }).join('') || '<tr><td colspan="5">No communication records.</td></tr>';
+  }
+  async function saveComm(e) {
+    e.preventDefault();
+    var f = e.target;
+    var payload = {
+      matter_id: f.elements.matter_id.value,
+      comm_type: f.elements.comm_type.value,
+      direction: f.elements.direction.value,
+      occurred_at: isoFromLocal(f.elements.occurred_at.value) || new Date().toISOString(),
+      subject: f.elements.subject.value.trim() || null,
+      related_person: f.elements.related_person.value.trim() || null,
+      client_visible: f.elements.client_visible.value === 'true',
+      summary: f.elements.summary.value.trim(),
+      is_automated: false
+    };
+    if (!payload.matter_id || !payload.summary) return setNote('commNote', 'Matter and summary are required.');
+    var res = await sb.from('matter_communications').insert(payload);
+    if (res.error) return setNote('commNote', res.error.message);
+    f.reset();
+    setNote('commNote', 'Manual record saved. Nothing was sent.', true);
+    await loadComms();
+  }
+
+  async function loadLegalReports() {
+    setNote('legalReportNote', 'Loading…', true);
+    var jobs = await Promise.all([
+      sb.from('legal_matters').select('id', { count: 'exact', head: true }).in('status', ['intake', 'open', 'active', 'on_hold', 'pending']),
+      sb.from('legal_matters').select('id', { count: 'exact', head: true }).eq('status', 'closed'),
+      sb.from('matter_tasks').select('id', { count: 'exact', head: true }).in('status', ['todo', 'in_progress']),
+      sb.from('matter_documents').select('id', { count: 'exact', head: true }),
+      sb.from('inquiries').select('id', { count: 'exact', head: true }).in('status', ['new', 'reviewed'])
+    ]);
+    var err = jobs.find(function (r) { return r.error; });
+    if (err) { setNote('legalReportNote', err.error.message); return; }
+    function n(r) { return typeof r.count === 'number' ? r.count : 0; }
+    $id('legalReportStats').innerHTML = [
+      ['Open matters', n(jobs[0])],
+      ['Closed matters', n(jobs[1])],
+      ['Open tasks', n(jobs[2])],
+      ['Documents', n(jobs[3])],
+      ['Open inquiries', n(jobs[4])]
+    ].map(function (x) {
+      return '<div class="stat-card"><div class="label">' + escapeHtml(x[0]) + '</div><div class="value">' + x[1] + '</div></div>';
+    }).join('');
+    setNote('legalReportNote', '');
+  }
+
+  function bindLegalOps() {
+    $id('clientForm').addEventListener('submit', saveClient);
+    $id('clientCancel').addEventListener('click', resetClientForm);
+    $id('clientSearch').addEventListener('input', renderClients);
+    $id('clientBody').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-cl-edit]'); if (!b) return;
+      var c = legalClients.find(function (x) { return x.id === b.getAttribute('data-cl-edit'); }); if (!c) return;
+      var f = $id('clientForm');
+      f.elements.legal_name.value = c.legal_name || '';
+      f.elements.client_type.value = c.client_type || 'individual';
+      f.elements.email.value = c.email || '';
+      f.elements.phone.value = c.phone || '';
+      f.elements.address.value = c.address || '';
+      f.elements.preferred_contact_method.value = c.preferred_contact_method || '';
+      f.elements.status.value = c.status || 'active';
+      f.elements.notes.value = c.notes || '';
+      legalEditClientId = c.id;
+      $id('clientSave').textContent = 'Update client';
+      $id('clientCancel').hidden = false;
+    });
+    $id('legalMatterForm').addEventListener('submit', saveLegalMatter);
+    $id('legalMatterCancel').addEventListener('click', resetMatterForm);
+    ['lmStatus', 'lmType', 'lmPriority', 'lmSearch'].forEach(function (id) { $id(id).addEventListener('input', renderLegalMatters); $id(id).addEventListener('change', renderLegalMatters); });
+    $id('legalMatterBody').addEventListener('click', function (e) {
+      var open = e.target.closest('[data-lm-open]');
+      var ed = e.target.closest('[data-lm-edit]');
+      if (open) return openMatterWorkspace(open.getAttribute('data-lm-open'));
+      if (!ed) return;
+      var m = legalMatters.find(function (x) { return x.id === ed.getAttribute('data-lm-edit'); }); if (!m) return;
+      var f = $id('legalMatterForm');
+      ['title', 'client_id', 'matter_type', 'practice_area_id', 'lead_lawyer_id', 'status', 'priority', 'opened_at', 'target_close_at', 'confidentiality_level', 'internal_reference', 'description'].forEach(function (k) {
+        if (f.elements[k]) f.elements[k].value = m[k] == null ? '' : m[k];
+      });
+      f.elements.confidentiality_flag.value = m.confidentiality_flag ? 'true' : 'false';
+      legalEditMatterId = m.id;
+      $id('legalMatterSave').textContent = 'Update matter';
+      $id('legalMatterCancel').hidden = false;
+    });
+    $id('mwClose').addEventListener('click', function () { mwMatterId = null; $id('matterWorkspace').classList.remove('is-open'); });
+    document.querySelectorAll('[data-mw-tab]').forEach(function (b) {
+      b.addEventListener('click', function () { mwTab = b.getAttribute('data-mw-tab'); renderMatterWorkspace(); });
+    });
+    $id('taskForm').addEventListener('submit', saveTask);
+    $id('taskFilter').addEventListener('change', renderTasks);
+    $id('taskBody').addEventListener('click', async function (e) {
+      var b = e.target.closest('[data-task-done]'); if (!b) return;
+      await sb.from('matter_tasks').update({ status: 'completed' }).eq('id', b.getAttribute('data-task-done'));
+      await loadTasks();
+    });
+    $id('eventForm').addEventListener('submit', saveEvent);
+    $id('eventFilter').addEventListener('change', renderEvents);
+    $id('docForm').addEventListener('submit', saveDocument);
+    $id('docBody').addEventListener('click', async function (e) {
+      var b = e.target.closest('[data-doc-open]'); if (!b) return;
+      var path = b.getAttribute('data-doc-open');
+      var signed = await sb.storage.from('matter-documents').createSignedUrl(path, 60);
+      if (signed.error) return setNote('docNote', signed.error.message);
+      window.open(signed.data.signedUrl, '_blank', 'noopener');
+    });
+    $id('commForm').addEventListener('submit', saveComm);
+  }
+
   function bindEduSearch() {
     $id('esRun').addEventListener('click', runEduSearch);
     $id('esQuery').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); runEduSearch(); } });
@@ -6828,7 +7541,7 @@ window.ramdaniAuth = {
   }
 
   function showAdminView(view) {
-    var panels = ['dashboardPanel','studentsPanel','adminsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','orgSettingsPanel','brandingLogoPanel','brandingTypePanel','contactInfoPanel','seoSettingsPanel','systemSettingsPanel','disclaimersPanel','homepageSectionsPanel','navigationPanel','certTemplatesPanel','mediaLibraryPanel','certIssuancesPanel','courseBuilderPanel','quizBuilderPanel','quizResultsPanel','eduSearchPanel','enrollmentsPanel','seoOverridesPanel','notificationsPanel','auditLogPanel'];
+    var panels = ['dashboardPanel','studentsPanel','adminsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','orgSettingsPanel','brandingLogoPanel','brandingTypePanel','contactInfoPanel','seoSettingsPanel','systemSettingsPanel','disclaimersPanel','homepageSectionsPanel','navigationPanel','certTemplatesPanel','mediaLibraryPanel','certIssuancesPanel','courseBuilderPanel','quizBuilderPanel','quizResultsPanel','eduSearchPanel','enrollmentsPanel','seoOverridesPanel','notificationsPanel','auditLogPanel','opsDashPanel','clientsPanel','legalMattersPanel','myTasksPanel','legalCalendarPanel','legalDocsPanel','legalCommsPanel','legalReportsPanel'];
     panels.forEach(function(id){ var el=document.getElementById(id); if(el){ el.hidden=true; el.classList.remove('is-active'); }});
     document.querySelectorAll('.admin-nav [data-table]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-table')===view); });
     document.getElementById('adminApp').classList.remove('nav-open');
@@ -6858,6 +7571,14 @@ window.ramdaniAuth = {
     if(view==='__seooverrides') { activate('seoOverridesPanel','SEO overrides'); populateSeoOverrideEntitySelect(); loadSeoOverrideRecords().then(loadSeoOverrideForRecord); loadSeoOverridesList(); return; }
     if(view==='__notifications') { activate('notificationsPanel','Notifications'); loadNotifications(); return; }
     if(view==='__auditlog') { activate('auditLogPanel','Audit log'); loadAuditLog(); return; }
+    if(view==='__opsdash') { activate('opsDashPanel','Operations dashboard'); loadOpsDash(); return; }
+    if(view==='__clients') { activate('clientsPanel','Clients'); loadClients(); return; }
+    if(view==='__legalmatters') { activate('legalMattersPanel','Matters / Cases'); loadLegalMatters(); return; }
+    if(view==='__mytasks') { activate('myTasksPanel','My tasks'); loadTasks(); return; }
+    if(view==='__legalcalendar') { activate('legalCalendarPanel','Calendar / dates'); loadEvents(); return; }
+    if(view==='__legaldocs') { activate('legalDocsPanel','Documents'); loadDocuments(); return; }
+    if(view==='__legalcomms') { activate('legalCommsPanel','Communications'); loadComms(); return; }
+    if(view==='__legalreports') { activate('legalReportsPanel','Reports'); loadLegalReports(); return; }
     activate('contentPanel', (TABLES.find(function(t){return t.id===view;})||{}).label || 'Content');
     loadTable(view);
   }
