@@ -1150,13 +1150,12 @@ html[dir="rtl"] .lead {
           </div>
 
           <div id="certIssuancesPanel" class="admin-panel" hidden>
-            <div class="admin-section-head"><div><h2>Certificate issuances</h2><p class="note">Issue a numbered, verifiable certificate to a student for a completed module. Verification code is generated automatically.</p></div></div>
+            <div class="admin-section-head"><div><h2>Certificate issuances</h2><p class="note">Issue a numbered, verifiable certificate to a student for a completed module. Certificate number and verification code are generated automatically by the database.</p></div></div>
             <form id="certIssuanceForm" class="form admin-form">
               <p class="note field-full">Issue only to an <strong>active</strong> student who is <strong>enrolled</strong> in the selected module. Dropdowns load live IDs from the database.</p>
               <label><span>Student (active only)</span><select name="student_id" required><option value="">Select student…</option></select></label>
               <label><span>Enrolled module</span><select name="module_id" required><option value="">Select enrolled module…</option></select></label>
               <label><span>Certificate template</span><select name="template_id"><option value="">Use default template</option></select></label>
-              <label><span>Certificate number</span><input name="certificate_number" required placeholder="RLF-CERT-2026-0001" /></label>
               <label><span>Issue date</span><input name="issue_date" type="date" /></label>
               <div class="form-actions"><button class="btn btn-primary" type="submit">Issue certificate</button><p id="certIssuanceNote" class="form-status"></p></div>
             </form>
@@ -6714,6 +6713,9 @@ window.ramdaniAuth = {
   var certIssuanceModulesCache = [];
 
   function randomVerificationCode() {
+    // Deprecated: verification codes are now generated server-side
+    // (set_certificate_verification_code trigger, Module 9). Kept only
+    // to avoid breaking any external reference; no longer called.
     var chars = 'abcdef0123456789';
     var out = '';
     for (var i = 0; i < 16; i++) out += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -6806,8 +6808,10 @@ window.ramdaniAuth = {
       var student = certIssuanceStudentsCache.find(function (s) { return s.id === r.student_id; });
       var mod = certIssuanceModulesCache.find(function (m) { return m.id === r.module_id; });
       var tpl = certTemplatesCache.find(function (t) { return t.id === r.template_id; });
-      return '<tr><td>' + escapeHtml(r.certificate_number) + '</td><td>' + escapeHtml(student ? (student.full_name || student.email) : '') +
-        '</td><td>' + escapeHtml(mod ? mod.title : '') + '</td><td>' + escapeHtml(tpl ? tpl.name : 'Default') + '</td><td>' +
+      var recipientLabel = r.recipient_type === 'event_attendee' ? 'Event attendee' : (student ? (student.full_name || student.email) : '');
+      var contextLabel = r.recipient_type === 'event_attendee' ? 'Event certificate' : (mod ? mod.title : '');
+      return '<tr><td>' + escapeHtml(r.certificate_number) + '</td><td>' + escapeHtml(recipientLabel) +
+        '</td><td>' + escapeHtml(contextLabel) + '</td><td>' + escapeHtml(tpl ? tpl.name : 'Default') + '</td><td>' +
         escapeHtml(r.issue_date || '') + '</td><td>' + escapeHtml(r.status || '') + '</td><td>' + escapeHtml(r.verification_code || '') + '</td><td>' +
         (r.status === 'issued'
           ? '<button type="button" class="btn" data-revoke-cert="' + r.id + '">Revoke</button>'
@@ -6847,9 +6851,7 @@ window.ramdaniAuth = {
     note.className = 'form-status';
     var fd = new FormData(form);
     var studentId = fd.get('student_id');
-    var certNumber = (fd.get('certificate_number') || '').trim();
     if (!studentId) { note.className = 'form-status err'; note.textContent = 'Student is required.'; return; }
-    if (!certNumber) { note.className = 'form-status err'; note.textContent = 'Certificate number is required.'; return; }
     var moduleId = fd.get('module_id');
     if (!moduleId) { note.className = 'form-status err'; note.textContent = 'An enrolled module is required.'; return; }
     var stu = certIssuanceStudentsCache.find(function (s) { return s.id === studentId; });
@@ -6868,16 +6870,15 @@ window.ramdaniAuth = {
     var payload = {
       student_id: studentId,
       module_id: moduleId,
+      recipient_type: 'student',
       template_id: fd.get('template_id') || null,
-      certificate_number: certNumber,
-      verification_code: randomVerificationCode(),
       issue_date: fd.get('issue_date') || null,
       status: 'issued'
     };
     var res = await sb.from('certificate_issuances').insert(payload);
     if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; return; }
     note.className = 'form-status ok';
-    note.textContent = 'Certificate issued.';
+    note.textContent = 'Certificate issued. Certificate number and verification code were generated by the server.';
     form.reset();
     loadCertIssuances();
   }
