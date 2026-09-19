@@ -546,6 +546,21 @@ body{font-size:15px}a,button,input,textarea,select{-webkit-tap-highlight-color:t
 .nav-panel a:hover{background:rgba(183,146,82,.12);color:var(--forest)}
 .nav-panel .nav-panel-all{margin-top:.35rem;border-top:1px solid var(--border);padding-top:.7rem;font-weight:600;color:var(--forest)}
 .nav-panel-loading:empty::before{content:'Loading…';display:block;padding:.55rem .65rem;color:var(--muted);font-size:.8rem}
+/* Practice Areas dropdown: separate the "Legal Services" overview link
+   from the individual practice areas so it reads as a category link,
+   not a 9th practice area in the same list. */
+.nav-panel a[href="/pages/services.html"]{
+  font-size:.72rem;
+  font-weight:600;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--brass);
+  padding-bottom:.5rem;
+  margin-bottom:.35rem;
+  border-bottom:1px solid var(--border);
+  border-radius:0;
+}
+.nav-panel a[href="/pages/services.html"]:hover{background:transparent;color:var(--forest)}
 @media (min-width:1200px){.nav-panel{position:absolute;top:100%;inset-inline-start:0;margin-top:.55rem}}
 @media (max-width:1199px){.nav-panel{position:static;box-shadow:none;border-color:var(--border);margin-top:.3rem;animation:none}.nav-drop{width:100%}.nav-drop summary{padding:.65rem}}
 @media (prefers-reduced-motion: reduce){.nav-drop[open]>.nav-panel,.nav-drop:hover>.nav-panel{animation:none}}
@@ -4409,7 +4424,7 @@ window.ramdaniSite = Object.freeze({
   }
   var groupedNavHtml =
     links([['/pages/about.html', 'nav_about', 'About']]) +
-    dropdown('Practice Areas', [
+    dropdown('Legal Services', [
       ['/pages/services.html', 'Legal Services']
     ], '<div id="navPracticeAreas" class="nav-panel-loading"></div><a href="/pages/practice-areas.html" class="nav-panel-all">All Practice Areas →</a>') +
     dropdown('Legal Education', [
