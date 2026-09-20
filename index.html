@@ -3655,14 +3655,14 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
         var res = await ramdaniAuth.signInPassword(document.getElementById('memLoginEmail').value.trim(), document.getElementById('memLoginPassword').value);
         if (res.error) return setSt(res.error.message);
         var p = await ramdaniAuth.profile();
-        if (!p || p.role !== 'member') { await ramdaniAuth.signOut(); return setSt('This account is not a member account.'); }
+        if (!(await ramdaniAuth.isMember(p))) { await ramdaniAuth.signOut(); return setSt('This account is not a member account.'); }
         window.ramdaniGo('/member/dashboard');
       });
       document.getElementById('memberSignOutBtn').addEventListener('click', async function () { await ramdaniAuth.signOut(); window.ramdaniGo('/portal/login'); });
     }
     var p = await ramdaniAuth.profile();
     if (path.indexOf('/dashboard') >= 0) {
-      if (!p || p.role !== 'member') { window.ramdaniGo('/portal/login'); return; }
+      if (!(await ramdaniAuth.isMember(p))) { window.ramdaniGo('/portal/login'); return; }
       login.hidden = true; dash.hidden = false;
       document.getElementById('memWelcome').textContent = 'Welcome, ' + (p.full_name || 'Member');
       document.getElementById('memDashMeta').textContent = p.email || '';
@@ -3773,14 +3773,14 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
         var res = await ramdaniAuth.signInPassword(document.getElementById('cliLoginEmail').value.trim(), document.getElementById('cliLoginPassword').value);
         if (res.error) return setSt(res.error.message);
         var p = await ramdaniAuth.profile();
-        if (!p || p.role !== 'client') { await ramdaniAuth.signOut(); return setSt('This account is not a client account.'); }
+        if (!(await ramdaniAuth.isClient(p))) { await ramdaniAuth.signOut(); return setSt('This account is not a client account.'); }
         window.ramdaniGo('/client/dashboard');
       });
       document.getElementById('clientSignOutBtn').addEventListener('click', async function () { await ramdaniAuth.signOut(); window.ramdaniGo('/client/login'); });
     }
     var p = await ramdaniAuth.profile();
     if (path.indexOf('/dashboard') >= 0) {
-      if (!p || p.role !== 'client') { window.ramdaniGo('/client/login'); return; }
+      if (!(await ramdaniAuth.isClient(p))) { window.ramdaniGo('/client/login'); return; }
       login.hidden = true; dash.hidden = false;
       document.getElementById('cliWelcome').textContent = 'Welcome, ' + (p.full_name || 'Client');
       var cn = document.getElementById('cliDashName'); if (cn) cn.textContent = p.full_name || '—';
@@ -4163,7 +4163,7 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
         var res = await ramdaniAuth.signInPassword(document.getElementById('lawLoginEmail').value.trim(), document.getElementById('lawLoginPassword').value);
         if (res.error) return setSt(res.error.message);
         var p = await ramdaniAuth.profile();
-        if (!p || p.role !== 'lawyer') { await ramdaniAuth.signOut(); return setSt('This account is not a lawyer account.'); }
+        if (!(await ramdaniAuth.isLawyer(p))) { await ramdaniAuth.signOut(); return setSt('This account is not a lawyer account.'); }
         if (!p.is_active) {
           await ramdaniAuth.signOut();
           return setSt(p.status === 'suspended'
@@ -4180,7 +4180,7 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
     signup.hidden = true;
     var p = await ramdaniAuth.profile();
     if (path.indexOf('/dashboard') < 0) { login.hidden = false; dash.hidden = true; return; }
-    if (!p || p.role !== 'lawyer' || !p.is_active) { window.ramdaniGo('/portal/login'); return; }
+    if (!(await ramdaniAuth.isLawyer(p)) || !p.is_active) { window.ramdaniGo('/portal/login'); return; }
     login.hidden = true; dash.hidden = false;
     if (window.ramdaniLawyerBoot) await window.ramdaniLawyerBoot(p);
   }
@@ -5055,14 +5055,40 @@ window.ramdaniAuth = {
   STAFF_ROLES: ['admin', 'editor', 'content_manager', 'education_manager', 'student_manager', 'communications_manager', 'firm_admin', 'lawyer', 'operations_staff'],
   async requireAdmin() {
     var p = await this.profile();
+    if (p && p.is_active && this.STAFF_ROLES.indexOf(p.role) === -1) {
+      // Multi-role identity: profiles.role may hold a domain role (student/member/...) while an active
+      // profile_roles staff grant exists. profile_roles_select_own lets the user read only their own rows.
+      try {
+        var pr = await sb.from('profile_roles').select('role').eq('profile_id', p.id).is('revoked_at', null);
+        var self = this;
+        var hit = (pr.data || []).map(function (r) { return r.role; }).filter(function (r) { return self.STAFF_ROLES.indexOf(r) !== -1; })[0];
+        if (hit) p = Object.assign({}, p, { role: hit });
+      } catch (e) { /* fall through to the normal denial below */ }
+    }
     if (!p || this.STAFF_ROLES.indexOf(p.role) === -1 || !p.is_active) {
       throw new Error('Admin access required');
     }
     return p;
   },
+  // Domain-native student eligibility (not profiles.role): active profile + active students row.
+  // RLS (students_select_own) lets a user read only their own students row.
+  async isActiveStudent(p) {
+    if (!p || p.is_active !== true || p.status !== 'active') return false;
+    var r = await sb.from('students').select('status').eq('profile_id', p.id).maybeSingle();
+    return !!(r && !r.error && r.data && r.data.status === 'active');
+  },
+  // Additive domain-native recognition for member/client/lawyer portals: the legacy profiles.role
+  // still passes (existing behaviour unchanged); a profile whose domain row is active also passes.
+  // Uses the same backend predicates RLS uses. UI gate only - RLS remains the security boundary.
+  async _domainActive(fn) {
+    try { var r = await sb.rpc(fn); return !r.error && r.data === true; } catch (e) { return false; }
+  },
+  async isMember(p) { return !!(p && (p.role === 'member' || await this._domainActive('ramdani_is_member'))); },
+  async isClient(p) { return !!(p && (p.role === 'client' || await this._domainActive('ramdani_is_client'))); },
+  async isLawyer(p) { return !!(p && (p.role === 'lawyer' || await this._domainActive('ramdani_is_lawyer'))); },
   async requireStudent() {
     var p = await this.profile();
-    if (!p || p.role !== 'student') {
+    if (!(await this.isActiveStudent(p))) {
       throw new Error('Student access required');
     }
     return p;
@@ -5566,7 +5592,7 @@ window.ramdaniAuth = {
       var res = await ramdaniAuth.signInPassword(email, password);
       if (res.error) return setStatus('studentLoginStatus', res.error.message);
       var profile = await ramdaniAuth.profile();
-      if (!profile || profile.role !== 'student') {
+      if (!(await ramdaniAuth.isActiveStudent(profile))) {
         await ramdaniAuth.signOut();
         return setStatus('studentLoginStatus', 'This account is not a student account.');
       }
@@ -5925,7 +5951,7 @@ window.ramdaniAuth = {
     if (session) {
       var p = null;
       try { p = await ramdaniAuth.profile(); } catch (e) { p = null; }
-      if (p && p.role === 'student') { window.ramdaniGo('/student/dashboard'); return; }
+      if (await ramdaniAuth.isActiveStudent(p)) { window.ramdaniGo('/student/dashboard'); return; }
     }
     showPanel('studentLoginPanel');
   };
@@ -5959,9 +5985,11 @@ window.ramdaniAuth = {
   async function loadMembershipCard(p) {
     var box = document.getElementById('lawMemberCardBox');
     var mem = await sb.from('members').select('*').eq('profile_id', p.id).maybeSingle();
+    if (mem.error) { if (window.console) console.error('membership lookup failed', mem.error); box.innerHTML = '<p class="empty">Could not load membership information. Please try again later.</p>'; return; }
     if (!mem.data) { box.innerHTML = '<p class="empty">No membership record is linked to this login.</p>'; return; }
     var m = mem.data;
     var card = await sb.from('member_cards').select('*').eq('member_id', m.id).in('status', ['issued', 'active']).order('created_at', { ascending: false }).limit(1);
+    if (card.error) { if (window.console) console.error('member card lookup failed', card.error); box.innerHTML = '<p class="empty">Membership status: ' + esc(m.status) + '. The card could not be loaded.</p>'; return; }
     var c = card.data && card.data[0];
     box.innerHTML = c
       ? '<div class="id-card"><p class="note">Member card — ' + esc(m.status) + '</p><h3>' + esc(m.full_name) + '</h3><p>' + esc(c.card_number) + '</p><p class="qr">Verify: ' + esc(c.verify_code) + '</p></div>'
@@ -5971,6 +5999,7 @@ window.ramdaniAuth = {
   async function loadCertificates(p) {
     var box = document.getElementById('lawCertificates');
     var res = await sb.from('certificate_issuances').select('*').or('student_id.eq.' + p.id + ',profile_id.eq.' + p.id).eq('status', 'issued').order('created_at', { ascending: false });
+    if (res.error) { if (window.console) console.error('loadCertificates failed', res.error); box.innerHTML = '<p class="empty">Could not load this section. Please try again later.</p>'; return; }
     box.innerHTML = (res.data || []).map(function (c) {
       return '<article class="card"><h3>Certificate ' + esc(c.certificate_number) + '</h3><p class="note">' + esc(c.issue_date || '') + '</p><p class="qr">Verify: ' + esc(c.verification_code) + '</p></article>';
     }).join('') || '<p class="empty">No certificates issued yet.</p>';
@@ -5979,6 +6008,7 @@ window.ramdaniAuth = {
   async function loadDocuments(p) {
     var box = document.getElementById('lawDocuments');
     var res = await sb.from('issued_documents').select('document_number, category, issued_at, status').eq('student_id', p.id).eq('status', 'issued');
+    if (res.error) { if (window.console) console.error('loadDocuments failed', res.error); box.innerHTML = '<p class="empty">Could not load this section. Please try again later.</p>'; return; }
     box.innerHTML = (res.data || []).map(function (d) {
       return '<article class="card"><h3>' + esc(d.category) + '</h3><p class="note">' + esc(d.document_number || '') + (d.issued_at ? ' · ' + esc(d.issued_at) : '') + '</p></article>';
     }).join('') || '<p class="empty">No documents issued.</p>';
@@ -5987,6 +6017,7 @@ window.ramdaniAuth = {
   async function loadCourses(p) {
     var box = document.getElementById('lawCourses');
     var res = await sb.from('enrollments').select('id, status, enrolled_at, modules(title, code, category)').eq('student_id', p.id).order('enrolled_at', { ascending: false });
+    if (res.error) { if (window.console) console.error('loadCourses failed', res.error); box.innerHTML = '<p class="empty">Could not load this section. Please try again later.</p>'; return; }
     box.innerHTML = (res.data || []).map(function (e) {
       var mod = e.modules || {};
       return '<article class="card"><h3>' + esc(mod.title || 'Course') + '</h3><p class="note">' + esc(mod.code || '') + ' · ' + esc(e.status) + '</p></article>';
@@ -5996,6 +6027,7 @@ window.ramdaniAuth = {
   async function loadQuizzes(p) {
     var box = document.getElementById('lawQuizResults');
     var res = await sb.from('quiz_attempts').select('score, total, created_at, quizzes(title)').eq('student_id', p.id).order('created_at', { ascending: false }).limit(20);
+    if (res.error) { if (window.console) console.error('loadQuizzes failed', res.error); box.innerHTML = '<p class="empty">Could not load this section. Please try again later.</p>'; return; }
     box.innerHTML = (res.data || []).map(function (a) {
       var q = a.quizzes || {};
       return '<p><strong>' + esc(q.title || 'Quiz') + '</strong> — ' + esc(a.score) + '/' + esc(a.total) + ' <span class="note">' + esc((a.created_at || '').slice(0, 10)) + '</span></p>';
@@ -9289,8 +9321,16 @@ window.ramdaniAuth = {
     var moduleSel = form.querySelector('[name="module_id"]');
     var templateSel = form.querySelector('[name="template_id"]');
 
-    var studentsRes = await sb.from('profiles').select('id, full_name, email, student_id, is_active, status').eq('role', 'student').eq('is_active', true).eq('status', 'active').order('full_name');
-    certIssuanceStudentsCache = studentsRes.data || [];
+    var studentsRes = await sb.from('profiles').select('id, full_name, email, student_id, is_active, status, stu:students!students_profile_id_fkey!inner(status)').eq('stu.status', 'active').eq('is_active', true).eq('status', 'active').order('full_name');
+    certIssuanceStudentsCache = studentsRes.error ? [] : (studentsRes.data || []);
+    var ciNote = document.getElementById('certIssuanceNote');
+    if (studentsRes.error) {
+      if (ciNote) { ciNote.className = 'form-status err'; ciNote.textContent = 'Could not load the student list. Please reload and try again.'; }
+      if (window.console) console.error('cert recipient lookup failed', studentsRes.error);
+    } else if (!certIssuanceStudentsCache.length && ciNote) {
+      ciNote.className = 'form-status';
+      ciNote.textContent = 'No eligible active students are visible to your account.';
+    }
     studentSel.innerHTML = '<option value="">Select student…</option>' + certIssuanceStudentsCache.map(function (s) {
       return '<option value="' + s.id + '">' + escapeHtml(s.full_name || s.email) + (s.student_id ? ' (' + escapeHtml(s.student_id) + ')' : '') + '</option>';
     }).join('');
@@ -9436,10 +9476,19 @@ window.ramdaniAuth = {
       issue_date: fd.get('issue_date') || null,
       status: 'issued'
     };
-    var res = await sb.from('certificate_issuances').insert(payload);
-    if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; return; }
+    var res = await sb.from('certificate_issuances').insert(payload).select('certificate_number, verification_code').maybeSingle();
+    if (res.error) {
+      var em = String(res.error.message || '');
+      note.className = 'form-status err';
+      if (/row-level security|permission denied/i.test(em)) note.textContent = 'You are not authorized to issue certificates.';
+      else if (/^Certificate can only be issued|^Student must have|^A module is required/.test(em)) note.textContent = em;
+      else { note.textContent = 'Could not issue the certificate. Please try again.'; if (window.console) console.error('certificate issue failed', res.error); }
+      return;
+    }
     note.className = 'form-status ok';
-    note.textContent = 'Certificate issued. Certificate number and verification code were generated by the server.';
+    note.textContent = res.data && res.data.certificate_number
+      ? 'Certificate issued. Number: ' + res.data.certificate_number + (res.data.verification_code ? ' · Verification code: ' + res.data.verification_code : '')
+      : 'Certificate issued. Certificate number and verification code were generated by the server.';
     form.reset();
     loadCertIssuances();
   }
@@ -10258,7 +10307,7 @@ window.ramdaniAuth = {
     setNote('qrNote', 'Loading…', true);
     var res = await Promise.all([
       sb.from('quiz_attempts').select('*').order('created_at', { ascending: true }),
-      sb.from('profiles').select('id, full_name, email, student_id').eq('role', 'student'),
+      sb.from('profiles').select('id, full_name, email, student_id, stu:students!students_profile_id_fkey!inner(status)'),
       sb.from('quizzes').select('id, title, pass_percent, module_id'),
       sb.from('modules').select('id, title, code')
     ]);
@@ -11125,8 +11174,13 @@ window.ramdaniAuth = {
       sb.from('cabinets').select('id, title').order('title'),
       sb.from('members').select('id, member_number, full_name, status').order('full_name'),
       sb.from('events').select('id, title, starts_at, status').order('starts_at', { ascending: false }),
-      sb.from('profiles').select('id, full_name, email, student_id, is_active, status').eq('role', 'student').eq('is_active', true).eq('status', 'active').order('full_name')
+      sb.from('profiles').select('id, full_name, email, student_id, is_active, status, stu:students!students_profile_id_fkey!inner(status)').eq('stu.status', 'active').eq('is_active', true).eq('status', 'active').order('full_name')
     ]);
+    var platLookupFailed = res.some(function (x) { return x && x.error; });
+    if (platLookupFailed) {
+      if (window.console) console.error('platform lookups failed', res.map(function (x) { return x && x.error; }).filter(Boolean));
+      var pn = $id('memberNote'); if (pn) { pn.className = 'form-status err'; pn.textContent = 'Some lists (societies, chapters, members, events or students) could not be loaded — dropdowns may be incomplete for your account.'; }
+    }
     platSocieties = res[0].data || [];
     platChapters = res[1].data || [];
     platCabinets = res[2].data || [];
@@ -11403,8 +11457,8 @@ window.ramdaniAuth = {
   }
   async function openMemberProfile(memberId) {
     var m = platMembers.find(function (x) { return x.id === memberId; });
-    if (!m) { var r = await sb.from('members').select('*').eq('id', memberId).maybeSingle(); m = r.data; }
-    if (!m) return;
+    if (!m) { var r = await sb.from('members').select('*').eq('id', memberId).maybeSingle(); if (r.error && window.console) console.error('member lookup failed', r.error); m = r.data; }
+    if (!m) { var mn = $id('memberNote'); if (mn) { mn.className = 'form-status err'; mn.textContent = 'Could not open this member record (not found or not permitted).'; } return; }
     activate('memberProfilePanel', 'Member profile');
     $id('mpName').textContent = m.full_name + (m.member_number ? ' (' + m.member_number + ')' : '');
 
@@ -11417,7 +11471,7 @@ window.ramdaniAuth = {
 
     $id('mpPersonal').innerHTML = '<p><strong>Email:</strong> ' + escapeHtml(m.email || '—') + '</p><p><strong>Phone:</strong> ' + escapeHtml(m.phone || '—') + '</p><p><strong>Bio:</strong> ' + escapeHtml(m.bio || '—') + '</p><p><strong>Joined:</strong> ' + escapeHtml(m.joined_at || '—') + '</p><p><strong>Valid until:</strong> ' + escapeHtml(m.valid_until || '—') + '</p>';
 
-    if (!platMemberships.length) { var mr = await sb.from('memberships').select('*'); platMemberships = mr.data || []; }
+    if (!platMemberships.length) { var mr = await sb.from('memberships').select('*'); if (mr.error && window.console) console.error('memberships lookup failed', mr.error); platMemberships = mr.data || []; }
     var memberships = platMemberships.filter(function (x) { return x.member_id === memberId; });
     $id('mpMembership').innerHTML = memberships.length ? memberships.map(function (ms) {
       return '<p>' + escapeHtml(ms.reference_id || '') + ' — <span class="status-badge status-' + escapeHtml(ms.status) + '">' + escapeHtml(ms.status) + '</span> (' + escapeHtml(ms.membership_type || '') + ', expiry: ' + escapeHtml(ms.expiry_date || '—') + ')</p>';
@@ -11432,6 +11486,7 @@ window.ramdaniAuth = {
 
     var cardRes = await sb.from('member_cards').select('*').eq('member_id', memberId).order('created_at', { ascending: false });
     var cards = cardRes.data || [];
+    if (cardRes.error) { if (window.console) console.error('member cards lookup failed', cardRes.error); $id('mpCard').innerHTML = '<p class="note">Cards could not be loaded for your account.</p>'; } else
     $id('mpCard').innerHTML = cards.length ? cards.map(function (c) {
       return '<p>' + escapeHtml(c.card_number || '(pending)') + ' — <span class="status-badge status-' + escapeHtml(c.status) + '">' + escapeHtml(c.status) + '</span></p>';
     }).join('') : '<p class="note">No card generated yet — use the Member cards panel (requires an approved/active membership).</p>';
@@ -12059,7 +12114,7 @@ window.ramdaniAuth = {
     setNote('enNote', 'Loading…', true);
     var res = await Promise.all([
       sb.from('enrollments').select('*').order('enrolled_at', { ascending: false }),
-      sb.from('profiles').select('id, full_name, email, student_id').eq('role', 'student'),
+      sb.from('profiles').select('id, full_name, email, student_id, stu:students!students_profile_id_fkey!inner(status)'),
       sb.from('modules').select('id, title, code').order('title'),
       sb.from('course_completions').select('student_id, module_id, lesson_percent, best_quiz_percent, is_eligible_for_certificate'),
       sb.from('certificate_issuances').select('student_id, module_id, status')
