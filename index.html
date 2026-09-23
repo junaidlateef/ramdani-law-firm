@@ -1590,6 +1590,19 @@ html.dark .official-doc-preview h3 {
 }
 .id-link-note { font-size: .82rem; }
 /* ===== end MODULE 10 — IDENTITY LIFECYCLE ===== */
+/* ===== MODULE 11 — PUBLIC SIGNUP / MEMBER TABLES ===== */
+@media print {
+  #publicShell, #loginPanel, .admin-nav, .admin-nav-overlay, .admin-topbar, .admin-toolbar, .admin-form, .form-actions, .cc-pager { display: none !important; }
+  .admin-shell { display: block !important; }
+  .admin-main, .admin-content { padding: 0 !important; }
+  table.data { width: 100%; border-collapse: collapse; }
+  table.data th, table.data td { border: 1px solid #ccc; padding: 4px 6px; font-size: 11px; }
+  table.data thead { display: table-header-group; }
+  .member-thumb { width: 36px; height: 36px; object-fit: cover; }
+}
+.member-thumb { width: 36px; height: 36px; object-fit: cover; border-radius: 4px; background: var(--line); }
+.member-thumb.is-empty { display: inline-block; width: 36px; height: 36px; }
+/* ===== end MODULE 11 — PUBLIC SIGNUP / MEMBER TABLES ===== */
 </style>
 </head>
 <body>
@@ -2782,9 +2795,22 @@ html.dark .official-doc-preview h3 {
               <label><span>Photo</span><input name="photo" type="file" accept="image/jpeg,image/png,image/webp" /></label>
               <div class="form-actions"><button class="btn btn-primary" type="submit" id="memberSave">Save member</button><button class="btn" type="button" id="memberCancel" hidden>Cancel</button><p id="memberNote" class="form-status"></p></div>
             </form>
-            <div class="admin-toolbar"><select id="memberStatusFilter"><option value="">All statuses</option><option value="application">Application</option><option value="review">Review</option><option value="approved">Approved</option><option value="active">Active</option><option value="expired">Expired</option><option value="suspended">Suspended</option><option value="revoked">Revoked</option></select><input type="search" id="memberSearch" placeholder="Search name, email or member number" /></div>
+            <div class="admin-toolbar">
+              <select id="memberStatusFilter"><option value="">All statuses</option><option value="application">Application</option><option value="review">Review</option><option value="approved">Approved</option><option value="active">Active</option><option value="expired">Expired</option><option value="suspended">Suspended</option><option value="revoked">Revoked</option></select>
+              <select id="memberSocietyFilter" aria-label="Filter by society"><option value="">All societies</option></select>
+              <select id="memberChapterFilter" aria-label="Filter by chapter"><option value="">All chapters</option></select>
+              <input type="search" id="memberSearch" placeholder="Search name, email, member number or reference" />
+              <button type="button" class="btn" id="memberExportCsv">Export CSV</button>
+              <button type="button" class="btn" id="memberPrintBtn">Print</button>
+            </div>
             <p class="note">Card and certificate columns read live <code>member_cards</code> / <code>issued_documents</code> for this member id. Empty means not issued — never invented.</p>
-            <div class="table-wrap"><table class="data"><thead><tr><th>Number</th><th>Name</th><th>Email</th><th>Society</th><th>Chapter</th><th>Status</th><th>Card</th><th>Certificate</th><th>Actions</th></tr></thead><tbody id="memberBody"></tbody></table></div>
+            <p id="memberTableNote" class="note" role="status"></p>
+            <div class="table-wrap"><table class="data" id="membersDataTable"><thead><tr><th>Photo</th><th>Number</th><th>Name</th><th>Email</th><th>Society</th><th>Chapter</th><th>Status</th><th>Card</th><th>Certificate</th><th>Actions</th></tr></thead><tbody id="memberBody"></tbody></table></div>
+            <div class="cc-pager" id="memberPager" hidden>
+              <button type="button" class="btn btn-sm" id="memberPrev">Previous</button>
+              <p class="note" id="memberPageLabel"></p>
+              <button type="button" class="btn btn-sm" id="memberNext">Next</button>
+            </div>
           </div>
 
           <div id="memberProfilePanel" class="admin-panel" hidden>
@@ -2983,7 +3009,7 @@ html.dark .official-doc-preview h3 {
                   <a class="ra-role" href="/portal/signup?role=student"><strong>Student</strong><span>Study modules, quizzes, enrolments and your student card.</span></a>
                   <a class="ra-role" href="/portal/signup?role=lawyer"><strong>Lawyer</strong><span>Requires review and approval by the firm before you can sign in.</span></a>
                 </div>
-                <p class="ra-foot">Member and client accounts are created by the firm — to join a society or chapter, send a request on the <a href="/join">Join page</a>. By creating an account you accept the <a href="/pages/privacy.html">privacy notice</a>.</p>
+                <p class="ra-foot">Student and lawyer accounts are self-serve. Member records are created by authorised staff after a chapter/society inquiry — the live backend does not allow public member inserts. <a href="/join">Join options</a> · <a href="/pages/chapters.html">Chapters</a> · <a href="/pages/societies.html">Societies</a>. By creating an account you accept the <a href="/pages/privacy.html">privacy notice</a>.</p>
               </div>
               <a id="raRoleBack" class="ra-back" href="/portal/signup" hidden>← Choose a different account type</a>
               <div id="raSignupHost" class="ra-host"></div>
@@ -3210,7 +3236,9 @@ html.dark .official-doc-preview h3 {
               <div><dt>Chapter</dt><dd id="memDashChapter">—</dd></div>
               <div><dt>Designation</dt><dd id="memDashRole">—</dd></div>
               <div><dt>Phone</dt><dd id="memDashPhone">—</dd></div>
+              <div><dt>Reference</dt><dd id="memDashRef">—</dd></div>
             </dl>
+            <p class="note"><a href="/pages/verify-certificate.html">Public verification</a> · <a href="/pages/chapters.html">Chapters</a> · <a href="/pages/societies.html">Societies</a></p>
           </div>
         </section>
         <section class="portal-section">
@@ -3994,7 +4022,8 @@ if (window.ramdaniEducation) ramdaniEducation.bindInternshipApply();
   } },
   '/pages/join.html': { title: 'Join — Ramdani Law Firm', desc: 'Create a student or lawyer account with Ramdani Law Firm.', html: `<section class="section"><div class="wrap"><div class="auth-box">
       <h1>Join Ramdani Law Firm</h1>
-      <p class="note">Student and lawyer accounts create a login plus a linked profile. Society or chapter membership is not self-serve: send a join inquiry on the relevant listing, then staff create the member record and link it to a portal profile. One login → one profile → one member.</p>
+      <p class="note">Create a student or lawyer login here. That creates <code>auth.users</code> → <code>profiles</code> through the existing signup functions. Society and chapter joining is a separate inquiry on those listings — it does not create a member record. There is no public member self-signup: the live backend only lets staff insert <code>members</code>, and new auth users become student or lawyer profiles.</p>
+      <p class="note"><a href="/portal/signup">Create an account</a> · <a href="/pages/chapters.html">Browse chapters</a> · <a href="/pages/societies.html">Browse societies</a> · <a href="/pages/verify-certificate.html">Verify a card or certificate</a></p>
       <form id="joinForm" class="form">
         <label>I am a <select id="joinType" required><option value="">Select…</option><option value="student">Student</option><option value="lawyer">Lawyer</option></select></label>
         <p class="note" id="joinHint"></p>
@@ -4451,6 +4480,13 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
     if (path === '/client') path = '/client/login';
     if (path === '/lawyer') path = '/lawyer/login';
     // Sign-up / recovery now live inside the unified authentication shell (same existing forms, same handlers)
+    if (path === '/signup' || path === '/signup/') { path = '/portal/signup'; }
+    if (path === '/login' || path === '/login/') path = '/portal/login';
+    if (path === '/verify' || path === '/verification' || path === '/verify/' || path === '/verification/') path = '/pages/verify-certificate.html';
+    if (path === '/chapters' || path === '/chapters/') path = '/pages/chapters.html';
+    if (path === '/societies' || path === '/societies/') path = '/pages/societies.html';
+    if (path === '/membership' || path === '/membership/') path = '/pages/join.html';
+    if (path === '/profile' || path === '/profile/') path = '/portal/dashboard';
     if (path === '/student/signup') { path = '/portal/signup'; search = '?role=student'; }
     if (path === '/lawyer/signup') { path = '/portal/signup'; search = '?role=lawyer'; }
     if (path === '/student/forgot-password') path = '/portal/forgot';
@@ -4641,6 +4677,7 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
         setDd('memDashStatus', m.status);
         setDd('memDashRole', m.designation);
         setDd('memDashPhone', m.phone);
+        setDd('memDashRef', m.reference_id);
         var soc = m.society_id ? await sb.from('societies').select('title').eq('id', m.society_id).maybeSingle() : { data: null };
         var ch = m.chapter_id ? await sb.from('chapters').select('title').eq('id', m.chapter_id).maybeSingle() : { data: null };
         setDd('memDashSociety', soc.data && soc.data.title);
@@ -8689,6 +8726,15 @@ window.ramdaniAuth = {
     if (hint) hint.textContent = extra.seat_no
       ? 'Inquiry for one published seat (1–10). Staff review it. This does not enrol you or issue a student card.'
       : 'Staff will reply. This does not create membership, a chapter, or a lawyer–client relationship.';
+    var fn = form.querySelector('[name="full_name"]');
+    var em = form.querySelector('[name="email"]');
+    if (window.ramdaniAuth && ramdaniAuth.profile) {
+      ramdaniAuth.profile().then(function (p) {
+        if (!p) return;
+        if (fn && !fn.value) fn.value = p.full_name || '';
+        if (em && !em.value) em.value = p.email || '';
+      }).catch(function () {});
+    }
     if (dialog.showModal) dialog.showModal();
   }
 
@@ -13266,6 +13312,8 @@ window.ramdaniAuth = {
     var pr = await sb.from('profiles').select('id, full_name, email, role').eq('role', 'member').order('full_name');
     platMemberProfiles = pr.error ? [] : (pr.data || []);
     fillMemberProfileSelect();
+    fillMemberLookups();
+    memberPage = 1;
     renderMembers();
   }
   async function openMemberProfile(memberId) {
@@ -13357,20 +13405,87 @@ window.ramdaniAuth = {
     }
   }
 
-  function renderMembers() {
-    var st = $id('memberStatusFilter').value, q = ($id('memberSearch').value || '').trim().toLowerCase();
-    var rows = platMembers.filter(function (m) {
+  var memberPage = 1;
+  var MEMBER_PAGE_SIZE = 25;
+  var memberPhotoUrls = {};
+  function filteredMembers() {
+    var st = $id('memberStatusFilter') ? $id('memberStatusFilter').value : '';
+    var q = ($id('memberSearch') && $id('memberSearch').value || '').trim().toLowerCase();
+    var socF = $id('memberSocietyFilter') ? $id('memberSocietyFilter').value : '';
+    var chpF = $id('memberChapterFilter') ? $id('memberChapterFilter').value : '';
+    return (platMembers || []).filter(function (m) {
       if (st && m.status !== st) return false;
-      if (q && [m.full_name, m.email, m.member_number, m.designation].join(' ').toLowerCase().indexOf(q) === -1) return false;
+      if (socF && m.society_id !== socF) return false;
+      if (chpF && m.chapter_id !== chpF) return false;
+      if (q && [m.full_name, m.email, m.member_number, m.designation, m.reference_id, m.phone].join(' ').toLowerCase().indexOf(q) === -1) return false;
       return true;
     });
-    $id('memberBody').innerHTML = rows.map(function (m) {
+  }
+  function fillMemberLookups() {
+    function fill(selId, rows, labelFn) {
+      var sel = $id(selId); if (!sel) return;
+      var cur = sel.value;
+      var keep = sel.querySelector('option[value=""]');
+      sel.innerHTML = keep ? keep.outerHTML : '<option value=""></option>';
+      (rows || []).forEach(function (r) {
+        sel.innerHTML += '<option value="' + r.id + '">' + escapeHtml(labelFn(r)) + '</option>';
+      });
+      sel.value = cur;
+    }
+    fill('memberSocietyFilter', platSocieties, function (r) { return r.title || r.short_name || r.id; });
+    fill('memberChapterFilter', platChapters, function (r) { return r.title || r.city || r.id; });
+  }
+  function renderMembers() {
+    var rows = filteredMembers();
+    var total = rows.length;
+    var pages = Math.max(1, Math.ceil(total / MEMBER_PAGE_SIZE));
+    if (memberPage > pages) memberPage = pages;
+    if (memberPage < 1) memberPage = 1;
+    var slice = rows.slice((memberPage - 1) * MEMBER_PAGE_SIZE, memberPage * MEMBER_PAGE_SIZE);
+    var note = $id('memberTableNote');
+    if (note) note.textContent = total ? (total + ' member' + (total === 1 ? '' : 's')) : 'No members match these filters.';
+    var pager = $id('memberPager');
+    if (pager) {
+      pager.hidden = total <= MEMBER_PAGE_SIZE;
+      var lab = $id('memberPageLabel');
+      if (lab) lab.textContent = 'Page ' + memberPage + ' of ' + pages;
+    }
+    $id('memberBody').innerHTML = slice.map(function (m) {
       var soc = platSocieties.find(function (s) { return s.id === m.society_id; });
       var chp = platChapters.find(function (s) { return s.id === m.chapter_id; });
       var cardSt = identityStatusLabel(platMemberCardStatus[m.id]);
       var certSt = identityStatusLabel(platMemberCertStatus[m.id]);
-      return '<tr><td>' + escapeHtml(m.member_number || m.reference_id || '') + '</td><td>' + escapeHtml(m.full_name) + '</td><td>' + escapeHtml(m.email || '') + '</td><td>' + escapeHtml(soc ? soc.title : '') + '</td><td>' + escapeHtml(chp ? chp.title : '') + '</td><td>' + escapeHtml(m.status) + '</td><td>' + escapeHtml(cardSt) + '</td><td>' + escapeHtml(certSt) + '</td><td><button type="button" class="btn btn-sm" data-mem-profile="' + m.id + '">Profile</button> <button type="button" class="btn btn-sm" data-mem-edit="' + m.id + '">Edit</button></td></tr>';
-    }).join('') || '<tr><td colspan="9">No members yet.</td></tr>';
+      var photo = memberPhotoUrls[m.id]
+        ? '<img class="member-thumb" alt="" src="' + escapeHtml(memberPhotoUrls[m.id]) + '" />'
+        : '<span class="member-thumb is-empty" data-mem-photo="' + escapeHtml(m.id) + '"></span>';
+      return '<tr><td>' + photo + '</td><td>' + escapeHtml(m.member_number || m.reference_id || '') + '</td><td>' + escapeHtml(m.full_name) + '</td><td>' + escapeHtml(m.email || '') + '</td><td>' + escapeHtml(soc ? soc.title : '') + '</td><td>' + escapeHtml(chp ? chp.title : '') + '</td><td>' + escapeHtml(m.status) + '</td><td>' + escapeHtml(cardSt) + '</td><td>' + escapeHtml(certSt) + '</td><td><button type="button" class="btn btn-sm" data-mem-profile="' + m.id + '">Profile</button> <button type="button" class="btn btn-sm" data-mem-edit="' + m.id + '">Edit</button></td></tr>';
+    }).join('') || '<tr><td colspan="10">No members yet.</td></tr>';
+    slice.forEach(function (m) {
+      if (!m.photo_path || memberPhotoUrls[m.id]) return;
+      sb.storage.from('private-docs').createSignedUrl(m.photo_path, 300).then(function (signed) {
+        if (!signed.data || !signed.data.signedUrl) return;
+        memberPhotoUrls[m.id] = signed.data.signedUrl;
+        var el = document.querySelector('[data-mem-photo="' + m.id + '"]');
+        if (el) el.outerHTML = '<img class="member-thumb" alt="" src="' + escapeHtml(signed.data.signedUrl) + '" />';
+      });
+    });
+  }
+  function exportMembersCsv() {
+    var rows = filteredMembers();
+    var header = ['member_number','reference_id','full_name','email','phone','status','society','chapter','designation','joined_at','valid_until','card','certificate'];
+    function csvCell(v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }
+    var lines = [header.join(',')];
+    rows.forEach(function (m) {
+      var soc = platSocieties.find(function (s) { return s.id === m.society_id; });
+      var chp = platChapters.find(function (s) { return s.id === m.chapter_id; });
+      lines.push([m.member_number, m.reference_id, m.full_name, m.email, m.phone, m.status, soc && soc.title, chp && chp.title, m.designation, m.joined_at, m.valid_until, identityStatusLabel(platMemberCardStatus[m.id]), identityStatusLabel(platMemberCertStatus[m.id])].map(csvCell).join(','));
+    });
+    var blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'ramdani-members.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
   }
   function resetMemberForm() {
     platEditMemberId = null;
@@ -13753,8 +13868,20 @@ window.ramdaniAuth = {
     $id('membershipSearch').addEventListener('input', renderMemberships);
     $id('memberForm').addEventListener('submit', saveMember);
     $id('memberCancel').addEventListener('click', resetMemberForm);
-    $id('memberStatusFilter').addEventListener('change', renderMembers);
-    $id('memberSearch').addEventListener('input', renderMembers);
+    $id('memberStatusFilter').addEventListener('change', function () { memberPage = 1; renderMembers(); });
+    $id('memberSearch').addEventListener('input', function () { memberPage = 1; renderMembers(); });
+    var socF = $id('memberSocietyFilter');
+    if (socF) socF.addEventListener('change', function () { memberPage = 1; renderMembers(); });
+    var chpF = $id('memberChapterFilter');
+    if (chpF) chpF.addEventListener('change', function () { memberPage = 1; renderMembers(); });
+    var exp = $id('memberExportCsv');
+    if (exp) exp.addEventListener('click', exportMembersCsv);
+    var prn = $id('memberPrintBtn');
+    if (prn) prn.addEventListener('click', function () { window.print(); });
+    var prevM = $id('memberPrev');
+    var nextM = $id('memberNext');
+    if (prevM) prevM.addEventListener('click', function () { memberPage -= 1; renderMembers(); });
+    if (nextM) nextM.addEventListener('click', function () { memberPage += 1; renderMembers(); });
     $id('mpBack').addEventListener('click', function () { showAdminView('__members'); });
     $id('memberBody').addEventListener('click', function (e) {
       var pf = e.target.closest('[data-mem-profile]');
