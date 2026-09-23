@@ -166,7 +166,10 @@ img { max-width: 100%; height: auto; }
   position: sticky;
   top: 0;
   z-index: 20;
+  transition: box-shadow var(--transition-base, 220ms ease), background-color var(--transition-base, 220ms ease);
 }
+.site-header.is-scrolled { box-shadow: var(--shadow-premium, var(--shadow)); }
+@media (prefers-reduced-motion: reduce) { .site-header { transition: none; } }
 .header-inner {
   display: flex;
   align-items: center;
@@ -570,6 +573,16 @@ body{font-size:15px}a,button,input,textarea,select{-webkit-tap-highlight-color:t
 .nav-panel a:hover{background:rgba(183,146,82,.12);color:var(--forest)}
 .nav-panel .nav-panel-all{margin-top:.35rem;border-top:1px solid var(--border);padding-top:.7rem;font-weight:600;color:var(--forest)}
 .nav-panel-loading:empty::before{content:'Loading…';display:block;padding:.55rem .65rem;color:var(--muted);font-size:.8rem}
+.menu-toggle{position:relative;width:2.4rem;height:2.4rem;padding:0;display:none;align-items:center;justify-content:center}
+.menu-toggle-icon,.menu-toggle-icon::before,.menu-toggle-icon::after{width:1.15rem;height:2px;background:var(--ink);border-radius:2px;transition:transform .2s ease,opacity .2s ease}
+.menu-toggle-icon{position:relative;display:block}
+.menu-toggle-icon::before,.menu-toggle-icon::after{content:'';position:absolute;left:0}
+.menu-toggle-icon::before{top:-.4rem}
+.menu-toggle-icon::after{top:.4rem}
+.menu-toggle[aria-expanded="true"] .menu-toggle-icon{background:transparent}
+.menu-toggle[aria-expanded="true"] .menu-toggle-icon::before{top:0;transform:rotate(45deg)}
+.menu-toggle[aria-expanded="true"] .menu-toggle-icon::after{top:0;transform:rotate(-45deg)}
+@media (prefers-reduced-motion: reduce){.menu-toggle-icon,.menu-toggle-icon::before,.menu-toggle-icon::after{transition:none}}
 /* Practice Areas dropdown: separate the "Legal Services" overview link
    from the individual practice areas so it reads as a category link,
    not a 9th practice area in the same list. */
@@ -589,8 +602,22 @@ body{font-size:15px}a,button,input,textarea,select{-webkit-tap-highlight-color:t
 @media (max-width:1199px){.nav-panel{position:static;box-shadow:none;border-color:var(--border);margin-top:.3rem;animation:none}.nav-drop{width:100%}.nav-drop summary{padding:.65rem}}
 @media (prefers-reduced-motion: reduce){.nav-drop[open]>.nav-panel{animation:none}}
 h1,h2,h3{font-weight:600}h2{font-size:2.25rem}h3{font-size:1.6rem}.hero{background:var(--navy);color:var(--ivory);padding:6rem 0 6.25rem;border-bottom:3px solid var(--gold);overflow:hidden}.hero .wrap{max-width:1280px;display:grid;grid-template-columns:1fr;align-items:center;gap:3rem}.hero .wrap.has-media{grid-template-columns:1.05fr 0.95fr}.hero-media{display:none;position:relative}.hero-media.is-visible{display:block}.hero-media img{width:100%;height:auto;max-height:32rem;object-fit:cover;display:block;border-radius:6px;border:1px solid rgba(211,182,137,.35);box-shadow:0 1.5rem 3.5rem rgba(0,0,0,.4)}.hero .kicker{position:relative;color:#d0b58a;margin-bottom:1.75rem;letter-spacing:.14em;padding-top:1.25rem}.hero .kicker::before{content:'';display:block;width:3.5rem;height:2px;margin-bottom:1rem;background:var(--gold)}.hero h1{font-size:clamp(3.3rem,6vw,5.8rem);max-width:950px;line-height:1.04}.hero .wrap.has-media h1{font-size:clamp(2.6rem,4.4vw,4.2rem)}.hero-tagline{font:500 clamp(1.9rem,3vw,2.8rem)/1.3 var(--serif);color:#d3b689;margin:1.2rem 0}.hero .lead{color:#d1d9e0;font-size:1rem;max-width:620px}.hero-actions{margin-top:2rem;gap:1rem}.hero .btn-primary{background:var(--gold);border-color:var(--gold);color:var(--deep-navy)}.hero .btn:not(.btn-primary){background:transparent;color:var(--ivory);border-color:#8b9aaa}.section{padding:3.5rem 0}.section h1{font-size:clamp(2.6rem,5vw,4rem);margin-bottom:1.4rem}.grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:1.5rem}.card{border-radius:4px;padding:1.5rem}.empty{grid-column:1/-1;display:block;padding:2.3rem;margin:1rem 0;background:var(--card);border:1px solid var(--line);border-inline-start:3px solid var(--gold);border-radius:3px;color:var(--muted)}.empty:before{content:'—';display:block;color:var(--gold);font-size:1.7rem;margin-bottom:.3rem}.note{max-width:48rem}.form{background:var(--card);padding:2rem;border:1px solid var(--line);border-radius:4px;gap:1.15rem;max-width:42rem}.form label{font-size:.875rem;font-weight:500}.form input,.form textarea,.form select{margin-top:.4rem;border-radius:3px;min-height:46px}.form textarea{resize:vertical}.form .btn{justify-self:start}.privacy-note{border-inline-start:2px solid var(--gold);padding-inline-start:1rem;font-size:.8rem;line-height:1.7}.consultation-notice{border-inline-start:3px solid var(--gold);padding:1rem;background:var(--card);max-width:42rem;margin-bottom:1.5rem}
+.trust-section{background:var(--card);border-block:1px solid var(--line)}
+.value-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:1.25rem;margin-top:1.75rem}
+.value-grid .card{background:var(--paper);border:1px solid var(--line);border-top:3px solid var(--gold)}
+.value-grid .card h3{font-size:1.05rem;margin-bottom:.5rem}
+.value-grid .card p{color:var(--muted);font-size:.9rem;margin:0}
+.home-final-cta{text-align:center;background:var(--navy);color:var(--ivory);border-bottom:3px solid var(--gold)}
+.home-final-cta h2{color:var(--ivory)}
+.home-final-cta .lead{color:#d1d9e0;max-width:620px;margin-inline:auto}
+.home-final-cta .hero-actions{justify-content:center}
+.home-final-cta .btn-primary{background:var(--gold);border-color:var(--gold);color:var(--deep-navy)}
+.home-final-cta .btn:not(.btn-primary){background:transparent;color:var(--ivory);border-color:#8b9aaa}
+.about-mv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:1.5rem}
+.about-mv .card{background:var(--card);border:1px solid var(--line);border-inline-start:3px solid var(--gold);padding:1.75rem}
+.about-mv .card h2{margin-top:0}
 .site-footer{background:var(--deep-navy);color:#c0cbd3;padding:3.5rem 0 1.25rem;border-top:0}.site-footer .brand,.site-footer a{color:var(--ivory)}.site-footer .brand{font-size:1.5rem}.site-footer .brand img{width:48px;height:48px}.footer-grid{display:grid;grid-template-columns:1.1fr 1.3fr 1fr;gap:3rem}.footer-heading{font-family:var(--sans);font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);margin:0 0 1rem}.footer-tagline{font-family:var(--serif);font-size:1.6rem;color:var(--gold)}.footer-links{display:flex;flex-wrap:wrap;gap:.5rem 1.25rem;font-size:.8rem}.footer-links a:hover,.footer-bottom a:hover{color:var(--gold)}.footer-cta{border-color:var(--gold);background:transparent}.footer-bottom{margin-top:2.5rem;border-top:1px solid rgba(183,146,82,.22);padding-top:1.25rem;display:flex;justify-content:space-between;gap:1rem;font-size:.75rem}.footer-bottom nav{display:flex;flex-wrap:wrap;gap:1rem}.social-slots[hidden]{display:none}.social-slots a{display:inline-flex;gap:.4rem;align-items:center;font-size:.75rem}.social-icon{border:1px solid #738493;border-radius:3px;padding:.2rem .4rem}.auth-box{border-top:3px solid var(--gold);border-radius:4px;width:min(28rem,calc(100% - 2rem))}.auth-box .form{padding:0;border:0}.admin-main{min-width:0}
-@media(max-width:1199px){.header-inner{grid-template-columns:1fr auto}.menu-toggle{display:block}.nav{display:none;white-space:normal;grid-template-columns:repeat(3,minmax(0,1fr));max-height:65vh;overflow:auto;padding:1rem 0}.nav.is-open{display:grid}.nav a{white-space:normal;padding:.65rem}.site-header{position:sticky}.brand{font-size:1.4rem}.brand img{width:48px;height:48px}}
+@media(max-width:1199px){.header-inner{grid-template-columns:1fr auto}.menu-toggle{display:flex}.nav{display:none;white-space:normal;grid-template-columns:repeat(3,minmax(0,1fr));max-height:65vh;overflow:auto;padding:1rem 0}.nav.is-open{display:grid}.nav a{white-space:normal;padding:.65rem}.site-header{position:sticky}.brand{font-size:1.4rem}.brand img{width:48px;height:48px}}
 @media(max-width:700px){.header-inner{gap:.6rem;grid-template-columns:1fr}.header-controls{justify-content:space-between;gap:.4rem}.brand{font-size:1.5rem}.brand img{width:44px;height:44px}.header-cta{padding:.5rem .8rem;font-size:.8rem}.nav{grid-template-columns:1fr 1fr;margin-top:0}.hero{padding:3.2rem 0}.hero .wrap.has-media{grid-template-columns:1fr}.hero-media{order:-1;margin-bottom:.5rem}.hero-media img{max-height:16rem}.hero .kicker{font-size:.67rem;line-height:1.8}.hero h1{font-size:3.5rem}.hero .wrap.has-media h1{font-size:3.2rem}.hero-actions{align-items:stretch}.hero-actions .btn{flex:1 1 180px}.section{padding:2.5rem 0}.footer-grid{grid-template-columns:1fr;gap:2rem}.footer-bottom{flex-direction:column}.form{padding:1.25rem}.empty{padding:1.5rem}h2{font-size:2rem}}
 html[dir='rtl'] .nav a{line-height:2}html[dir='rtl'] .hero h1{line-height:1.6;font-size:clamp(2.5rem,5vw,4rem)}html[dir='rtl'] .brand{font-family:var(--serif)}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
@@ -2968,6 +2995,18 @@ window.RAMDANI_PAGES = {
         <div class="hero-media" id="heroMedia"><img id="heroMediaImg" src="" alt="" /></div>
       </div>
     </section>
+    <section class="section trust-section">
+      <div class="wrap">
+        <p class="kicker" data-i18n="home_trust_kicker">Why Ramdani</p>
+        <h2 data-i18n="home_trust_title">What guides our work</h2>
+        <div class="value-grid">
+          <div class="card"><h3>Accuracy over advertisement</h3><p>Published facts only — no invented rankings, awards, or case results.</p></div>
+          <div class="card"><h3>Confidentiality after engagement</h3><p>Nothing on these pages creates a lawyer&ndash;client relationship or replaces a confirmed engagement.</p></div>
+          <div class="card"><h3>Staff-verified publication</h3><p>People, matters, and citations are published only after staff verification.</p></div>
+          <div class="card"><h3>Bilingual public record</h3><p>Public information is maintained in both Urdu and English.</p></div>
+        </div>
+      </div>
+    </section>
     <section class="section" id="semesters">
       <div class="wrap">
         <p class="kicker" data-i18n="home_curriculum_kicker">LLB curriculum</p>
@@ -2980,6 +3019,16 @@ window.RAMDANI_PAGES = {
       <div class="wrap">
         <h2 data-i18n="practice_title"></h2>
         <div id="homePractice" class="grid"></div>
+      </div>
+    </section>
+    <section class="section home-final-cta">
+      <div class="wrap">
+        <h2 data-i18n="cta_consult"></h2>
+        <p class="lead" data-i18n="hero_sub"></p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="/pages/consultation.html" data-i18n="cta_consult"></a>
+          <a class="btn" href="/pages/practice-areas.html" data-i18n="cta_practice">Practice areas</a>
+        </div>
       </div>
     </section>`, init: async function () {
 if (window.ramdaniEducation) ramdaniEducation.renderHome();
@@ -3008,24 +3057,29 @@ if (window.ramdaniEducation) ramdaniEducation.renderHome();
     </div></section>`, init: async function () {
 
   } },
-  '/pages/about.html': { title: 'About — Ramdani Law Firm', desc: 'About — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section"><div class="wrap">
+  '/pages/about.html': { title: 'About — Ramdani Law Firm', desc: 'About — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section about-hero"><div class="wrap">
+      <p class="kicker" data-i18n="about_kicker">About the firm</p>
       <h1 data-i18n="about_title"></h1>
       <p class="lead" data-i18n="about_lead"></p>
       <div id="aboutOrgBlock"></div>
       <p>Ramdani Law Firm / Law Chamber is based in Dera Ghazi Khan, Punjab, Pakistan. This website is the firm’s public information channel: who we are, the areas of law we may accept, how to request a consultation, and educational materials the firm chooses to publish.</p>
       <p class="note">Nothing on these pages creates a lawyer–client relationship. Privileged documents and sensitive case facts must not be sent through public forms. Credentials, rankings, fee quotes, and case outcomes appear only when the firm supplies them in writing.</p>
-      <h2>Mission</h2>
-      <p>To provide a clear, accurate public account of the firm’s work and to accept instructions only after conflict checks and a confirmed engagement.</p>
-      <h2>Vision</h2>
-      <p>A professional digital presence that students, clients, and referring colleagues can trust because unpublished claims are left unpublished.</p>
+    </div></section>
+    <section class="section about-mv"><div class="wrap about-mv-grid">
+      <div class="card"><h2>Mission</h2><p>To provide a clear, accurate public account of the firm’s work and to accept instructions only after conflict checks and a confirmed engagement.</p></div>
+      <div class="card"><h2>Vision</h2><p>A professional digital presence that students, clients, and referring colleagues can trust because unpublished claims are left unpublished.</p></div>
+    </div></section>
+    <section class="section trust-section"><div class="wrap">
       <h2>Values</h2>
-      <ul>
-        <li>Accuracy over advertisement</li>
-        <li>Confidentiality after engagement — not on public forms</li>
-        <li>No invented awards, rankings, or case results</li>
-        <li>Urdu and English public information</li>
-        <li>Staff-only publication of people, matters, and verified citations</li>
-      </ul>
+      <div class="value-grid">
+        <div class="card"><p>Accuracy over advertisement</p></div>
+        <div class="card"><p>Confidentiality after engagement — not on public forms</p></div>
+        <div class="card"><p>No invented awards, rankings, or case results</p></div>
+        <div class="card"><p>Urdu and English public information</p></div>
+        <div class="card"><p>Staff-only publication of people, matters, and verified citations</p></div>
+      </div>
+    </div></section>
+    <section class="section"><div class="wrap">
       <h2>History</h2>
       <p>A detailed firm history will be published when the chamber supplies dates, founding facts, and names it is willing to put on the public record. This page does not invent a founding year, a list of reported victories, or a league-table rank.</p>
       <p><a href="/pages/about-standards.html">Professional standards</a> · <a href="/pages/consultation.html">Request a consultation</a></p>
@@ -4559,7 +4613,7 @@ window.ramdaniSite = Object.freeze({
     ]);
   var brand = '<a class="brand" href="/" aria-label="Ramdani Law Firm — Home"><img src="' + site.logo + '" width="56" height="56" alt="" /><span>' + site.name + '</span></a>';
   var header = document.querySelector('.site-header');
-  if (header) header.innerHTML = '<div class="wrap header-inner">' + brand + '<div class="header-controls"><a class="btn btn-primary header-cta" href="/pages/consultation.html" data-i18n="nav_consult">Consultation</a><div class="lang-switch" aria-label="Language"><button type="button" data-lang-btn="en" lang="en">EN</button><button type="button" data-lang-btn="ur" lang="ur">اردو</button></div><button type="button" class="theme-btn" id="themeBtn" aria-label="Toggle dark theme" aria-pressed="false">◐</button><button type="button" class="menu-toggle" aria-controls="primaryNav" aria-expanded="false">Menu</button></div><nav id="primaryNav" class="nav" aria-label="Primary">' + groupedNavHtml + '</nav></div>';
+  if (header) header.innerHTML = '<div class="wrap header-inner">' + brand + '<div class="header-controls"><a class="btn btn-primary header-cta" href="/pages/consultation.html" data-i18n="nav_consult">Consultation</a><div class="lang-switch" aria-label="Language"><button type="button" data-lang-btn="en" lang="en">EN</button><button type="button" data-lang-btn="ur" lang="ur">اردو</button></div><button type="button" class="theme-btn" id="themeBtn" aria-label="Toggle dark theme" aria-pressed="false">◐</button><button type="button" class="menu-toggle" aria-controls="primaryNav" aria-expanded="false" aria-label="Toggle menu"><span class="menu-toggle-icon" aria-hidden="true"></span></button></div><nav id="primaryNav" class="nav" aria-label="Primary">' + groupedNavHtml + '</nav></div>';
   var footer = document.querySelector('.site-footer');
   if (footer) footer.innerHTML = '<div class="wrap footer-grid"><div>' + brand + '<p class="footer-tagline" lang="en" dir="ltr">' + site.tagline + '</p><p>' + site.location + '</p><div class="social-slots" aria-label="Social profiles"></div></div><div><h2 class="footer-heading">Quick links</h2><nav class="footer-links" aria-label="Footer">' + links(site.navigation.slice(1)) + '</nav></div><div><h2 class="footer-heading" data-i18n="nav_consult">Consultation</h2><a class="btn footer-cta" href="/pages/consultation.html" data-i18n="cta_consult">Request a Consultation</a><p class="privacy-note" data-i18n="footer_note">Public website only. Private client and case files are not stored on these pages.</p></div></div><div class="wrap footer-bottom"><small>© ' + new Date().getFullYear() + ' ' + site.name + '. All rights reserved.</small><nav aria-label="Legal and admin"><a href="/pages/privacy.html">Privacy Policy (draft)</a><a href="/pages/legal.html">Terms / Legal Notice (draft)</a><a href="/admin/" data-i18n="nav_admin">Admin</a></nav></div>';
   var labels = { instagram: 'Instagram', facebook: 'Facebook', linkedin: 'LinkedIn', tiktok: 'TikTok', x: 'X' };
@@ -4583,6 +4637,13 @@ window.ramdaniSite = Object.freeze({
     nav.addEventListener('click', function (e) { if (e.target.closest('a')) closeMenu(); });
     document.addEventListener('click', function (e) { if (!header.contains(e.target)) closeMenu(); });
     matchMedia('(min-width: 1200px)').addEventListener('change', closeMenu);
+  }
+
+  // Sticky header: subtle shadow once the page has scrolled past the hero.
+  if (header) {
+    var syncHeaderScroll = function () { header.classList.toggle('is-scrolled', window.scrollY > 4); };
+    syncHeaderScroll();
+    window.addEventListener('scroll', syncHeaderScroll, { passive: true });
   }
 
   // Nav dropdowns (Legal Services / Legal Education / Pakistan Laws etc.):
@@ -4703,6 +4764,9 @@ window.ramdaniSite = Object.freeze({
       people_title: 'People',
       people_empty: 'Advocate profiles will appear here once published by the firm.',
       practice_title: 'Practice areas',
+      home_trust_kicker: 'Why Ramdani',
+      home_trust_title: 'What guides our work',
+      about_kicker: 'About the firm',
       practice_empty: 'Practice areas will appear here once published.',
       practice_lead: 'Staff-published outlines of the kinds of work described on this site. Not legal advice and not a retainer.',
       services_title: 'Legal services',
@@ -4818,6 +4882,9 @@ window.ramdaniSite = Object.freeze({
       people_title: '\u0627\u0641\u0631\u0627\u062f',
       people_empty: '\u0648\u06a9\u0644\u0627\u0621 \u06a9\u06d2 \u067e\u0631\u0648\u0641\u0627\u0626\u0644\u0632 \u0634\u0627\u0626\u0639 \u06c1\u0648\u0646\u06d2 \u06a9\u06d2 \u0628\u0639\u062f \u06cc\u06c1\u0627\u06ba \u0646\u0638\u0631 \u0622\u0626\u06cc\u06ba \u06af\u06d2\u06d4',
       practice_title: '\u0639\u0645\u0644\u06cc \u0634\u0639\u0628\u06d2',
+      home_trust_kicker: '\u0631\u0645\u062f\u0627\u0646\u06cc \u06a9\u06cc\u0648\u06ba',
+      home_trust_title: '\u06c1\u0645\u0627\u0631\u06d2 \u0627\u0635\u0648\u0644',
+      about_kicker: '\u0641\u0631\u0645 \u06a9\u06d2 \u0628\u0627\u0631\u06d2 \u0645\u06cc\u06ba',
       practice_empty: '\u0639\u0645\u0644\u06cc \u0634\u0639\u0628\u06d2 \u0634\u0627\u0626\u0639 \u06c1\u0648\u0646\u06d2 \u06a9\u06d2 \u0628\u0639\u062f \u06cc\u06c1\u0627\u06ba \u0646\u0638\u0631 \u0622\u0626\u06cc\u06ba \u06af\u06d2\u06d4',
       practice_lead: '\u0635\u0631\u0641 \u0639\u0645\u0644\u06c1 \u06a9\u06cc \u0634\u0627\u0626\u0639 \u0634\u062f\u06c1 \u0641\u06c1\u0631\u0633\u062a\u06cc\u06ba\u06d4 \u0642\u0627\u0646\u0648\u0646\u06cc \u0645\u0634\u0648\u0631\u06c1 \u0646\u06c1\u06cc\u06ba\u06d4',
       services_title: '\u0642\u0627\u0646\u0648\u0646\u06cc \u062e\u062f\u0645\u0627\u062a',
