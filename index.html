@@ -4854,6 +4854,16 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
         ? 'Your registration was not approved or your account is suspended. Please contact the office.'
         : 'Your registration is awaiting admin approval. You can sign in once it is approved.';
     }
+    if (p.role === 'student' && (!p.is_active || p.status !== 'active')) {
+      // Students can be created active-by-default at signup but still have
+      // their students-table row start as 'pending' until an admin
+      // approves it — isActiveStudent() checks both. Previously this state
+      // had no message anywhere in the unified login/signup flow, so a
+      // newly-registered pending student was silently sent nowhere.
+      return p.status === 'suspended'
+        ? 'Your account is suspended. Please contact the office.'
+        : 'Your registration is awaiting admin approval. You can sign in once it is approved.';
+    }
     return '';
   }
   // ---- Authentication page (portal shell): re-homes the EXISTING student-signup / lawyer-signup / reset panels
@@ -5065,7 +5075,9 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
         new Promise(function (_, reject) { setTimeout(function () { reject(new Error('TIMEOUT')); }, 8000); })
       ]);
     } catch (e) { p = null; profileErr = e; }
-    var canEnter = !!(p && ['student', 'member', 'lawyer'].indexOf(p.role) >= 0 && !(p.role === 'lawyer' && !p.is_active));
+    var canEnter = !!(p && ['student', 'member', 'lawyer'].indexOf(p.role) >= 0
+      && !(p.role === 'lawyer' && !p.is_active)
+      && !(p.role === 'student' && (!p.is_active || p.status !== 'active')));
     if (isDash) {
       if (p && p.role === 'client') { window.ramdaniGo('/client/dashboard'); return; }
       if (!canEnter) {
@@ -5079,6 +5091,16 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
         if (profileErr && profileErr.message === 'TIMEOUT') {
           login.hidden = false;
           setPortalStatus('Connecting is taking too long. This is usually a network or server issue, not your account — please refresh and try again.', 'err');
+          return;
+        }
+        // A loaded profile that simply isn't allowed in yet (pending
+        // student/lawyer approval, suspended, wrong role) is not an error
+        // and not "logged out" either — show the actual reason instead of
+        // silently bouncing to a bare login form.
+        var blockMsg = p ? portalBlockMessage(p) : '';
+        if (blockMsg) {
+          login.hidden = false;
+          setPortalStatus(blockMsg, 'err');
           return;
         }
         var hadSession = false;
