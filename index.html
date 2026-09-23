@@ -1606,6 +1606,27 @@ html.dark .official-doc-preview h3 {
 </style>
 </head>
 <body>
+<!-- TEMPORARY DIAGNOSTIC: on-screen error banner (no DevTools needed).
+     Safe to remove later — does not affect any app logic. -->
+<div id="ramdaniErrBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:999999;background:#b00020;color:#fff;padding:12px 16px;font:13px/1.5 monospace;white-space:pre-wrap;max-height:40vh;overflow:auto;"></div>
+<script>
+(function () {
+  function show(msg) {
+    var b = document.getElementById('ramdaniErrBanner');
+    if (!b) return;
+    b.style.display = 'block';
+    b.textContent += (b.textContent ? '\n\n' : '') + msg;
+  }
+  window.addEventListener('error', function (e) {
+    show('ERROR: ' + (e.message || 'unknown') + '\nFile: ' + (e.filename || '?') + ':' + (e.lineno || '?') + ':' + (e.colno || '?'));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    var r = e.reason;
+    var msg = (r && (r.message || r.error_description || JSON.stringify(r))) || String(r);
+    show('PROMISE ERROR: ' + msg);
+  });
+})();
+</script>
   <!-- PUBLIC WEBSITE: header, #viewRoot, footer (pages/*.html render here) -->
   <div id="publicShell">
   <a class="skip-link" href="#viewRoot">Skip to content</a>
