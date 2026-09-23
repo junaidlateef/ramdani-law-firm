@@ -5055,17 +5055,32 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
       el.hidden = true;
     });
     var p = null, profileErr = null;
-    try { p = await ramdaniAuth.profile(); } catch (e) { p = null; profileErr = e; }
+    try {
+      // Guard against a network/auth call that never resolves or rejects
+      // (e.g. a request silently blocked before it ever completes). Without
+      // this, bootPortal() simply hangs forever on the line below, leaving
+      // an empty portalRoot with no error and no way to tell what happened.
+      p = await Promise.race([
+        ramdaniAuth.profile(),
+        new Promise(function (_, reject) { setTimeout(function () { reject(new Error('TIMEOUT')); }, 8000); })
+      ]);
+    } catch (e) { p = null; profileErr = e; }
     var canEnter = !!(p && ['student', 'member', 'lawyer'].indexOf(p.role) >= 0 && !(p.role === 'lawyer' && !p.is_active));
     if (isDash) {
       if (p && p.role === 'client') { window.ramdaniGo('/client/dashboard'); return; }
       if (!canEnter) {
         // A genuine "not signed in" (no session, no row) silently sends the
-        // user to the login form as before. But if profile() *threw*
-        // (network hiccup, transient query failure) while a session exists,
-        // that is not the same as "logged out" — bouncing silently here
-        // made a real error indistinguishable from never having logged in.
-        // Surface it and keep the login screen recoverable instead.
+        // user to the login form as before. But if profile() *threw* or
+        // *timed out* (network hiccup, blocked request, transient query
+        // failure) while a session exists, that is not the same as
+        // "logged out" — bouncing silently here made a real error
+        // indistinguishable from never having logged in. Surface it and
+        // keep the login screen recoverable instead.
+        if (profileErr && profileErr.message === 'TIMEOUT') {
+          login.hidden = false;
+          setPortalStatus('Connecting is taking too long. This is usually a network or server issue, not your account — please refresh and try again.', 'err');
+          return;
+        }
         var hadSession = false;
         try { hadSession = !!(await ramdaniAuth.session()); } catch (e2) { hadSession = false; }
         if (profileErr && hadSession) {
@@ -7486,18 +7501,29 @@ window.ramdaniAuth = {
 
     if (path === '/student/dashboard') {
       var profile = null, studentErr = null;
-      try { profile = await ramdaniAuth.requireStudent(); } catch (e) { profile = null; studentErr = e; }
+      try {
+        profile = await Promise.race([
+          ramdaniAuth.requireStudent(),
+          new Promise(function (_, reject) { setTimeout(function () { reject(new Error('TIMEOUT')); }, 8000); })
+        ]);
+      } catch (e) { profile = null; studentErr = e; }
       if (!profile) {
         // bootPortal() already confirmed role === 'student' with a session
         // present before calling us, so landing here without a profile is
-        // an actual failure (a transient query error), not "logged out".
-        // Bouncing silently made that failure look identical to never
-        // having signed in. Surface it on the login screen instead.
+        // an actual failure (a transient query error or a hang), not
+        // "logged out". Bouncing silently made that failure look identical
+        // to never having signed in. Surface it on the login screen instead.
         window.ramdaniGo('/portal/login');
         if (studentErr) {
+          var isTimeout = studentErr.message === 'TIMEOUT';
           setTimeout(function () {
             var el = document.getElementById('portalLoginStatus');
-            if (el) { el.className = 'ra-status err'; el.textContent = 'Could not load your student profile. Please refresh the page or try signing in again.'; }
+            if (el) {
+              el.className = 'ra-status err';
+              el.textContent = isTimeout
+                ? 'Connecting is taking too long. This is usually a network or server issue, not your account — please refresh and try again.'
+                : 'Could not load your student profile. Please refresh the page or try signing in again.';
+            }
           }, 0);
         }
         return;
