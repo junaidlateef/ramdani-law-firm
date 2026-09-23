@@ -1556,6 +1556,40 @@ html[data-theme="dark"] .event-badge.is-open { color: var(--gold); }
   .admin-shell .admin-nav { transition: none; }
 }
 /* ===== end MODULE 9 — CONTROL CENTER ===== */
+/* ===== MODULE 10 — IDENTITY LIFECYCLE ===== */
+.official-id-card,
+.official-doc-preview {
+  background: #fff;
+  color: #1a1a1a;
+  border: 1px solid #c8b273;
+  border-radius: 8px;
+  padding: 1rem 1.1rem;
+  max-width: 22rem;
+}
+.official-id-card img.official-logo,
+.official-doc-preview img.official-logo {
+  height: 42px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+.official-id-card h3,
+.official-doc-preview h3 { margin: .35rem 0 .15rem; color: #0e2c27; font-family: Georgia, serif; }
+.official-id-card .qr,
+.official-doc-preview .qr { font-family: ui-monospace, monospace; font-size: .75rem; word-break: break-all; }
+.official-marks { display: flex; gap: 1rem; align-items: flex-end; margin-top: .85rem; }
+.official-marks .mark { flex: 1; text-align: center; font-size: .7rem; color: #444; }
+.official-marks img { max-height: 48px; max-width: 100%; object-fit: contain; }
+.official-marks .mark-ph { border: 1px dashed #bbb; min-height: 48px; display: flex; align-items: center; justify-content: center; color: #888; padding: .35rem; }
+html.dark .official-id-card,
+html.dark .official-doc-preview,
+html.dark .official-id-card h3,
+html.dark .official-doc-preview h3 {
+  background: #fff;
+  color: #1a1a1a;
+}
+.id-link-note { font-size: .82rem; }
+/* ===== end MODULE 10 — IDENTITY LIFECYCLE ===== */
 </style>
 </head>
 <body>
@@ -1655,8 +1689,14 @@ html[data-theme="dark"] .event-badge.is-open { color: var(--gold); }
           <button type="button" data-table="societies">Societies</button>
           <button type="button" data-table="chapters">Chapters</button>
           <button type="button" data-table="cabinets">Cabinets</button>
-          <button type="button" data-table="__memberships">Memberships</button>
-          <button type="button" data-table="__membercards">Member cards</button>
+        </details>
+        <details class="admin-nav-group">
+          <summary class="admin-nav-group-title">Membership</summary>
+          <button type="button" data-table="__memberships">Applications & approvals</button>
+          <button type="button" data-table="__membercards">Membership cards</button>
+          <button type="button" data-table="__certissuances">Certificates</button>
+          <button type="button" data-table="__docscenter">Documents</button>
+          <button type="button" data-table="__identityverify">Verification</button>
           <button type="button" data-table="__joinrequests">Join requests</button>
         </details>
         <details class="admin-nav-group">
@@ -2692,7 +2732,7 @@ html[data-theme="dark"] .event-badge.is-open { color: var(--gold); }
           </div>
 
           <div id="membershipsPanel" class="admin-panel" hidden>
-            <div class="admin-section-head"><div><h2>Memberships</h2><p class="note">The relationship between a person and an organization/society/chapter/cabinet. Approval is never automatic — use the explicit action buttons below to move a membership through its lifecycle.</p></div></div>
+            <div class="admin-section-head"><div><h2>Memberships</h2><p class="note">Applications start as <code>application</code>. Approve then Activate. A membership card may be drafted only after approval. Approval is never automatic — use the explicit action buttons below.</p></div></div>
             <form id="membershipForm" class="form admin-form">
               <label><span>Member</span><select name="member_id" required><option value="">Select member…</option></select></label>
               <label><span>Organization</span><select name="organization_id"><option value="">None</option></select></label>
@@ -2730,6 +2770,7 @@ html[data-theme="dark"] .event-badge.is-open { color: var(--gold); }
               <label><span>Full name</span><input name="full_name" required /></label>
               <label><span>Email</span><input name="email" type="email" /></label>
               <label><span>Phone</span><input name="phone" /></label>
+              <label class="field-full"><span>Linked portal profile</span><select name="profile_id"><option value="">Not linked — staff-created record</option></select><span class="note id-link-note">Only <code>profiles.role = member</code> accounts. One profile → one member. Students, lawyers and clients keep their own identity tables.</span></label>
               <label><span>Society</span><select name="society_id"><option value="">None</option></select></label>
               <label><span>Chapter</span><select name="chapter_id"><option value="">None</option></select></label>
               <label><span>Cabinet</span><select name="cabinet_id"><option value="">None</option></select></label>
@@ -2742,7 +2783,8 @@ html[data-theme="dark"] .event-badge.is-open { color: var(--gold); }
               <div class="form-actions"><button class="btn btn-primary" type="submit" id="memberSave">Save member</button><button class="btn" type="button" id="memberCancel" hidden>Cancel</button><p id="memberNote" class="form-status"></p></div>
             </form>
             <div class="admin-toolbar"><select id="memberStatusFilter"><option value="">All statuses</option><option value="application">Application</option><option value="review">Review</option><option value="approved">Approved</option><option value="active">Active</option><option value="expired">Expired</option><option value="suspended">Suspended</option><option value="revoked">Revoked</option></select><input type="search" id="memberSearch" placeholder="Search name, email or member number" /></div>
-            <div class="table-wrap"><table class="data"><thead><tr><th>Number</th><th>Name</th><th>Society</th><th>Status</th><th></th></tr></thead><tbody id="memberBody"></tbody></table></div>
+            <p class="note">Card and certificate columns read live <code>member_cards</code> / <code>issued_documents</code> for this member id. Empty means not issued — never invented.</p>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Number</th><th>Name</th><th>Email</th><th>Society</th><th>Chapter</th><th>Status</th><th>Card</th><th>Certificate</th><th>Actions</th></tr></thead><tbody id="memberBody"></tbody></table></div>
           </div>
 
           <div id="memberProfilePanel" class="admin-panel" hidden>
@@ -2849,6 +2891,16 @@ html[data-theme="dark"] .event-badge.is-open { color: var(--gold); }
             </form>
             <div class="table-wrap"><table class="data"><thead><tr><th>Doc #</th><th>Recipient</th><th>Category</th><th>Status</th><th>Verify</th><th></th></tr></thead><tbody id="issuedDocBody"></tbody></table></div>
           </div>
+          <div id="identityVerifyPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Verification</h2><p class="note">Uses the public certificate RPC, then the card RPC. Staff may also look up an issued-document verify code. Revoked records must not be shown as valid.</p></div></div>
+            <p><a class="btn" href="/pages/verify-certificate.html" target="_blank" rel="noopener">Open public verification page</a></p>
+            <form id="identityVerifyForm" class="form admin-form">
+              <label class="field-full"><span>Verification code</span><input name="code" required placeholder="Code printed on a card, certificate or document" /></label>
+              <div class="form-actions"><button class="btn btn-primary" type="submit">Verify</button><p id="identityVerifyNote" class="form-status" role="status"></p></div>
+            </form>
+            <div id="identityVerifyResult" class="table-wrap" style="padding:1rem"></div>
+          </div>
+
           <div id="eventGuestsPanel" class="admin-panel" hidden>
             <div class="admin-section-head"><div><h2>Event guests</h2><p class="note">Named guests only. Invitation and attendance are recorded here, not invented.</p></div></div>
             <form id="eventGuestForm" class="form admin-form">
@@ -3162,8 +3214,16 @@ html[data-theme="dark"] .event-badge.is-open { color: var(--gold); }
           </div>
         </section>
         <section class="portal-section">
+          <h2>Membership</h2>
+          <div id="memMembershipBox"><p class="empty">Loading…</p></div>
+        </section>
+        <section class="portal-section">
           <h2>Membership card</h2>
           <div id="memCardBox"></div>
+        </section>
+        <section class="portal-section">
+          <h2>Certificates</h2>
+          <div id="memCertsBox"><p class="empty">Loading…</p></div>
         </section>
         <section class="portal-section">
           <h2>Documents</h2>
@@ -3934,7 +3994,7 @@ if (window.ramdaniEducation) ramdaniEducation.bindInternshipApply();
   } },
   '/pages/join.html': { title: 'Join — Ramdani Law Firm', desc: 'Create a student or lawyer account with Ramdani Law Firm.', html: `<section class="section"><div class="wrap"><div class="auth-box">
       <h1>Join Ramdani Law Firm</h1>
-      <p class="note">Choose the kind of account you want to create.</p>
+      <p class="note">Student and lawyer accounts create a login plus a linked profile. Society or chapter membership is not self-serve: send a join inquiry on the relevant listing, then staff create the member record and link it to a portal profile. One login → one profile → one member.</p>
       <form id="joinForm" class="form">
         <label>I am a <select id="joinType" required><option value="">Select…</option><option value="student">Student</option><option value="lawyer">Lawyer</option></select></label>
         <p class="note" id="joinHint"></p>
@@ -4325,10 +4385,18 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
         var row = Array.isArray(res.data) ? res.data[0] : res.data;
         status.textContent = '';
         result.hidden = false;
+        if (row && row.certificate_number && String(row.status || '').toLowerCase() === 'revoked') {
+          result.innerHTML = '<p class="empty">This certificate has been revoked and is not valid.</p>';
+          return;
+        }
         if (!row || !row.certificate_number) {
           var card = await sb.rpc('ramdani_verify_card', { p_code: code });
           if (!card.error && card.data && card.data.ok) {
             var d = card.data;
+            if (String(d.status || '').toLowerCase() === 'revoked') {
+              result.innerHTML = '<p class="empty">This card has been revoked and is not valid.</p>';
+              return;
+            }
             result.innerHTML = '<h2>' + esc(d.kind === 'student' ? 'Student card verified' : 'Member card verified') + '</h2>' +
               '<p><strong>Card number:</strong> ' + esc(d.card_number) + '</p>' +
               (d.name ? '<p><strong>Name:</strong> ' + esc(d.name) + '</p>' : '') +
@@ -4558,9 +4626,13 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
           note('Photo saved.', true);
         });
       }
+      var memShipBox = document.getElementById('memMembershipBox');
+      var memCertBox = document.getElementById('memCertsBox');
       if (!mem.data) {
         setDd('memDashNumber'); setDd('memDashStatus'); setDd('memDashSociety'); setDd('memDashChapter'); setDd('memDashRole'); setDd('memDashPhone');
         box.innerHTML = '<p class="empty">No membership record is linked to this login.</p>';
+        if (memShipBox) memShipBox.innerHTML = '<p class="empty">No membership record is linked to this login.</p>';
+        if (memCertBox) memCertBox.innerHTML = '<p class="empty">No certificates.</p>';
         document.getElementById('memDocsBox').innerHTML = '<p class="empty">No documents issued.</p>';
         document.getElementById('memEventsBox').innerHTML = '<p class="empty">No events.</p>';
       } else {
@@ -4574,15 +4646,36 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
         setDd('memDashSociety', soc.data && soc.data.title);
         setDd('memDashChapter', ch.data && ch.data.title);
         await showMemPhoto(m.photo_path);
-        var card = await sb.from('member_cards').select('*').eq('member_id', m.id).in('status', ['issued','active']).order('created_at', { ascending: false }).limit(1);
+        var ships = await sb.from('memberships').select('*').eq('member_id', m.id).order('created_at', { ascending: false });
+        var activeShip = (ships.data || []).find(function (s) { return s.status === 'active' || s.status === 'approved'; });
+        var pendingOnly = (m.status === 'application' || m.status === 'review') && !activeShip;
+        if (memShipBox) {
+          if (ships.error) memShipBox.innerHTML = '<p class="empty">Unable to load memberships.</p>';
+          else memShipBox.innerHTML = (ships.data || []).length ? ships.data.map(function (s) {
+            return '<p>' + ramdaniUi.escape(s.membership_number || s.reference_id || '') + ' — <span class="status-badge status-' + ramdaniUi.escape(s.status) + '">' + ramdaniUi.escape(s.status) + '</span>' + (s.membership_type ? ' · ' + ramdaniUi.escape(s.membership_type) : '') + (s.expiry_date ? ' · expiry ' + ramdaniUi.escape(s.expiry_date) : '') + '</p>';
+          }).join('') : '<p class="empty">No membership record yet. Staff must approve an application before a card can be issued.</p>';
+        }
+        var card = pendingOnly ? { data: [] } : await sb.from('member_cards').select('*').eq('member_id', m.id).in('status', ['issued','active']).order('created_at', { ascending: false }).limit(1);
         var c = card.data && card.data[0];
         box.innerHTML = c
-          ? '<div class="id-card"><p class="note">Member card</p><h3>' + ramdaniUi.escape(m.full_name) + '</h3><p>' + ramdaniUi.escape(c.card_number) + '</p><p class="qr">Verify: ' + ramdaniUi.escape(c.verify_code) + '</p></div>'
-          : '<p class="empty">No card has been issued yet.</p>';
-        var docs = await sb.from('issued_documents').select('document_number, category, issued_at, status').eq('member_id', m.id).eq('status', 'issued');
+          ? '<div class="id-card official-id-card"><p class="note">Membership card</p><h3>' + ramdaniUi.escape(m.full_name) + '</h3><p>' + ramdaniUi.escape(c.card_number) + '</p><p>' + ramdaniUi.escape(m.member_number || '') + (c.designation ? ' · ' + ramdaniUi.escape(c.designation) : '') + '</p><p class="qr">Verify: ' + ramdaniUi.escape(c.verify_code) + '</p><p class="note"><a href="/pages/verify-certificate.html?code=' + encodeURIComponent(c.verify_code || '') + '">Public verification</a></p></div>'
+          : '<p class="empty">' + (pendingOnly ? 'Membership is pending review. An official card is not available yet.' : 'No card has been issued yet.') + '</p>';
+        var docs = await sb.from('issued_documents').select('document_number, category, issued_at, status, verify_code').eq('member_id', m.id).eq('status', 'issued');
         document.getElementById('memDocsBox').innerHTML = (docs.data || []).map(function (d) {
-          return '<article class="card"><h3>' + ramdaniUi.escape(d.category) + '</h3><p class="note">' + ramdaniUi.escape(d.document_number || '') + (d.issued_at ? ' · ' + ramdaniUi.escape(d.issued_at) : '') + '</p></article>';
+          return '<article class="card"><h3>' + ramdaniUi.escape(d.category) + '</h3><p class="note">' + ramdaniUi.escape(d.document_number || '') + (d.issued_at ? ' · ' + ramdaniUi.escape(d.issued_at) : '') + (d.verify_code ? ' · verify ' + ramdaniUi.escape(d.verify_code) : '') + '</p></article>';
         }).join('') || '<p class="empty">No documents issued.</p>';
+        if (memCertBox) {
+          var issuedCertDocs = (docs.data || []).filter(function (d) { return d.category && (String(d.category).toLowerCase().indexOf('cert') !== -1 || d.category === 'membership'); });
+          var acad = m.profile_id ? await sb.from('certificate_issuances').select('certificate_number, issue_date, status, verification_code').or('profile_id.eq.' + m.profile_id + ',student_id.eq.' + m.profile_id).eq('status', 'issued').order('created_at', { ascending: false }).limit(20) : { data: [] };
+          var bits = [];
+          issuedCertDocs.forEach(function (d) {
+            bits.push('<article class="card"><h3>' + ramdaniUi.escape(d.category) + '</h3><p class="note">' + ramdaniUi.escape(d.document_number || '') + (d.verify_code ? ' · ' + ramdaniUi.escape(d.verify_code) : '') + '</p></article>');
+          });
+          (acad.data || []).forEach(function (ct) {
+            bits.push('<article class="card"><h3>' + ramdaniUi.escape(ct.certificate_number || 'Certificate') + '</h3><p class="note">' + ramdaniUi.escape(ct.issue_date || '') + (ct.verification_code ? ' · verify ' + ramdaniUi.escape(ct.verification_code) : '') + '</p></article>');
+          });
+          memCertBox.innerHTML = bits.length ? bits.join('') : '<p class="empty">No certificates issued to this member.</p>';
+        }
         var upcomingBox = document.getElementById('memUpcomingEventsBox');
         if (upcomingBox) {
           var memRegsIds = {};
@@ -7245,11 +7338,13 @@ window.ramdaniAuth = {
           var mr = await sb.from('modules').select('id, title').in('id', ids);
           (mr.data || []).forEach(function (m) { titles[m.id] = m.title; });
         }
-        certEl.innerHTML = certs.map(function (c) {
+        var certHtml = certs.map(function (c) {
           return '<article class="card"><h3>' + esc(titles[c.module_id] || 'Certificate') + '</h3>' +
             '<p class="note">No. ' + esc(c.certificate_number) + ' · Issued ' + esc(c.issue_date || '') + '</p>' +
-            '<p class="note">Verification code: ' + esc(c.verification_code) + '</p></article>';
+            '<p class="note">Verification code: ' + esc(c.verification_code) + '</p>' +
+            '<p class="note"><a href="/pages/verify-certificate.html?code=' + encodeURIComponent(c.verification_code || '') + '">Verify</a></p></article>';
         }).join('');
+        certEl.innerHTML = certHtml;
       }
     }
     var cardEl = document.getElementById('myStudentCard');
@@ -7266,11 +7361,11 @@ window.ramdaniAuth = {
     }
     var docsEl = document.getElementById('myStudentDocs');
     if (docsEl) {
-      var docs = await sb.from('issued_documents').select('id, category, status, issued_at, recipient_name').eq('student_id', uid).eq('status', 'issued').order('issued_at', { ascending: false });
+      var docs = await sb.from('issued_documents').select('id, category, status, issued_at, recipient_name, document_number, verify_code').eq('student_id', uid).eq('status', 'issued').order('issued_at', { ascending: false });
       if (docs.error) docsEl.innerHTML = '<p class="empty">Could not load documents.</p>';
       else if (!docs.data || !docs.data.length) docsEl.innerHTML = '<p class="empty">No documents issued to you yet.</p>';
       else docsEl.innerHTML = docs.data.map(function (d) {
-        return '<article class="card"><h3>' + esc(d.category) + '</h3><p class="note">' + esc(d.issued_at || '') + '</p></article>';
+        return '<article class="card"><h3>' + esc(d.category) + '</h3><p class="note">' + esc(d.document_number || '') + (d.issued_at ? ' · ' + esc(d.issued_at) : '') + (d.verify_code ? ' · verify ' + esc(d.verify_code) : '') + '</p></article>';
       }).join('');
     }
     var evEl = document.getElementById('myStudentEvents');
@@ -9038,6 +9133,7 @@ window.ramdaniAuth = {
     '__memberships': ['student_manager'],
     '__members': ['student_manager'],
     '__membercards': ['student_manager'],
+    '__identityverify': ['student_manager', 'education_manager', 'communications_manager'],
     '__docscenter': ['student_manager', 'education_manager'],
     '__events': ['communications_manager', 'student_manager'],
     '__eventregs': ['communications_manager', 'student_manager'],
@@ -12883,6 +12979,69 @@ window.ramdaniAuth = {
     fillSel(f.elements.cabinet_id, platCabinets, function (r) { return r.title; });
   }
 
+  var platMemberProfiles = [];
+  var platMemberCardStatus = {};
+  var platMemberCertStatus = {};
+
+  function identityStatusLabel(st) {
+    if (!st) return 'Not issued';
+    if (st === 'revoked') return 'Revoked';
+    if (st === 'issued' || st === 'active') return 'Issued';
+    if (st === 'approved' || st === 'draft') return st.charAt(0).toUpperCase() + st.slice(1);
+    return st;
+  }
+
+  async function loadOfficialChrome() {
+    var chrome = { logo: (window.ramdaniSite && ramdaniSite.logo) || '/assets/ramdani-logo.png', seal: '', signature: '', orgName: (window.ramdaniSite && ramdaniSite.name) || 'Ramdani Law Firm', founderName: '', founderTitle: '' };
+    try {
+      var b = await sb.from('branding_settings').select('logo_primary_url, certificate_logo_url, official_seal_url').eq('status', 'published').order('updated_at', { ascending: false }).limit(1).maybeSingle();
+      if (b.error) b = await sb.from('branding_settings').select('logo_primary_url, certificate_logo_url').eq('status', 'published').order('updated_at', { ascending: false }).limit(1).maybeSingle();
+      if (b.data) {
+        chrome.logo = b.data.certificate_logo_url || b.data.logo_primary_url || chrome.logo;
+        chrome.seal = b.data.official_seal_url || '';
+      }
+    } catch (e) {}
+    try {
+      var o = await sb.from('organization_settings').select('org_name, founder_name, founder_title, founder_signature_url').limit(1).maybeSingle();
+      if (o.data) {
+        if (o.data.org_name) chrome.orgName = o.data.org_name;
+        chrome.founderName = o.data.founder_name || '';
+        chrome.founderTitle = o.data.founder_title || '';
+        chrome.signature = o.data.founder_signature_url || '';
+      }
+    } catch (e2) {}
+    return chrome;
+  }
+
+  function officialMarksHtml(chrome, escFn) {
+    var esc = escFn || escapeHtml;
+    var sig = chrome.signature
+      ? '<img src="' + esc(chrome.signature) + '" alt="" />'
+      : '<div class="mark-ph">Signature not uploaded</div>';
+    var seal = chrome.seal
+      ? '<img src="' + esc(chrome.seal) + '" alt="" />'
+      : '<div class="mark-ph">Official seal not uploaded</div>';
+    var who = [chrome.founderName, chrome.founderTitle].filter(Boolean).join(' · ');
+    return '<div class="official-marks"><div class="mark">' + sig + '<div>Authorized signature' + (who ? '<br>' + esc(who) : '') + '</div></div><div class="mark">' + seal + '<div>Official seal</div></div></div>';
+  }
+
+  function fillMemberProfileSelect(currentId) {
+    var sel = $id('memberForm') && $id('memberForm').elements.profile_id;
+    if (!sel) return;
+    var linked = {};
+    (platMembers || []).forEach(function (m) { if (m.profile_id && m.profile_id !== currentId) linked[m.profile_id] = true; });
+    var html = '<option value="">Not linked — staff-created record</option>';
+    (platMemberProfiles || []).forEach(function (p) {
+      if (linked[p.id] && p.id !== currentId) return;
+      html += '<option value="' + p.id + '">' + escapeHtml((p.full_name || p.email || p.id) + (p.email ? ' · ' + p.email : '')) + '</option>';
+    });
+    if (currentId && !(platMemberProfiles || []).some(function (p) { return p.id === currentId; })) {
+      html += '<option value="' + currentId + '">Linked profile ' + escapeHtml(currentId) + '</option>';
+    }
+    sel.innerHTML = html;
+    if (currentId) sel.value = currentId;
+  }
+
   async function loadMemberships() {
     await ensureOrgSocietyLookupsLoaded();
     fillMembershipSelects();
@@ -12927,6 +13086,9 @@ window.ramdaniAuth = {
       } else if (m.status === 'expired') {
         actions += ' <button type="button" class="btn btn-sm" data-mship-renew="' + m.id + '">Renew</button>';
       }
+      if (m.status === 'approved' || m.status === 'active') {
+        actions += ' <button type="button" class="btn btn-sm" data-mship-card="' + m.id + '">Issue card draft</button>';
+      }
       if (m.status !== 'revoked') {
         actions += ' <button type="button" class="btn btn-sm" data-mship-revoke="' + m.id + '">Revoke</button>';
       }
@@ -12940,6 +13102,7 @@ window.ramdaniAuth = {
         if (row) fillMembershipForm(row);
       });
     });
+    document.querySelectorAll('[data-mship-card]').forEach(function (btn) { btn.addEventListener('click', function () { draftCardForMembership(btn.getAttribute('data-mship-card')); }); });
     document.querySelectorAll('[data-mship-approve]').forEach(function (btn) { btn.addEventListener('click', function () { approveMembership(btn.getAttribute('data-mship-approve')); }); });
     document.querySelectorAll('[data-mship-activate]').forEach(function (btn) { btn.addEventListener('click', function () { setMembershipStatus(btn.getAttribute('data-mship-activate'), 'active'); }); });
     document.querySelectorAll('[data-mship-suspend]').forEach(function (btn) { btn.addEventListener('click', function () { if (confirm('Suspend this membership?')) setMembershipStatus(btn.getAttribute('data-mship-suspend'), 'suspended'); }); });
@@ -12954,16 +13117,62 @@ window.ramdaniAuth = {
     });
   }
 
+  async function syncMemberStatusFromMembership(memberId, next) {
+    if (!memberId || !next) return;
+    var mem = (platMembers || []).find(function (x) { return x.id === memberId; });
+    if (!mem) {
+      var r = await sb.from('members').select('id, status').eq('id', memberId).maybeSingle();
+      mem = r.data;
+    }
+    if (!mem) return;
+    if (next === 'approved' && (mem.status === 'application' || mem.status === 'review')) {
+      await sb.from('members').update({ status: 'approved' }).eq('id', memberId);
+    } else if (next === 'active' && (mem.status === 'approved' || mem.status === 'application' || mem.status === 'review')) {
+      await sb.from('members').update({ status: 'active' }).eq('id', memberId);
+    } else if (next === 'revoked' && mem.status !== 'revoked') {
+      await sb.from('members').update({ status: 'revoked' }).eq('id', memberId);
+    }
+  }
   async function approveMembership(id) {
     var profile = await ramdaniAuth.profile();
     var res = await sb.from('memberships').update({ status: 'approved', approved_by: profile && profile.id, approved_at: new Date().toISOString() }).eq('id', id);
     if (res.error) return setNote('membershipNote', res.error.message);
+    var row = (platMemberships || []).find(function (m) { return String(m.id) === String(id); });
+    if (row) await syncMemberStatusFromMembership(row.member_id, 'approved');
+    setNote('membershipNote', 'Approved. You can now draft a membership card for this membership.', true);
     await loadMemberships();
+    await loadMembers();
   }
   async function setMembershipStatus(id, status) {
     var res = await sb.from('memberships').update({ status: status }).eq('id', id);
     if (res.error) return setNote('membershipNote', res.error.message);
+    var row = (platMemberships || []).find(function (m) { return String(m.id) === String(id); });
+    if (row) await syncMemberStatusFromMembership(row.member_id, status);
     await loadMemberships();
+    await loadMembers();
+  }
+  async function draftCardForMembership(membershipId) {
+    var membership = (platMemberships || []).find(function (m) { return String(m.id) === String(membershipId); });
+    if (!membership) return setNote('membershipNote', 'Membership not found.');
+    if (membership.status !== 'approved' && membership.status !== 'active') {
+      return setNote('membershipNote', 'Card drafts are allowed only after the membership is approved.');
+    }
+    var existing = await sb.from('member_cards').select('id, status').eq('membership_id', membershipId).not('status', 'eq', 'revoked').limit(1);
+    if (existing.error) return setNote('membershipNote', existing.error.message);
+    if (existing.data && existing.data.length) {
+      return setNote('membershipNote', 'A card already exists for this membership. Open Membership cards to approve or issue it.');
+    }
+    var res = await sb.from('member_cards').insert({
+      membership_id: membershipId,
+      member_id: membership.member_id,
+      organization_id: membership.organization_id || null,
+      society_id: membership.society_id || null,
+      chapter_id: membership.chapter_id || null,
+      status: 'draft'
+    });
+    if (res.error) return setNote('membershipNote', res.error.message);
+    setNote('membershipNote', 'Card saved as draft. Number and verify code are generated server-side when issued.', true);
+    await loadMemberCards();
   }
   async function renewMembership(id, newExpiry) {
     var res = await sb.from('memberships').update({ status: 'active', expiry_date: newExpiry }).eq('id', id);
@@ -13022,6 +13231,41 @@ window.ramdaniAuth = {
     var res = await sb.from('members').select('*').order('updated_at', { ascending: false });
     if (res.error) { setNote('memberNote', res.error.message); return; }
     platMembers = res.data || [];
+    platMemberCardStatus = {};
+    platMemberCertStatus = {};
+    var ids = platMembers.map(function (m) { return m.id; }).filter(Boolean);
+    var pids = platMembers.map(function (m) { return m.profile_id; }).filter(Boolean);
+    if (ids.length) {
+      var cr = await sb.from('member_cards').select('member_id, status').in('member_id', ids);
+      (cr.data || []).forEach(function (c) {
+        var prev = platMemberCardStatus[c.member_id];
+        var rank = { active: 4, issued: 3, approved: 2, draft: 1, revoked: 0 };
+        if (!prev || (rank[c.status] || 0) > (rank[prev] || 0)) platMemberCardStatus[c.member_id] = c.status;
+      });
+      var dr = await sb.from('issued_documents').select('member_id, category, status').in('member_id', ids);
+      (dr.data || []).forEach(function (d) {
+        if (d.status !== 'issued' && d.status !== 'revoked') return;
+        if (d.category && String(d.category).toLowerCase().indexOf('cert') === -1 && d.category !== 'membership') return;
+        var prev = platMemberCertStatus[d.member_id];
+        if (d.status === 'issued' || prev !== 'issued') platMemberCertStatus[d.member_id] = d.status;
+      });
+    }
+    if (pids.length) {
+      var certsA = await sb.from('certificate_issuances').select('profile_id, student_id, status').in('profile_id', pids);
+      var certsB = await sb.from('certificate_issuances').select('profile_id, student_id, status').in('student_id', pids);
+      [certsA, certsB].forEach(function (certs) {
+        if (certs.error) return;
+        (certs.data || []).forEach(function (c) {
+          if (c.status !== 'issued') return;
+          platMembers.forEach(function (m) {
+            if (m.profile_id && (m.profile_id === c.profile_id || m.profile_id === c.student_id)) platMemberCertStatus[m.id] = 'issued';
+          });
+        });
+      });
+    }
+    var pr = await sb.from('profiles').select('id, full_name, email, role').eq('role', 'member').order('full_name');
+    platMemberProfiles = pr.error ? [] : (pr.data || []);
+    fillMemberProfileSelect();
     renderMembers();
   }
   async function openMemberProfile(memberId) {
@@ -13038,7 +13282,13 @@ window.ramdaniAuth = {
     }
     $id('mpOverview').innerHTML = '<div style="display:flex;gap:1rem;align-items:center">' + photoHtml + '<div><p><strong>Reference:</strong> ' + escapeHtml(m.reference_id || '—') + '</p><p><strong>Status:</strong> <span class="status-badge status-' + escapeHtml(m.status) + '">' + escapeHtml(m.status) + '</span></p><p><strong>Designation:</strong> ' + escapeHtml(m.designation || '—') + '</p></div></div>';
 
-    $id('mpPersonal').innerHTML = '<p><strong>Email:</strong> ' + escapeHtml(m.email || '—') + '</p><p><strong>Phone:</strong> ' + escapeHtml(m.phone || '—') + '</p><p><strong>Bio:</strong> ' + escapeHtml(m.bio || '—') + '</p><p><strong>Joined:</strong> ' + escapeHtml(m.joined_at || '—') + '</p><p><strong>Valid until:</strong> ' + escapeHtml(m.valid_until || '—') + '</p>';
+    var linkedHtml = '<p><strong>Linked portal profile:</strong> Not linked</p>';
+    if (m.profile_id) {
+      var pref = await sb.from('profiles').select('full_name, email, role').eq('id', m.profile_id).maybeSingle();
+      var prn = pref.data;
+      linkedHtml = '<p><strong>Linked portal profile:</strong> ' + escapeHtml(prn ? ((prn.full_name || '') + ' · ' + (prn.email || '') + ' · ' + (prn.role || '')) : m.profile_id) + '</p>';
+    }
+    $id('mpPersonal').innerHTML = linkedHtml + '<p><strong>Email:</strong> ' + escapeHtml(m.email || '—') + '</p><p><strong>Phone:</strong> ' + escapeHtml(m.phone || '—') + '</p><p><strong>Bio:</strong> ' + escapeHtml(m.bio || '—') + '</p><p><strong>Joined:</strong> ' + escapeHtml(m.joined_at || '—') + '</p><p><strong>Valid until:</strong> ' + escapeHtml(m.valid_until || '—') + '</p>';
 
     if (!platMemberships.length) { var mr = await sb.from('memberships').select('*'); if (mr.error && window.console) console.error('memberships lookup failed', mr.error); platMemberships = mr.data || []; }
     var memberships = platMemberships.filter(function (x) { return x.member_id === memberId; });
@@ -13116,8 +13366,11 @@ window.ramdaniAuth = {
     });
     $id('memberBody').innerHTML = rows.map(function (m) {
       var soc = platSocieties.find(function (s) { return s.id === m.society_id; });
-      return '<tr><td>' + escapeHtml(m.member_number) + '</td><td>' + escapeHtml(m.full_name) + '</td><td>' + escapeHtml(soc ? soc.title : '') + '</td><td>' + escapeHtml(m.status) + '</td><td><button type="button" class="btn btn-sm" data-mem-profile="' + m.id + '">Profile</button> <button type="button" class="btn btn-sm" data-mem-edit="' + m.id + '">Edit</button></td></tr>';
-    }).join('') || '<tr><td colspan="5">No members yet.</td></tr>';
+      var chp = platChapters.find(function (s) { return s.id === m.chapter_id; });
+      var cardSt = identityStatusLabel(platMemberCardStatus[m.id]);
+      var certSt = identityStatusLabel(platMemberCertStatus[m.id]);
+      return '<tr><td>' + escapeHtml(m.member_number || m.reference_id || '') + '</td><td>' + escapeHtml(m.full_name) + '</td><td>' + escapeHtml(m.email || '') + '</td><td>' + escapeHtml(soc ? soc.title : '') + '</td><td>' + escapeHtml(chp ? chp.title : '') + '</td><td>' + escapeHtml(m.status) + '</td><td>' + escapeHtml(cardSt) + '</td><td>' + escapeHtml(certSt) + '</td><td><button type="button" class="btn btn-sm" data-mem-profile="' + m.id + '">Profile</button> <button type="button" class="btn btn-sm" data-mem-edit="' + m.id + '">Edit</button></td></tr>';
+    }).join('') || '<tr><td colspan="9">No members yet.</td></tr>';
   }
   function resetMemberForm() {
     platEditMemberId = null;
@@ -13133,6 +13386,7 @@ window.ramdaniAuth = {
       full_name: f.elements.full_name.value.trim(),
       email: f.elements.email.value.trim() || null,
       phone: f.elements.phone.value.trim() || null,
+      profile_id: (f.elements.profile_id && f.elements.profile_id.value) || null,
       society_id: f.elements.society_id.value || null,
       chapter_id: f.elements.chapter_id.value || null,
       cabinet_id: f.elements.cabinet_id.value || null,
@@ -13143,6 +13397,12 @@ window.ramdaniAuth = {
       bio: f.elements.bio.value.trim() || null
     };
     if (!payload.full_name) return setNote('memberNote', 'Name is required.');
+    if (payload.profile_id) {
+      var dupQ = sb.from('members').select('id').eq('profile_id', payload.profile_id);
+      var dup = await dupQ;
+      var clash = (dup.data || []).some(function (r) { return r.id !== platEditMemberId; });
+      if (clash) return setNote('memberNote', 'That portal profile is already linked to another member. One person → one member record.');
+    }
     var file = f.elements.photo && f.elements.photo.files && f.elements.photo.files[0];
     var res = platEditMemberId
       ? await sb.from('members').update(payload).eq('id', platEditMemberId).select('id, profile_id').maybeSingle()
@@ -13198,7 +13458,7 @@ window.ramdaniAuth = {
       else if (c.status === 'approved') actions += '<button type="button" class="btn btn-sm" data-mc-issue="' + c.id + '">Issue</button> ';
       else if (c.status === 'issued') actions += '<button type="button" class="btn btn-sm" data-mc-activate="' + c.id + '">Activate</button> ';
       else if (c.status === 'active' || c.status === 'expired') actions += '<button type="button" class="btn btn-sm" data-mc-renew="' + c.id + '">Renew</button> ';
-      actions += '<button type="button" class="btn btn-sm" data-mc-preview="' + escapeHtml(c.card_number || '') + '|' + escapeHtml(m.full_name || '') + '|' + escapeHtml(c.verify_code || '') + '|' + escapeHtml(c.status) + '">Preview</button> ';
+      actions += '<button type="button" class="btn btn-sm" data-mc-preview="' + escapeHtml(c.id) + '">Preview</button> ';
       if (c.status !== 'revoked') actions += '<button type="button" class="btn btn-sm" data-mc-revoke="' + c.id + '">Revoke</button>';
       return '<tr><td>' + escapeHtml(c.card_number || '(pending)') + '</td><td>' + escapeHtml((m.member_number || '') + ' ' + (m.full_name || '')) + '</td><td>' + escapeHtml(soc ? soc.title : '') + '</td><td><span class="status-badge status-' + escapeHtml(c.status) + '">' + escapeHtml(c.status) + '</span></td><td><code>' + escapeHtml(c.verify_code || '') + '</code></td><td><div class="table-actions">' + actions + '</div></td></tr>';
     }).join('') || '<tr><td colspan="6">No member cards yet.</td></tr>';
@@ -13208,6 +13468,20 @@ window.ramdaniAuth = {
     document.querySelectorAll('[data-mc-activate]').forEach(function (btn) { btn.addEventListener('click', async function () { var r = await sb.from('member_cards').update({ status: 'active' }).eq('id', btn.getAttribute('data-mc-activate')); if (r.error) setNote('memberCardNote', r.error.message); else loadMemberCards(); }); });
     document.querySelectorAll('[data-mc-renew]').forEach(function (btn) { btn.addEventListener('click', async function () { var d = window.prompt('New expiry date (YYYY-MM-DD):', ''); if (!d) return; var r = await sb.from('member_cards').update({ status: 'active', expiry_date: d }).eq('id', btn.getAttribute('data-mc-renew')); if (r.error) setNote('memberCardNote', r.error.message); else loadMemberCards(); }); });
     document.querySelectorAll('[data-mc-revoke]').forEach(function (btn) { btn.addEventListener('click', async function () { if (!confirm('Revoke this card?')) return; var r = await sb.from('member_cards').update({ status: 'revoked' }).eq('id', btn.getAttribute('data-mc-revoke')); if (r.error) setNote('memberCardNote', r.error.message); else loadMemberCards(); }); });
+  }
+  async function previewMemberCard(cardId) {
+    var res = await sb.from('member_cards').select('*, members(full_name, member_number, designation, photo_path, email)').eq('id', cardId).maybeSingle();
+    if (res.error || !res.data) return setNote('memberCardNote', (res.error && res.error.message) || 'Card not found.');
+    var c = res.data;
+    var m = c.members || {};
+    var soc = platSocieties.find(function (x) { return x.id === c.society_id; });
+    var chrome = await loadOfficialChrome();
+    var w = window.open('', '_blank', 'noopener,width=460,height=640');
+    if (!w) return;
+    var logo = chrome.logo ? '<img class="official-logo" src="' + escapeHtml(chrome.logo) + '" alt="" />' : '';
+    var marks = officialMarksHtml(chrome, escapeHtml);
+    w.document.write('<!DOCTYPE html><html><head><title>Membership card</title><style>body{font-family:Georgia,serif;background:#f4f1ea;padding:24px;color:#1a1a1a} .card{background:#fff;border:1px solid #c8b273;padding:20px;max-width:320px} h2{margin:.3rem 0;color:#0e2c27} .qr{font-family:ui-monospace,monospace;font-size:12px;word-break:break-all} .marks{display:flex;gap:12px;margin-top:16px} .marks div{flex:1;text-align:center;font-size:11px} .marks img{max-height:48px} .ph{border:1px dashed #bbb;min-height:44px;display:flex;align-items:center;justify-content:center;color:#888}</style></head><body><div class="card">' + logo + '<p>' + escapeHtml(chrome.orgName) + '</p><p>Membership card</p><h2>' + escapeHtml(m.full_name || '') + '</h2><p>' + escapeHtml(c.card_number || '(pending)') + '</p><p>' + escapeHtml(m.member_number || '') + (c.designation || m.designation ? ' · ' + escapeHtml(c.designation || m.designation) : '') + '</p><p>' + escapeHtml(soc ? soc.title : '') + '</p><p>Issue: ' + escapeHtml(c.issue_date || '') + (c.expiry_date ? ' · Expiry: ' + escapeHtml(c.expiry_date) : '') + '</p><p>Status: ' + escapeHtml(c.status) + '</p><p class="qr">Verify: ' + escapeHtml(c.verify_code || '') + '</p><p style="font-size:11px">QR / code stores only this verification value — not private member data.</p>' + marks.replace(/class="official-marks"/, 'class="marks"').replace(/class="mark-ph"/g, 'class="ph"') + '</div><p><button onclick="window.print()">Print</button></p></body></html>');
+    w.document.close();
   }
   async function saveMemberCard(e) {
     e.preventDefault();
@@ -13347,12 +13621,25 @@ window.ramdaniAuth = {
       if (x.status === 'draft') actions += '<button type="button" class="btn btn-sm" data-doc-approve="' + x.id + '">Approve</button> ';
       if (x.status === 'approved') actions += '<button type="button" class="btn btn-sm" data-doc-issue="' + x.id + '">Issue</button> ';
       if (x.status === 'issued') actions += '<button type="button" class="btn btn-sm" data-doc-revoke="' + x.id + '">Revoke</button> ';
+      if (x.body_rendered) actions += '<button type="button" class="btn btn-sm" data-doc-preview="' + x.id + '">Preview</button> ';
       if (x.storage_path) actions += '<button type="button" class="btn btn-sm" data-doc-file="' + x.id + '">Download</button> ';
       return '<tr><td>' + escapeHtml(x.document_number || '') + '</td><td>' + escapeHtml(x.recipient_name) + '</td><td>' + escapeHtml(x.category) + '</td><td><span class="status-badge status-' + escapeHtml(x.status) + '">' + escapeHtml(x.status) + '</span></td><td><code>' + escapeHtml(x.verify_code || '') + '</code></td><td><div class="table-actions">' + actions + '</div></td></tr>';
     }).join('') || '<tr><td colspan="6">No issued documents.</td></tr>';
     docCenterCache = d.data || [];
   }
   var docCenterCache = [];
+  async function previewIssuedDocument(id) {
+    var row = (typeof docCenterCache !== 'undefined' ? docCenterCache : []).find(function (x) { return x.id === id; });
+    if (!row) return setNote('issueDocNote', 'Document not in the current list.');
+    var chrome = await loadOfficialChrome();
+    var w = window.open('', '_blank', 'noopener,width=720,height=900');
+    if (!w) return;
+    var logo = chrome.logo ? '<img src="' + escapeHtml(chrome.logo) + '" alt="" style="height:48px" />' : '';
+    var marks = officialMarksHtml(chrome, escapeHtml);
+    var body = row.body_rendered || '';
+    w.document.write('<!DOCTYPE html><html><head><title>' + escapeHtml(row.document_number || 'Document') + '</title><style>body{font-family:Georgia,serif;background:#f4f1ea;padding:24px;color:#1a1a1a} .sheet{background:#fff;border:1px solid #c8b273;padding:28px;max-width:640px;margin:0 auto} .body{white-space:pre-wrap;line-height:1.45} .qr{font-family:ui-monospace,monospace;font-size:12px;word-break:break-all}</style></head><body><div class="sheet">' + logo + '<p>' + escapeHtml(chrome.orgName) + '</p><h1 style="font-size:1.35rem">' + escapeHtml(row.category || 'Document') + '</h1><p>' + escapeHtml(row.recipient_name || '') + '</p><p>' + escapeHtml(row.document_number || '') + (row.issued_at ? ' · ' + escapeHtml(String(row.issued_at).slice(0, 10)) : '') + '</p><div class="body">' + escapeHtml(body) + '</div><p class="qr">Verify: ' + escapeHtml(row.verify_code || '') + '</p>' + marks + '</div><p style="text-align:center"><button onclick="window.print()">Print</button></p></body></html>');
+    w.document.close();
+  }
   async function downloadIssuedDocFile(id) {
     var row = docCenterCache.find(function (x) { return x.id === id; });
     if (!row || !row.storage_path) return;
@@ -13475,21 +13762,69 @@ window.ramdaniAuth = {
       var b = e.target.closest('[data-mem-edit]'); if (!b) return;
       var m = platMembers.find(function (x) { return x.id === b.getAttribute('data-mem-edit'); }); if (!m) return;
       var f = $id('memberForm');
-      ['full_name','email','phone','society_id','chapter_id','cabinet_id','designation','joined_at','valid_until','status','bio'].forEach(function (k) {
+      fillMemberProfileSelect(m.profile_id);
+      ['full_name','email','phone','profile_id','society_id','chapter_id','cabinet_id','designation','joined_at','valid_until','status','bio'].forEach(function (k) {
         if (f.elements[k]) f.elements[k].value = m[k] == null ? '' : m[k];
       });
       platEditMemberId = m.id;
       $id('memberSave').textContent = 'Update member';
       $id('memberCancel').hidden = false;
     });
+    var ivForm = $id('identityVerifyForm');
+    if (ivForm && !ivForm.dataset.bound) {
+      ivForm.dataset.bound = '1';
+      ivForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var code = (ivForm.elements.code.value || '').trim();
+        var note = $id('identityVerifyNote');
+        var out = $id('identityVerifyResult');
+        if (note) { note.className = 'form-status'; note.textContent = 'Checking…'; }
+        if (out) out.innerHTML = '';
+        if (!code) { if (note) { note.className = 'form-status err'; note.textContent = 'Enter a verification code.'; } return; }
+        var cert = await sb.rpc('verify_certificate', { p_code: code });
+        var row = !cert.error && (Array.isArray(cert.data) ? cert.data[0] : cert.data);
+        if (row && row.certificate_number) {
+          if (note) note.textContent = '';
+          if (out) out.innerHTML = '<p><strong>Certificate</strong> ' + escapeHtml(row.certificate_number) + ' — ' + escapeHtml(row.status || 'issued') + '</p>' + (row.holder_name ? '<p>' + escapeHtml(row.holder_name) + '</p>' : '');
+          return;
+        }
+        var card = await sb.rpc('ramdani_verify_card', { p_code: code });
+        if (!card.error && card.data && card.data.ok) {
+          var d = card.data;
+          if (String(d.status || '').toLowerCase() === 'revoked') {
+            if (note) { note.className = 'form-status err'; note.textContent = 'This card is revoked.'; }
+            if (out) out.innerHTML = '<p>Revoked' + (d.card_number ? ' — ' + escapeHtml(d.card_number) : '') + '</p>';
+            return;
+          }
+          if (note) note.textContent = '';
+          if (out) out.innerHTML = '<p><strong>' + escapeHtml(d.kind === 'student' ? 'Student card' : 'Member card') + '</strong> ' + escapeHtml(d.card_number || '') + ' — ' + escapeHtml(d.status || '') + '</p>' + (d.name ? '<p>' + escapeHtml(d.name) + '</p>' : '');
+          return;
+        }
+        var doc = await sb.from('issued_documents').select('document_number, recipient_name, category, status, verify_code, revoked_at, revoke_reason').eq('verify_code', code).maybeSingle();
+        if (doc.data) {
+          if (doc.data.status === 'revoked' || doc.data.revoked_at) {
+            if (note) { note.className = 'form-status err'; note.textContent = 'This document is revoked.'; }
+            if (out) out.innerHTML = '<p>' + escapeHtml(doc.data.document_number || '') + ' — revoked' + (doc.data.revoke_reason ? ' · ' + escapeHtml(doc.data.revoke_reason) : '') + '</p>';
+            return;
+          }
+          if (doc.data.status !== 'issued') {
+            if (note) { note.className = 'form-status err'; note.textContent = 'This document is not currently issued.'; }
+            if (out) out.innerHTML = '<p>Status: ' + escapeHtml(doc.data.status) + '</p>';
+            return;
+          }
+          if (note) note.textContent = '';
+          if (out) out.innerHTML = '<p><strong>Document</strong> ' + escapeHtml(doc.data.document_number || '') + ' — ' + escapeHtml(doc.data.category || '') + '</p><p>' + escapeHtml(doc.data.recipient_name || '') + '</p>';
+          return;
+        }
+        if (note) { note.className = 'form-status err'; note.textContent = 'No valid issued certificate, card or document matches this code.'; }
+      });
+    }
     $id('memberCardForm').addEventListener('submit', saveMemberCard);
     $id('memberCardStatusFilter').addEventListener('change', loadMemberCards);
     $id('memberCardBody').addEventListener('click', function (e) {
       var prev = e.target.closest('[data-mc-preview]');
       if (prev) {
-        var p = prev.getAttribute('data-mc-preview').split('|');
-        var w = window.open('', '_blank', 'noopener,width=420,height=560');
-        if (w) w.document.write('<html><head><title>Card preview</title></head><body style="font-family:Georgia,serif;padding:24px"><div style="border:1px solid #333;padding:20px;max-width:320px"><p>Ramdani Law Firm</p><h2>' + p[1] + '</h2><p>' + p[0] + '</p><p>Status: ' + p[3] + '</p><p style="font-size:12px;word-break:break-all">Verify: ' + p[2] + '</p><p style="font-size:12px">QR stores only this verification code.</p></div><p><button onclick="window.print()">Print</button></p></body></html>');
+        previewMemberCard(prev.getAttribute('data-mc-preview'));
       }
     });
     $id('studentCardForm').addEventListener('submit', saveStudentCard);
@@ -13530,6 +13865,7 @@ window.ramdaniAuth = {
       var ap = e.target.closest('[data-doc-approve]'); if (ap) return approveIssuedDoc(ap.getAttribute('data-doc-approve'));
       var is = e.target.closest('[data-doc-issue]'); if (is) return markIssuedDocIssued(is.getAttribute('data-doc-issue'));
       var rv = e.target.closest('[data-doc-revoke]'); if (rv) return revokeIssuedDoc(rv.getAttribute('data-doc-revoke'));
+      var pv = e.target.closest('[data-doc-preview]'); if (pv) return previewIssuedDocument(pv.getAttribute('data-doc-preview'));
       var dl = e.target.closest('[data-doc-file]'); if (dl) return downloadIssuedDocFile(dl.getAttribute('data-doc-file'));
     });
     var idf = $id('issueDocForm');
@@ -13844,7 +14180,7 @@ window.ramdaniAuth = {
   }
 
   function showAdminView(view) {
-    var panels = ['dashboardPanel','studentsPanel','adminsPanel','staffAccountsPanel','rolesPanel','lawyerAppsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','brandingLogoPanel','brandingTypePanel','contactInfoPanel','seoSettingsPanel','systemSettingsPanel','disclaimersPanel','homepageSectionsPanel','authMediaPanel','navigationPanel','certTemplatesPanel','mediaLibraryPanel','certIssuancesPanel','courseBuilderPanel','quizBuilderPanel','quizResultsPanel','eduSearchPanel','enrollmentsPanel','seoOverridesPanel','notificationsPanel','auditLogPanel','opsDashPanel','clientsPanel','legalMattersPanel','myTasksPanel','legalCalendarPanel','legalDocsPanel','legalCommsPanel','legalReportsPanel','legalSearchPanel','organizationsPanel','membershipsPanel','membersPanel','memberProfilePanel','memberCardsPanel','studentCardsPanel','eventsPanel','eventRegsPanel','eventGuestsPanel','docsCenterPanel'];
+    var panels = ['dashboardPanel','studentsPanel','adminsPanel','staffAccountsPanel','rolesPanel','lawyerAppsPanel','contentPanel','identityVerifyPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','brandingLogoPanel','brandingTypePanel','contactInfoPanel','seoSettingsPanel','systemSettingsPanel','disclaimersPanel','homepageSectionsPanel','authMediaPanel','navigationPanel','certTemplatesPanel','mediaLibraryPanel','certIssuancesPanel','courseBuilderPanel','quizBuilderPanel','quizResultsPanel','eduSearchPanel','enrollmentsPanel','seoOverridesPanel','notificationsPanel','auditLogPanel','opsDashPanel','clientsPanel','legalMattersPanel','myTasksPanel','legalCalendarPanel','legalDocsPanel','legalCommsPanel','legalReportsPanel','legalSearchPanel','organizationsPanel','membershipsPanel','membersPanel','memberProfilePanel','memberCardsPanel','studentCardsPanel','eventsPanel','eventRegsPanel','eventGuestsPanel','docsCenterPanel'];
     panels.forEach(function(id){ var el=document.getElementById(id); if(el){ el.hidden=true; el.classList.remove('is-active'); }});
     document.querySelectorAll('.admin-nav [data-table]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-table')===view); });
     if (window.ramdaniCloseAdminNav) window.ramdaniCloseAdminNav();
@@ -13895,6 +14231,7 @@ window.ramdaniAuth = {
     if(view==='__events') { activate('eventsPanel','Events'); loadPlatEvents(); return; }
     if(view==='__eventregs') { activate('eventRegsPanel','Registrations & attendance'); loadEventRegs(); return; }
     if(view==='__docscenter') { activate('docsCenterPanel','Document center'); loadDocCenter(); return; }
+    if(view==='__identityverify') { activate('identityVerifyPanel','Verification'); return; }
     if(view==='__eventguests') { activate('eventGuestsPanel','Event guests'); loadEventGuests(); return; }
     activate('contentPanel', (TABLES.find(function(t){return t.id===view;})||{}).label || 'Content');
     loadTable(view);
