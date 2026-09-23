@@ -1074,14 +1074,14 @@ html[data-theme='dark'] .ramdani-auth-page{
    Scoped to the Legal Services route only. Uses the Phase 1 tokens already
    declared in css/style.css — no new :root, no global overrides, no new
    dark-mode system. */
-.services-hero, .academy-hero { padding-bottom: 2.25rem; }
-.services-hero .kicker, .academy-hero .kicker { margin-bottom: 1rem; }
-.services-hero .kicker::before, .academy-hero .kicker::before { content: ''; display: block; width: 3rem; height: 2px; background: var(--gold); margin-bottom: .9rem; }
-.services-hero h1, .academy-hero h1 { margin-bottom: 1rem; }
-.services-hero .note, .academy-hero .note { margin-top: 1.1rem; border-inline-start: 2px solid var(--gold); padding-inline-start: 1rem; font-size: .85rem; line-height: 1.75; }
+.services-hero, .academy-hero, .people-hero { padding-bottom: 2.25rem; }
+.services-hero .kicker, .academy-hero .kicker, .people-hero .kicker { margin-bottom: 1rem; }
+.services-hero .kicker::before, .academy-hero .kicker::before, .people-hero .kicker::before { content: ''; display: block; width: 3rem; height: 2px; background: var(--gold); margin-bottom: .9rem; }
+.services-hero h1, .academy-hero h1, .people-hero h1 { margin-bottom: 1rem; }
+.services-hero .note, .academy-hero .note, .people-hero .note { margin-top: 1.1rem; border-inline-start: 2px solid var(--gold); padding-inline-start: 1rem; font-size: .85rem; line-height: 1.75; }
 
-.services-list-section, .academy-band { background: var(--ivory); border-block: 1px solid var(--line); }
-.services-list-section > .wrap > h2, .academy-band > .wrap > h2 { margin-bottom: 1.5rem; }
+.services-list-section, .academy-band, .people-band { background: var(--ivory); border-block: 1px solid var(--line); }
+.services-list-section > .wrap > h2, .academy-band > .wrap > h2, .people-band > .wrap > h2 { margin-bottom: 1.5rem; }
 .services-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); gap: 1.5rem; align-items: stretch; }
 .services-grid .service-card {
   display: flex;
@@ -1358,6 +1358,91 @@ html[data-theme="dark"] .event-badge.is-open { color: var(--gold); }
   .events-grid { gap: .85rem; }
 }
 /* ===== end MODULE 6 — EVENTS & PROGRAMS ===== */
+/* ===== MODULE 7 — LAWYERS / TEAM (Phase 2) =====
+   Public People route only. Phase 1 tokens. No new :root, no second
+   dark-mode system, no invented profile-detail page. */
+.people-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); gap: 1.5rem; align-items: stretch; }
+.people-grid .people-card {
+  display: flex;
+  flex-direction: column;
+  gap: .7rem;
+  height: 100%;
+  padding: 0;
+  overflow: hidden;
+  background: var(--card);
+  border-top-width: 3px;
+  border-top-color: transparent;
+}
+.people-grid .people-card::before { display: none; }
+.people-grid .people-card:hover,
+.people-grid .people-card:focus-within { border-color: var(--gold); box-shadow: var(--shadow-premium, var(--shadow)); }
+.people-portrait {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  background: var(--forest);
+  overflow: hidden;
+}
+.people-portrait img {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+  border: 0;
+  border-radius: 0;
+}
+.people-initials {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--serif);
+  font-size: clamp(2.2rem, 6vw, 3.2rem);
+  letter-spacing: .06em;
+  color: var(--gold);
+  background: var(--forest-deep);
+}
+.people-portrait.is-photo .people-initials { display: none; }
+.people-body { display: flex; flex-direction: column; gap: .45rem; padding: 1.15rem 1.25rem 1.35rem; flex: 1; }
+.people-name { margin: 0; font-size: 1.25rem; overflow-wrap: anywhere; }
+.people-role { margin: 0; font-size: .82rem; letter-spacing: .04em; text-transform: uppercase; color: var(--gold); }
+.people-bio { margin: 0; color: var(--muted); font-size: .92rem; }
+.people-chips { display: flex; flex-wrap: wrap; gap: .35rem; margin: 0; }
+.people-chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill, 999px);
+  padding: .15rem .55rem;
+  font-size: .72rem;
+  color: var(--muted);
+}
+.people-details { margin: 0; }
+.people-details summary {
+  cursor: pointer;
+  min-height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--accent-dark);
+  list-style: none;
+}
+.people-details summary::-webkit-details-marker { display: none; }
+.people-details summary::after { content: '\25be'; color: var(--gold); margin-inline-start: .35rem; }
+.people-details[open] summary::after { transform: rotate(180deg); }
+.people-details p { margin: .4rem 0 0; font-size: .9rem; color: var(--muted); }
+.people-cta { margin-top: auto; align-self: start; min-height: 2.75rem; }
+@media (prefers-reduced-motion: reduce) {
+  .people-grid .people-card { transition: none; }
+  .people-details summary::after { transition: none; }
+}
+@media (max-width: 700px) {
+  .people-grid { gap: 1.15rem; }
+  .people-portrait { aspect-ratio: 4 / 5; }
+}
+/* ===== end MODULE 7 — LAWYERS / TEAM ===== */
 </style>
 </head>
 <body>
@@ -3729,17 +3814,29 @@ if (window.ramdaniEducation) ramdaniEducation.renderModules();
     </div></section>`, init: async function () {
 var rows = await ramdaniApi.listPublished('news', null); ramdaniUi.renderList(document.getElementById('list'), rows, 'news_empty');
   } },
-  '/pages/people.html': { title: 'People — Ramdani Law Firm', desc: 'People — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section"><div class="wrap">
-      <h1 data-i18n="people_title"></h1>
-      <div id="list" class="grid"></div>
+  '/pages/people.html': { title: 'People — Ramdani Law Firm', desc: 'People — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section people-hero"><div class="wrap">
+      <p class="kicker" data-i18n="people_kicker">The chamber</p>
+      <h1 data-i18n="people_title">People</h1>
+      <p class="lead" data-i18n="people_lead">Advocate profiles published by authorised staff. Credentials appear only when the firm supplies them in writing.</p>
+      <p class="note" data-i18n="people_note">Nothing on this page creates a lawyer&ndash;client relationship. Privileged documents must not be sent through public forms.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="/pages/consultation.html" data-i18n="cta_consult">Request a consultation</a>
+        <a class="btn" href="/pages/practice-areas.html" data-i18n="cta_practice">Practice areas</a>
+      </div>
+    </div></section>
+    <section class="section people-band" aria-labelledby="peopleListHeading"><div class="wrap">
+      <h2 id="peopleListHeading" data-i18n="people_list_title">Published profiles</h2>
+      <div id="list" class="grid people-grid"></div>
+    </div></section>
+    <section class="section home-final-cta services-cta-band"><div class="wrap">
+      <h2 data-i18n="cta_consult">Request a consultation</h2>
+      <p class="lead" data-i18n="people_cta_lead">Request a consultation. Authorised staff will respond. Do not send privileged documents through public forms.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="/pages/consultation.html" data-i18n="cta_consult">Request a consultation</a>
+        <a class="btn" href="/pages/practice-areas.html" data-i18n="cta_practice">Practice areas</a>
+      </div>
     </div></section>`, init: async function () {
-var rows = await ramdaniApi.listPublished('people', 'full_name');
-var el = document.getElementById('list');
-if (!rows || !rows.length) { ramdaniUi.renderList(el, rows, 'people_empty'); return; }
-el.innerHTML = rows.map(function (row) {
-  var img = row.photo_url ? '<img src="' + ramdaniUi.escape(row.photo_url) + '" alt="' + ramdaniUi.escape(row.full_name || 'Lawyer') + '" />' : '';
-  return '<article class="card people-card">' + img + '<div><h3>' + ramdaniUi.escape(row.full_name || 'Untitled') + '</h3><p class="note">' + ramdaniUi.escape(row.role_title || '') + '</p><p>' + ramdaniUi.escape(row.short_bio || '') + '</p></div></article>';
-}).join('');
+var rows = await ramdaniApi.listPublished('people', 'full_name'); ramdaniUi.renderPeople(document.getElementById('list'), rows, 'people_empty');
   } },
   '/pages/practice-area.html': { title: 'Practice outline — Ramdani Law Firm', desc: 'Practice outline — Ramdani Law Firm. Study outlines published by staff. Dera Ghazi Khan, Pakistan.', html: `<section class="section"><div class="wrap">
       <p><a href="/pages/practice-areas.html">All practice outlines</a></p>
@@ -5121,6 +5218,15 @@ window.ramdaniSite = Object.freeze({
       about_lead: 'Ramdani Law Firm / Law Chamber is based in Dera Ghazi Khan and provides legal services across Pakistan. Specific credentials, rankings, and case outcomes are published only when supplied by the firm.',
       people_title: 'People',
       people_empty: 'Advocate profiles will appear here once published by the firm.',
+      people_kicker: 'The chamber',
+      people_lead: 'Advocate profiles published by authorised staff. Credentials appear only when the firm supplies them in writing.',
+      people_note: 'Nothing on this page creates a lawyer\u2013client relationship. Privileged documents must not be sent through public forms.',
+      people_list_title: 'Published profiles',
+      people_cta_lead: 'Request a consultation. Authorised staff will respond. Do not send privileged documents through public forms.',
+      people_education: 'Education',
+      people_qualifications: 'Qualifications',
+      people_languages: 'Languages',
+      people_bio: 'Biography',
       practice_title: 'Practice areas',
       home_trust_kicker: 'Why Ramdani',
       home_trust_title: 'What guides our work',
@@ -5266,7 +5372,16 @@ window.ramdaniSite = Object.freeze({
       about_title: '\u0641\u0631\u0645 \u06a9\u0627 \u062a\u0639\u0627\u0631\u0641',
       about_lead: '\u0631\u0645\u062f\u0627\u0646\u06cc \u0644\u0627 \u0641\u0631\u0645 / \u0644\u0627 \u0686\u06cc\u0645\u0628\u0631 \u0688\u06cc\u0631\u06c1 \u063a\u0627\u0632\u06cc \u062e\u0627\u0646 \u0645\u06cc\u06ba \u0648\u0627\u0642\u0639 \u06c1\u06d2 \u0627\u0648\u0631 \u067e\u0627\u06a9\u0633\u062a\u0627\u0646 \u0628\u06be\u0631 \u0645\u06cc\u06ba \u0642\u0627\u0646\u0648\u0646\u06cc \u062e\u062f\u0645\u0627\u062a \u0641\u0631\u0627\u06c1\u0645 \u06a9\u0631\u062a\u06cc \u06c1\u06d2\u06d4',
       people_title: '\u0627\u0641\u0631\u0627\u062f',
-      people_empty: '\u0648\u06a9\u0644\u0627\u0621 \u06a9\u06d2 \u067e\u0631\u0648\u0641\u0627\u0626\u0644\u0632 \u0634\u0627\u0626\u0639 \u06c1\u0648\u0646\u06d2 \u06a9\u06d2 \u0628\u0639\u062f \u06cc\u06c1\u0627\u06ba \u0646\u0638\u0631 \u0622\u0626\u06cc\u06ba \u06af\u06d2\u06d4',
+      people_empty: '\u0648\u06a9\u0644\u0627\u0621 \u06a9\u06d2 \u067e\u0631\u0648\u0641\u0627\u0626\u0644\u0632 \u0634\u0627\u0626\u0639 \u06c1\u0648\u0646\u06d2 \u06a9\u06d2 \u0628\u0639\u062f \u06cc\u06c1\u0627\u06ba \u0646\u0638\u0631 \u0622\u0626\u06cc\u06ba \u06af\u06cc\u06d4',
+      people_kicker: '\u0686\u06cc\u0645\u0628\u0631',
+      people_lead: '\u0645\u062c\u0627\u0632 \u0639\u0645\u0644\u06c1 \u06a9\u06cc \u062c\u0627\u0646\u0628 \u0633\u06d2 \u0634\u0627\u0626\u0639 \u06a9\u0631\u062f\u06c1 \u0648\u06a9\u0644\u0627\u0621 \u06a9\u06d2 \u067e\u0631\u0648\u0641\u0627\u0626\u0644\u0632\u06d4 \u062a\u0639\u0644\u06cc\u0645\u0627\u062a \u0635\u0631\u0641 \u0627\u0633\u06cc \u0635\u0648\u0631\u062a \u0645\u06cc\u06ba \u0646\u0638\u0631 \u0622\u062a\u06cc \u06c1\u06cc\u06ba \u062c\u0628 \u0641\u0631\u0645 \u062a\u062d\u0631\u06cc\u0631\u06cc \u0637\u0648\u0631 \u067e\u0631 \u0641\u0631\u0627\u06c1\u0645 \u06a9\u0631\u06d2\u06d4',
+      people_note: '\u0627\u0633 \u0635\u0641\u062d\u06d2 \u0633\u06d2 \u0648\u06a9\u06cc\u0644\u2013\u06a9\u0644\u0627\u0626\u0646\u0679 \u062a\u0639\u0644\u0642 \u0642\u0627\u0626\u0645 \u0646\u06c1\u06cc\u06ba \u06c1\u0648\u062a\u0627\u06d4 \u0639\u0648\u0627\u0645\u06cc \u0641\u0627\u0631\u0645 \u06a9\u06d2 \u0630\u0631\u06cc\u0639\u06d2 \u0627\u0633\u062a\u062d\u0642\u0627\u0642 \u06cc\u0627\u0641\u062a\u06c1 \u062f\u0633\u062a\u0627\u0648\u06cc\u0632\u0627\u062a \u0646\u06c1 \u0628\u06be\u06cc\u062c\u06cc\u06ba\u06d4',
+      people_list_title: '\u0634\u0627\u0626\u0639 \u0634\u062f\u06c1 \u067e\u0631\u0648\u0641\u0627\u0626\u0644\u0632',
+      people_cta_lead: '\u0645\u0634\u0627\u0648\u0631\u06c1 \u06a9\u06cc \u062f\u0631\u062e\u0648\u0627\u0633\u062a \u06a9\u0631\u06cc\u06ba\u06d4 \u0645\u062c\u0627\u0632 \u0639\u0645\u0644\u06c1 \u062c\u0648\u0627\u0628 \u062f\u06d2 \u06af\u0627\u06d4 \u0639\u0648\u0627\u0645\u06cc \u0641\u0627\u0631\u0645 \u06a9\u06d2 \u0630\u0631\u06cc\u0639\u06d2 \u0627\u0633\u062a\u062d\u0642\u0627\u0642 \u06cc\u0627\u0641\u062a\u06c1 \u062f\u0633\u062a\u0627\u0648\u06cc\u0632\u0627\u062a \u0646\u06c1 \u0628\u06be\u06cc\u062c\u06cc\u06ba\u06d4',
+      people_education: '\u062a\u0639\u0644\u06cc\u0645',
+      people_qualifications: '\u0627\u06c1\u0644\u06cc\u062a\u06cc\u06ba',
+      people_languages: '\u0632\u0628\u0627\u0646\u06cc\u06ba',
+      people_bio: '\u0633\u0648\u0627\u0646\u062d \u0639\u0645\u0631\u06cc',
       practice_title: '\u0639\u0645\u0644\u06cc \u0634\u0639\u0628\u06d2',
       home_trust_kicker: '\u0631\u0645\u062f\u0627\u0646\u06cc \u06a9\u06cc\u0648\u06ba',
       home_trust_title: '\u06c1\u0645\u0627\u0631\u06d2 \u0627\u0635\u0648\u0644',
@@ -5554,6 +5669,73 @@ window.ramdaniUi = {
       '<p class="event-title" dir="auto">' + self.escape(ev.title || 'Event') + '</p>' +
       (meta.length ? '<p class="event-meta">' + meta.map(function (m) { return self.escape(m); }).join(' \u00b7 ') + '</p>' : '') +
       extra + cta + '</article>';
+  },
+  // People card — presentation only. Fields come from existing `people`
+  // rows returned by ramdaniApi.listPublished(); no extra request, no
+  // invented credentials, and no profile-detail link (slug is disabled).
+  peopleCard: function (row) {
+    row = row || {};
+    var self = this;
+    function t(key, fallback) {
+      var v = window.ramdaniT ? ramdaniT(key) : '';
+      return (!v || v === key) ? fallback : v;
+    }
+    var name = row.full_name || 'Untitled';
+    var initials = String(name).split(/\s+/).filter(Boolean).slice(0, 2).map(function (w) {
+      return w.charAt(0);
+    }).join('').toUpperCase() || '\u2014';
+    var photo = row.photo_url
+      ? '<img src="' + self.escape(row.photo_url) + '" alt="' + self.escape(name) + '" width="480" height="640" loading="lazy" />'
+      : '';
+    var portraitClass = row.photo_url ? 'people-portrait is-photo' : 'people-portrait';
+    var chips = [];
+    if (row.education) chips.push(t('people_education', 'Education') + ': ' + row.education);
+    if (row.qualifications) chips.push(t('people_qualifications', 'Qualifications') + ': ' + row.qualifications);
+    if (row.languages) chips.push(t('people_languages', 'Languages') + ': ' + row.languages);
+    var chipHtml = chips.length
+      ? '<p class="people-chips">' + chips.map(function (c) {
+          return '<span class="people-chip">' + self.escape(c) + '</span>';
+        }).join('') + '</p>'
+      : '';
+    var longBio = row.long_bio
+      ? '<details class="people-details"><summary>' + self.escape(t('people_bio', 'Biography')) + '</summary><p dir="auto">' +
+        self.escape(row.long_bio) + '</p></details>'
+      : '';
+    var consult = t('cta_consult', 'Request a consultation');
+    var label = self.escape(consult + ' \u2014 ' + name);
+    return '<article class="card people-card">' +
+      '<div class="' + portraitClass + '">' +
+        '<span class="people-initials" aria-hidden="true">' + self.escape(initials) + '</span>' +
+        photo +
+      '</div>' +
+      '<div class="people-body">' +
+        '<h3 class="people-name" dir="auto">' + self.escape(name) + '</h3>' +
+        (row.role_title ? '<p class="people-role" dir="auto">' + self.escape(row.role_title) + '</p>' : '') +
+        chipHtml +
+        (row.short_bio ? '<p class="people-bio" dir="auto">' + self.escape(row.short_bio) + '</p>' : '') +
+        longBio +
+        '<a class="btn people-cta" href="/pages/consultation.html" data-i18n="cta_consult" aria-label="' + label + '">' +
+          self.escape(consult) + '</a>' +
+      '</div></article>';
+  },
+  renderPeople: function (el, rows, emptyKey) {
+    if (!el) return;
+    if (!rows || !rows.length) {
+      el.innerHTML = this.empty(emptyKey);
+      return;
+    }
+    el.innerHTML = rows.map(function (row) {
+      return window.ramdaniUi.peopleCard(row);
+    }).join('');
+    el.querySelectorAll('.people-portrait.is-photo img').forEach(function (img) {
+      img.addEventListener('error', function () {
+        var holder = img.parentNode;
+        if (holder) {
+          holder.classList.remove('is-photo');
+          if (img.parentNode) img.parentNode.removeChild(img);
+        }
+      });
+    });
   },
   academyNav: function (currentPath) {
     var el = document.getElementById('academyNav');
