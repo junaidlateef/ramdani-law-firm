@@ -1074,14 +1074,14 @@ html[data-theme='dark'] .ramdani-auth-page{
    Scoped to the Legal Services route only. Uses the Phase 1 tokens already
    declared in css/style.css — no new :root, no global overrides, no new
    dark-mode system. */
-.services-hero { padding-bottom: 2.25rem; }
-.services-hero .kicker { margin-bottom: 1rem; }
-.services-hero .kicker::before { content: ''; display: block; width: 3rem; height: 2px; background: var(--gold); margin-bottom: .9rem; }
-.services-hero h1 { margin-bottom: 1rem; }
-.services-hero .note { margin-top: 1.1rem; border-inline-start: 2px solid var(--gold); padding-inline-start: 1rem; font-size: .85rem; line-height: 1.75; }
+.services-hero, .academy-hero { padding-bottom: 2.25rem; }
+.services-hero .kicker, .academy-hero .kicker { margin-bottom: 1rem; }
+.services-hero .kicker::before, .academy-hero .kicker::before { content: ''; display: block; width: 3rem; height: 2px; background: var(--gold); margin-bottom: .9rem; }
+.services-hero h1, .academy-hero h1 { margin-bottom: 1rem; }
+.services-hero .note, .academy-hero .note { margin-top: 1.1rem; border-inline-start: 2px solid var(--gold); padding-inline-start: 1rem; font-size: .85rem; line-height: 1.75; }
 
-.services-list-section { background: var(--ivory); border-block: 1px solid var(--line); }
-.services-list-section > .wrap > h2 { margin-bottom: 1.5rem; }
+.services-list-section, .academy-band { background: var(--ivory); border-block: 1px solid var(--line); }
+.services-list-section > .wrap > h2, .academy-band > .wrap > h2 { margin-bottom: 1.5rem; }
 .services-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); gap: 1.5rem; align-items: stretch; }
 .services-grid .service-card {
   display: flex;
@@ -1149,6 +1149,152 @@ html[data-theme="dark"] .services-cta-band { background: var(--forest-deep); }
   .services-hero .hero-actions .btn { flex: 1 1 14rem; }
 }
 /* ===== end MODULE 4 — LEGAL SERVICES ===== */
+/* ===== MODULE 5 - ACADEMY (Phase 2) =====
+   Legal Education surface: study modules, module outline, lectures, LAT/GAT
+   quizzes, certificates, internships. Phase 1 tokens only; no new :root, no
+   second dark-mode system, nothing global re-declared. */
+
+/* section nav shared by the Academy pages */
+.academy-nav { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.5rem; }
+.academy-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.5rem;
+  padding: .4rem .9rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill, 999px);
+  background: var(--card);
+  color: var(--ink);
+  font-size: .82rem;
+  font-weight: 500;
+  transition: border-color var(--transition-fast, 150ms ease), background-color var(--transition-fast, 150ms ease);
+}
+.academy-nav a:hover { text-decoration: none; border-color: var(--gold); }
+.academy-nav a[aria-current="page"] { background: var(--forest); border-color: var(--forest); color: #F4F0E8; font-weight: 600; }
+html[data-theme="dark"] .academy-nav a[aria-current="page"] { background: var(--gold); border-color: var(--gold); color: var(--forest-deep); }
+
+/* breadcrumb - module outline */
+.academy-breadcrumb ol { display: flex; flex-wrap: wrap; gap: .3rem .5rem; list-style: none; margin: 0 0 1.1rem; padding: 0; font-size: .8rem; color: var(--muted); }
+.academy-breadcrumb li { display: inline-flex; align-items: center; gap: .5rem; }
+.academy-breadcrumb li + li::before { content: '/'; color: var(--gold); }
+.academy-breadcrumb a { color: var(--muted); }
+.academy-breadcrumb a:hover { color: var(--accent-dark); }
+.academy-breadcrumb [aria-current="page"] { color: var(--ink); font-weight: 600; overflow-wrap: anywhere; }
+
+/* metadata chips - values come from published records only */
+.academy-chips { display: flex; flex-wrap: wrap; gap: .4rem; margin: 0; }
+.academy-chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill, 999px);
+  padding: .15rem .6rem;
+  font-size: .72rem;
+  letter-spacing: .03em;
+  color: var(--muted);
+  background: transparent;
+}
+.academy-chip.is-accent { border-color: var(--gold); color: var(--gold); }
+
+/* filter chips (existing .btn markup, presentational state only) */
+.academy-filters { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.5rem; }
+.academy-filters .btn { min-height: 2.5rem; padding: .4rem .9rem; font-size: .8rem; border-radius: var(--radius-pill, 999px); }
+.academy-filters .btn[aria-pressed="true"] { background: var(--forest); border-color: var(--forest); color: #F4F0E8; }
+html[data-theme="dark"] .academy-filters .btn[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: var(--forest-deep); }
+
+/* cards */
+.academy-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); gap: 1.5rem; align-items: stretch; }
+.academy-grid .academy-card,
+.academy-card {
+  display: flex;
+  flex-direction: column;
+  gap: .65rem;
+  height: 100%;
+  background: var(--card);
+  border-top-width: 3px;
+  border-top-color: transparent;
+}
+.academy-card::before { display: none; }
+.academy-card:hover,
+.academy-card:focus-within { border-color: var(--gold); box-shadow: var(--shadow-premium, var(--shadow)); }
+.academy-card h3 { margin: 0; font-size: 1.15rem; overflow-wrap: anywhere; }
+.academy-card > p { margin: 0; }
+.academy-card .academy-summary { color: var(--muted); font-size: .92rem; }
+.academy-card .btn { margin-top: auto; align-self: start; }
+.academy-card .note { font-size: .78rem; }
+
+/* lecture media - thumbnail is derived from the published YouTube id */
+.academy-media {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm, 3px);
+  background: var(--paper);
+}
+.academy-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.academy-media-play {
+  position: absolute;
+  inset-block-end: .5rem;
+  inset-inline-start: .5rem;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-pill, 999px);
+  background: rgba(14, 44, 39, .82);
+  color: #F4F0E8;
+  font-size: .7rem;
+}
+html[dir="rtl"] .academy-media-play { transform: scaleX(-1); }
+
+/* enrollment + lesson checklist (module outline) */
+.academy-status { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin: 0 0 1rem; font-size: .85rem; color: var(--muted); }
+.academy-badge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-pill, 999px);
+  padding: .15rem .65rem;
+  font-size: .74rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--accent-dark);
+}
+.academy-section { margin-bottom: 1.25rem; }
+.academy-section > h3 { margin-bottom: .6rem; font-size: 1.1rem; }
+.lesson-list li { padding: 0; }
+.lesson-list li + li { border-top: 1px solid var(--line); }
+.lesson-list label {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  min-height: 2.75rem;
+  padding: .45rem .25rem;
+  cursor: pointer;
+  font-size: .92rem;
+}
+.lesson-list input[type="checkbox"] { width: 1.1rem; height: 1.1rem; accent-color: var(--gold); flex: 0 0 auto; }
+.lesson-list label:hover { color: var(--accent-dark); }
+.lesson-list li:has(input:checked) label { color: var(--muted); }
+
+/* quiz page */
+.quiz-compact .mcq { background: var(--card); }
+.quiz-compact .mcq-head { align-items: center; }
+.academy-hero + .section .quiz-compact { margin-top: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .academy-nav a { transition: none; }
+}
+@media (max-width: 700px) {
+  .academy-nav { gap: .4rem; }
+  .academy-nav a { font-size: .78rem; padding: .35rem .75rem; }
+  .academy-grid { gap: 1.15rem; }
+  .academy-breadcrumb ol { font-size: .75rem; }
+}
+/* ===== end MODULE 5 - ACADEMY ===== */
 </style>
 </head>
 <body>
@@ -3206,14 +3352,21 @@ if (window.ramdaniEducation) ramdaniEducation.renderCase();
     </div></section>`, init: async function () {
 if (window.ramdaniEducation) ramdaniEducation.renderCases();
   } },
-  '/pages/certificates.html': { title: 'Certificates — Ramdani Law Firm', desc: 'Certificates — Ramdani Law Firm. Study outlines published by staff. Dera Ghazi Khan, Pakistan.', html: `<section class="section"><div class="wrap">
-      <h1 data-i18n="certificates_title"></h1>
+  '/pages/certificates.html': { title: 'Certificates — Ramdani Law Firm', desc: 'Certificates — Ramdani Law Firm. Study outlines published by staff. Dera Ghazi Khan, Pakistan.', html: `<section class="section academy-hero"><div class="wrap">
+      <p class="kicker" data-i18n="academy_kicker">Legal education</p>
+      <h1 data-i18n="certificates_title">Certificates</h1>
       <p class="lead" data-i18n="certificates_lead"></p>
       <p class="note">Certificate listings are published by staff and may link to an LLB, LAT, GAT, Pakistan-law, or skills outline. Completing a quiz does not issue a certificate.</p>
-      <p><a class="btn" href="/pages/verify-certificate.html">Verify a certificate</a></p>
-      <div id="filters" class="library-filters"></div>
-      <div id="list" class="grid"></div>
+      <div class="hero-actions">
+        <a class="btn" href="/pages/verify-certificate.html">Verify a certificate</a>
+      </div>
+      <nav class="academy-nav" id="academyNav" aria-label="Legal education sections"></nav>
+    </div></section>
+    <section class="section academy-band"><div class="wrap">
+      <div id="filters" class="academy-filters" role="group" aria-label="Filter certificates by category"></div>
+      <div id="list" class="grid academy-grid"></div>
     </div></section>`, init: async function () {
+if (window.ramdaniUi) ramdaniUi.academyNav('/pages/certificates.html');
 if (window.ramdaniEducation) ramdaniEducation.renderCertificates();
   } },
   '/pages/chapters.html': { title: 'Chapters — Ramdani Law Firm', desc: 'Chapters — Ramdani Law Firm. Study outlines published by staff. Dera Ghazi Khan, Pakistan.', html: `<section class="section"><div class="wrap">
@@ -3377,21 +3530,31 @@ if (window.ramdaniEducation) ramdaniEducation.bindInternshipApply();
       window.ramdaniGo(sel.value === 'lawyer' ? '/lawyer/signup' : '/student/signup');
     });
   } },
-  '/pages/internships.html': { title: 'Internships — Ramdani Law Firm', desc: 'Internships — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section"><div class="wrap">
-      <h1 data-i18n="internships_title"></h1>
+  '/pages/internships.html': { title: 'Internships — Ramdani Law Firm', desc: 'Internships — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section academy-hero"><div class="wrap">
+      <p class="kicker" data-i18n="academy_kicker">Legal education</p>
+      <h1 data-i18n="internships_title">Internships</h1>
       <p class="lead" data-i18n="internships_lead"></p>
       <p class="note">Only openings published by staff appear here. Applying does not create employment, a placement, or a lawyer–client relationship. Staff review applications; there is no automatic selection.</p>
+      <nav class="academy-nav" id="academyNav" aria-label="Legal education sections"></nav>
+    </div></section>
+    <section class="section academy-band"><div class="wrap">
       <div id="list" class="internship-list"></div>
     </div></section>`, init: async function () {
+if (window.ramdaniUi) ramdaniUi.academyNav('/pages/internships.html');
 if (window.ramdaniEducation) ramdaniEducation.renderInternships();
   } },
-  '/pages/learning.html': { title: 'Lectures — Ramdani Law Firm', desc: 'Lectures — Ramdani Law Firm. Study outlines published by staff. Dera Ghazi Khan, Pakistan.', html: `<section class="section"><div class="wrap">
-      <h1 data-i18n="learning_title"></h1>
+  '/pages/learning.html': { title: 'Lectures — Ramdani Law Firm', desc: 'Lectures — Ramdani Law Firm. Study outlines published by staff. Dera Ghazi Khan, Pakistan.', html: `<section class="section academy-hero"><div class="wrap">
+      <p class="kicker" data-i18n="academy_kicker">Legal education</p>
+      <h1 data-i18n="learning_title">Lectures</h1>
       <p class="lead" data-i18n="learning_lead"></p>
       <p class="note">Only lectures published by staff are listed. Videos are embedded from YouTube when a public video ID is supplied. This is not a university course and not legal advice.</p>
+      <nav class="academy-nav" id="academyNav" aria-label="Legal education sections"></nav>
+    </div></section>
+    <section class="section academy-band"><div class="wrap">
       <div id="lecturePlayer" class="lecture-player" hidden></div>
-      <div id="list" class="grid"></div>
+      <div id="list" class="grid academy-grid"></div>
     </div></section>`, init: async function () {
+if (window.ramdaniUi) ramdaniUi.academyNav('/pages/learning.html');
 if (window.ramdaniEducation) ramdaniEducation.renderLectures();
   } },
   '/pages/legal.html': { title: 'Terms / Legal Notice — draft — Ramdani Law Firm', desc: 'Terms / Legal Notice — draft — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section"><div class="wrap">
@@ -3457,23 +3620,38 @@ if (window.ramdaniEducation) ramdaniEducation.renderLibrary();
     </div></section>`, init: async function () {
 var rows = await ramdaniApi.listPublished('matters', null); ramdaniUi.renderList(document.getElementById('list'), rows, 'matters_empty');
   } },
-  '/pages/module.html': { title: 'Module — Ramdani Law Firm', desc: 'Module — Ramdani Law Firm. Study outlines published by staff. Dera Ghazi Khan, Pakistan.', html: `<section class="section"><div class="wrap">
-      <p><a href="/pages/modules.html">All modules</a></p>
+  '/pages/module.html': { title: 'Module — Ramdani Law Firm', desc: 'Module — Ramdani Law Firm. Study outlines published by staff. Dera Ghazi Khan, Pakistan.', html: `<section class="section academy-hero"><div class="wrap">
+      <nav class="academy-breadcrumb" aria-label="Breadcrumb">
+        <ol>
+          <li><a href="/" data-i18n="nav_home">Home</a></li>
+          <li><a href="/pages/modules.html" data-i18n="nav_modules">Study modules</a></li>
+          <li><span id="modCrumb" aria-current="page"></span></li>
+        </ol>
+      </nav>
+      <p class="kicker" data-i18n="academy_kicker">Legal education</p>
       <h1 id="modTitle">Module</h1>
       <p class="lead" id="modSummary"></p>
+      <div id="modMeta" class="academy-chips"></div>
+    </div></section>
+    <section class="section academy-band"><div class="wrap">
       <div id="modBody"></div>
-      <h2>Your enrollment &amp; lessons</h2>
+      <h2 data-i18n="academy_lessons_title">Your enrollment &amp; lessons</h2>
       <div id="modLearning"></div>
     </div></section>`, init: async function () {
 if (window.ramdaniEducation) ramdaniEducation.renderModule();
   } },
-  '/pages/modules.html': { title: 'Study modules — Ramdani Law Firm', desc: 'Study modules — Ramdani Law Firm. Study outlines published by staff. Dera Ghazi Khan, Pakistan.', html: `<section class="section"><div class="wrap">
-      <h1 data-i18n="modules_title"></h1>
+  '/pages/modules.html': { title: 'Study modules — Ramdani Law Firm', desc: 'Study modules — Ramdani Law Firm. Study outlines published by staff. Dera Ghazi Khan, Pakistan.', html: `<section class="section academy-hero"><div class="wrap">
+      <p class="kicker" data-i18n="academy_kicker">Legal education</p>
+      <h1 data-i18n="modules_title">Study modules</h1>
       <p class="lead" data-i18n="modules_lead"></p>
       <p class="note">Outlines only. Not a university degree, not legal advice, and not official LAT/GAT papers. Quizzes and verified case notes are linked when staff publish them.</p>
-      <div id="filters" class="hero-actions" style="margin-bottom:1rem"></div>
-      <div id="list" class="grid"></div>
+      <nav class="academy-nav" id="academyNav" aria-label="Legal education sections"></nav>
+    </div></section>
+    <section class="section academy-band"><div class="wrap">
+      <div id="filters" class="academy-filters" role="group" aria-label="Filter modules by category"></div>
+      <div id="list" class="grid academy-grid"></div>
     </div></section>`, init: async function () {
+if (window.ramdaniUi) ramdaniUi.academyNav('/pages/modules.html');
 if (window.ramdaniEducation) ramdaniEducation.renderModules();
   } },
   '/pages/news.html': { title: 'News — Ramdani Law Firm', desc: 'News — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section"><div class="wrap">
@@ -3533,21 +3711,36 @@ if (window.ramdaniEducation) ramdaniEducation.renderPracticeAreas();
     </div></section>`, init: async function () {
 
   } },
-  '/pages/quiz.html': { title: 'Quiz — Ramdani Law Firm', desc: 'Quiz — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section"><div class="wrap">
+  '/pages/quiz.html': { title: 'Quiz — Ramdani Law Firm', desc: 'Quiz — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section academy-hero"><div class="wrap">
+      <nav class="academy-breadcrumb" aria-label="Breadcrumb">
+        <ol>
+          <li><a href="/" data-i18n="nav_home">Home</a></li>
+          <li><a href="/pages/quizzes.html" data-i18n="nav_quizzes">LAT / GAT</a></li>
+          <li><span id="quizCrumb" aria-current="page"></span></li>
+        </ol>
+      </nav>
+      <p class="kicker" data-i18n="academy_kicker">Legal education</p>
       <h1 id="quizTitle">Quiz</h1>
       <p class="lead" id="quizSummary"></p>
+      <p class="note">Practice materials only. Not official LAT/GAT papers or affiliated with any testing authority.</p>
+    </div></section>
+    <section class="section academy-band"><div class="wrap">
       <form id="quizForm" class="form"></form>
       <div id="quizResult" class="card" hidden></div>
     </div></section>`, init: async function () {
 if (window.ramdaniEducation) ramdaniEducation.renderQuiz();
   } },
-  '/pages/quizzes.html': { title: 'LAT / GAT & Quizzes — Ramdani Law Firm', desc: 'LAT / GAT & Quizzes — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section"><div class="wrap">
-      <h1 data-i18n="quizzes_title"></h1>
+  '/pages/quizzes.html': { title: 'LAT / GAT & Quizzes — Ramdani Law Firm', desc: 'LAT / GAT & Quizzes — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section academy-hero"><div class="wrap">
+      <p class="kicker" data-i18n="academy_kicker">Legal education</p>
+      <h1 data-i18n="quizzes_title">LAT / GAT practice</h1>
       <p class="lead" data-i18n="quizzes_lead"></p>
       <p class="note">Practice materials only. Not official LAT/GAT papers or affiliated with any testing authority.</p>
-      <div id="filters" class="hero-actions" style="margin-bottom:1rem"></div>
-      <div id="list" class="grid"></div>
+      <nav class="academy-nav" id="academyNav" aria-label="Legal education sections"></nav>
+    </div></section>
+    <section class="section academy-band"><div class="wrap">
+      <div id="list" class="grid academy-grid"></div>
     </div></section>`, init: async function () {
+if (window.ramdaniUi) ramdaniUi.academyNav('/pages/quizzes.html');
 if (window.ramdaniEducation) ramdaniEducation.renderQuizzes();
   } },
   '/pages/resources.html': { title: 'Resources — Ramdani Law Firm', desc: 'Resources — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section"><div class="wrap">
@@ -4890,6 +5083,9 @@ window.ramdaniSite = Object.freeze({
       quizzes_title: 'LAT / GAT practice',
       quizzes_empty: 'Practice quizzes will appear here once published.',
       quizzes_lead: 'Optional practice only. Not official exam papers and not affiliated with any testing authority.',
+      academy_kicker: 'Legal education',
+      academy_lessons_title: 'Your enrollment & lessons',
+      academy_type_video: 'Video',
       modules_title: 'Study modules',
       modules_empty: 'Module outlines will appear here once published.',
       modules_lead: 'A public study map for LLB, LAT/GAT practice, Pakistan laws, and legal skills. Outlines only — not a university, not legal advice, and not official exam papers.',
@@ -5014,6 +5210,9 @@ window.ramdaniSite = Object.freeze({
       quizzes_title: 'LAT / GAT مشق',
       quizzes_empty: 'مشق کے کوئز شائع ہونے کے بعد یہاں نظر آئیں گے۔',
       quizzes_lead: 'صرف مشق۔ سرکاری پرچے نہیں۔',
+      academy_kicker: 'قانونی تعلیم',
+      academy_lessons_title: 'آپ کا اندراج اور اسباق',
+      academy_type_video: 'ویڈیو',
       modules_title: 'مطالعہ ماڈیولز',
       modules_empty: 'ماڈیول آؤٹ لائنز شائع ہونے کے بعد یہاں نظر آئیں گے۔',
       modules_lead: 'ایل ایل بی، LAT/GAT مشق، پاکستانی قوانین، اور قانونی مہارتوں کا عوامی نقشہ۔ صرف آؤٹ لائن — یونیورسٹی نہیں، قانونی مشورہ نہیں، سرکاری پرچے نہیں۔',
@@ -5174,6 +5373,25 @@ window.ramdaniUi = {
   },
   empty: function (key) {
     return '<p class="empty" data-i18n="' + this.escape(key) + '">' + this.escape(window.ramdaniT ? ramdaniT(key) : 'Nothing published yet.') + '</p>';
+  },
+  // Academy section nav - links the existing Legal Education routes.
+  // Labels reuse the existing nav_* translation keys.
+  academyNav: function (currentPath) {
+    var el = document.getElementById('academyNav');
+    if (!el) return;
+    var items = [
+      ['/pages/modules.html', 'nav_modules', 'Study modules'],
+      ['/pages/learning.html', 'nav_learning', 'Lectures'],
+      ['/pages/quizzes.html', 'nav_quizzes', 'LAT / GAT'],
+      ['/pages/certificates.html', 'nav_certificates', 'Certificates'],
+      ['/pages/internships.html', 'nav_internships', 'Internships']
+    ];
+    el.innerHTML = items.map(function (item) {
+      var label = (window.ramdaniT ? ramdaniT(item[1]) : '') || item[2];
+      if (label === item[1]) label = item[2];
+      return '<a href="' + item[0] + '"' + (item[0] === currentPath ? ' aria-current="page"' : '') +
+        ' data-i18n="' + item[1] + '">' + window.ramdaniUi.escape(label) + '</a>';
+    }).join('');
   },
   // Legal Services card — presentation only. Fields come from the existing
   // 'services' rows returned by ramdaniApi.listPublished(); nothing is invented
@@ -6575,6 +6793,19 @@ window.ramdaniAuth = {
   function empty(el, key) {
     if (el) el.innerHTML = '<p class="empty">' + escape(window.ramdaniT ? ramdaniT(key) : 'Nothing published yet.') + '</p>';
   }
+  // Resolve a translated label at render time; the markup also carries
+  // data-i18n so a later language switch updates it.
+  function label(key, fallback) {
+    var value = window.ramdaniT ? ramdaniT(key) : '';
+    return (!value || value === key) ? fallback : value;
+  }
+  function chips(values) {
+    var list = (values || []).filter(Boolean);
+    if (!list.length) return '';
+    return '<p class="academy-chips">' + list.map(function (v) {
+      return '<span class="academy-chip">' + escape(v) + '</span>';
+    }).join('') + '</p>';
+  }
 
   async function listPublished(table, extra) {
     if (!window.sb) return [];
@@ -6609,7 +6840,7 @@ window.ramdaniAuth = {
       var deadline = r.deadline ? ('Deadline: ' + formatDate(r.deadline)) : 'Deadline: rolling, if published';
       var stipend = r.stipend_note || 'Stipend: not stated';
       var body = r.body ? '<p>' + escape(r.body).slice(0, 420) + '</p>' : '';
-      return '<article class="internship-card">' +
+      return '<article class="internship-card academy-card">' +
         '<div class="internship-head"><div><h3>' + escape(r.title) + '</h3>' +
         '<div class="internship-meta">' + chips + '</div></div></div>' +
         '<p>' + escape(r.summary || '') + '</p>' + body +
@@ -6697,9 +6928,11 @@ window.ramdaniAuth = {
     if (!el) return;
     if (!rows.length) return empty(el, 'quizzes_empty');
     el.innerHTML = rows.map(function (r) {
-      return '<article class="card"><p class="kicker">' + escape((r.category || 'practice').toUpperCase()) +
-        '</p><h3>' + escape(r.title) + '</h3><p>' + escape(r.summary || '') +
-        '</p><a class="btn btn-primary" href="' + withPreview('/pages/quiz.html?slug=' + encodeURIComponent(r.slug), qs('preview') === '1') + '">Start</a></article>';
+      return '<article class="card academy-card">' +
+        chips([(r.category || 'practice').toUpperCase()]) +
+        '<h3>' + escape(r.title) + '</h3>' +
+        '<p class="academy-summary">' + escape(r.summary || '') + '</p>' +
+        '<a class="btn btn-primary" href="' + withPreview('/pages/quiz.html?slug=' + encodeURIComponent(r.slug), qs('preview') === '1') + '">Start</a></article>';
     }).join('');
   }
 
@@ -6712,11 +6945,14 @@ window.ramdaniAuth = {
     if (!preview) quizQ = quizQ.eq('status', 'published');
     var quizRes = await quizQ.maybeSingle();
     var quiz = quizRes.data;
+    var quizCrumb = document.getElementById('quizCrumb');
     if (!quiz) {
       document.getElementById('quizTitle').textContent = 'Quiz not available';
+      if (quizCrumb) quizCrumb.textContent = 'Quiz not available';
       return;
     }
     document.getElementById('quizTitle').textContent = quiz.title;
+    if (quizCrumb) quizCrumb.textContent = quiz.title;
     document.getElementById('quizSummary').textContent = quiz.summary || '';
     if (window.ramdaniSeo) {
       var qTitle = quiz.title + ' — Ramdani Law Firm';
@@ -7062,8 +7298,12 @@ window.ramdaniAuth = {
         return '<button type="button" class="btn" data-cat="' + c + '">' + (c === 'all' ? 'All' : catLabel(c)) + '</button>';
       }).join('');
       filters.querySelectorAll('[data-cat]').forEach(function (btn) {
+        btn.setAttribute('aria-pressed', String(btn.getAttribute('data-cat') === 'all'));
         btn.addEventListener('click', function () {
           var cat = btn.getAttribute('data-cat');
+          filters.querySelectorAll('[data-cat]').forEach(function (other) {
+            other.setAttribute('aria-pressed', String(other === btn));
+          });
           var shown = cat === 'all' ? rows : rows.filter(function (r) { return r.category === cat; });
           paintModules(el, shown);
         });
@@ -7076,9 +7316,11 @@ window.ramdaniAuth = {
     if (!el) return;
     if (!rows.length) return empty(el, 'modules_empty');
     el.innerHTML = rows.map(function (r) {
-      var meta = [r.code, catLabel(r.category), r.semester ? ('Semester ' + r.semester) : ''].filter(Boolean).join(' · ');
-      return '<article class="card"><p class="kicker">' + escape(meta) + '</p><h3>' + escape(r.title) +
-        '</h3><p>' + escape(r.summary || '') + '</p><a class="btn btn-primary" href="' + withPreview('/pages/module.html?slug=' +
+      return '<article class="card academy-card">' +
+        chips([r.code, catLabel(r.category), r.semester ? ('Semester ' + r.semester) : '']) +
+        '<h3>' + escape(r.title) + '</h3>' +
+        '<p class="academy-summary">' + escape(r.summary || '') + '</p>' +
+        '<a class="btn btn-primary" href="' + withPreview('/pages/module.html?slug=' +
         encodeURIComponent(r.slug), qs('preview') === '1') + '">Open outline</a></article>';
     }).join('');
   }
@@ -7099,12 +7341,21 @@ window.ramdaniAuth = {
     if (!preview) modQ = modQ.eq('status', 'published');
     var res = await modQ.maybeSingle();
     var m = res.data;
+    var crumb = document.getElementById('modCrumb');
     if (!m) {
       document.getElementById('modTitle').textContent = 'Module not available';
+      if (crumb) crumb.textContent = 'Module not available';
       return;
     }
     document.getElementById('modTitle').textContent = m.title;
+    if (crumb) crumb.textContent = m.title;
     document.getElementById('modSummary').textContent = m.summary || '';
+    var metaEl = document.getElementById('modMeta');
+    if (metaEl) {
+      metaEl.innerHTML = [m.code, catLabel(m.category), m.semester ? ('Semester ' + m.semester) : '',
+        m.credit_hours ? (m.credit_hours + ' credit hours') : '']
+        .filter(Boolean).map(function (v) { return '<span class="academy-chip">' + escape(v) + '</span>'; }).join('');
+    }
     var outcomes = listItems(m.learning_outcomes);
     var topics = listItems(m.topics);
     var readings = listItems(m.readings);
@@ -7119,7 +7370,6 @@ window.ramdaniAuth = {
     var cRes = await cQ;
     cases = cRes.data || [];
     var html = '';
-    html += '<p class="note">' + escape([m.code, catLabel(m.category), m.semester ? ('Semester ' + m.semester) : '', m.credit_hours ? (m.credit_hours + ' credit hours') : ''].filter(Boolean).join(' · ')) + '</p>';
     if (m.people && m.people.full_name) {
       html += '<p class="note">Instructor: ' + escape(m.people.full_name) + (m.people.role_title ? ' — ' + escape(m.people.role_title) : '') + '</p>';
     }
@@ -7141,19 +7391,20 @@ window.ramdaniAuth = {
     }
     html += '<h2>Practice quizzes</h2>';
     if (quizzes.length) {
-      html += quizzes.map(function (q) {
-        return '<article class="card"><h3>' + escape(q.title) + '</h3><p>' + escape(q.summary || '') +
+      html += '<div class="grid academy-grid">' + quizzes.map(function (q) {
+        return '<article class="card academy-card"><h3>' + escape(q.title) + '</h3><p class="academy-summary">' + escape(q.summary || '') +
           '</p><a class="btn" href="' + withPreview('/pages/quiz.html?slug=' + encodeURIComponent(q.slug), preview) + '">Start</a></article>';
-      }).join('');
+      }).join('') + '</div>';
     } else {
       html += '<p class="empty">No practice quiz is linked to this module yet.</p>';
     }
     html += '<h2>Verified case notes</h2>';
     if (cases.length) {
-      html += cases.map(function (c) {
-        return '<article class="card"><h3>' + escape(c.title) + '</h3><p class="note">' + escape([c.citation, c.court, c.year].filter(Boolean).join(' · ')) +
-          '</p><a class="btn" href="' + withPreview('/pages/case.html?slug=' + encodeURIComponent(c.slug), preview) + '">Read note</a></article>';
-      }).join('');
+      html += '<div class="grid academy-grid">' + cases.map(function (c) {
+        return '<article class="card academy-card"><h3>' + escape(c.title) + '</h3>' +
+          chips([c.citation, c.court, c.year]) +
+          '<a class="btn" href="' + withPreview('/pages/case.html?slug=' + encodeURIComponent(c.slug), preview) + '">Read note</a></article>';
+      }).join('') + '</div>';
     } else {
       html += '<p class="empty">No verified case note is linked yet. Unverified citations are not shown.</p>';
     }
@@ -7164,11 +7415,13 @@ window.ramdaniAuth = {
     certs = certRes.data || [];
     html += '<h2>Linked certificates</h2>';
     if (certs.length) {
-      html += certs.map(function (c) {
-        return '<article class="card"><p class="kicker">' + escape(catLabel(c.category)) + '</p><h3>' + escape(c.title) +
-          '</h3><p>' + escape(c.summary || '') + '</p><p class="note">Study outline only. Completing a quiz does not issue a certificate.</p>' +
+      html += '<div class="grid academy-grid">' + certs.map(function (c) {
+        return '<article class="card academy-card">' + chips([catLabel(c.category)]) +
+          '<h3>' + escape(c.title) + '</h3>' +
+          '<p class="academy-summary">' + escape(c.summary || '') + '</p>' +
+          '<p class="note">Study outline only. Completing a quiz does not issue a certificate.</p>' +
           '<a class="btn" href="/pages/certificates.html">All certificates</a></article>';
-      }).join('');
+      }).join('') + '</div>';
     } else {
       html += '<p class="empty">No certificate listing is linked to this module yet.</p>';
     }
@@ -7192,7 +7445,7 @@ window.ramdaniAuth = {
     if (!box || !window.ramdaniStudent) return;
     var session = await ramdaniStudent.session();
     if (!session) {
-      box.innerHTML = '<div class="card"><p>Sign in as a student to enroll in this course and track your progress.</p>' +
+      box.innerHTML = '<div class="card academy-card"><p>Sign in as a student to enroll in this course and track your progress.</p>' +
         '<a class="btn btn-primary" href="/portal/login">Sign in</a></div>';
       return;
     }
@@ -7211,18 +7464,18 @@ window.ramdaniAuth = {
 
     var html = '';
     if (!enr) {
-      html += '<div class="card"><p>You are not enrolled in this course yet.</p><button type="button" class="btn btn-primary" id="enrollBtn">Enroll now</button></div>';
+      html += '<div class="card academy-card"><p>You are not enrolled in this course yet.</p><button type="button" class="btn btn-primary" id="enrollBtn">Enroll now</button></div>';
     } else {
-      html += '<p class="note">Enrollment status: ' + escape(enr.status) + '</p>';
+      html += '<p class="academy-status">Enrollment status: <span class="academy-badge">' + escape(enr.status) + '</span></p>';
       if (!sections.length) {
         html += '<p class="empty">No lessons published yet for this course.</p>';
       } else {
         sections.forEach(function (sec) {
           var secLessons = lessons.filter(function (l) { return l.section_id === sec.id; });
-          html += '<h3>' + escape(sec.title) + '</h3><ul class="lesson-list">' + secLessons.map(function (l) {
+          html += '<section class="academy-section"><h3>' + escape(sec.title) + '</h3><ul class="lesson-list">' + secLessons.map(function (l) {
             var done = !!doneMap[l.id];
-            return '<li><label><input type="checkbox" data-lesson="' + l.id + '"' + (done ? ' checked' : '') + ' /> ' + escape(l.title) + '</label></li>';
-          }).join('') + '</ul>';
+            return '<li><label><input type="checkbox" data-lesson="' + l.id + '"' + (done ? ' checked' : '') + ' /><span>' + escape(l.title) + '</span></label></li>';
+          }).join('') + '</ul></section>';
         });
       }
     }
@@ -7548,10 +7801,25 @@ window.ramdaniAuth = {
     }
     el.innerHTML = rows.map(function (r) {
       var id = r.youtube_id || youtubeIdFrom(r.youtube_url);
-      return '<article class="card"><h3>' + escape(r.title) + '</h3><p>' + escape(r.summary || '') +
+      var media = id
+        ? '<span class="academy-media"><img src="https://i.ytimg.com/vi/' + encodeURIComponent(id) +
+          '/hqdefault.jpg" alt="" loading="lazy" /><span class="academy-media-play" aria-hidden="true">\u25B6</span></span>'
+        : '';
+      var typeChip = id
+        ? '<p class="academy-chips"><span class="academy-chip is-accent" data-i18n="academy_type_video">' +
+          escape(label('academy_type_video', 'Video')) + '</span></p>'
+        : '';
+      return '<article class="card academy-card">' + media + typeChip +
+        '<h3>' + escape(r.title) + '</h3><p class="academy-summary">' + escape(r.summary || '') +
         '</p><button type="button" class="btn btn-primary" data-play="' + escape(r.slug) + '"' + (id ? '' : ' disabled') + '>' +
         (id ? 'Watch' : 'No video yet') + '</button></article>';
     }).join('');
+    el.querySelectorAll('.academy-media img').forEach(function (img) {
+      img.addEventListener('error', function () {
+        var holder = img.parentNode;
+        if (holder && holder.parentNode) holder.parentNode.removeChild(holder);
+      });
+    });
     el.querySelectorAll('[data-play]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var slug = btn.getAttribute('data-play');
@@ -7569,9 +7837,9 @@ window.ramdaniAuth = {
     function paint(shown) {
       if (!shown.length) return empty(el, 'certificates_empty');
       el.innerHTML = shown.map(function (r) {
-        var href = r.module_id ? '' : '';
-        return '<article class="card"><p class="kicker">' + escape(catLabel(r.category)) + '</p><h3>' + escape(r.title) +
-          '</h3><p>' + escape(r.summary || '') + '</p>' +
+        return '<article class="card academy-card">' + chips([catLabel(r.category)]) +
+          '<h3>' + escape(r.title) + '</h3>' +
+          '<p class="academy-summary">' + escape(r.summary || '') + '</p>' +
           (r.body ? '<p class="note">' + escape(r.body).slice(0, 280) + '</p>' : '') +
           '<p class="note">Linked to a published study outline when staff set a module. Not a university degree and not automatically issued.</p></article>';
       }).join('');
@@ -7582,8 +7850,12 @@ window.ramdaniAuth = {
         return '<button type="button" class="btn" data-cat="' + c + '">' + (c === 'all' ? 'All' : catLabel(c)) + '</button>';
       }).join('');
       filters.querySelectorAll('[data-cat]').forEach(function (btn) {
+        btn.setAttribute('aria-pressed', String(btn.getAttribute('data-cat') === 'all'));
         btn.addEventListener('click', function () {
           var cat = btn.getAttribute('data-cat');
+          filters.querySelectorAll('[data-cat]').forEach(function (other) {
+            other.setAttribute('aria-pressed', String(other === btn));
+          });
           paint(cat === 'all' ? rows : rows.filter(function (r) { return r.category === cat; }));
         });
       });
