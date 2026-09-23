@@ -5033,12 +5033,28 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
       if (el.parentNode !== host) host.appendChild(el);
       el.hidden = true;
     });
-    var p = null;
-    try { p = await ramdaniAuth.profile(); } catch (e) { p = null; }
+    var p = null, profileErr = null;
+    try { p = await ramdaniAuth.profile(); } catch (e) { p = null; profileErr = e; }
     var canEnter = !!(p && ['student', 'member', 'lawyer'].indexOf(p.role) >= 0 && !(p.role === 'lawyer' && !p.is_active));
     if (isDash) {
       if (p && p.role === 'client') { window.ramdaniGo('/client/dashboard'); return; }
-      if (!canEnter) { window.ramdaniGo('/portal/login'); return; }
+      if (!canEnter) {
+        // A genuine "not signed in" (no session, no row) silently sends the
+        // user to the login form as before. But if profile() *threw*
+        // (network hiccup, transient query failure) while a session exists,
+        // that is not the same as "logged out" — bouncing silently here
+        // made a real error indistinguishable from never having logged in.
+        // Surface it and keep the login screen recoverable instead.
+        var hadSession = false;
+        try { hadSession = !!(await ramdaniAuth.session()); } catch (e2) { hadSession = false; }
+        if (profileErr && hadSession) {
+          login.hidden = false;
+          setPortalStatus('Could not load your account. Please refresh the page or try signing in again.', 'err');
+          return;
+        }
+        window.ramdaniGo('/portal/login');
+        return;
+      }
       login.hidden = true;
       if (p.role === 'student') { if (window.ramdaniStudentBoot) await window.ramdaniStudentBoot('/student/dashboard'); return; }
       if (p.role === 'member') { await bootMemberPortal('/member/dashboard'); return; }
@@ -7448,9 +7464,23 @@ window.ramdaniAuth = {
     if (path === '/student/forgot-password') return showPanel('studentForgotPanel');
 
     if (path === '/student/dashboard') {
-      var profile = null;
-      try { profile = await ramdaniAuth.requireStudent(); } catch (e) { profile = null; }
-      if (!profile) { window.ramdaniGo('/portal/login'); return; }
+      var profile = null, studentErr = null;
+      try { profile = await ramdaniAuth.requireStudent(); } catch (e) { profile = null; studentErr = e; }
+      if (!profile) {
+        // bootPortal() already confirmed role === 'student' with a session
+        // present before calling us, so landing here without a profile is
+        // an actual failure (a transient query error), not "logged out".
+        // Bouncing silently made that failure look identical to never
+        // having signed in. Surface it on the login screen instead.
+        window.ramdaniGo('/portal/login');
+        if (studentErr) {
+          setTimeout(function () {
+            var el = document.getElementById('portalLoginStatus');
+            if (el) { el.className = 'ra-status err'; el.textContent = 'Could not load your student profile. Please refresh the page or try signing in again.'; }
+          }, 0);
+        }
+        return;
+      }
       fillDashboard(profile);
       showPanel('studentDashboardPanel');
       renderLearning();
