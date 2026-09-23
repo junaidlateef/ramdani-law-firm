@@ -343,7 +343,7 @@ details.admin-nav-group > summary.admin-nav-group-title:hover { background:rgba(
 .admin-main { min-width:0; padding:0; }
 .admin-topbar { position:sticky; top:0; z-index:20; display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:1rem 1.6rem; background:color-mix(in srgb, var(--white) 94%, transparent); backdrop-filter:blur(12px); border-bottom:1px solid var(--line); }
 .admin-topbar-left { display:flex; align-items:center; gap:.8rem; min-width:0; }
-.admin-menu-btn { display:none; }
+.admin-menu-btn { display: none !important; }
 .admin-eyebrow { font-size:.7rem; text-transform:uppercase; letter-spacing:.12em; color:var(--muted); }
 .admin-page-title { font-family:var(--serif); font-size:1.65rem; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .admin-content { padding:1.5rem; max-width:1500px; margin:0 auto; width:100%; }
@@ -1514,6 +1514,48 @@ html[data-theme="dark"] .event-badge.is-open { color: var(--gold); }
   .events-grid, .insights-grid, .resources-grid { gap: 1.15rem; }
 }
 /* ===== end MODULE 8 — PUBLIC INTEGRATION ===== */
+/* ===== MODULE 9 — CONTROL CENTER (admin shell) ===== */
+.admin-nav-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(14, 44, 39, .45);
+  z-index: 25;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.admin-nav { z-index: 30; }
+.cc-pager { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; margin-top: .75rem; }
+.cc-pager .note { margin: 0; }
+.cc-seats { margin-top: 1rem; }
+.cc-seats h3 { margin: 0 0 .6rem; font-size: 1.05rem; }
+.cc-seat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 11rem), 1fr)); gap: .5rem; }
+.cc-seat { border: 1px solid var(--line); border-radius: 6px; padding: .55rem .7rem; background: var(--card); font-size: .82rem; }
+.cc-seat strong { display: block; color: var(--gold); font-size: .72rem; letter-spacing: .04em; text-transform: uppercase; }
+@media (max-width: 800px) {
+  .admin-shell .admin-nav {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: min(290px, 88vw);
+    transform: translateX(-105%);
+    transition: transform .2s ease;
+    z-index: 30;
+    box-shadow: 20px 0 50px rgba(0,0,0,.2);
+  }
+  html[dir="rtl"] .admin-shell .admin-nav {
+    inset: 0 0 0 auto;
+    transform: translateX(105%);
+    box-shadow: -20px 0 50px rgba(0,0,0,.2);
+  }
+  .admin-shell.nav-open .admin-nav { transform: translateX(0); }
+  .admin-shell.nav-open .admin-nav-overlay { display: block; }
+  .admin-menu-btn { display: inline-flex !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin-shell .admin-nav { transition: none; }
+}
+/* ===== end MODULE 9 — CONTROL CENTER ===== */
 </style>
 </head>
 <body>
@@ -1587,121 +1629,109 @@ html[data-theme="dark"] .event-badge.is-open { color: var(--gold); }
     </div>
 
     <div id="adminApp" class="admin-shell hidden">
-      <aside class="admin-nav" id="adminSidebar">
+      <aside class="admin-nav" id="adminSidebar" aria-label="Control center">
         <div class="admin-brand">
           <img src="/assets/ramdani-logo.png" alt="" />
-          <div><strong>Ramdani Law Firm</strong><small>Administration</small></div>
+          <div><strong>Ramdani Law Firm</strong><small>Control center</small></div>
         </div>
         <div class="admin-user"><div class="admin-user-label">Signed in as</div><p id="staffName"></p></div>
         <details class="admin-nav-group" open>
           <summary class="admin-nav-group-title">Dashboard</summary>
-          <button type="button" data-table="__dashboard">◈ &nbsp; Dashboard</button>
-          <button type="button" data-table="__students">♙ &nbsp; Students</button>
+          <button type="button" data-table="__dashboard">Dashboard</button>
         </details>
         <details class="admin-nav-group" open>
-          <summary class="admin-nav-group-title">Law Firm</summary>
-          <button type="button" data-table="people">People</button>
-          <button type="button" data-table="practice_areas">Practice areas</button>
-          <button type="button" data-table="services">Services</button>
-          <button type="button" data-table="matters">Representative matters</button>
-          <button type="button" data-table="articles">Insights</button>
-          <button type="button" data-table="news">News</button>
-          <button type="button" data-table="resources">Resources</button>
-          <button type="button" data-table="careers">Careers</button>
-        </details>
-        <details class="admin-nav-group" open>
-          <summary class="admin-nav-group-title">Private Legal Operations</summary>
-          <button type="button" data-table="__opsdash">Operations dashboard</button>
+          <summary class="admin-nav-group-title">People</summary>
+          <button type="button" data-table="__members">Members</button>
+          <button type="button" data-table="__students">Students</button>
+          <button type="button" data-table="__lawyerapps">Lawyers</button>
           <button type="button" data-table="__clients">Clients</button>
-          <button type="button" data-table="__legalmatters">Matters / Cases</button>
-          <button type="button" data-table="__mytasks">My tasks</button>
-          <button type="button" data-table="__legalcalendar">Calendar / dates</button>
-          <button type="button" data-table="__legaldocs">Documents</button>
-          <button type="button" data-table="__legalcomms">Communications</button>
-          <button type="button" data-table="__legalreports">Reports</button>
-          <button type="button" data-table="__legalsearch">Secure search</button>
-          <button type="button" data-table="__auditlog">Audit log</button>
+          <button type="button" data-table="__staffaccounts">Staff</button>
+          <button type="button" data-table="people">Public profiles</button>
+          <button type="button" data-table="__roles">Roles & permissions</button>
         </details>
-        <details class="admin-nav-group" open>
-          <summary class="admin-nav-group-title">Courses &amp; Programs</summary>
-          <button type="button" data-table="modules">Courses</button>
-          <button type="button" data-table="__coursebuilder">Sections &amp; lessons</button>
-          <button type="button" data-table="lectures">Lectures</button>
-        </details>
-        <details class="admin-nav-group" open>
-          <summary class="admin-nav-group-title">Assessments</summary>
-          <button type="button" data-table="quizzes">Quizzes</button>
-          <button type="button" data-table="__quizbuilder">Questions (quiz builder)</button>
-          <button type="button" data-table="__quizresults">Results</button>
-        </details>
-        <details class="admin-nav-group" open>
-          <summary class="admin-nav-group-title">Students &amp; Progress</summary>
-          <button type="button" data-table="__enrollments">Enrollments &amp; progress</button>
-          <button type="button" data-table="__studentcards">Student cards</button>
-        </details>
-        <details class="admin-nav-group" open>
-          <summary class="admin-nav-group-title">Legal Learning</summary>
-          <button type="button" data-table="books">Library</button>
-          <button type="button" data-table="cases">Case notes</button>
-          <button type="button" data-table="statutes">Statutes</button>
-          <button type="button" data-table="__edusearch">Search all content</button>
-        </details>
-        <details class="admin-nav-group" open>
-          <summary class="admin-nav-group-title">Certificates</summary>
-          <button type="button" data-table="certificates">Templates &amp; listings</button>
-          <button type="button" data-table="__certissuances">Issued certificates</button>
-          <button type="button" data-table="__docscenter">Document center</button>
-        </details>
-        <details class="admin-nav-group" open>
-          <summary class="admin-nav-group-title">Community</summary>
+        <details class="admin-nav-group">
+          <summary class="admin-nav-group-title">Organization</summary>
           <button type="button" data-table="__organizations">Organizations</button>
-          <button type="button" data-table="__memberships">Memberships</button>
           <button type="button" data-table="societies">Societies</button>
           <button type="button" data-table="chapters">Chapters</button>
           <button type="button" data-table="cabinets">Cabinets</button>
-          <button type="button" data-table="__members">Members</button>
+          <button type="button" data-table="__memberships">Memberships</button>
           <button type="button" data-table="__membercards">Member cards</button>
-          <button type="button" data-table="internships">Internships</button>
+          <button type="button" data-table="__joinrequests">Join requests</button>
         </details>
-        <details class="admin-nav-group" open>
-          <summary class="admin-nav-group-title">Communications</summary>
-          <button type="button" data-table="__inquiries">Inquiries</button>
+        <details class="admin-nav-group">
+          <summary class="admin-nav-group-title">Academy</summary>
+          <button type="button" data-table="modules">Courses / modules</button>
+          <button type="button" data-table="__coursebuilder">Sections & lessons</button>
+          <button type="button" data-table="lectures">Lectures</button>
+          <button type="button" data-table="quizzes">Quizzes</button>
+          <button type="button" data-table="__quizbuilder">Quiz builder</button>
+          <button type="button" data-table="__quizresults">Results</button>
+          <button type="button" data-table="__enrollments">Enrollments & progress</button>
+          <button type="button" data-table="__studentcards">Student cards</button>
+          <button type="button" data-table="books">Library</button>
+          <button type="button" data-table="cases">Case notes</button>
+          <button type="button" data-table="statutes">Statutes</button>
+          <button type="button" data-table="__edusearch">Search content</button>
+          <button type="button" data-table="certificates">Certificate listings</button>
+        </details>
+        <details class="admin-nav-group">
+          <summary class="admin-nav-group-title">Events & Programs</summary>
           <button type="button" data-table="__events">Events</button>
-          <button type="button" data-table="__eventregs">Registrations &amp; attendance</button>
-          <button type="button" data-table="__eventguests">Event guests</button>
+          <button type="button" data-table="__eventregs">Registrations</button>
+          <button type="button" data-table="__eventguests">Guests</button>
+          <button type="button" data-table="internships">Internships</button>
           <button type="button" data-table="__applications">Internship applications</button>
-          <button type="button" data-table="__joinrequests">Society / chapter requests</button>
-          <button type="button" data-table="social_posts">Social posts</button>
         </details>
-        <details class="admin-nav-group" open>
-          <summary class="admin-nav-group-title">Website</summary>
+        <details class="admin-nav-group">
+          <summary class="admin-nav-group-title">Legal Practice</summary>
+          <button type="button" data-table="__opsdash">Operations dashboard</button>
+          <button type="button" data-table="__legalmatters">Matters / Cases</button>
+          <button type="button" data-table="__mytasks">Tasks</button>
+          <button type="button" data-table="__legalcalendar">Calendar / dates</button>
+          <button type="button" data-table="__legaldocs">Case documents</button>
+          <button type="button" data-table="__legalcomms">Communications</button>
+          <button type="button" data-table="__legalreports">Reports</button>
+          <button type="button" data-table="__legalsearch">Secure search</button>
+        </details>
+        <details class="admin-nav-group">
+          <summary class="admin-nav-group-title">Publishing</summary>
+          <button type="button" data-table="articles">Articles / Insights</button>
+          <button type="button" data-table="news">News</button>
+          <button type="button" data-table="resources">Resources / PDF library</button>
+          <button type="button" data-table="__medialibrary">Gallery / Media</button>
+          <button type="button" data-table="practice_areas">Practice areas</button>
+          <button type="button" data-table="services">Services</button>
+          <button type="button" data-table="matters">Representative matters</button>
+          <button type="button" data-table="careers">Careers</button>
+          <button type="button" data-table="social_posts">Social posts</button>
           <button type="button" data-table="__homepagesections">Homepage sections</button>
-          <button type="button" data-table="__authmedia">Authentication page · Side media</button>
+        </details>
+        <details class="admin-nav-group">
+          <summary class="admin-nav-group-title">Documents</summary>
+          <button type="button" data-table="__docscenter">Issued documents</button>
+          <button type="button" data-table="__certtemplates">Templates</button>
+          <button type="button" data-table="__certissuances">Verification issuances</button>
+        </details>
+        <details class="admin-nav-group">
+          <summary class="admin-nav-group-title">System</summary>
+          <button type="button" data-table="__notifications">Notifications</button>
+          <button type="button" data-table="__auditlog">Audit logs</button>
+          <button type="button" data-table="__admins">Admin accounts</button>
+          <button type="button" data-table="__inquiries">Inquiries</button>
+          <button type="button" data-table="__brandinglogo">Branding</button>
+          <button type="button" data-table="__brandingtype">Typography</button>
+          <button type="button" data-table="__contactinfo">Contact info</button>
           <button type="button" data-table="__navigation">Navigation</button>
           <button type="button" data-table="__seosettings">SEO settings</button>
           <button type="button" data-table="__seooverrides">SEO overrides</button>
           <button type="button" data-table="__disclaimers">Disclaimers</button>
-        </details>
-        <details class="admin-nav-group" open>
-          <summary class="admin-nav-group-title">Branding</summary>
-          <button type="button" data-table="__brandinglogo">Branding</button>
-          <button type="button" data-table="__brandingtype">Typography</button>
-          <button type="button" data-table="__contactinfo">Contact info</button>
-          <button type="button" data-table="__certtemplates">Certificate templates</button>
-          <button type="button" data-table="__medialibrary">Media library</button>
-        </details>
-        <details class="admin-nav-group" open>
-          <summary class="admin-nav-group-title">System</summary>
-          <button type="button" data-table="__admins">Admin accounts</button>
-          <button type="button" data-table="__staffaccounts">Staff &amp; portal accounts</button>
-          <button type="button" data-table="__lawyerapps">Lawyer applications</button>
+          <button type="button" data-table="__authmedia">Auth page media</button>
           <button type="button" data-table="__systemsettings">System settings</button>
-          <button type="button" data-table="__notifications">Notifications</button>
-          <button type="button" data-table="__auditlog">Audit log</button>
         </details>
         <button type="button" class="btn signout" id="signOutBtn">Sign out</button>
       </aside>
-
+      <div class="admin-nav-overlay" id="adminNavOverlay"></div>
       <section class="admin-main">
         <header class="admin-topbar">
           <div class="admin-topbar-left"><button type="button" class="btn admin-menu-btn" id="adminMenuBtn" aria-label="Open menu">☰</button><div><div class="admin-eyebrow">Ramdani Law Firm</div><h1 id="tableTitle" class="admin-page-title">Dashboard</h1></div></div>
@@ -1712,10 +1742,20 @@ html[data-theme="dark"] .event-badge.is-open { color: var(--gold); }
             <div class="admin-section-head"><div><h2>Dashboard overview</h2><p class="note">Manage the firm's website, education content, students and incoming requests from one place.</p></div><button class="btn btn-primary" type="button" data-table="people">Add content</button></div>
             <div class="dashboard-grid">
               <div class="stat-card"><div class="label">Students</div><div class="value" id="statStudents">—</div></div>
+              <div class="stat-card"><div class="label">Members</div><div class="value" id="statMembers">—</div></div>
+              <div class="stat-card"><div class="label">Lawyers</div><div class="value" id="statLawyers">—</div></div>
+              <div class="stat-card"><div class="label">Clients</div><div class="value" id="statClients">—</div></div>
+              <div class="stat-card"><div class="label">Upcoming events</div><div class="value" id="statEvents">—</div></div>
+              <div class="stat-card"><div class="label">Published articles</div><div class="value" id="statArticles">—</div></div>
+              <div class="stat-card"><div class="label">Documents issued</div><div class="value" id="statDocs">—</div></div>
               <div class="stat-card"><div class="label">Published content</div><div class="value" id="statPublished">—</div></div>
               <div class="stat-card"><div class="label">Pending inquiries</div><div class="value" id="statInquiries">—</div></div>
               <div class="stat-card"><div class="label">Internship applications</div><div class="value" id="statApplications">—</div></div>
             </div>
+            <div class="admin-section-head"><h2>Upcoming events</h2><p class="note">Published events with a start time still ahead. Empty if none are scheduled.</p></div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Title</th><th>When</th><th>Venue</th><th>Registration</th></tr></thead><tbody id="dashUpcomingBody"><tr><td colspan="4">Loading…</td></tr></tbody></table></div>
+            <div class="admin-section-head"><h2>Pending actions</h2><p class="note">New inquiries and internship applications that still need staff review. Empty if none are waiting.</p></div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Type</th><th>From</th><th>Detail</th><th>Status</th></tr></thead><tbody id="dashPendingBody"><tr><td colspan="4">Loading…</td></tr></tbody></table></div>
             <div class="admin-section-head"><h2>Education overview</h2></div>
             <div class="dashboard-grid" id="eduStats"></div>
             <div class="admin-section-head"><h2>Education analytics</h2><p class="note">Calculated from real enrollment, completion and quiz-attempt records.</p></div>
@@ -1762,8 +1802,16 @@ html[data-theme="dark"] .event-badge.is-open { color: var(--gold); }
                 <div class="form-actions"><button class="btn btn-primary" type="submit">Create account</button><p id="createStaffNote" class="form-status"></p></div>
               </form>
             </div>
+            <div class="admin-toolbar"><input type="search" id="staffSearch" placeholder="Search name, email or role" aria-label="Search staff accounts" /></div>
             <div class="table-wrap" style="margin-top:1rem"><table class="data"><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead><tbody id="staffAccountsBody"></tbody></table></div>
             <p id="staffAccountsNote" class="form-status"></p>
+          </div>
+
+          <div id="rolesPanel" class="admin-panel" hidden>
+            <div class="admin-section-head"><div><h2>Roles & permissions</h2><p class="note"><code>profile_roles</code> is the authoritative administrative grant. <code>profiles.role</code> is a domain/legacy field and is shown for compatibility only. This view does not write roles.</p></div></div>
+            <div class="admin-toolbar"><button type="button" class="btn" id="rolesRefreshBtn">Refresh</button></div>
+            <p id="rolesNote" class="form-status" role="status"></p>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Name</th><th>Email</th><th>Domain role</th><th>Active</th><th>Administrative grants</th></tr></thead><tbody id="rolesBody"></tbody></table></div>
           </div>
 
           <div id="adminsPanel" class="admin-panel" hidden>
@@ -1831,8 +1879,28 @@ html[data-theme="dark"] .event-badge.is-open { color: var(--gold); }
               <div class="form-actions"><button class="btn btn-primary" id="saveBtn" type="submit">Save</button><button class="btn" id="cancelEditBtn" type="button" hidden>Cancel edit</button><button class="btn" id="previewContentBtn" type="button" hidden>Preview</button><p id="saveNote" class="form-status"></p></div>
             </form>
             <div style="height:1rem"></div>
-            <div class="admin-toolbar"><input id="contentSearch" type="search" placeholder="Search current records" aria-label="Search current records" /></div>
+            <div class="admin-toolbar">
+              <input id="contentSearch" type="search" placeholder="Search current records" aria-label="Search current records" />
+              <select id="contentStatusFilter" aria-label="Filter by status">
+                <option value="">All statuses</option>
+                <option value="published">Published</option>
+                <option value="draft">Draft</option>
+                <option value="archived">Archived</option>
+              </select>
+              <button type="button" class="btn" id="contentRefreshBtn">Refresh</button>
+            </div>
+            <p id="contentTableNote" class="note" role="status" aria-live="polite"></p>
             <div class="table-wrap"><table class="data"><thead id="dataHead"></thead><tbody id="dataBody"></tbody></table></div>
+            <div class="cc-pager" id="contentPager" hidden>
+              <button type="button" class="btn btn-sm" id="contentPrev">Previous</button>
+              <p class="note" id="contentPageLabel"></p>
+              <button type="button" class="btn btn-sm" id="contentNext">Next</button>
+            </div>
+            <div id="cabinetSeatsBox" class="cc-seats" hidden>
+              <h3>Cabinet seats</h3>
+              <p class="note">Existing 10-seat structure from <code>cabinet_seats</code>. Labels come from published seat records — empty seats stay numbered 1–10.</p>
+              <div id="cabinetSeatsGrid" class="cc-seat-grid"></div>
+            </div>
           </div>
 
           <div id="inquiriesPanel" class="admin-panel" hidden><div class="admin-section-head"><div><h2>Inquiries</h2><p class="note">Workflow: New → Reviewing → Contacted → In progress → Closed → Archived. Internal notes never appear publicly.</p></div></div><div class="table-wrap"><table class="data"><thead><tr><th>Kind</th><th>Type</th><th>Name</th><th>Email</th><th>Subject</th><th>Assigned</th><th>Status</th><th>Internal notes</th></tr></thead><tbody id="inqBody"></tbody></table></div></div>
@@ -2689,13 +2757,13 @@ html[data-theme="dark"] .event-badge.is-open { color: var(--gold); }
             <h3>Member card</h3>
             <div id="mpCard" class="table-wrap" style="padding:1rem"></div>
             <h3>Documents</h3>
-            <div id="mpDocuments" class="table-wrap" style="padding:1rem"><p class="note">Will populate once Module 7 (Member Documents) is built.</p></div>
+            <div id="mpDocuments" class="table-wrap" style="padding:1rem"><p class="note">Loading…</p></div>
             <h3>Events</h3>
-            <div id="mpEvents" class="table-wrap" style="padding:1rem"><p class="note">Will populate once Module 8 (Events / Attendance) is built.</p></div>
+            <div id="mpEvents" class="table-wrap" style="padding:1rem"><p class="note">Loading…</p></div>
             <h3>Certificates</h3>
-            <div id="mpCertificates" class="table-wrap" style="padding:1rem"><p class="note">Will populate once Module 9 (Certificates) is built.</p></div>
+            <div id="mpCertificates" class="table-wrap" style="padding:1rem"><p class="note">Loading…</p></div>
             <h3>Notifications</h3>
-            <div id="mpNotifications" class="table-wrap" style="padding:1rem"><p class="note">Will populate once Module 16 (Notifications) is built.</p></div>
+            <div id="mpNotifications" class="table-wrap" style="padding:1rem"><p class="note">Loading…</p></div>
           </div>
 
           <div id="memberCardsPanel" class="admin-panel" hidden>
@@ -8850,6 +8918,40 @@ window.ramdaniAuth = {
 <!-- APPLICATION LOGIC: js/admin.js -->
 <script>
 (function () {
+  (function bindAdminNav() {
+    var menuBtn = document.getElementById('adminMenuBtn');
+    var overlay = document.getElementById('adminNavOverlay');
+    function closeAdminNav() {
+      var app = document.getElementById('adminApp');
+      if (app) app.classList.remove('nav-open');
+      if (menuBtn) {
+        menuBtn.setAttribute('aria-expanded', 'false');
+        if (menuBtn.offsetParent) menuBtn.focus();
+      }
+    }
+    function openAdminNav() {
+      var app = document.getElementById('adminApp');
+      if (app) app.classList.add('nav-open');
+      if (menuBtn) menuBtn.setAttribute('aria-expanded', 'true');
+      var first = document.querySelector('#adminSidebar button[data-table]');
+      if (first) first.focus();
+    }
+    if (menuBtn) {
+      menuBtn.setAttribute('aria-expanded', 'false');
+      menuBtn.setAttribute('aria-controls', 'adminSidebar');
+      menuBtn.addEventListener('click', function () {
+        var app = document.getElementById('adminApp');
+        if (app && app.classList.contains('nav-open')) closeAdminNav();
+        else openAdminNav();
+      });
+    }
+    if (overlay) overlay.addEventListener('click', closeAdminNav);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeAdminNav();
+    });
+    window.ramdaniCloseAdminNav = closeAdminNav;
+  })();
+
   var TABLES = [
     { id: 'people', label: 'People', fields: ['full_name', 'slug', 'role_title', 'short_bio', 'long_bio', 'photo_url', 'education', 'qualifications', 'languages', 'sort_order', 'status'] },
     { id: 'practice_areas', label: 'Practice areas', fields: ['title', 'slug', 'summary', 'body', 'sort_order', 'status'] },
@@ -8923,6 +9025,7 @@ window.ramdaniAuth = {
     '__students': ['student_manager'],
     '__admins': [],
     '__staffaccounts': [],
+    '__roles': [],
     '__lawyerapps': [],
     'people': ['content_manager'], 'practice_areas': ['content_manager'], 'services': ['content_manager'],
     'matters': ['content_manager'], 'articles': ['content_manager'], 'news': ['content_manager'],
@@ -9030,11 +9133,6 @@ window.ramdaniAuth = {
       });
     });
 
-    var menuBtn = document.getElementById('adminMenuBtn');
-    if (menuBtn) menuBtn.addEventListener('click', function () {
-      document.getElementById('adminApp').classList.toggle('nav-open');
-    });
-
     document.getElementById('studentSearch').addEventListener('input', function () {
       renderStudentRows(allStudents, this.value.trim().toLowerCase());
     });
@@ -9125,7 +9223,22 @@ window.ramdaniAuth = {
       loadAdmins();
     });
 
-    document.getElementById('contentSearch').addEventListener('input', renderContentRows);
+    document.getElementById('contentSearch').addEventListener('input', function () { contentPage = 1; renderContentRows(); });
+    var stFilter = document.getElementById('contentStatusFilter');
+    if (stFilter) stFilter.addEventListener('change', function () { contentPage = 1; renderContentRows(); });
+    var refreshBtn = document.getElementById('contentRefreshBtn');
+    if (refreshBtn) refreshBtn.addEventListener('click', function () {
+      var name = document.getElementById('createForm').dataset.table;
+      if (name) loadTable(name);
+    });
+    var prev = document.getElementById('contentPrev');
+    var next = document.getElementById('contentNext');
+    if (prev) prev.addEventListener('click', function () { contentPage -= 1; renderContentRows(); });
+    if (next) next.addEventListener('click', function () { contentPage += 1; renderContentRows(); });
+    var staffSearch = document.getElementById('staffSearch');
+    if (staffSearch) staffSearch.addEventListener('input', function () { paintStaffAccounts(this.value); });
+    var rolesRefresh = document.getElementById('rolesRefreshBtn');
+    if (rolesRefresh) rolesRefresh.addEventListener('click', loadRolesView);
     document.getElementById('cancelEditBtn').addEventListener('click', resetEditor);
     document.getElementById('previewContentBtn').addEventListener('click', function(){
       var form=document.getElementById('createForm');
@@ -9318,10 +9431,80 @@ window.ramdaniAuth = {
     var res = await sb.from('profiles').select('id, full_name, email, role, is_active')
       .not('role', 'in', '(student,admin)').order('created_at', { ascending: false });
     if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; return; }
-    var rows = res.data || [];
+    allStaffAccounts = res.data || [];
+    var qEl = document.getElementById('staffSearch');
+    paintStaffAccounts(qEl ? qEl.value : '');
+  }
+
+  var allStaffAccounts = [];
+  function paintStaffAccounts(filter) {
+    var body = document.getElementById('staffAccountsBody');
+    if (!body) return;
+    var q = (filter || '').trim().toLowerCase();
+    var rows = !q ? allStaffAccounts : allStaffAccounts.filter(function (r) {
+      return [r.full_name, r.email, r.role, STAFF_ROLE_LABELS[r.role]].join(' ').toLowerCase().indexOf(q) !== -1;
+    });
     body.innerHTML = rows.map(function (r) {
       return '<tr><td>' + escapeHtml(r.full_name) + '</td><td>' + escapeHtml(r.email) + '</td><td>' + escapeHtml(STAFF_ROLE_LABELS[r.role] || r.role) + '</td><td>' + (r.is_active ? 'Active' : 'Inactive') + '</td><td><button type="button" class="btn" data-staff-toggle="' + escapeHtml(r.id) + '" data-active="' + (r.is_active ? '1' : '0') + '">' + (r.is_active ? 'Deactivate' : 'Activate') + '</button></td></tr>';
     }).join('') || '<tr><td colspan="5">No staff or portal accounts yet.</td></tr>';
+  }
+
+  async function loadRolesView() {
+    var body = document.getElementById('rolesBody');
+    var note = document.getElementById('rolesNote');
+    if (!body) return;
+    if (note) { note.className = 'form-status'; note.textContent = 'Loading…'; }
+    body.innerHTML = '<tr><td colspan="5">Loading…</td></tr>';
+    var res = await sb.from('profiles').select('id, full_name, email, role, is_active').not('role', 'in', '(student)').order('created_at', { ascending: false }).limit(200);
+    if (res.error) {
+      if (note) { note.className = 'form-status err'; note.textContent = 'Unable to load accounts.'; }
+      body.innerHTML = '<tr><td colspan="5">Unable to load accounts.</td></tr>';
+      return;
+    }
+    var rows = res.data || [];
+    var grants = {};
+    var ids = rows.map(function (r) { return r.id; });
+    if (ids.length) {
+      var pr = await sb.from('profile_roles').select('profile_id, role, revoked_at').in('profile_id', ids);
+      if (pr.error) {
+        if (note) { note.className = 'form-status'; note.textContent = 'Administrative grants could not be listed for every row (RLS). Domain roles below still come from profiles.role.'; }
+      } else {
+        (pr.data || []).forEach(function (g) {
+          if (g.revoked_at) return;
+          (grants[g.profile_id] = grants[g.profile_id] || []).push(g.role);
+        });
+        if (note) { note.className = 'form-status'; note.textContent = ''; }
+      }
+    } else if (note) note.textContent = '';
+    body.innerHTML = rows.length ? rows.map(function (r) {
+      var g = grants[r.id] || [];
+      return '<tr><td>' + escapeHtml(r.full_name) + '</td><td>' + escapeHtml(r.email) + '</td><td>' + escapeHtml(STAFF_ROLE_LABELS[r.role] || r.role || '') + '</td><td>' + (r.is_active ? 'Active' : 'Inactive') + '</td><td>' + escapeHtml(g.length ? g.join(', ') : '—') + '</td></tr>';
+    }).join('') : '<tr><td colspan="5">No accounts found.</td></tr>';
+  }
+
+  async function loadCabinetSeatsInspector() {
+    var box = document.getElementById('cabinetSeatsBox');
+    var grid = document.getElementById('cabinetSeatsGrid');
+    if (!box || !grid) return;
+    var ids = (currentRows || []).map(function (r) { return r.id; }).filter(Boolean);
+    if (!ids.length) { grid.innerHTML = '<p class="empty">No cabinets in this list.</p>'; return; }
+    var sRes = await sb.from('cabinet_seats').select('id, cabinet_id, seat_no, label, status, note').in('cabinet_id', ids).order('seat_no');
+    if (sRes.error) { grid.innerHTML = '<p class="empty">Unable to load cabinet seats.</p>'; return; }
+    var byCab = {};
+    (sRes.data || []).forEach(function (s) { (byCab[s.cabinet_id] = byCab[s.cabinet_id] || [])[s.seat_no] = s; });
+    var DEFAULT_LABELS = ['President','Vice President','General Secretary','Joint Secretary','Media Coordinator','Event Coordinator','Legal Advisor','Content & Research','Graphic Designer','Design Maker'];
+    grid.innerHTML = (currentRows || []).map(function (cab) {
+      var limit = Math.min(10, Math.max(1, Number(cab.seat_limit) || 10));
+      var seats = byCab[cab.id] || {};
+      var chips = '';
+      for (var n = 1; n <= limit; n++) {
+        var s = seats[n];
+        var label = (s && s.label) || DEFAULT_LABELS[n - 1] || ('Seat ' + n);
+        var st = (s && s.status) || 'open';
+        chips += '<div class="cc-seat"><strong>' + n + ' · ' + escapeHtml(st) + '</strong>' + escapeHtml(label) + (s && s.note ? '<span class="note"> — ' + escapeHtml(s.note) + '</span>' : '') + '</div>';
+      }
+      return '<div class="admin-card" style="margin-bottom:.75rem"><h3 style="margin-top:0">' + escapeHtml(cab.title || 'Cabinet') + '</h3><div class="cc-seat-grid">' + chips + '</div></div>';
+    }).join('');
   }
 
   async function loadAdmins() {
@@ -12876,6 +13059,52 @@ window.ramdaniAuth = {
     $id('mpCard').innerHTML = cards.length ? cards.map(function (c) {
       return '<p>' + escapeHtml(c.card_number || '(pending)') + ' — <span class="status-badge status-' + escapeHtml(c.status) + '">' + escapeHtml(c.status) + '</span></p>';
     }).join('') : '<p class="note">No card generated yet — use the Member cards panel (requires an approved/active membership).</p>';
+
+    var docsEl = $id('mpDocuments');
+    if (docsEl) {
+      var docs = await sb.from('issued_documents').select('document_number, category, issued_at, status').eq('member_id', memberId).eq('status', 'issued').order('issued_at', { ascending: false }).limit(20);
+      if (docs.error) docsEl.innerHTML = '<p class="note">Unable to load issued documents.</p>';
+      else docsEl.innerHTML = (docs.data || []).length ? docs.data.map(function (d) {
+        return '<p>' + escapeHtml(d.category || 'Document') + (d.document_number ? ' — ' + escapeHtml(d.document_number) : '') + (d.issued_at ? ' · ' + escapeHtml(String(d.issued_at).slice(0, 10)) : '') + '</p>';
+      }).join('') : '<p class="note">No issued documents for this member.</p>';
+    }
+    var evEl = $id('mpEvents');
+    if (evEl) {
+      if (!m.profile_id) evEl.innerHTML = '<p class="note">No portal profile is linked, so event registrations cannot be listed.</p>';
+      else {
+        var regs = await sb.from('event_registrations').select('status, created_at, events(title, starts_at)').eq('profile_id', m.profile_id).order('created_at', { ascending: false }).limit(20);
+        if (regs.error) evEl.innerHTML = '<p class="note">Unable to load event registrations.</p>';
+        else evEl.innerHTML = (regs.data || []).length ? regs.data.map(function (r) {
+          var ev = r.events || {};
+          var when = (window.ramdaniUi && ramdaniUi.formatWhen) ? ramdaniUi.formatWhen(ev.starts_at) : (ev.starts_at || '');
+          return '<p>' + escapeHtml(ev.title || 'Event') + ' — ' + escapeHtml(r.status || '') + (when ? ' · ' + escapeHtml(when) : '') + '</p>';
+        }).join('') : '<p class="note">No event registrations for this member.</p>';
+      }
+    }
+    var certEl = $id('mpCertificates');
+    if (certEl) {
+      var certs;
+      if (m.profile_id) {
+        certs = await sb.from('certificate_issuances').select('certificate_number, issue_date, status, verification_code').or('profile_id.eq.' + m.profile_id + ',student_id.eq.' + m.profile_id).eq('status', 'issued').order('created_at', { ascending: false }).limit(20);
+      } else {
+        certs = { data: [], error: null };
+      }
+      if (certs.error) certEl.innerHTML = '<p class="note">Unable to load certificates.</p>';
+      else certEl.innerHTML = (certs.data || []).length ? certs.data.map(function (c) {
+        return '<p>' + escapeHtml(c.certificate_number || 'Certificate') + (c.issue_date ? ' · ' + escapeHtml(c.issue_date) : '') + (c.verification_code ? ' · verify ' + escapeHtml(c.verification_code) : '') + '</p>';
+      }).join('') : '<p class="note">No certificates issued to this member.</p>';
+    }
+    var nEl = $id('mpNotifications');
+    if (nEl) {
+      if (!m.profile_id) nEl.innerHTML = '<p class="note">No portal profile is linked, so notifications cannot be listed.</p>';
+      else {
+        var notes = await sb.from('notifications').select('title, message, created_at, read_at').eq('user_id', m.profile_id).order('created_at', { ascending: false }).limit(15);
+        if (notes.error) nEl.innerHTML = '<p class="note">Unable to load notifications.</p>';
+        else nEl.innerHTML = (notes.data || []).length ? notes.data.map(function (n) {
+          return '<p><strong>' + escapeHtml(n.title || 'Notice') + '</strong> — ' + escapeHtml(n.read_at ? 'Read' : 'Unread') + (n.message ? '<br><span class="note">' + escapeHtml(n.message) + '</span>' : '') + '</p>';
+        }).join('') : '<p class="note">No notifications for this member.</p>';
+      }
+    }
   }
 
   function renderMembers() {
@@ -13615,15 +13844,17 @@ window.ramdaniAuth = {
   }
 
   function showAdminView(view) {
-    var panels = ['dashboardPanel','studentsPanel','adminsPanel','staffAccountsPanel','lawyerAppsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','brandingLogoPanel','brandingTypePanel','contactInfoPanel','seoSettingsPanel','systemSettingsPanel','disclaimersPanel','homepageSectionsPanel','authMediaPanel','navigationPanel','certTemplatesPanel','mediaLibraryPanel','certIssuancesPanel','courseBuilderPanel','quizBuilderPanel','quizResultsPanel','eduSearchPanel','enrollmentsPanel','seoOverridesPanel','notificationsPanel','auditLogPanel','opsDashPanel','clientsPanel','legalMattersPanel','myTasksPanel','legalCalendarPanel','legalDocsPanel','legalCommsPanel','legalReportsPanel','legalSearchPanel','organizationsPanel','membershipsPanel','membersPanel','memberProfilePanel','memberCardsPanel','studentCardsPanel','eventsPanel','eventRegsPanel','eventGuestsPanel','docsCenterPanel'];
+    var panels = ['dashboardPanel','studentsPanel','adminsPanel','staffAccountsPanel','rolesPanel','lawyerAppsPanel','contentPanel','inquiriesPanel','applicationsPanel','joinrequestsPanel','brandingLogoPanel','brandingTypePanel','contactInfoPanel','seoSettingsPanel','systemSettingsPanel','disclaimersPanel','homepageSectionsPanel','authMediaPanel','navigationPanel','certTemplatesPanel','mediaLibraryPanel','certIssuancesPanel','courseBuilderPanel','quizBuilderPanel','quizResultsPanel','eduSearchPanel','enrollmentsPanel','seoOverridesPanel','notificationsPanel','auditLogPanel','opsDashPanel','clientsPanel','legalMattersPanel','myTasksPanel','legalCalendarPanel','legalDocsPanel','legalCommsPanel','legalReportsPanel','legalSearchPanel','organizationsPanel','membershipsPanel','membersPanel','memberProfilePanel','memberCardsPanel','studentCardsPanel','eventsPanel','eventRegsPanel','eventGuestsPanel','docsCenterPanel'];
     panels.forEach(function(id){ var el=document.getElementById(id); if(el){ el.hidden=true; el.classList.remove('is-active'); }});
     document.querySelectorAll('.admin-nav [data-table]').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-table')===view); });
-    document.getElementById('adminApp').classList.remove('nav-open');
+    if (window.ramdaniCloseAdminNav) window.ramdaniCloseAdminNav();
+    else document.getElementById('adminApp').classList.remove('nav-open');
     if(view==='__dashboard') { activate('dashboardPanel','Dashboard'); loadDashboard(); return; }
     if(view==='__students') { activate('studentsPanel','Students'); loadStudents(); return; }
     if(view==='__admins') { activate('adminsPanel','Admin accounts'); loadAdmins(); return; }
     if(view==='__lawyerapps') { activate('lawyerAppsPanel','Lawyer applications'); loadLawyerApps(); return; }
     if(view==='__staffaccounts') { activate('staffAccountsPanel','Staff & portal accounts'); loadStaffAccounts(); return; }
+    if(view==='__roles') { activate('rolesPanel','Roles & permissions'); loadRolesView(); return; }
     if(view==='__inquiries') { activate('inquiriesPanel','Inquiries'); loadInquiries(); return; }
     if(view==='__applications') { activate('applicationsPanel','Internship applications'); loadInternshipApps(); return; }
     if(view==='__joinrequests') { activate('joinrequestsPanel','Society / chapter requests'); loadJoinRequests(); return; }
@@ -13717,15 +13948,55 @@ window.ramdaniAuth = {
   }
 
   async function loadDashboard() {
+    var nowIso = new Date().toISOString();
     var queries = await Promise.all([
       sb.from('profiles').select('id',{count:'exact',head:true}).eq('role','student'),
       sb.from('inquiries').select('id',{count:'exact',head:true}).eq('status','new'),
-      sb.from('internship_applications').select('id',{count:'exact',head:true}).in('status',['new','reviewed','shortlisted'])
+      sb.from('internship_applications').select('id',{count:'exact',head:true}).in('status',['new','reviewed','shortlisted']),
+      sb.from('members').select('id',{count:'exact',head:true}),
+      sb.from('profiles').select('id',{count:'exact',head:true}).eq('role','lawyer'),
+      sb.from('clients').select('id',{count:'exact',head:true}),
+      sb.from('events').select('id',{count:'exact',head:true}).eq('status','published').gte('starts_at', nowIso),
+      sb.from('articles').select('id',{count:'exact',head:true}).eq('status','published'),
+      sb.from('issued_documents').select('id',{count:'exact',head:true}).eq('status','issued'),
+      sb.from('events').select('title, starts_at, venue, registration_open, status').eq('status','published').gte('starts_at', nowIso).order('starts_at', { ascending: true }).limit(8),
+      sb.from('inquiries').select('id, full_name, subject, status, created_at').eq('status','new').order('created_at', { ascending: false }).limit(8),
+      sb.from('internship_applications').select('id, full_name, email, status, created_at, internships(title)').in('status',['new','reviewed','shortlisted']).order('created_at', { ascending: false }).limit(8)
     ]);
-    var studentCount=queries[0].count, inquiryCount=queries[1].count, appCount=queries[2].count;
-    document.getElementById('statStudents').textContent=studentCount==null?'—':studentCount;
-    document.getElementById('statInquiries').textContent=inquiryCount==null?'—':inquiryCount;
-    document.getElementById('statApplications').textContent=appCount==null?'—':appCount;
+    function countOf(r) { return r && typeof r.count === 'number' ? r.count : '—'; }
+    document.getElementById('statStudents').textContent=countOf(queries[0]);
+    document.getElementById('statInquiries').textContent=countOf(queries[1]);
+    document.getElementById('statApplications').textContent=countOf(queries[2]);
+    var sm = document.getElementById('statMembers'); if (sm) sm.textContent = countOf(queries[3]);
+    var sl = document.getElementById('statLawyers'); if (sl) sl.textContent = countOf(queries[4]);
+    var sc = document.getElementById('statClients'); if (sc) sc.textContent = countOf(queries[5]);
+    var se = document.getElementById('statEvents'); if (se) se.textContent = countOf(queries[6]);
+    var sa = document.getElementById('statArticles'); if (sa) sa.textContent = countOf(queries[7]);
+    var sd = document.getElementById('statDocs'); if (sd) sd.textContent = countOf(queries[8]);
+    var upBody = document.getElementById('dashUpcomingBody');
+    if (upBody) {
+      if (queries[9] && queries[9].error) upBody.innerHTML = '<tr><td colspan="4">Unable to load upcoming events.</td></tr>';
+      else {
+        var evs = (queries[9] && queries[9].data) || [];
+        upBody.innerHTML = evs.length ? evs.map(function (ev) {
+          var when = (window.ramdaniUi && ramdaniUi.formatWhen) ? ramdaniUi.formatWhen(ev.starts_at) : (ev.starts_at || '');
+          return '<tr><td>' + ramdaniUi.escape(ev.title || '') + '</td><td>' + ramdaniUi.escape(when) + '</td><td>' + ramdaniUi.escape(ev.venue || '') + '</td><td>' + (ev.registration_open ? 'Open' : 'Closed') + '</td></tr>';
+        }).join('') : '<tr><td colspan="4">No upcoming published events.</td></tr>';
+      }
+    }
+    var pendBody = document.getElementById('dashPendingBody');
+    if (pendBody) {
+      var pendingRows = [];
+      if (queries[10] && !queries[10].error) (queries[10].data || []).forEach(function (inq) {
+        pendingRows.push('<tr><td>Inquiry</td><td>' + ramdaniUi.escape(inq.full_name || '') + '</td><td>' + ramdaniUi.escape(inq.subject || '') + '</td><td>' + ramdaniUi.escape(inq.status || '') + '</td></tr>');
+      });
+      if (queries[11] && !queries[11].error) (queries[11].data || []).forEach(function (app) {
+        var intern = app.internships || {};
+        pendingRows.push('<tr><td>Internship application</td><td>' + ramdaniUi.escape(app.full_name || app.email || '') + '</td><td>' + ramdaniUi.escape(intern.title || '') + '</td><td>' + ramdaniUi.escape(app.status || '') + '</td></tr>');
+      });
+      if ((queries[10] && queries[10].error) && (queries[11] && queries[11].error)) pendBody.innerHTML = '<tr><td colspan="4">Unable to load pending actions.</td></tr>';
+      else pendBody.innerHTML = pendingRows.length ? pendingRows.join('') : '<tr><td colspan="4">Nothing waiting for review.</td></tr>';
+    }
     var published=0;
     for(var i=0;i<TABLES.length;i++){
       var r=await sb.from(TABLES[i].id).select('id',{count:'exact',head:true}).eq('status','published');
@@ -13745,6 +14016,7 @@ window.ramdaniAuth = {
     }
     var res=await sb.from(name).select('*').order('updated_at',{ascending:false});
     currentRows=res.data||[];
+    contentPage = 1;
     renderContentRows();
     if (esEditId && esEditTable === name) {
       var row = currentRows.find(function (r) { return r.id === esEditId; });
@@ -13753,16 +14025,37 @@ window.ramdaniAuth = {
     }
   }
 
+  var contentPage = 1;
+  var CONTENT_PAGE_SIZE = 25;
   function renderContentRows(){
     var name=document.getElementById('createForm').dataset.table;
     var meta=TABLES.find(function(t){return t.id===name;}); if(!meta) return;
     var filter=(document.getElementById('contentSearch').value||'').trim().toLowerCase();
+    var stEl=document.getElementById('contentStatusFilter');
+    var st=stEl?stEl.value:'';
     var rows=!filter?currentRows:currentRows.filter(function(row){return meta.fields.some(function(f){return String(row[f]==null?'':row[f]).toLowerCase().indexOf(filter)!==-1;});});
+    if (st) rows = rows.filter(function (row) { return String(row.status || '') === st; });
+    var total = rows.length;
+    var pages = Math.max(1, Math.ceil(total / CONTENT_PAGE_SIZE));
+    if (contentPage > pages) contentPage = pages;
+    if (contentPage < 1) contentPage = 1;
+    var slice = rows.slice((contentPage - 1) * CONTENT_PAGE_SIZE, contentPage * CONTENT_PAGE_SIZE);
+    var note = document.getElementById('contentTableNote');
+    if (note) note.textContent = total ? (total + ' record' + (total === 1 ? '' : 's')) : 'No records found.';
+    var pager = document.getElementById('contentPager');
+    if (pager) {
+      pager.hidden = total <= CONTENT_PAGE_SIZE;
+      var lab = document.getElementById('contentPageLabel');
+      if (lab) lab.textContent = 'Page ' + contentPage + ' of ' + pages;
+    }
     document.getElementById('dataHead').innerHTML='<tr>'+meta.fields.map(function(f){return '<th>'+ramdaniUi.escape(f)+'</th>';}).join('')+'<th>Actions</th></tr>';
-    document.getElementById('dataBody').innerHTML=rows.map(function(row){
+    document.getElementById('dataBody').innerHTML=slice.map(function(row){
       var status=row.status?'<span class="status-badge status-'+ramdaniUi.escape(String(row.status))+'">'+ramdaniUi.escape(row.status)+'</span>':'';
       return '<tr>'+meta.fields.map(function(f){return '<td>'+((f==='status')?status:ramdaniUi.escape(row[f]))+'</td>';}).join('')+'<td><div class="table-actions"><button type="button" class="btn btn-sm" data-edit="'+ramdaniUi.escape(row.id)+'">Edit</button>'+(contentPreviewHref(name, row.slug)?'<button type="button" class="btn btn-sm" data-preview="'+ramdaniUi.escape(row.id)+'">Preview</button>':'')+'<button type="button" class="btn btn-sm" data-del="'+ramdaniUi.escape(row.id)+'">Delete</button></div></td></tr>';
     }).join('')||'<tr><td colspan="'+(meta.fields.length+1)+'">No records found.</td></tr>';
+    var seatsBox = document.getElementById('cabinetSeatsBox');
+    if (seatsBox) seatsBox.hidden = name !== 'cabinets';
+    if (name === 'cabinets') loadCabinetSeatsInspector();
     document.querySelectorAll('[data-edit]').forEach(function(btn){btn.addEventListener('click',function(){var row=currentRows.find(function(r){return String(r.id)===String(btn.getAttribute('data-edit'));});if(row)fillForm(row);});});
     document.querySelectorAll('[data-preview]').forEach(function(btn){btn.addEventListener('click',function(){var row=currentRows.find(function(r){return String(r.id)===String(btn.getAttribute('data-preview'));});if(row)openContentPreview(name, row.slug);});});
     document.querySelectorAll('[data-del]').forEach(function(btn){btn.addEventListener('click',async function(){if(!confirm('Permanently delete this record? This cannot be undone.'))return;var res=await sb.from(name).delete().eq('id',btn.getAttribute('data-del'));var note=document.getElementById('saveNote');note.className='form-status '+(res.error?'err':'ok');note.textContent=res.error?res.error.message:'Record deleted.';if(!res.error)loadTable(name);});});
