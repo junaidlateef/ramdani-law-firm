@@ -1074,14 +1074,14 @@ html[data-theme='dark'] .ramdani-auth-page{
    Scoped to the Legal Services route only. Uses the Phase 1 tokens already
    declared in css/style.css — no new :root, no global overrides, no new
    dark-mode system. */
-.services-hero, .academy-hero, .people-hero { padding-bottom: 2.25rem; }
-.services-hero .kicker, .academy-hero .kicker, .people-hero .kicker { margin-bottom: 1rem; }
-.services-hero .kicker::before, .academy-hero .kicker::before, .people-hero .kicker::before { content: ''; display: block; width: 3rem; height: 2px; background: var(--gold); margin-bottom: .9rem; }
-.services-hero h1, .academy-hero h1, .people-hero h1 { margin-bottom: 1rem; }
-.services-hero .note, .academy-hero .note, .people-hero .note { margin-top: 1.1rem; border-inline-start: 2px solid var(--gold); padding-inline-start: 1rem; font-size: .85rem; line-height: 1.75; }
+.services-hero, .academy-hero, .people-hero, .events-hero, .insights-hero, .gallery-hero, .resources-hero { padding-bottom: 2.25rem; }
+.services-hero .kicker, .academy-hero .kicker, .people-hero .kicker, .events-hero .kicker, .insights-hero .kicker, .gallery-hero .kicker, .resources-hero .kicker { margin-bottom: 1rem; }
+.services-hero .kicker::before, .academy-hero .kicker::before, .people-hero .kicker::before, .events-hero .kicker::before, .insights-hero .kicker::before, .gallery-hero .kicker::before, .resources-hero .kicker::before { content: ''; display: block; width: 3rem; height: 2px; background: var(--gold); margin-bottom: .9rem; }
+.services-hero h1, .academy-hero h1, .people-hero h1, .events-hero h1, .insights-hero h1, .gallery-hero h1, .resources-hero h1 { margin-bottom: 1rem; }
+.services-hero .note, .academy-hero .note, .people-hero .note, .events-hero .note, .insights-hero .note, .gallery-hero .note, .resources-hero .note { margin-top: 1.1rem; border-inline-start: 2px solid var(--gold); padding-inline-start: 1rem; font-size: .85rem; line-height: 1.75; }
 
-.services-list-section, .academy-band, .people-band { background: var(--ivory); border-block: 1px solid var(--line); }
-.services-list-section > .wrap > h2, .academy-band > .wrap > h2, .people-band > .wrap > h2 { margin-bottom: 1.5rem; }
+.services-list-section, .academy-band, .people-band, .events-band, .insights-band, .gallery-band, .resources-band { background: var(--ivory); border-block: 1px solid var(--line); }
+.services-list-section > .wrap > h2, .academy-band > .wrap > h2, .people-band > .wrap > h2, .events-band > .wrap > h2, .insights-band > .wrap > h2, .gallery-band > .wrap > h2, .resources-band > .wrap > h2 { margin-bottom: 1.5rem; }
 .services-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); gap: 1.5rem; align-items: stretch; }
 .services-grid .service-card {
   display: flex;
@@ -1443,6 +1443,77 @@ html[data-theme="dark"] .event-badge.is-open { color: var(--gold); }
   .people-portrait { aspect-ratio: 4 / 5; }
 }
 /* ===== end MODULE 7 — LAWYERS / TEAM ===== */
+/* ===== MODULE 8 — PUBLIC INTEGRATION (Events, Articles, Gallery, Resources) ===== */
+.events-grid, .insights-grid, .resources-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+  gap: 1.5rem;
+  align-items: stretch;
+}
+.events-grid .event-card, .insights-grid .insight-card, .resources-grid .resource-card {
+  display: flex;
+  flex-direction: column;
+  gap: .65rem;
+  height: 100%;
+  background: var(--card);
+  border-top-width: 3px;
+  border-top-color: transparent;
+}
+.insights-grid .insight-card::before,
+.resources-grid .resource-card::before { display: none; }
+.insight-card:hover, .insight-card:focus-within,
+.resource-card:hover, .resource-card:focus-within {
+  border-color: var(--gold);
+  box-shadow: var(--shadow-premium, var(--shadow));
+}
+.insight-card h3, .resource-card h3 { margin: 0; font-size: 1.2rem; overflow-wrap: anywhere; }
+.insight-card .insight-summary, .resource-card .resource-summary { margin: 0; color: var(--muted); font-size: .92rem; }
+.insight-card .insight-meta, .resource-card .resource-meta { margin: 0; color: var(--muted); font-size: .82rem; }
+.insight-card .btn, .resource-card .btn, .event-card .hero-actions { margin-top: auto; align-self: start; }
+.article-body, .resource-body { max-width: 46rem; font-size: 1.02rem; line-height: 1.8; }
+.article-body p, .resource-body p { margin: 0 0 1rem; }
+.event-detail-meta { margin: 0 0 1rem; color: var(--muted); }
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+  gap: 1rem;
+}
+.gallery-item {
+  margin: 0;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md, 5px);
+  overflow: hidden;
+  cursor: pointer;
+  padding: 0;
+  text-align: start;
+  color: inherit;
+  font: inherit;
+  width: 100%;
+}
+.gallery-item img { width: 100%; height: 12rem; object-fit: cover; display: block; background: var(--forest-deep); }
+.gallery-item figcaption, .gallery-file { padding: .65rem .8rem .85rem; font-size: .82rem; color: var(--muted); }
+.gallery-item:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+.gallery-lightbox {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0;
+  max-width: min(52rem, calc(100% - 2rem));
+  width: calc(100% - 2rem);
+  background: var(--card);
+  color: var(--ink);
+}
+.gallery-lightbox::backdrop { background: rgba(14, 44, 39, .72); }
+.gallery-lightbox-inner { padding: 1rem 1rem 1.25rem; }
+.gallery-lightbox img { width: 100%; height: auto; max-height: 70vh; object-fit: contain; display: block; background: var(--forest-deep); }
+.gallery-lightbox-close { margin-bottom: .75rem; }
+@media (prefers-reduced-motion: reduce) {
+  .insight-card, .resource-card, .gallery-item { transition: none; }
+}
+@media (max-width: 700px) {
+  .gallery-item img { height: 10rem; }
+  .events-grid, .insights-grid, .resources-grid { gap: 1.15rem; }
+}
+/* ===== end MODULE 8 — PUBLIC INTEGRATION ===== */
 </style>
 </head>
 <body>
@@ -3626,11 +3697,145 @@ ramdaniBindInquiry("contactForm","contact");
     </div></section>`, init: async function () {
 if (window.ramdaniEducation) ramdaniEducation.renderFaq();
   } },
-  '/pages/insights.html': { title: 'Insights — Ramdani Law Firm', desc: 'Insights — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section"><div class="wrap">
-      <h1 data-i18n="insights_title"></h1>
-      <div id="list" class="grid"></div>
+  '/pages/article.html': { title: 'Article — Ramdani Law Firm', desc: 'Article — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section insights-hero"><div class="wrap">
+      <nav class="academy-breadcrumb" aria-label="Breadcrumb"><ol>
+        <li><a href="/" data-i18n="nav_home">Home</a></li>
+        <li><a href="/pages/insights.html" data-i18n="nav_insights">Insights</a></li>
+        <li><span id="articleCrumb" aria-current="page"></span></li>
+      </ol></nav>
+      <p class="kicker" data-i18n="insights_kicker">Publications</p>
+      <h1 id="articleTitle">Article</h1>
+      <p class="lead" id="articleSummary"></p>
+      <p class="note" id="articleWhen"></p>
+    </div></section>
+    <section class="section insights-band"><div class="wrap article-body" id="articleBody"></div></section>`, init: async function () {
+var slug = new URLSearchParams(window.ramdaniRoute.search()).get('slug');
+var titleEl = document.getElementById('articleTitle');
+var bodyEl = document.getElementById('articleBody');
+var crumb = document.getElementById('articleCrumb');
+if (!slug) {
+  var missing = ramdaniUi.t('article_missing', 'This article is not published.');
+  titleEl.textContent = missing; if (crumb) crumb.textContent = missing;
+  return;
+}
+var row = await ramdaniApi.getBySlug('articles', slug);
+if (!row) {
+  var miss = ramdaniUi.t('article_missing', 'This article is not published.');
+  titleEl.textContent = miss; if (crumb) crumb.textContent = miss;
+  return;
+}
+titleEl.textContent = row.title || 'Article';
+if (crumb) crumb.textContent = row.title || '';
+document.getElementById('articleSummary').textContent = row.summary || '';
+var when = ramdaniUi.formatDay(row.published_at || row.created_at);
+document.getElementById('articleWhen').textContent = when;
+bodyEl.innerHTML = row.body ? ramdaniUi.nl2p(row.body) : ramdaniUi.empty('insights_empty');
+if (window.ramdaniSeo) {
+  ramdaniSeo.setTitle((row.title || 'Article') + ' \u2014 Ramdani Law Firm');
+  ramdaniSeo.setDescription((row.summary || 'Published article. Not legal advice.').slice(0, 160));
+}
+  } },
+  '/pages/events.html': { title: 'Events & Programs — Ramdani Law Firm', desc: 'Events & Programs — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section events-hero"><div class="wrap">
+      <p class="kicker" data-i18n="events_kicker">Events & programs</p>
+      <h1 data-i18n="nav_events">Events & Programs</h1>
+      <p class="lead" data-i18n="events_public_lead">Events published by authorised staff. Registering does not create membership or a lawyer&ndash;client relationship.</p>
+      <p class="note" data-i18n="events_public_note">Registration uses the existing portal account. The firm remains the authority on capacity and confirmation.</p>
+    </div></section>
+    <section class="section events-band"><div class="wrap">
+      <div id="list" class="grid events-grid"></div>
+      <p id="eventRegNote" class="form-status" role="status" aria-live="polite"></p>
     </div></section>`, init: async function () {
-var rows = await ramdaniApi.listPublished('articles', null); ramdaniUi.renderList(document.getElementById('list'), rows, 'insights_empty');
+var el = document.getElementById('list');
+var rows = await ramdaniApi.listPublished('events', 'starts_at');
+ramdaniUi.renderPublicEvents(el, rows, 'events_empty');
+ramdaniUi.bindPublicEventRegister(el, document.getElementById('eventRegNote'));
+  } },
+  '/pages/event.html': { title: 'Event — Ramdani Law Firm', desc: 'Event — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section events-hero"><div class="wrap">
+      <nav class="academy-breadcrumb" aria-label="Breadcrumb"><ol>
+        <li><a href="/" data-i18n="nav_home">Home</a></li>
+        <li><a href="/pages/events.html" data-i18n="nav_events">Events & Programs</a></li>
+        <li><span id="eventCrumb" aria-current="page"></span></li>
+      </ol></nav>
+      <p class="kicker" data-i18n="events_kicker">Events & programs</p>
+      <h1 id="eventTitle">Event</h1>
+      <p class="lead" id="eventSummary"></p>
+      <p class="event-detail-meta" id="eventMeta"></p>
+      <div id="eventActions" class="hero-actions"></div>
+      <p id="eventRegNote" class="form-status" role="status" aria-live="polite"></p>
+    </div></section>
+    <section class="section events-band"><div class="wrap" id="eventBody"></div></section>`, init: async function () {
+var slug = new URLSearchParams(window.ramdaniRoute.search()).get('slug');
+var titleEl = document.getElementById('eventTitle');
+var crumb = document.getElementById('eventCrumb');
+var noteEl = document.getElementById('eventRegNote');
+if (!slug) {
+  var miss = ramdaniUi.t('events_unavailable', 'This event is not published.');
+  titleEl.textContent = miss; if (crumb) crumb.textContent = miss; return;
+}
+var ev = await ramdaniApi.getBySlug('events', slug);
+if (!ev) {
+  var un = ramdaniUi.t('events_unavailable', 'This event is not published.');
+  titleEl.textContent = un; if (crumb) crumb.textContent = un; return;
+}
+titleEl.textContent = ev.title || 'Event';
+if (crumb) crumb.textContent = ev.title || '';
+document.getElementById('eventSummary').textContent = ev.summary || '';
+var meta = [];
+var when = ramdaniUi.formatWhen(ev.starts_at);
+var until = ramdaniUi.formatWhen(ev.ends_at);
+if (when) meta.push(until ? (when + ' \u2013 ' + until) : when);
+if (ev.venue) meta.push(ev.venue);
+if (ev.address) meta.push(ev.address);
+document.getElementById('eventMeta').textContent = meta.join(' \u00b7 ');
+document.getElementById('eventBody').innerHTML = ev.description ? ramdaniUi.nl2p(ev.description) : '';
+var actions = document.getElementById('eventActions');
+if (ev.registration_open) {
+  var lbl = ramdaniUi.t('events_register', 'Register');
+  actions.innerHTML = '<button type="button" class="btn btn-primary" data-public-register="' + ramdaniUi.escape(ev.id) + '">' + ramdaniUi.escape(lbl) + '</button>';
+  ramdaniUi.bindPublicEventRegister(actions, noteEl);
+} else {
+  actions.innerHTML = '<p class="note">' + ramdaniUi.escape(ramdaniUi.t('events_closed', 'Registration is not open for this event.')) + '</p>';
+}
+if (window.ramdaniSeo) {
+  ramdaniSeo.setTitle((ev.title || 'Event') + ' \u2014 Ramdani Law Firm');
+  ramdaniSeo.setDescription((ev.summary || 'Published event. Not a retainer.').slice(0, 160));
+}
+  } },
+  '/pages/gallery.html': { title: 'Gallery — Ramdani Law Firm', desc: 'Gallery — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section gallery-hero"><div class="wrap">
+      <p class="kicker" data-i18n="gallery_kicker">The chamber</p>
+      <h1 data-i18n="gallery_title">Gallery</h1>
+      <p class="lead" data-i18n="gallery_lead">Images the firm has marked public. Private files are not listed.</p>
+    </div></section>
+    <section class="section gallery-band"><div class="wrap">
+      <div id="list" class="gallery-grid"></div>
+    </div></section>
+    <dialog id="galleryLightbox" class="gallery-lightbox" aria-label="Image">
+      <div class="gallery-lightbox-inner">
+        <button type="button" class="btn gallery-lightbox-close" data-i18n="gallery_close">Close</button>
+        <img id="galleryLightboxImg" alt="" />
+        <p id="galleryLightboxCap" class="note"></p>
+      </div>
+    </dialog>`, init: async function () {
+var el = document.getElementById('list');
+var rows = [];
+if (window.sb) {
+  var res = await sb.from('media_assets').select('*').eq('is_public', true).order('created_at', { ascending: false });
+  if (res.error) console.warn('Ramdani gallery', res.error.message);
+  else rows = res.data || [];
+}
+ramdaniUi.renderGallery(el, rows, 'gallery_empty');
+ramdaniUi.bindGalleryLightbox(el, document.getElementById('galleryLightbox'));
+  } },
+  '/pages/insights.html': { title: 'Insights — Ramdani Law Firm', desc: 'Insights — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section insights-hero"><div class="wrap">
+      <p class="kicker" data-i18n="insights_kicker">Publications</p>
+      <h1 data-i18n="insights_title">Insights</h1>
+      <p class="lead" data-i18n="insights_lead">Articles published by authorised staff. Not legal advice.</p>
+      <p class="note" data-i18n="insights_note">Only staff-published articles appear here. Unpublished drafts stay hidden.</p>
+    </div></section>
+    <section class="section insights-band"><div class="wrap">
+      <div id="list" class="grid insights-grid"></div>
+    </div></section>`, init: async function () {
+var rows = await ramdaniApi.listPublished('articles', null); ramdaniUi.renderArticles(document.getElementById('list'), rows, 'insights_empty');
   } },
   '/pages/internship-apply.html': { title: 'Internship application — Ramdani Law Firm', desc: 'Internship application — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section"><div class="wrap">
       <h1 data-i18n="intern_apply_title"></h1>
@@ -3909,11 +4114,59 @@ if (window.ramdaniEducation) ramdaniEducation.renderQuiz();
 if (window.ramdaniUi) ramdaniUi.academyNav('/pages/quizzes.html');
 if (window.ramdaniEducation) ramdaniEducation.renderQuizzes();
   } },
-  '/pages/resources.html': { title: 'Resources — Ramdani Law Firm', desc: 'Resources — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section"><div class="wrap">
-      <h1 data-i18n="resources_title"></h1>
-      <div id="list" class="grid"></div>
+  '/pages/resource.html': { title: 'Resource — Ramdani Law Firm', desc: 'Resource — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section resources-hero"><div class="wrap">
+      <nav class="academy-breadcrumb" aria-label="Breadcrumb"><ol>
+        <li><a href="/" data-i18n="nav_home">Home</a></li>
+        <li><a href="/pages/resources.html" data-i18n="nav_resources">Resources</a></li>
+        <li><span id="resourceCrumb" aria-current="page"></span></li>
+      </ol></nav>
+      <p class="kicker" data-i18n="resources_kicker">Library</p>
+      <h1 id="resourceTitle">Resource</h1>
+      <p class="lead" id="resourceSummary"></p>
+      <p class="note" id="resourceWhen"></p>
+      <div id="resourceFile" class="hero-actions"></div>
+    </div></section>
+    <section class="section resources-band"><div class="wrap resource-body" id="resourceBody"></div></section>`, init: async function () {
+var slug = new URLSearchParams(window.ramdaniRoute.search()).get('slug');
+var titleEl = document.getElementById('resourceTitle');
+var crumb = document.getElementById('resourceCrumb');
+if (!slug) {
+  var miss = ramdaniUi.t('resource_missing', 'This resource is not published.');
+  titleEl.textContent = miss; if (crumb) crumb.textContent = miss; return;
+}
+var row = await ramdaniApi.getBySlug('resources', slug);
+if (!row) {
+  var un = ramdaniUi.t('resource_missing', 'This resource is not published.');
+  titleEl.textContent = un; if (crumb) crumb.textContent = un; return;
+}
+titleEl.textContent = row.title || 'Resource';
+if (crumb) crumb.textContent = row.title || '';
+document.getElementById('resourceSummary').textContent = row.summary || '';
+document.getElementById('resourceWhen').textContent = ramdaniUi.formatDay(row.published_at || row.created_at);
+document.getElementById('resourceBody').innerHTML = row.body ? ramdaniUi.nl2p(row.body) : '';
+var file = ramdaniUi.fileUrlFromRow(row);
+var fileBox = document.getElementById('resourceFile');
+if (file) {
+  fileBox.innerHTML = '<a class="btn btn-primary" href="' + ramdaniUi.escape(file) + '" rel="noopener noreferrer" target="_blank">' +
+    ramdaniUi.escape(ramdaniUi.t('resources_download', 'Download PDF')) + '</a>';
+} else {
+  fileBox.innerHTML = '<p class="note">' + ramdaniUi.escape(ramdaniUi.t('resource_no_file', 'No public file is attached to this listing.')) + '</p>';
+}
+if (window.ramdaniSeo) {
+  ramdaniSeo.setTitle((row.title || 'Resource') + ' \u2014 Ramdani Law Firm');
+  ramdaniSeo.setDescription((row.summary || 'Published resource. Not a case file.').slice(0, 160));
+}
+  } },
+  '/pages/resources.html': { title: 'Resources — Ramdani Law Firm', desc: 'Resources — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section resources-hero"><div class="wrap">
+      <p class="kicker" data-i18n="resources_kicker">Library</p>
+      <h1 data-i18n="resources_title">Resources</h1>
+      <p class="lead" data-i18n="resources_lead">Public resources published by authorised staff. Private matter files are not listed here.</p>
+      <p class="note" data-i18n="resources_note">Download appears only when a real public file is attached. This is not a store of case documents.</p>
+    </div></section>
+    <section class="section resources-band"><div class="wrap">
+      <div id="list" class="grid resources-grid"></div>
     </div></section>`, init: async function () {
-var rows = await ramdaniApi.listPublished('resources', null); ramdaniUi.renderList(document.getElementById('list'), rows, 'resources_empty');
+var rows = await ramdaniApi.listPublished('resources', null); ramdaniUi.renderResources(document.getElementById('list'), rows, 'resources_empty');
   } },
   '/pages/services.html': { title: 'Legal Services — Ramdani Law Firm', desc: 'Legal Services — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section services-hero"><div class="wrap">
       <p class="kicker" data-i18n="services_kicker">How we can help</p>
@@ -4846,6 +5099,7 @@ window.ramdaniSite = Object.freeze({
     ['/pages/people.html', 'nav_people', 'People'], ['/pages/practice-areas.html', 'nav_practice', 'Practice Areas'],
     ['/pages/services.html', 'nav_services', 'Legal Services'], ['/pages/matters.html', 'nav_matters', 'Representative Matters'],
     ['/pages/insights.html', 'nav_insights', 'Insights'], ['/pages/news.html', 'nav_news', 'News'],
+    ['/pages/events.html', 'nav_events', 'Events & Programs'], ['/pages/gallery.html', 'nav_gallery', 'Gallery'],
     ['/pages/resources.html', 'nav_resources', 'Resources'], ['/pages/careers.html', 'nav_careers', 'Careers'],
     ['/pages/internships.html', 'nav_internships', 'Internships'], ['/pages/quizzes.html', 'nav_quizzes', 'LAT / GAT'],
     ['/pages/modules.html', 'nav_modules', 'Study modules'], ['/pages/cases.html', 'nav_cases', 'Case notes'],
@@ -5037,7 +5291,7 @@ window.ramdaniSite = Object.freeze({
     return '<details class="nav-drop"><summary>' + label + '</summary><div class="nav-panel">' + itemsHtml + (extra || '') + '</div></details>';
   }
   var groupedNavHtml =
-    links([['/pages/about.html', 'nav_about', 'About']]) +
+    links([['/pages/about.html', 'nav_about', 'About'], ['/pages/events.html', 'nav_events', 'Events & Programs']]) +
     dropdown('Legal Services', [
       ['/pages/services.html', 'Legal Services']
     ], '<div id="navPracticeAreas" class="nav-panel-loading"></div><a href="/pages/practice-areas.html" class="nav-panel-all">All Practice Areas →</a>') +
@@ -5060,6 +5314,12 @@ window.ramdaniSite = Object.freeze({
       ['/pages/chapters.html', 'Chapters'],
       ['/portal/login', 'Members'],
       ['/pages/faq.html', 'FAQ']
+    ]) +
+    dropdown('Publications', [
+      ['/pages/insights.html', 'Insights', 'nav_insights'],
+      ['/pages/gallery.html', 'Gallery', 'nav_gallery'],
+      ['/pages/resources.html', 'Resources', 'nav_resources'],
+      ['/pages/verify-certificate.html', 'Verify a certificate']
     ]) +
     dropdown('Portal', [
       ['/portal/login', 'Student Portal'],
@@ -5242,6 +5502,35 @@ window.ramdaniSite = Object.freeze({
       services_cta_lead: 'Describe your matter and authorised staff will respond. Do not send privileged documents through public forms.',
       matters_title: 'Representative matters',
       matters_empty: 'Public representative matters will appear here once published. Confidential client information is never shown on this site.',
+      nav_events: 'Events & Programs',
+      nav_gallery: 'Gallery',
+      events_public_lead: 'Events published by authorised staff. Registering does not create membership or a lawyer\u2013client relationship.',
+      events_public_note: 'Registration uses the existing portal account. The firm remains the authority on capacity and confirmation.',
+      events_empty: 'No published events are listed right now.',
+      events_view: 'View details',
+      events_sign_in: 'Sign in through the portal to register.',
+      events_closed: 'Registration is not open for this event.',
+      events_unavailable: 'This event is not published.',
+      events_reg_ok: 'Registered.',
+      events_reg_wait: 'Event is full \u2014 you have been waitlisted.',
+      events_reg_err: 'Registration could not be completed. Your permissions or the event state may prevent this.',
+      insights_kicker: 'Publications',
+      insights_lead: 'Articles published by authorised staff. Not legal advice.',
+      insights_note: 'Only staff-published articles appear here. Unpublished drafts stay hidden.',
+      insights_read: 'Read article',
+      article_missing: 'This article is not published.',
+      gallery_title: 'Gallery',
+      gallery_kicker: 'The chamber',
+      gallery_lead: 'Images the firm has marked public. Private files are not listed.',
+      gallery_empty: 'Our gallery is being updated. Please check back soon.',
+      gallery_close: 'Close',
+      resources_kicker: 'Library',
+      resources_lead: 'Public resources published by authorised staff. Private matter files are not listed here.',
+      resources_note: 'Download appears only when a real public file is attached. This is not a store of case documents.',
+      resources_view: 'View resource',
+      resources_download: 'Download PDF',
+      resource_missing: 'This resource is not published.',
+      resource_no_file: 'No public file is attached to this listing.',
       insights_title: 'Insights',
       insights_empty: 'Published articles will appear here.',
       news_title: 'News',
@@ -5397,6 +5686,35 @@ window.ramdaniSite = Object.freeze({
       services_cta_lead: '\u0627\u067e\u0646\u06d2 \u0645\u0639\u0627\u0645\u0644\u06d2 \u06a9\u06cc \u062a\u0641\u0635\u06cc\u0644 \u0628\u06be\u06cc\u062c\u06cc\u06ba\u060c \u0645\u062c\u0627\u0632 \u0639\u0645\u0644\u06c1 \u062c\u0648\u0627\u0628 \u062f\u06d2 \u06af\u0627\u06d4 \u0639\u0648\u0627\u0645\u06cc \u0641\u0627\u0631\u0645 \u06a9\u06d2 \u0630\u0631\u06cc\u0639\u06d2 \u0627\u0633\u062a\u062d\u0642\u0627\u0642 \u06cc\u0627\u0641\u062a\u06c1 \u062f\u0633\u062a\u0627\u0648\u06cc\u0632\u0627\u062a \u0646\u06c1 \u0628\u06be\u06cc\u062c\u06cc\u06ba\u06d4',
       matters_title: '\u0646\u0645\u0627\u0626\u0646\u062f\u06c1 \u0645\u0639\u0627\u0645\u0644\u0627\u062a',
       matters_empty: '\u0639\u0648\u0627\u0645\u06cc \u0646\u0645\u0627\u0626\u0646\u062f\u06c1 \u0645\u0639\u0627\u0645\u0644\u0627\u062a \u0634\u0627\u0626\u0639 \u06c1\u0648\u0646\u06d2 \u06a9\u06d2 \u0628\u0639\u062f \u06cc\u06c1\u0627\u06ba \u0646\u0638\u0631 \u0622\u0626\u06cc\u06ba \u06af\u06d2\u06d4',
+      nav_events: '\u0645\u0634\u0627\u063a\u0644 \u0627\u0648\u0631 \u067e\u0631\u0648\u06af\u0631\u0627\u0645\u0632',
+      nav_gallery: '\u06af\u06cc\u0644\u0631\u06cc',
+      events_public_lead: '\u0645\u062c\u0627\u0632 \u0639\u0645\u0644\u06c1 \u06a9\u06cc \u0634\u0627\u0626\u0639 \u06a9\u0631\u062f\u06c1 \u0645\u0634\u0627\u063a\u0644\u06d4 \u0631\u062c\u0633\u0679\u0631\u06cc\u0634\u0646 \u0633\u06d2 \u0631\u06a9\u0646\u06cc\u062a \u06cc\u0627 \u0648\u06a9\u06cc\u0644\u2013\u06a9\u0644\u0627\u0626\u0646\u0679 \u062a\u0639\u0644\u0642 \u0642\u0627\u0626\u0645 \u0646\u06c1\u06cc\u06ba \u06c1\u0648\u062a\u0627\u06d4',
+      events_public_note: '\u0631\u062c\u0633\u0679\u0631\u06cc\u0634\u0646 \u0645\u0648\u062c\u0648\u062f\u06c1 \u067e\u0648\u0631\u0679\u0644 \u0627\u06a9\u0627\u0624\u0646\u0679 \u0633\u06d2 \u06c1\u0648\u062a\u06cc \u06c1\u06d2\u06d4 \u06af\u0646\u062c\u0627\u0626\u0634 \u0627\u0648\u0631 \u062a\u0635\u062f\u06cc\u0642 \u06a9\u0627 \u062d\u062a\u0645\u06cc \u0641\u06cc\u0635\u0644\u06c1 \u0641\u0631\u0645 \u06a9\u0627 \u06c1\u06d2\u06d4',
+      events_empty: '\u0627\u0633 \u0648\u0642\u062a \u06a9\u0648\u0626\u06cc \u0634\u0627\u0626\u0639 \u0634\u062f\u06c1 \u0645\u0634\u063a\u0644\u06c1 \u062f\u0631\u062c \u0646\u06c1\u06cc\u06ba\u06d4',
+      events_view: '\u062a\u0641\u0635\u06cc\u0644 \u062f\u06cc\u06a9\u06be\u06cc\u06ba',
+      events_sign_in: '\u0631\u062c\u0633\u0679\u0631 \u06a9\u06d2 \u0644\u06cc\u06d2 \u067e\u0648\u0631\u0679\u0644 \u0633\u06d2 \u0633\u0627\u0626\u0646 \u0627\u0646 \u06a9\u0631\u06cc\u06ba\u06d4',
+      events_closed: '\u0627\u0633 \u0645\u0634\u063a\u0644\u06d2 \u06a9\u06d2 \u0644\u06cc\u06d2 \u0631\u062c\u0633\u0679\u0631\u06cc\u0634\u0646 \u06a9\u06be\u0644\u06cc \u0646\u06c1\u06cc\u06ba\u06d4',
+      events_unavailable: '\u06cc\u06c1 \u0645\u0634\u063a\u0644\u06c1 \u0634\u0627\u0626\u0639 \u0646\u06c1\u06cc\u06ba\u06d4',
+      events_reg_ok: '\u0631\u062c\u0633\u0679\u0631 \u06c1\u0648 \u06af\u0626\u06d2\u06d4',
+      events_reg_wait: '\u0645\u0634\u063a\u0644\u06c1 \u0628\u06be\u0631\u0627 \u06c1\u0648\u0627 \u06c1\u06d2 \u2014 \u0622\u067e \u0648\u06cc\u0679 \u0644\u0633\u0679 \u0645\u06cc\u06ba \u06c1\u06cc\u06ba\u06d4',
+      events_reg_err: '\u0631\u062c\u0633\u0679\u0631\u06cc\u0634\u0646 \u0645\u06a9\u0645\u0644 \u0646\u06c1\u06cc\u06ba \u06c1\u0648 \u0633\u06a9\u06cc\u06d4 \u0627\u062c\u0627\u0632\u062a \u06cc\u0627 \u0645\u0634\u063a\u0644\u06d2 \u06a9\u06cc \u062d\u0627\u0644\u062a \u0631\u06a9\u0627\u0648\u0679 \u0628\u0646 \u0633\u06a9\u062a\u06cc \u06c1\u06d2\u06d4',
+      insights_kicker: '\u0627\u0634\u0627\u0639\u062a\u06cc\u06ba',
+      insights_lead: '\u0645\u062c\u0627\u0632 \u0639\u0645\u0644\u06c1 \u06a9\u06cc \u0634\u0627\u0626\u0639 \u06a9\u0631\u062f\u06c1 \u062a\u062d\u0631\u06cc\u0631\u06cc\u06ba\u06d4 \u0642\u0627\u0646\u0648\u0646\u06cc \u0645\u0634\u0648\u0631\u06c1 \u0646\u06c1\u06cc\u06ba\u06d4',
+      insights_note: '\u06cc\u06c1\u0627\u06ba \u0635\u0631\u0641 \u0634\u0627\u0626\u0639 \u0634\u062f\u06c1 \u0645\u0636\u0627\u0645\u06cc\u0646 \u0646\u0638\u0631 \u0622\u062a\u06d2 \u06c1\u06cc\u06ba\u06d4 \u063a\u06cc\u0631 \u0634\u0627\u0626\u0639 \u0645\u0633\u0648\u062f\u06d2 \u067e\u0648\u0634\u06cc\u062f\u06c1 \u0631\u06c1\u062a\u06d2 \u06c1\u06cc\u06ba\u06d4',
+      insights_read: '\u0645\u0636\u0645\u0648\u0646 \u067e\u0691\u06be\u06cc\u06ba',
+      article_missing: '\u06cc\u06c1 \u0645\u0636\u0645\u0648\u0646 \u0634\u0627\u0626\u0639 \u0646\u06c1\u06cc\u06ba\u06d4',
+      gallery_title: '\u06af\u06cc\u0644\u0631\u06cc',
+      gallery_kicker: '\u0686\u06cc\u0645\u0628\u0631',
+      gallery_lead: '\u0648\u06c1 \u062a\u0635\u0627\u0648\u06cc\u0631 \u062c\u0646\u06c1\u06cc\u06ba \u0641\u0631\u0645 \u0646\u06d2 \u0639\u0648\u0627\u0645\u06cc \u0642\u0631\u0627\u0631 \u062f\u06cc\u0627 \u06c1\u06d2\u06d4 \u0646\u062c\u06cc \u0641\u0627\u0626\u0644\u06cc\u06ba \u062f\u0631\u062c \u0646\u06c1\u06cc\u06ba\u06d4',
+      gallery_empty: '\u06c1\u0645\u0627\u0631\u06cc \u06af\u06cc\u0644\u0631\u06cc \u0627\u067e \u0688\u06cc\u0679 \u06c1\u0648 \u0631\u06c1\u06cc \u06c1\u06d2\u06d4 \u0628\u0631\u0627\u06c1 \u06a9\u0631\u0645 \u0628\u0639\u062f \u0645\u06cc\u06ba \u062f\u0648\u0628\u0627\u0631\u06c1 \u062f\u06cc\u06a9\u06be\u06cc\u06ba\u06d4',
+      gallery_close: '\u0628\u0646\u062f \u06a9\u0631\u06cc\u06ba',
+      resources_kicker: '\u0644\u0627\u0626\u0628\u0631\u06cc\u0631\u06cc',
+      resources_lead: '\u0645\u062c\u0627\u0632 \u0639\u0645\u0644\u06c1 \u06a9\u06d2 \u0634\u0627\u0626\u0639 \u06a9\u0631\u062f\u06c1 \u0639\u0648\u0627\u0645\u06cc \u0648\u0633\u0627\u0626\u0644\u06d4 \u0646\u062c\u06cc \u0645\u0642\u062f\u0645\u0627\u062a\u06cc \u0641\u0627\u0626\u0644\u06cc\u06ba \u06cc\u06c1\u0627\u06ba \u0646\u06c1\u06cc\u06ba\u06d4',
+      resources_note: '\u0688\u0627\u0624\u0646 \u0644\u0648\u0688 \u0635\u0631\u0641 \u0627\u0633\u06cc \u0635\u0648\u0631\u062a \u0645\u06cc\u06ba \u062f\u06a9\u06be\u0627\u0626\u06cc \u062f\u06cc\u062a\u0627 \u06c1\u06d2 \u062c\u0628 \u0648\u0627\u0642\u0639\u06cc \u0639\u0648\u0627\u0645\u06cc \u0641\u0627\u0626\u0644 \u0645\u0646\u0633\u0644\u06a9 \u06c1\u0648\u06d4 \u06cc\u06c1 \u06a9\u06cc\u0633 \u062f\u0633\u062a\u0627\u0648\u06cc\u0632\u0627\u062a \u06a9\u0627 \u0630\u062e\u06cc\u0631\u06c1 \u0646\u06c1\u06cc\u06ba\u06d4',
+      resources_view: '\u0648\u0633\u06cc\u0644\u06c1 \u062f\u06cc\u06a9\u06be\u06cc\u06ba',
+      resources_download: '\u067e\u06cc \u0688\u06cc \u0627\u06cc\u0641 \u0688\u0627\u0624\u0646 \u0644\u0648\u0688',
+      resource_missing: '\u06cc\u06c1 \u0648\u0633\u06cc\u0644\u06c1 \u0634\u0627\u0626\u0639 \u0646\u06c1\u06cc\u06ba\u06d4',
+      resource_no_file: '\u0627\u0633 \u0641\u06c1\u0631\u0633\u062a \u06a9\u06d2 \u0633\u0627\u062a\u06be \u06a9\u0648\u0626\u06cc \u0639\u0648\u0627\u0645\u06cc \u0641\u0627\u0626\u0644 \u0645\u0646\u0633\u0644\u06a9 \u0646\u06c1\u06cc\u06ba\u06d4',
       insights_title: '\u062a\u062d\u0631\u06cc\u0631\u06cc\u06ba',
       insights_empty: '\u0634\u0627\u0626\u0639 \u0634\u062f\u06c1 \u0645\u0636\u0627\u0645\u06cc\u0646 \u06cc\u06c1\u0627\u06ba \u0646\u0638\u0631 \u0622\u0626\u06cc\u06ba \u06af\u06d2\u06d4',
       news_title: '\u062e\u0628\u0631\u06cc\u06ba',
@@ -5597,6 +5915,193 @@ window.ramdaniUi = {
   empty: function (key) {
     return '<p class="empty" data-i18n="' + this.escape(key) + '">' + this.escape(window.ramdaniT ? ramdaniT(key) : 'Nothing published yet.') + '</p>';
   },
+  t: function (key, fallback) {
+    var v = window.ramdaniT ? ramdaniT(key) : '';
+    return (!v || v === key) ? (fallback || key) : v;
+  },
+  formatDay: function (value) {
+    if (!value) return '';
+    var d = new Date(value);
+    if (isNaN(d.getTime())) return String(value);
+    var loc = document.documentElement.lang === 'ur' ? 'ur-PK' : 'en-PK';
+    try { return d.toLocaleDateString(loc, { dateStyle: 'medium', timeZone: 'Asia/Karachi' }); }
+    catch (e) { return String(value); }
+  },
+  assetUrl: function (path) {
+    if (!path || !window.sb) return '';
+    if (/^https?:\/\//i.test(path)) return path;
+    var pub = sb.storage.from('site-assets').getPublicUrl(path);
+    return pub && pub.data ? pub.data.publicUrl : '';
+  },
+  fileUrlFromRow: function (row) {
+    if (!row) return '';
+    var direct = row.file_url || row.pdf_url || row.document_url || row.url || '';
+    if (direct) return /^https?:\/\//i.test(direct) ? direct : this.assetUrl(direct);
+    if (row.storage_path) return this.assetUrl(row.storage_path);
+    return '';
+  },
+  nl2p: function (s) {
+    var t = this.escape(s || '');
+    if (!t) return '';
+    return '<p dir="auto">' + t.replace(/\n/g, '<br>') + '</p>';
+  },
+  async registerForEvent(eventId) {
+    if (!window.sb || !window.ramdaniAuth) return { error: { message: this.t('events_reg_err', 'Registration could not be completed.') } };
+    var session = await ramdaniAuth.session();
+    if (!session) return { error: { code: 'auth', message: this.t('events_sign_in', 'Sign in through the portal to register.') } };
+    var p = await ramdaniAuth.profile();
+    if (!p || !p.id) return { error: { code: 'auth', message: this.t('events_sign_in', 'Sign in through the portal to register.') } };
+    return sb.rpc('register_for_event', {
+      p_event_id: eventId,
+      p_profile_id: p.id,
+      p_full_name: p.full_name || '',
+      p_email: p.email || ''
+    });
+  },
+  bindPublicEventRegister: function (root, noteEl) {
+    if (!root || root.dataset.boundRegister === '1') return;
+    root.dataset.boundRegister = '1';
+    var self = this;
+    root.addEventListener('click', async function (e) {
+      var b = e.target.closest('[data-public-register]');
+      if (!b) return;
+      b.disabled = true;
+      var res = await self.registerForEvent(b.getAttribute('data-public-register'));
+      if (noteEl) {
+        if (res.error && res.error.code === 'auth') {
+          noteEl.className = 'form-status err';
+          noteEl.textContent = res.error.message;
+          window.ramdaniGo('/portal/login');
+          b.disabled = false;
+          return;
+        }
+        if (res.error) {
+          noteEl.className = 'form-status err';
+          noteEl.textContent = self.t('events_reg_err', 'Registration could not be completed. Your permissions or the event state may prevent this.');
+          if (res.error.message) console.warn('register_for_event', res.error.message);
+          b.disabled = false;
+          return;
+        }
+        noteEl.className = 'form-status ok';
+        noteEl.textContent = (res.data && res.data.status === 'waitlisted')
+          ? self.t('events_reg_wait', 'Event is full — you have been waitlisted.')
+          : self.t('events_reg_ok', 'Registered.');
+      }
+      b.disabled = false;
+    });
+  },
+  renderPublicEvents: function (el, rows, emptyKey) {
+    if (!el) return;
+    if (!rows || !rows.length) { el.innerHTML = this.empty(emptyKey); return; }
+    var self = this;
+    el.innerHTML = rows.map(function (ev) {
+      var href = ev.slug ? '/pages/event.html?slug=' + encodeURIComponent(ev.slug) : '';
+      return self.eventCard(ev, {
+        detailHref: href,
+        registerAttr: ev.registration_open ? 'data-public-register' : ''
+      });
+    }).join('');
+  },
+  articleCard: function (row) {
+    var title = this.escape(row.title || 'Untitled');
+    var summary = this.escape(row.summary || '');
+    var when = this.formatDay(row.published_at || row.created_at);
+    var href = row.slug ? '/pages/article.html?slug=' + encodeURIComponent(row.slug) : '';
+    var read = this.t('insights_read', 'Read article');
+    return '<article class="card insight-card">' +
+      '<h3 dir="auto">' + (href ? '<a class="card-link" href="' + href + '">' + title + '</a>' : title) + '</h3>' +
+      (when ? '<p class="insight-meta">' + this.escape(when) + '</p>' : '') +
+      (summary ? '<p class="insight-summary" dir="auto">' + summary + '</p>' : '') +
+      (href ? '<a class="btn" href="' + href + '">' + this.escape(read) + '</a>' : '') +
+      '</article>';
+  },
+  renderArticles: function (el, rows, emptyKey) {
+    if (!el) return;
+    if (!rows || !rows.length) { el.innerHTML = this.empty(emptyKey); return; }
+    var self = this;
+    el.innerHTML = rows.map(function (row) { return self.articleCard(row); }).join('');
+  },
+  resourceCard: function (row) {
+    var title = this.escape(row.title || 'Untitled');
+    var summary = this.escape(row.summary || '');
+    var when = this.formatDay(row.published_at || row.created_at);
+    var href = row.slug ? '/pages/resource.html?slug=' + encodeURIComponent(row.slug) : '';
+    var file = this.fileUrlFromRow(row);
+    var view = this.t('resources_view', 'View resource');
+    var dl = this.t('resources_download', 'Download PDF');
+    return '<article class="card resource-card">' +
+      '<h3 dir="auto">' + (href ? '<a class="card-link" href="' + href + '">' + title + '</a>' : title) + '</h3>' +
+      (when ? '<p class="resource-meta">' + this.escape(when) + '</p>' : '') +
+      (summary ? '<p class="resource-summary" dir="auto">' + summary + '</p>' : '') +
+      '<div class="hero-actions">' +
+        (href ? '<a class="btn btn-primary" href="' + href + '">' + this.escape(view) + '</a>' : '') +
+        (file ? '<a class="btn" href="' + this.escape(file) + '" rel="noopener noreferrer" target="_blank">' + this.escape(dl) + '</a>' : '') +
+      '</div></article>';
+  },
+  renderResources: function (el, rows, emptyKey) {
+    if (!el) return;
+    if (!rows || !rows.length) { el.innerHTML = this.empty(emptyKey); return; }
+    var self = this;
+    el.innerHTML = rows.map(function (row) { return self.resourceCard(row); }).join('');
+  },
+  renderGallery: function (el, rows, emptyKey) {
+    if (!el) return;
+    var self = this;
+    var shown = (rows || []).filter(function (r) {
+      if (r.is_public === false) return false;
+      if (r.status && String(r.status) !== 'published') return false;
+      return !!(r.storage_path || r.file_url);
+    });
+    if (!shown.length) {
+      el.innerHTML = '<p class="empty" data-i18n="' + this.escape(emptyKey) + '">' +
+        this.escape(this.t(emptyKey, 'Our gallery is being updated. Please check back soon.')) + '</p>';
+      return;
+    }
+    el.innerHTML = shown.map(function (r, i) {
+      var url = self.fileUrlFromRow(r);
+      var alt = self.escape(r.alt_text || r.caption || r.filename || '');
+      var cap = self.escape(r.caption || r.alt_text || '');
+      var isImg = /^image\//.test(r.file_type || '') && r.file_type.indexOf('icon') === -1;
+      if (isImg && url) {
+        return '<button type="button" class="gallery-item" data-gallery-i="' + i + '">' +
+          '<img src="' + self.escape(url) + '" alt="' + alt + '" loading="lazy" />' +
+          (cap ? '<figcaption>' + cap + '</figcaption>' : '') + '</button>';
+      }
+      return '<article class="gallery-item gallery-file"><p>' + self.escape(r.filename || 'File') + '</p>' +
+        (cap ? '<p class="note">' + cap + '</p>' : '') +
+        (url ? '<a class="btn" href="' + self.escape(url) + '" rel="noopener noreferrer" target="_blank">' +
+          self.escape(self.t('resources_view', 'View resource')) + '</a>' : '') + '</article>';
+    }).join('');
+    el.querySelectorAll('img').forEach(function (img) {
+      img.addEventListener('error', function () {
+        var item = img.closest('.gallery-item');
+        if (item && item.parentNode) item.parentNode.removeChild(item);
+        if (!el.querySelector('.gallery-item')) {
+          el.innerHTML = '<p class="empty">' + self.escape(self.t(emptyKey, 'Our gallery is being updated. Please check back soon.')) + '</p>';
+        }
+      });
+    });
+  },
+  bindGalleryLightbox: function (grid, dialog) {
+    if (!grid || !dialog || grid.dataset.boundLightbox === '1') return;
+    grid.dataset.boundLightbox = '1';
+    var img = document.getElementById('galleryLightboxImg');
+    var cap = document.getElementById('galleryLightboxCap');
+    var closeBtn = dialog.querySelector('.gallery-lightbox-close');
+    grid.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-gallery-i]');
+      if (!b) return;
+      var pic = b.querySelector('img');
+      if (!pic || !img) return;
+      img.src = pic.currentSrc || pic.src;
+      img.alt = pic.alt || '';
+      if (cap) cap.textContent = (b.querySelector('figcaption') || {}).textContent || '';
+      if (typeof dialog.showModal === 'function') dialog.showModal();
+      if (closeBtn) closeBtn.focus();
+    });
+    if (closeBtn) closeBtn.addEventListener('click', function () { dialog.close(); });
+    dialog.addEventListener('click', function (e) { if (e.target === dialog) dialog.close(); });
+  },
   // Academy section nav - links the existing Legal Education routes.
   // Labels reuse the existing nav_* translation keys.
   formatWhen: function (value) {
@@ -5653,13 +6158,18 @@ window.ramdaniUi = {
         '</details>';
     }
     var cta = '';
+    var actions = '';
+    if (opts.detailHref) {
+      actions += '<a class="btn" href="' + self.escape(opts.detailHref) + '">' + self.escape(t('events_view', 'View details')) + '</a>';
+    }
     if (opts.registerAttr && !opts.already) {
       var lbl = t('events_register', 'Register');
-      cta = '<button type="button" class="btn btn-primary event-cta" ' + opts.registerAttr + '="' + self.escape(ev.id) +
+      actions += '<button type="button" class="btn btn-primary event-cta" ' + opts.registerAttr + '="' + self.escape(ev.id) +
         '" aria-label="' + self.escape(lbl + ' \u2014 ' + (ev.title || '')) + '">' + self.escape(lbl) + '</button>';
     } else if (opts.already) {
-      cta = '<p class="event-registered">' + self.escape(t('events_registered', 'Already registered')) + '</p>';
+      actions += '<p class="event-registered">' + self.escape(t('events_registered', 'Already registered')) + '</p>';
     }
+    if (actions) cta = '<div class="hero-actions">' + actions + '</div>';
     var chipHtml = chips.length
       ? '<p class="event-chips">' + chips.map(function (c) {
           return '<span class="event-badge' + (c.kind ? ' ' + c.kind : '') + '">' + self.escape(c.text) + '</span>';
@@ -8345,9 +8855,9 @@ window.ramdaniAuth = {
     { id: 'practice_areas', label: 'Practice areas', fields: ['title', 'slug', 'summary', 'body', 'sort_order', 'status'] },
     { id: 'services', label: 'Services', fields: ['title', 'slug', 'summary', 'body', 'sort_order', 'status'] },
     { id: 'matters', label: 'Matters', fields: ['title', 'slug', 'summary', 'status'] },
-    { id: 'articles', label: 'Insights', fields: ['title', 'slug', 'summary', 'status'] },
+    { id: 'articles', label: 'Insights', fields: ['title', 'slug', 'summary', 'body', 'status'] },
     { id: 'news', label: 'News', fields: ['title', 'slug', 'summary', 'status'] },
-    { id: 'resources', label: 'Resources', fields: ['title', 'slug', 'summary', 'status'] },
+    { id: 'resources', label: 'Resources', fields: ['title', 'slug', 'summary', 'body', 'status'] },
     { id: 'careers', label: 'Careers', fields: ['title', 'slug', 'summary', 'body', 'status'] },
     { id: 'internships', label: 'Internships', fields: ['title', 'slug', 'summary', 'body', 'location', 'duration', 'deadline', 'status'] },
     { id: 'quizzes', label: 'Quizzes', fields: ['title', 'slug', 'summary', 'status'] },
@@ -8373,9 +8883,9 @@ window.ramdaniAuth = {
     books: { path: '/pages/library.html', slug: false },
     statutes: { path: '/pages/statutes.html', slug: false },
     certificates: { path: '/pages/certificates.html', slug: false },
-    articles: { path: '/pages/insights.html', slug: false },
+    articles: { path: '/pages/article.html', slug: true },
     news: { path: '/pages/news.html', slug: false },
-    resources: { path: '/pages/resources.html', slug: false },
+    resources: { path: '/pages/resource.html', slug: true },
     careers: { path: '/pages/careers.html', slug: false },
     people: { path: '/pages/people.html', slug: false },
     services: { path: '/pages/services.html', slug: false },
@@ -8570,10 +9080,30 @@ window.ramdaniAuth = {
     document.getElementById('staffAccountsBody').addEventListener('click', async function (e) {
       var b = e.target.closest('[data-staff-toggle]');
       if (!b) return;
+      var nextActive = b.getAttribute('data-active') !== '1';
+      if (!window.confirm(nextActive ? 'Activate this account?' : 'Deactivate this account?')) return;
+      var original = b.textContent;
       b.disabled = true;
-      var res = await ramdaniAuth.callAdminApi('set_account_active', { user_id: b.getAttribute('data-staff-toggle'), is_active: b.getAttribute('data-active') !== '1' });
+      b.setAttribute('aria-busy', 'true');
+      b.textContent = 'Working\u2026';
       var note = document.getElementById('staffAccountsNote');
-      if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; b.disabled = false; return; }
+      note.className = 'form-status';
+      note.textContent = '';
+      var res = await ramdaniAuth.callAdminApi('set_account_active', {
+        user_id: b.getAttribute('data-staff-toggle'),
+        is_active: nextActive
+      });
+      if (res.error) {
+        note.className = 'form-status err';
+        note.textContent = 'This action could not be completed. Your permissions or the account state may prevent this change.';
+        if (res.error.message) console.warn('set_account_active', res.error.message);
+        b.disabled = false;
+        b.removeAttribute('aria-busy');
+        b.textContent = original;
+        return;
+      }
+      note.className = 'form-status ok';
+      note.textContent = nextActive ? 'Account activated.' : 'Account deactivated.';
       loadStaffAccounts();
     });
 
