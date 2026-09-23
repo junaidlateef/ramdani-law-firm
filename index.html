@@ -1295,6 +1295,69 @@ html[dir="rtl"] .academy-media-play { transform: scaleX(-1); }
   .academy-breadcrumb ol { font-size: .75rem; }
 }
 /* ===== end MODULE 5 - ACADEMY ===== */
+/* ===== MODULE 6 — EVENTS & PROGRAMS (Phase 2) =====
+   Student + member portal event surfaces. Phase 1 tokens only. No new
+   :root, no second dark-mode system, no public Events route invented. */
+.events-section > .kicker { margin-bottom: .4rem; }
+.events-section > .kicker::before { content: ''; display: block; width: 2.5rem; height: 2px; background: var(--gold); margin-bottom: .7rem; }
+.events-section > .lead { margin: 0 0 1.15rem; max-width: 40rem; }
+.events-section > h3 { margin: 1.15rem 0 .65rem; font-size: 1.05rem; }
+.events-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: 1rem; align-items: stretch; }
+.events-grid > .empty { grid-column: 1 / -1; }
+.event-card {
+  display: flex;
+  flex-direction: column;
+  gap: .55rem;
+  height: 100%;
+  background: var(--card);
+  border-top-width: 3px;
+  border-top-color: transparent;
+}
+.event-card::before { display: none; }
+.event-card:hover,
+.event-card:focus-within { border-color: var(--gold); box-shadow: var(--shadow-premium, var(--shadow)); }
+.event-title { margin: 0; font-family: var(--serif); font-size: 1.15rem; font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
+.event-chips { display: flex; flex-wrap: wrap; gap: .35rem; margin: 0; }
+.event-badge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill, 999px);
+  padding: .15rem .6rem;
+  font-size: .72rem;
+  letter-spacing: .03em;
+  color: var(--muted);
+  background: transparent;
+}
+.event-badge.is-open { border-color: var(--gold); color: var(--accent-dark); }
+.event-badge.is-done { color: var(--muted); }
+html[data-theme="dark"] .event-badge.is-open { color: var(--gold); }
+.event-meta { margin: 0; color: var(--muted); font-size: .88rem; }
+.event-cta { margin-top: auto; align-self: start; min-height: 2.75rem; }
+.event-registered { margin-top: auto; font-size: .85rem; color: var(--muted); }
+.event-details { margin: 0; }
+.event-details summary {
+  cursor: pointer;
+  min-height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--accent-dark);
+  list-style: none;
+}
+.event-details summary::-webkit-details-marker { display: none; }
+.event-details summary::after { content: '\25be'; color: var(--gold); margin-inline-start: .35rem; }
+.event-details[open] summary::after { transform: rotate(180deg); }
+.event-details p { margin: .4rem 0 0; font-size: .9rem; color: var(--muted); }
+@media (prefers-reduced-motion: reduce) {
+  .event-card { transition: none; }
+  .event-details summary::after { transition: none; }
+}
+@media (max-width: 700px) {
+  .events-grid { gap: .85rem; }
+}
+/* ===== end MODULE 6 — EVENTS & PROGRAMS ===== */
 </style>
 </head>
 <body>
@@ -2789,12 +2852,15 @@ html[dir="rtl"] .academy-media-play { transform: scaleX(-1); }
           <div id="myStudentCard"></div>
         </section>
 
-        <section class="portal-section">
-          <h2>Events & attendance</h2>
-          <div id="myStudentUpcomingEvents"></div>
-          <p id="myStudentEventNote" class="form-status"></p>
-          <h3 class="note" style="margin-top:1rem">My registrations</h3>
-          <div id="myStudentEvents"></div>
+        <section class="portal-section events-section">
+          <p class="kicker" data-i18n="events_kicker">Events & programs</p>
+          <h2 data-i18n="events_title">Events</h2>
+          <p class="lead" data-i18n="events_lead">Events published by staff. Registering does not create membership or a lawyer&ndash;client relationship.</p>
+          <h3 data-i18n="events_open_heading">Open for registration</h3>
+          <div id="myStudentUpcomingEvents" class="events-grid"></div>
+          <p id="myStudentEventNote" class="form-status" role="status" aria-live="polite"></p>
+          <h3 data-i18n="events_my_regs">My registrations</h3>
+          <div id="myStudentEvents" class="events-grid"></div>
         </section>
 
         <section class="portal-section">
@@ -2879,12 +2945,15 @@ html[dir="rtl"] .academy-media-play { transform: scaleX(-1); }
           <h2>Documents</h2>
           <div id="memDocsBox"></div>
         </section>
-        <section class="portal-section">
-          <h2>Events</h2>
-          <div id="memUpcomingEventsBox"></div>
-          <p id="memEventNote" class="form-status"></p>
-          <h3 class="note" style="margin-top:1rem">My registrations</h3>
-          <div id="memEventsBox"></div>
+        <section class="portal-section events-section">
+          <p class="kicker" data-i18n="events_kicker">Events & programs</p>
+          <h2 data-i18n="events_title">Events</h2>
+          <p class="lead" data-i18n="events_lead">Events published by staff. Registering does not create membership or a lawyer&ndash;client relationship.</p>
+          <h3 data-i18n="events_open_heading">Open for registration</h3>
+          <div id="memUpcomingEventsBox" class="events-grid"></div>
+          <p id="memEventNote" class="form-status" role="status" aria-live="polite"></p>
+          <h3 data-i18n="events_my_regs">My registrations</h3>
+          <div id="memEventsBox" class="events-grid"></div>
         </section>
       </div>
     </div>
@@ -4104,8 +4173,7 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
           var avail = await sb.from('events').select('*').eq('status', 'published').eq('registration_open', true).order('starts_at', { ascending: true });
           upcomingBox.innerHTML = (avail.data || []).map(function (ev) {
             var already = memRegsIds[ev.id];
-            return '<article class="card"><h3>' + ramdaniUi.escape(ev.title) + '</h3><p class="note">' + ramdaniUi.escape(ev.starts_at || '') + (ev.venue ? ' · ' + ramdaniUi.escape(ev.venue) : '') + '</p>' +
-              (already ? '<p class="note">Already registered</p>' : '<button type="button" class="btn btn-sm" data-mem-register="' + ev.id + '">Register</button>') + '</article>';
+            return ramdaniUi.eventCard(ev, { already: already, registerAttr: 'data-mem-register' });
           }).join('') || '<p class="empty">No events open for registration right now.</p>';
           if (!upcomingBox.dataset.bound) {
             upcomingBox.dataset.bound = '1';
@@ -4123,7 +4191,7 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
         var regs = await sb.from('event_registrations').select('*, events(title, starts_at, status)').eq('profile_id', p.id).order('created_at', { ascending: false });
         document.getElementById('memEventsBox').innerHTML = (regs.data || []).map(function (r) {
           var ev = r.events || {};
-          return '<article class="card"><h3>' + ramdaniUi.escape(ev.title || 'Event') + '</h3><p class="note">' + ramdaniUi.escape(r.status || '') + (ev.starts_at ? ' · ' + ramdaniUi.escape(ev.starts_at) : '') + '</p></article>';
+          return ramdaniUi.eventCard(ev, { regStatus: r.status });
         }).join('') || '<p class="empty">You have not registered for any events.</p>';
       }
       return;
@@ -5076,6 +5144,26 @@ window.ramdaniSite = Object.freeze({
       resources_empty: 'Public resources will appear here once published.',
       careers_title: 'Careers',
       careers_empty: 'Open roles will appear here once published.',
+      events_kicker: 'Events & programs',
+      events_title: 'Events',
+      events_lead: 'Events published by staff. Registering does not create membership or a lawyer\u2013client relationship.',
+      events_open_heading: 'Open for registration',
+      events_my_regs: 'My registrations',
+      events_register: 'Register',
+      events_registered: 'Already registered',
+      events_status_registered: 'Registered',
+      events_open: 'Open for registration',
+      events_upcoming: 'Upcoming',
+      events_ongoing: 'Ongoing',
+      events_completed: 'Completed',
+      events_waitlisted: 'Waitlisted',
+      events_attended: 'Attended',
+      events_offline: 'In person',
+      events_online: 'Online',
+      events_hybrid: 'Hybrid',
+      events_details: 'Details',
+      events_capacity: 'Capacity',
+      events_cert: 'Certificate eligible',
       internships_title: 'Internships',
       internships_empty: 'Internship listings will appear here once published by the firm.',
       internships_lead: 'Published training opportunities only. Applications are reviewed by staff. This is not an offer of employment until confirmed in writing.',
@@ -5203,6 +5291,26 @@ window.ramdaniSite = Object.freeze({
       careers_title: '\u06a9\u06cc\u0631\u06cc\u0626\u0631',
       careers_empty: '\u06a9\u06be\u0644\u06cc \u0622\u0633\u0627\u0645\u06cc\u0627\u06ba \u0634\u0627\u0626\u0639 \u06c1\u0648\u0646\u06d2 \u06a9\u06d2 \u0628\u0639\u062f \u06cc\u06c1\u0627\u06ba \u0646\u0638\u0631 \u0622\u0626\u06cc\u06ba \u06af\u06cc\u06d4',
 
+      events_kicker: 'مشاغل اور پروگرامز',
+      events_title: 'مشاغل',
+      events_lead: 'عملہ کی جانب سے شائع شدہ مشاغل۔ رجسٹریشن سے رکنیت یا وکیل–کلائنٹ تعلق قائم نہیں ہوتا۔',
+      events_open_heading: 'رجسٹریشن کے لیے کھلے',
+      events_my_regs: 'میری رجسٹریشنز',
+      events_register: 'رجسٹر',
+      events_registered: 'پہلے سے رجسٹرڈ',
+      events_status_registered: 'رجسٹرڈ',
+      events_open: 'رجسٹریشن کے لیے کھلے',
+      events_upcoming: 'آنے والے',
+      events_ongoing: 'جاری',
+      events_completed: 'مکمل',
+      events_waitlisted: 'ویٹ لسٹ',
+      events_attended: 'شرکت کی',
+      events_offline: 'برسر',
+      events_online: 'آن لائن',
+      events_hybrid: 'ہائبرڈ',
+      events_details: 'تفصیل',
+      events_capacity: 'سمجھ',
+      events_cert: 'سرٹیفکیٹ کے لائق',
       internships_title: 'انٹرن شپ',
       internships_empty: 'انٹرن شپ فہرست شائع ہونے کے بعد یہاں نظر آئے گی۔',
       internships_lead: 'صرف شائع شدہ تربیتی مواقع۔ درخواستیں عملہ دیکھتا ہے۔',
@@ -5376,6 +5484,77 @@ window.ramdaniUi = {
   },
   // Academy section nav - links the existing Legal Education routes.
   // Labels reuse the existing nav_* translation keys.
+  formatWhen: function (value) {
+    if (!value) return '';
+    var d = new Date(value);
+    if (isNaN(d.getTime())) return String(value);
+    var loc = document.documentElement.lang === 'ur' ? 'ur-PK' : 'en-PK';
+    try {
+      return d.toLocaleString(loc, { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Karachi' });
+    } catch (e) {
+      return String(value);
+    }
+  },
+  // Event card — presentation only. Fields come from existing `events` /
+  // `event_registrations` rows. No extra request is made.
+  eventCard: function (ev, opts) {
+    opts = opts || {};
+    ev = ev || {};
+    var self = this;
+    function t(key, fallback) {
+      var v = window.ramdaniT ? ramdaniT(key) : '';
+      return (!v || v === key) ? fallback : v;
+    }
+    var typeMap = { offline: ['events_offline', 'In person'], online: ['events_online', 'Online'], hybrid: ['events_hybrid', 'Hybrid'] };
+    var statusMap = { waitlisted: ['events_waitlisted', 'Waitlisted'], attended: ['events_attended', 'Attended'], registered: ['events_status_registered', 'Registered'] };
+    var chips = [];
+    var typePair = typeMap[ev.event_type];
+    if (typePair) chips.push({ text: t(typePair[0], typePair[1]), kind: '' });
+    var now = Date.now();
+    var start = ev.starts_at ? new Date(ev.starts_at).getTime() : NaN;
+    var end = ev.ends_at ? new Date(ev.ends_at).getTime() : NaN;
+    if (!isNaN(start) && start > now) chips.push({ text: t('events_upcoming', 'Upcoming'), kind: 'is-open' });
+    else if (!isNaN(start) && (isNaN(end) || now <= end)) chips.push({ text: t('events_ongoing', 'Ongoing'), kind: 'is-open' });
+    else if (!isNaN(end) && end < now) chips.push({ text: t('events_completed', 'Completed'), kind: 'is-done' });
+    if (opts.already) chips.push({ text: t('events_registered', 'Already registered'), kind: 'is-done' });
+    else if (ev.registration_open) chips.push({ text: t('events_open', 'Open for registration'), kind: 'is-open' });
+    if (opts.regStatus) {
+      var st = statusMap[String(opts.regStatus).toLowerCase()];
+      chips.push({ text: st ? t(st[0], st[1]) : String(opts.regStatus), kind: 'is-done' });
+    }
+    if (ev.certificate_eligible) chips.push({ text: t('events_cert', 'Certificate eligible'), kind: '' });
+    var when = self.formatWhen(ev.starts_at);
+    var until = self.formatWhen(ev.ends_at);
+    var meta = [];
+    if (when) meta.push(until ? (when + ' \u2013 ' + until) : when);
+    if (ev.venue) meta.push(ev.venue);
+    if (ev.address) meta.push(ev.address);
+    if (ev.capacity) meta.push(t('events_capacity', 'Capacity') + ': ' + ev.capacity);
+    var extra = '';
+    if (ev.summary || ev.description) {
+      extra = '<details class="event-details"><summary>' + self.escape(t('events_details', 'Details')) + '</summary>' +
+        (ev.summary ? '<p>' + self.escape(ev.summary) + '</p>' : '') +
+        (ev.description ? '<p>' + self.escape(ev.description) + '</p>' : '') +
+        '</details>';
+    }
+    var cta = '';
+    if (opts.registerAttr && !opts.already) {
+      var lbl = t('events_register', 'Register');
+      cta = '<button type="button" class="btn btn-primary event-cta" ' + opts.registerAttr + '="' + self.escape(ev.id) +
+        '" aria-label="' + self.escape(lbl + ' \u2014 ' + (ev.title || '')) + '">' + self.escape(lbl) + '</button>';
+    } else if (opts.already) {
+      cta = '<p class="event-registered">' + self.escape(t('events_registered', 'Already registered')) + '</p>';
+    }
+    var chipHtml = chips.length
+      ? '<p class="event-chips">' + chips.map(function (c) {
+          return '<span class="event-badge' + (c.kind ? ' ' + c.kind : '') + '">' + self.escape(c.text) + '</span>';
+        }).join('') + '</p>'
+      : '';
+    return '<article class="card event-card">' + chipHtml +
+      '<p class="event-title" dir="auto">' + self.escape(ev.title || 'Event') + '</p>' +
+      (meta.length ? '<p class="event-meta">' + meta.map(function (m) { return self.escape(m); }).join(' \u00b7 ') + '</p>' : '') +
+      extra + cta + '</article>';
+  },
   academyNav: function (currentPath) {
     var el = document.getElementById('academyNav');
     if (!el) return;
@@ -6345,8 +6524,7 @@ window.ramdaniAuth = {
       else if (!avail.data || !avail.data.length) upEl.innerHTML = '<p class="empty">No events open for registration right now.</p>';
       else upEl.innerHTML = avail.data.map(function (ev) {
         var already = myRegsIds[ev.id];
-        return '<article class="card"><h3>' + esc(ev.title) + '</h3><p class="note">' + esc(ev.starts_at || '') + (ev.venue ? ' · ' + esc(ev.venue) : '') + '</p>' +
-          (already ? '<p class="note">Already registered</p>' : '<button type="button" class="btn btn-sm" data-student-register="' + ev.id + '">Register</button>') + '</article>';
+        return ramdaniUi.eventCard(ev, { already: already, registerAttr: 'data-student-register' });
       }).join('');
       if (!upEl.dataset.bound) {
         upEl.dataset.bound = '1';
@@ -6367,7 +6545,7 @@ window.ramdaniAuth = {
       else if (!regs.data || !regs.data.length) evEl.innerHTML = '<p class="empty">You have not registered for any events.</p>';
       else evEl.innerHTML = regs.data.map(function (r) {
         var ev = r.events || {};
-        return '<article class="card"><h3>' + esc(ev.title || 'Event') + '</h3><p class="note">' + esc(r.status) + (ev.starts_at ? ' · ' + esc(ev.starts_at) : '') + '</p></article>';
+        return ramdaniUi.eventCard(ev, { regStatus: r.status });
       }).join('');
     }
   }
