@@ -1687,6 +1687,41 @@ html.dark .rc-actions button { background:#fff; color:#0e2c27; }
   body.rc-printing #rcPrintRoot .rc-card:last-child { break-after:auto; }
   body.rc-printing #rcPrintRoot .rc-stage { zoom:1; }
 }
+
+/* --- Certificate: A4 landscape 297 x 210 mm --- */
+.rc-certwrap { display:block; max-width:100%; overflow-x:auto; --rc-zoom:.9; }
+.rc-cstage { zoom:var(--rc-zoom); width:297mm; height:210mm; }
+@media (max-width:1300px){ .rc-certwrap{ --rc-zoom:.7; } }
+@media (max-width:1000px){ .rc-certwrap{ --rc-zoom:.5; } }
+@media (max-width:700px){ .rc-certwrap{ --rc-zoom:.34; } }
+.rc-cert { box-sizing:border-box; position:relative; width:297mm; height:210mm; overflow:hidden; background:#fff; color:#1a1a1a; font-family:Georgia,"Times New Roman",serif; text-align:left; }
+.rc-cert .rc-frame { position:absolute; inset:9mm; border:.7mm solid #c8b273; }
+.rc-cert .rc-frame2 { position:absolute; inset:11.5mm; border:.2mm solid #0e2c27; }
+.rc-cert .rc-chead { position:absolute; left:20mm; right:20mm; top:17mm; text-align:center; }
+.rc-cert .rc-clogo { height:19mm; display:block; margin:0 auto 2mm; object-fit:contain; }
+.rc-cert .rc-corg { font-size:8mm; font-weight:700; color:#0e2c27; line-height:1.1; }
+.rc-cert .rc-ctitle { margin-top:2.2mm; font-size:5.2mm; color:#7d6a2c; letter-spacing:.3mm; }
+.rc-cert .rc-cintro { position:absolute; left:20mm; right:20mm; top:64mm; text-align:center; font-size:4.2mm; font-style:italic; color:#444; }
+.rc-cert .rc-cname { position:absolute; left:30mm; right:30mm; top:72mm; text-align:center; font-size:12.5mm; font-weight:700; color:#0e2c27; line-height:1.1; padding-bottom:2mm; border-bottom:.25mm solid #c8b273; }
+.rc-cert .rc-cbody { position:absolute; left:45mm; right:45mm; top:93mm; text-align:center; font-size:4.3mm; line-height:1.45; color:#333; }
+.rc-cert .rc-cgrid { position:absolute; left:26mm; right:26mm; top:110mm; display:grid; grid-template-columns:repeat(4,1fr); gap:5mm 6mm; margin:0; padding:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+.rc-cert .rc-cgrid div { min-width:0; }
+.rc-cert .rc-cgrid dt { font-size:3mm; color:#5b625f; margin:0 0 .6mm; }
+.rc-cert .rc-cgrid dd { margin:0; font-size:4.1mm; font-weight:600; color:#1a1a1a; word-break:break-word; }
+.rc-cert .rc-csig { position:absolute; left:30mm; top:158mm; width:66mm; height:16mm; border-bottom:.3mm solid #666; }
+.rc-cert .rc-cseal { position:absolute; right:32mm; top:146mm; width:32mm; height:32mm; border:.3mm dotted #999; border-radius:50%; }
+.rc-cert .rc-csig img, .rc-cert .rc-cseal img { width:100%; height:100%; object-fit:contain; display:block; }
+.rc-cert .rc-csig span, .rc-cert .rc-cseal span { position:absolute; left:0; bottom:-5mm; font:3mm system-ui,sans-serif; color:#5b625f; white-space:nowrap; }
+.rc-cert .rc-cseal span { left:50%; transform:translateX(-50%); bottom:-5mm; }
+.rc-cert .rc-cqr { position:absolute; left:50%; margin-left:-15mm; top:146mm; width:30mm; height:30mm; padding:1.2mm; box-sizing:border-box; border:.25mm solid #c8b273; background:#fff; }
+.rc-cert .rc-cqr svg { width:100%; height:100%; display:block; }
+.rc-cert .rc-cfoot { position:absolute; left:20mm; right:20mm; bottom:17mm; text-align:center; font:3mm system-ui,sans-serif; color:#333; }
+.rc-cert .rc-cfoot b { font-family:ui-monospace,Menlo,monospace; }
+@page rccert { size:297mm 210mm; margin:0; }
+@media print {
+  body.rc-printing #rcPrintRoot .rc-cert { display:block !important; page:rccert; break-inside:avoid; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  body.rc-printing #rcPrintRoot .rc-cstage { zoom:1; }
+}
 /* ===== end MODULE 13 ===== */
 
 </style>
@@ -2981,13 +3016,12 @@ html.dark .rc-actions button { background:#fff; color:#0e2c27; }
             <div class="admin-section-head"><div><h2>Lawyer cards</h2><p class="note">Issued only by staff to an active lawyer. The QR stores only a verification code. Signature and seal stay blank until real images exist.</p></div></div>
             <form id="lawyerCardForm" class="form admin-form">
               <label><span>Lawyer</span><select name="lawyer_id" required><option value="">Select lawyer…</option></select></label>
-              <label><span>Professional designation</span><input name="designation" placeholder="Advocate High Court…" /></label>
               <label><span>Issue date</span><input name="issue_date" type="date" /></label>
               <label><span>Expiry</span><input name="expiry_date" type="date" /></label>
               <label><span>Status</span><select name="status"><option value="draft">Draft</option><option value="approved">Approved</option><option value="issued">Issued</option><option value="active">Active</option></select></label>
               <div class="form-actions"><button class="btn btn-primary" type="submit">Save card</button><p id="lawyerCardNote" class="form-status"></p></div>
             </form>
-            <div class="table-wrap"><table class="data"><thead><tr><th>Card #</th><th>Lawyer</th><th>Designation</th><th>Status</th><th>Verify code</th><th>Actions</th></tr></thead><tbody id="lawyerCardBody"></tbody></table></div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Card #</th><th>Lawyer</th><th>Bar association</th><th>Status</th><th>Verify code</th><th>Actions</th></tr></thead><tbody id="lawyerCardBody"></tbody></table></div>
             <div id="lawyerCardPreview"></div>
           </div>
 
@@ -4622,21 +4656,40 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
           if (!card.error && card.data && card.data.ok) {
             var d = card.data;
             var kindLabel = { student: 'Student card verified', lawyer: 'Lawyer card verified', member: 'Member card verified' }[d.kind] || 'Card verified';
-            result.innerHTML = '<h2>' + esc(kindLabel) + '</h2>' +
+            result.innerHTML = '<h2>' + esc(kindLabel) + '</h2><p><strong>Result:</strong> VALID</p>' +
               (d.organization ? '<p><strong>Issued by:</strong> ' + esc(d.organization) + '</p>' : '') +
               '<p><strong>Card number:</strong> ' + esc(d.card_number) + '</p>' +
               (d.name ? '<p><strong>Name:</strong> ' + esc(d.name) + '</p>' : '') +
               (d.member_number ? '<p><strong>ID:</strong> ' + esc(d.member_number) + '</p>' : '') +
               (d.designation ? '<p><strong>Program / designation:</strong> ' + esc(d.designation) + '</p>' : '') +
               (d.issue_date ? '<p><strong>Issue date:</strong> ' + esc(d.issue_date) + '</p>' : '') +
+              (d.expiry_date ? '<p><strong>Expiry date:</strong> ' + esc(d.expiry_date) + '</p>' : '') +
               '<p><strong>Status:</strong> ' + esc(d.status || '') + '</p>';
             return;
           }
           if (!card.error && card.data && card.data.ok === false && (card.data.state === 'expired' || card.data.state === 'revoked')) {
-            result.innerHTML = '<p class="empty">This card has ' + (card.data.state === 'expired' ? 'expired' : 'been revoked') + ' and is not valid.</p>';
+            result.innerHTML = '<h2>' + (card.data.state === 'expired' ? 'EXPIRED' : 'REVOKED') + '</h2><p class="empty">This card has ' + (card.data.state === 'expired' ? 'expired' : 'been revoked') + ' and is not valid.</p>' +
+              (card.data.card_number ? '<p><strong>Card number:</strong> ' + esc(card.data.card_number) + '</p>' : '');
             return;
           }
-          result.innerHTML = '<p class="empty">No valid, currently-issued certificate or card matches this code.</p>';
+          var mc = await sb.rpc('verify_membership_certificate', { p_code: code });
+          if (!mc.error && mc.data && mc.data.kind === 'membership_certificate') {
+            var m = mc.data;
+            if (!m.ok) { result.innerHTML = '<h2>NOT VALID</h2><p class="empty">This membership certificate exists but the membership is not currently active.</p>'; return; }
+            result.innerHTML = '<h2>Membership certificate verified</h2><p><strong>Result:</strong> VALID</p>' +
+              (m.organization ? '<p><strong>Issued by:</strong> ' + esc(m.organization) + '</p>' : '') +
+              '<p><strong>Certificate number:</strong> ' + esc(m.certificate_number) + '</p>' +
+              (m.member_name ? '<p><strong>Member:</strong> ' + esc(m.member_name) + '</p>' : '') +
+              (m.member_number ? '<p><strong>Member number:</strong> ' + esc(m.member_number) + '</p>' : '') +
+              (m.membership_number ? '<p><strong>Membership number:</strong> ' + esc(m.membership_number) + '</p>' : '') +
+              (m.membership_type ? '<p><strong>Membership type:</strong> ' + esc(m.membership_type) + '</p>' : '') +
+              (m.society ? '<p><strong>Society:</strong> ' + esc(m.society) + '</p>' : '') +
+              (m.chapter ? '<p><strong>Chapter:</strong> ' + esc(m.chapter) + '</p>' : '') +
+              (m.issue_date ? '<p><strong>Issue date:</strong> ' + esc(m.issue_date) + '</p>' : '') +
+              (m.expiry_date ? '<p><strong>Expiry date:</strong> ' + esc(m.expiry_date) + '</p>' : '');
+            return;
+          }
+          result.innerHTML = '<h2>NOT FOUND</h2><p class="empty">No valid, currently-issued certificate or card matches this code.</p>';
           return;
         }
         result.innerHTML = '<h2>Certificate verified</h2>' +
@@ -4708,6 +4761,25 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       '<div class="rc-actions"><button type="button" data-rc-flip>Show back</button><button type="button" data-rc-print>Print card</button></div></div>';
   }
 
+
+  /* o: { org, logo, name, statement, fields:[[label,value]], cert:{number,verify_code,issue_date,expiry_date}, signatureUrl, sealUrl } */
+  function certHtml(o) {
+    var c = o.cert || {}, org = o.org || (window.ramdaniSite && ramdaniSite.name) || 'Ramdani Law Firm';
+    var okUrl = function (u) { return typeof u === 'string' && /^https:\/\//i.test(u); };
+    var fields = (o.fields || []).filter(function (f) { return f && f[1] != null && String(f[1]).trim() !== ''; });
+    var html = '<div class="rc-cert"><div class="rc-frame"></div><div class="rc-frame2"></div>' +
+      '<div class="rc-chead">' + (o.logo ? '<img class="rc-clogo" src="' + esc(o.logo) + '" alt="" onerror="this.remove()">' : '') +
+      '<div class="rc-corg">' + esc(org) + '</div><div class="rc-ctitle">' + esc(o.title || 'Certificate of Membership') + '</div></div>' +
+      '<div class="rc-cintro">This is to certify that</div><div class="rc-cname">' + esc(o.name || '') + '</div>' +
+      (o.statement ? '<div class="rc-cbody">' + esc(o.statement) + '</div>' : '') +
+      '<dl class="rc-cgrid">' + fields.map(function (f) { return '<div><dt>' + esc(f[0]) + '</dt><dd>' + esc(f[1]) + '</dd></div>'; }).join('') + '</dl>' +
+      '<div class="rc-csig">' + (okUrl(o.signatureUrl) ? '<img src="' + esc(o.signatureUrl) + '" alt="Authorised signature">' : '') + '<span>Authorised signature</span></div>' +
+      '<div class="rc-cqr">' + (c.verify_code ? qrSvg(verifyUrl(c.verify_code)) : '') + '</div>' +
+      '<div class="rc-cseal">' + (okUrl(o.sealUrl) ? '<img src="' + esc(o.sealUrl) + '" alt="Official seal">' : '') + '<span>Official seal</span></div>' +
+      '<div class="rc-cfoot">Certificate No. <b>' + esc(c.number || '') + '</b> &nbsp;·&nbsp; Verification code <b>' + esc(c.verify_code || '') + '</b><br>Verify by scanning the QR code or on the ' + esc(org) + ' verification page.</div></div>';
+    return '<div class="rc-wrap rc-certwrap"><div class="rc-cstage">' + html + '</div><div class="rc-actions"><button type="button" data-rc-print>Print / Save as PDF</button></div></div>';
+  }
+
   var photoCache = {};
   function hydratePhotos(root) {
     (root || document).querySelectorAll('img[data-rc-photo]').forEach(function (img) {
@@ -4721,7 +4793,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
   function printWrap(wrap) {
     var old = document.getElementById('rcPrintRoot'); if (old) old.remove();
     var root = document.createElement('div'); root.id = 'rcPrintRoot';
-    var stage = wrap.querySelector('.rc-stage').cloneNode(true);
+    var stage = wrap.querySelector('.rc-stage, .rc-cstage').cloneNode(true);
     root.appendChild(stage); document.body.appendChild(root);
     document.body.classList.add('rc-printing');
     var done = false;
@@ -4738,7 +4810,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     if (p) printWrap(p.closest('.rc-wrap'));
   });
 
-  window.ramdaniOfficial = { cardHtml: cardHtml, hydratePhotos: hydratePhotos, qrSvg: qrSvg, verifyUrl: verifyUrl, fmtDate: fmtDate };
+  window.ramdaniOfficial = { cardHtml: cardHtml, certHtml: certHtml, hydratePhotos: hydratePhotos, qrSvg: qrSvg, verifyUrl: verifyUrl, fmtDate: fmtDate };
 })();
 
 </script>
@@ -4987,10 +5059,14 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         }
         var card = pendingOnly ? { data: [] } : await sb.from('member_cards').select('*').eq('member_id', m.id).in('status', ['issued','active']).order('created_at', { ascending: false }).limit(1);
         var c = card.data && card.data[0];
+        var cardShip = c ? ((ships.data || []).find(function (s) { return s.id === c.membership_id; }) || null) : null;
+        var cardSocId = c && ((cardShip && cardShip.society_id) || c.society_id), cardChId = c && ((cardShip && cardShip.chapter_id) || c.chapter_id);
+        var cardSoc = cardSocId ? ((await sb.from('societies').select('title').eq('id', cardSocId).maybeSingle()).data || {}).title : null;
+        var cardCh = cardChId ? ((await sb.from('chapters').select('title').eq('id', cardChId).maybeSingle()).data || {}).title : null;
         box.innerHTML = c
           ? ramdaniOfficial.cardHtml({ kind: 'member', name: m.full_name, designation: c.designation || m.designation, photoPath: m.photo_path, card: c,
-              fields: [['Member No.', m.member_number], ['Membership No.', activeShip && activeShip.membership_number], ['Membership type', activeShip && activeShip.membership_type],
-                       ['Society', soc.data && soc.data.title], ['Chapter', ch.data && ch.data.title]] })
+              fields: [['Member No.', m.member_number], ['Membership No.', cardShip && cardShip.membership_number], ['Membership type', cardShip && cardShip.membership_type],
+                       ['Society', cardSoc], ['Chapter', cardCh]] })
           : '<p class="empty">' + (pendingOnly ? 'Membership is pending review. An official card is not available yet.' : 'No card has been issued yet.') + '</p>';
         if (window.ramdaniOfficial) ramdaniOfficial.hydratePhotos(box);
         var memCertDisplayBox = document.getElementById('memMembershipCertBox');
@@ -5012,49 +5088,17 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             var body = {};
             try { body = JSON.parse(cd.body_rendered || '{}'); } catch (e) { body = {}; }
             var certShip = (ships.data || []).find(function (s) { return s.id === cd.membership_id; });
-            var certSocTitle = soc.data && soc.data.title;
-            var certChTitle = ch.data && ch.data.title;
-            if (certShip && certShip.society_id && certShip.society_id !== m.society_id) {
-              var soc2 = await sb.from('societies').select('title').eq('id', certShip.society_id).maybeSingle();
-              certSocTitle = soc2.data && soc2.data.title;
-            }
-            if (certShip && certShip.chapter_id && certShip.chapter_id !== m.chapter_id) {
-              var ch2 = await sb.from('chapters').select('title').eq('id', certShip.chapter_id).maybeSingle();
-              certChTitle = ch2.data && ch2.data.title;
-            }
-            function mcRow(label, val) { return val ? '<div><dt>' + ramdaniUi.escape(label) + '</dt><dd>' + ramdaniUi.escape(val) + '</dd></div>' : ''; }
-            function mcMark(label, url) {
-              return '<div class="mark">' + (url ? '<img src="' + ramdaniUi.escape(url) + '" alt="' + ramdaniUi.escape(label) + '" />' : '<div class="mark-ph">' + ramdaniUi.escape(label) + '</div>') + '<p>' + ramdaniUi.escape(label) + '</p></div>';
-            }
-            var verifyUrl = '/pages/verify-certificate.html?code=' + encodeURIComponent(cd.verify_code || '');
-            memCertDisplayBox.innerHTML =
-              '<div class="membership-certificate print-target" id="memCertPrintTarget">' +
-                '<div class="mc-head">' +
-                  (body.logo_url ? '<img src="' + ramdaniUi.escape(body.logo_url) + '" alt="Logo" />' : '') +
-                  '<div><div class="mc-org">' + ramdaniUi.escape(body.organization_name || 'Ramdani Law Firm') + '</div><div class="mc-sub">Membership Certificate</div></div>' +
-                '</div>' +
-                '<p class="mc-title">This certifies that the named member holds an active, verified membership under the record below.</p>' +
-                '<p class="mc-recipient">' + ramdaniUi.escape(body.recipient_name || m.full_name || '') + '</p>' +
-                '<dl class="mc-grid">' +
-                  mcRow('Member Number', body.member_number || m.member_number) +
-                  mcRow('Membership Number', body.membership_number || (certShip && certShip.membership_number)) +
-                  mcRow('Membership Type', certShip && certShip.membership_type) +
-                  mcRow('Society', certSocTitle) +
-                  mcRow('Chapter', certChTitle) +
-                  mcRow('Certificate Number', cd.document_number) +
-                  mcRow('Issue Date', body.issue_date || cd.issued_at) +
-                  mcRow('Expiry Date', body.expiry_date) +
-                '</dl>' +
-                '<div class="mc-marks">' +
-                  mcMark('Signature', body.signature_url) +
-                  mcMark('Official Seal', body.seal_url) +
-                '</div>' +
-                '<p class="mc-verify">Verification code: ' + ramdaniUi.escape(cd.verify_code || '—') + '</p>' +
-              '</div>' +
-              '<div class="mc-actions">' +
-                '<a class="btn" href="' + verifyUrl + '" target="_blank" rel="noopener">Verify this certificate</a>' +
-                '<button type="button" class="btn btn-primary" id="memCertPrintBtn">Print / Save as PDF</button>' +
-              '</div>';
+            var certSocId = certShip && certShip.society_id, certChId = certShip && certShip.chapter_id;
+            var certSocTitle = certSocId ? ((await sb.from('societies').select('title').eq('id', certSocId).maybeSingle()).data || {}).title : null;
+            var certChTitle = certChId ? ((await sb.from('chapters').select('title').eq('id', certChId).maybeSingle()).data || {}).title : null;
+            memCertDisplayBox.innerHTML = ramdaniOfficial.certHtml({
+              org: body.organization_name, logo: body.logo_url, name: body.recipient_name || m.full_name, statement: body.body,
+              signatureUrl: body.signature_url, sealUrl: body.seal_url,
+              fields: [['Member number', body.member_number || m.member_number], ['Membership number', body.membership_number || (certShip && certShip.membership_number)],
+                       ['Membership type', certShip && certShip.membership_type], ['Society', certSocTitle], ['Chapter', certChTitle],
+                       ['Issue date', ramdaniOfficial.fmtDate(body.issue_date || cd.issued_at)], ['Expiry date', ramdaniOfficial.fmtDate(body.expiry_date)]],
+              cert: { number: cd.document_number, verify_code: cd.verify_code } });
+            var printBtn = null;
             var printBtn = document.getElementById('memCertPrintBtn');
             if (printBtn) {
               printBtn.addEventListener('click', function () {
@@ -8003,11 +8047,10 @@ window.ramdaniAuth = {
       else {
         var c = sc.data[0];
         var sp = (await sb.from('profiles').select('full_name, student_id, department, session, program, batch, photo_path').eq('id', uid).maybeSingle()).data || {};
-        var sSoc = c.society_id ? (await sb.from('societies').select('title').eq('id', c.society_id).maybeSingle()).data : null;
-        var sCh = c.chapter_id ? (await sb.from('chapters').select('title').eq('id', c.chapter_id).maybeSingle()).data : null;
-        cardEl.innerHTML = ramdaniOfficial.cardHtml({ kind: 'student', name: sp.full_name || c.full_name, designation: c.program || sp.program, photoPath: sp.photo_path, card: c,
-          fields: [['Student ID', c.student_number || sp.student_id], ['Roll No.', c.roll_number], ['Department', c.department || sp.department],
-                   ['Session / batch', c.batch || c.session || sp.batch || sp.session], ['Chapter', sCh && sCh.title], ['Society', sSoc && sSoc.title]] });
+        var stRow = (await sb.from('students').select('student_number, department, session, program, batch').eq('profile_id', uid).maybeSingle()).data || {};
+        cardEl.innerHTML = ramdaniOfficial.cardHtml({ kind: 'student', name: sp.full_name, designation: c.program || stRow.program || sp.program, photoPath: sp.photo_path, card: c,
+          fields: [['Student ID', stRow.student_number || sp.student_id], ['Department', stRow.department || sp.department],
+                   ['Session', stRow.session || sp.session], ['Batch', c.batch || stRow.batch || sp.batch]] });
         ramdaniOfficial.hydratePhotos(cardEl);
       }
     }
@@ -8144,8 +8187,9 @@ window.ramdaniAuth = {
     var card = await sb.from('member_cards').select('*').eq('member_id', m.id).in('status', ['issued', 'active']).order('created_at', { ascending: false }).limit(1);
     if (card.error) { if (window.console) console.error('member card lookup failed', card.error); box.innerHTML = '<p class="empty">Membership status: ' + esc(m.status) + '. The card could not be loaded.</p>'; return; }
     var c = card.data && card.data[0];
-    var lSoc = m.society_id ? (await sb.from('societies').select('title').eq('id', m.society_id).maybeSingle()).data : null;
-    var lCh = m.chapter_id ? (await sb.from('chapters').select('title').eq('id', m.chapter_id).maybeSingle()).data : null;
+    var lSocId = c && (c.society_id), lChId = c && (c.chapter_id);
+    var lSoc = lSocId ? (await sb.from('societies').select('title').eq('id', lSocId).maybeSingle()).data : null;
+    var lCh = lChId ? (await sb.from('chapters').select('title').eq('id', lChId).maybeSingle()).data : null;
     box.innerHTML = c
       ? ramdaniOfficial.cardHtml({ kind: 'member', name: m.full_name || p.full_name, designation: c.designation || m.designation, photoPath: m.photo_path || p.photo_path, card: c,
           fields: [['Member No.', m.member_number], ['Society', lSoc && lSoc.title], ['Chapter', lCh && lCh.title]] })
@@ -8164,9 +8208,17 @@ window.ramdaniAuth = {
     var c = lc.data && lc.data[0];
     if (!c) { box.innerHTML = '<p class="empty">No lawyer card has been issued yet.</p>'; return; }
     var L = lw.data;
-    box.innerHTML = ramdaniOfficial.cardHtml({ kind: 'lawyer', name: p.full_name || L.full_name, designation: c.designation || L.designation, photoPath: p.photo_path, card: c,
-      fields: [['Lawyer ID', L.lawyer_number || L.reference_id || p.reference_id], ['Bar association', p.bar_association || L.bar_association],
-               ['Licence no.', p.bar_license_no || L.bar_license_no], ['District', p.district || L.district]] });
+    var verified = L.status === 'active';
+    var lSoc2 = null, lCh2 = null;
+    var lm = await sb.from('members').select('id').eq('profile_id', p.id).maybeSingle();
+    if (lm.data) {
+      var lms = await sb.from('memberships').select('society_id, chapter_id').eq('member_id', lm.data.id).eq('status', 'active').limit(1);
+      var ms0 = lms.data && lms.data[0];
+      if (ms0 && ms0.society_id) lSoc2 = ((await sb.from('societies').select('title').eq('id', ms0.society_id).maybeSingle()).data || {}).title;
+      if (ms0 && ms0.chapter_id) lCh2 = ((await sb.from('chapters').select('title').eq('id', ms0.chapter_id).maybeSingle()).data || {}).title;
+    }
+    box.innerHTML = ramdaniOfficial.cardHtml({ kind: 'lawyer', name: p.full_name, photoPath: p.photo_path, card: c,
+      fields: [['Lawyer ID', L.reference_id || p.reference_id], ['Bar association', verified ? L.bar_association : null], ['Society', lSoc2], ['Chapter', lCh2]] });
     ramdaniOfficial.hydratePhotos(box);
   }
 
@@ -8176,7 +8228,7 @@ window.ramdaniAuth = {
     if (res.error) { if (window.console) console.error('loadCertificates failed', res.error); box.innerHTML = '<p class="empty">Could not load this section. Please try again later.</p>'; return; }
     box.innerHTML = (res.data || []).map(function (c) {
       return '<article class="card"><h3>Certificate ' + esc(c.certificate_number) + '</h3><p class="note">' + esc(c.issue_date || '') + '</p><p class="qr">Verify: ' + esc(c.verification_code) + '</p></article>';
-    }).join('') || '<p class="empty">No certificates issued yet.</p>';
+    }).join('') || '<p class="empty">No certificates have been issued to lawyer accounts.</p>';
   }
 
   async function loadDocuments(p) {
@@ -8185,7 +8237,7 @@ window.ramdaniAuth = {
     if (res.error) { if (window.console) console.error('loadDocuments failed', res.error); box.innerHTML = '<p class="empty">Could not load this section. Please try again later.</p>'; return; }
     box.innerHTML = (res.data || []).map(function (d) {
       return '<article class="card"><h3>' + esc(d.category) + '</h3><p class="note">' + esc(d.document_number || '') + (d.issued_at ? ' · ' + esc(d.issued_at) : '') + '</p></article>';
-    }).join('') || '<p class="empty">No documents issued.</p>';
+    }).join('') || '<p class="empty">No documents have been issued to lawyer accounts.</p>';
   }
 
   async function loadCourses(p) {
@@ -14397,7 +14449,7 @@ window.ramdaniAuth = {
     var lw = await sb.from('lawyers').select('*');
     if (lw.error) { setNote('lawyerCardNote', lw.error.message); return; }
     var pids = (lw.data || []).map(function (l) { return l.profile_id; }).filter(Boolean);
-    var pr = pids.length ? await sb.from('profiles').select('id, full_name, email, reference_id, photo_path, bar_association, bar_license_no, district').in('id', pids) : { data: [] };
+    var pr = pids.length ? await sb.from('profiles').select('id, full_name, email, reference_id, photo_path').in('id', pids) : { data: [] };
     var byProfile = {}; (pr.data || []).forEach(function (p) { byProfile[p.id] = p; });
     lawyerCardLawyers = {};
     (lw.data || []).forEach(function (l) { lawyerCardLawyers[l.id] = { lawyer: l, profile: byProfile[l.profile_id] || {} }; });
@@ -14409,7 +14461,7 @@ window.ramdaniAuth = {
     var res = await sb.from('lawyer_cards').select('*').order('created_at', { ascending: false });
     if (res.error) { setNote('lawyerCardNote', res.error.message); return; }
     $id('lawyerCardBody').innerHTML = (res.data || []).map(function (c) {
-      var x = lawyerCardLawyers[c.lawyer_id] || { profile: {} };
+      var x = lawyerCardLawyers[c.lawyer_id] || { lawyer: {}, profile: {} };
       var a = '';
       if (c.status === 'draft') a += '<button type="button" class="btn btn-sm" data-lc-set="approved" data-lc-id="' + c.id + '">Approve</button> ';
       else if (c.status === 'approved') a += '<button type="button" class="btn btn-sm" data-lc-set="issued" data-lc-id="' + c.id + '">Issue</button> ';
@@ -14417,7 +14469,7 @@ window.ramdaniAuth = {
       else if (c.status === 'active' || c.status === 'expired') a += '<button type="button" class="btn btn-sm" data-lc-renew="' + c.id + '">Renew</button> ';
       a += '<button type="button" class="btn btn-sm" data-lc-preview="' + c.id + '">Preview</button> ';
       if (c.status !== 'revoked') a += '<button type="button" class="btn btn-sm" data-lc-set="revoked" data-lc-id="' + c.id + '">Revoke</button>';
-      return '<tr><td>' + escapeHtml(c.card_number || '(pending)') + '</td><td>' + escapeHtml(x.profile.full_name || x.profile.email || '') + '</td><td>' + escapeHtml(c.designation || '') + '</td><td><span class="status-badge status-' + escapeHtml(c.status) + '">' + escapeHtml(c.status) + '</span></td><td><code>' + escapeHtml(c.verify_code || '') + '</code></td><td><div class="table-actions">' + a + '</div></td></tr>';
+      return '<tr><td>' + escapeHtml(c.card_number || '(pending)') + '</td><td>' + escapeHtml(x.profile.full_name || x.profile.email || '') + '</td><td>' + escapeHtml((x.lawyer && x.lawyer.status === 'active' && x.lawyer.bar_association) || '') + '</td><td><span class="status-badge status-' + escapeHtml(c.status) + '">' + escapeHtml(c.status) + '</span></td><td><code>' + escapeHtml(c.verify_code || '') + '</code></td><td><div class="table-actions">' + a + '</div></td></tr>';
     }).join('') || '<tr><td colspan="6">No lawyer cards yet.</td></tr>';
     var cardsById = {}; (res.data || []).forEach(function (c) { cardsById[c.id] = c; });
     var panel = $id('lawyerCardsPanel');
@@ -14426,7 +14478,7 @@ window.ramdaniAuth = {
       form.addEventListener('submit', async function (e) {
         e.preventDefault();
         var f = e.target;
-        var payload = { lawyer_id: f.elements.lawyer_id.value, designation: f.elements.designation.value.trim() || null, issue_date: f.elements.issue_date.value || null,
+        var payload = { lawyer_id: f.elements.lawyer_id.value, issue_date: f.elements.issue_date.value || null,
           expiry_date: f.elements.expiry_date.value || null, status: f.elements.status.value, issued_by: (await ramdaniAuth.profile() || {}).id || null };
         if (!payload.lawyer_id) return setNote('lawyerCardNote', 'Select a lawyer.');
         var r = await sb.from('lawyer_cards').insert(payload);
@@ -14440,7 +14492,6 @@ window.ramdaniAuth = {
           if (next === 'revoked' && !confirm('Revoke this card?')) return;
           var upd = { status: next };
           var me = await ramdaniAuth.profile();
-          if (next === 'approved') { upd.approved_by = me && me.id; upd.approved_at = new Date().toISOString(); }
           if (next === 'issued') upd.issued_by = me && me.id;
           var r = await sb.from('lawyer_cards').update(upd).eq('id', t.getAttribute('data-lc-id'));
           if (r.error) setNote('lawyerCardNote', r.error.message); else loadLawyerCards();
@@ -14451,8 +14502,8 @@ window.ramdaniAuth = {
         } else if (t.hasAttribute('data-lc-preview')) {
           var c = panel._cards && panel._cards[t.getAttribute('data-lc-preview')]; if (!c) return;
           var x = lawyerCardLawyers[c.lawyer_id] || { lawyer: {}, profile: {} }, p = x.profile, L = x.lawyer;
-          $id('lawyerCardPreview').innerHTML = ramdaniOfficial.cardHtml({ kind: 'lawyer', name: p.full_name, designation: c.designation, photoPath: p.photo_path, card: c,
-            fields: [['Lawyer ID', L.lawyer_number || L.reference_id || p.reference_id], ['Bar association', p.bar_association], ['Licence no.', p.bar_license_no], ['District', p.district]] });
+          $id('lawyerCardPreview').innerHTML = ramdaniOfficial.cardHtml({ kind: 'lawyer', name: p.full_name, photoPath: p.photo_path, card: c,
+            fields: [['Lawyer ID', L.reference_id || p.reference_id], ['Bar association', L.status === 'active' ? L.bar_association : null]] });
           ramdaniOfficial.hydratePhotos($id('lawyerCardPreview'));
         }
       });
