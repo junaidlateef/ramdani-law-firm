@@ -1661,18 +1661,27 @@ html.dark .membership-certificate { background:#fff; color:#16241f; }
 .rc-foot { position:absolute; left:0; right:0; bottom:0; height:5.6mm; border-top:.25mm solid var(--rc-gold); background:#faf8f1; display:flex; align-items:center; justify-content:space-between; padding:0 3.5mm; font-size:2mm; color:var(--rc-ink); }
 .rc-foot b { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-weight:700; letter-spacing:.1mm; }
 .rc-bhead { position:absolute; left:0; top:0; right:0; height:4.2mm; background:var(--rc-navy); color:#fff; font-size:2.1mm; display:flex; align-items:center; padding:0 3.5mm; font-family:Georgia,serif; }
-.rc-qr { position:absolute; left:4mm; top:7.5mm; width:24mm; height:24mm; padding:1mm; box-sizing:border-box; background:#fff; border:.25mm solid var(--rc-gold); border-radius:.8mm; }
+.rc-qr { position:absolute; left:4mm; top:6.3mm; width:24mm; height:24mm; padding:1mm; box-sizing:border-box; background:#fff; border:.25mm solid var(--rc-gold); border-radius:.8mm; }
 .rc-qr svg { width:100%; height:100%; display:block; }
-.rc-bmain { position:absolute; left:32mm; right:3.5mm; top:7.5mm; }
+.rc-bmain { position:absolute; left:32mm; right:3.5mm; top:6.3mm; z-index:1; }
+.rc-bcode { position:absolute; left:4mm; top:31.2mm; width:26mm; z-index:1; }
+.rc-btitle { margin:0; font-size:1.9mm; font-weight:700; letter-spacing:.12mm; text-transform:uppercase; color:var(--rc-navy); }
+.rc-blist { margin:.5mm 0 0; padding:0; list-style:none; font-size:1.65mm; line-height:1.25; color:var(--rc-ink); }
+.rc-blist li { position:relative; padding-left:1.7mm; }
+.rc-blist li::before { content:"\2022"; position:absolute; left:0; }
+.rc-bvt { margin-top:1.4mm; }
+.rc-bverif { margin:.4mm 0 0; font-size:1.65mm; line-height:1.25; color:var(--rc-mute); }
 .rc-blabel { font-size:1.75mm; color:var(--rc-mute); margin:0; }
-.rc-code { margin:.3mm 0 0; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:2.7mm; font-weight:700; letter-spacing:.15mm; color:var(--rc-navy); word-break:break-all; }
+.rc-code { margin:.3mm 0 0; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:2.2mm; font-weight:700; letter-spacing:.15mm; color:var(--rc-navy); word-break:break-all; }
 .rc-note { margin:1.6mm 0 0; font-size:1.85mm; color:var(--rc-mute); line-height:1.3; }
-.rc-sig { position:absolute; left:4mm; top:36mm; width:36mm; height:11mm; border-bottom:.25mm solid #777; }
+.rc-sig { position:absolute; left:4mm; top:40mm; width:36mm; height:8mm; border-bottom:.25mm solid #777; }
 .rc-sig span, .rc-seal span { position:absolute; left:0; bottom:-3.3mm; font-size:1.75mm; color:var(--rc-mute); white-space:nowrap; }
 .rc-seal { position:absolute; left:63mm; top:33.5mm; width:14mm; height:14mm; border:.25mm dotted #999; border-radius:50%; }
 .rc-seal span { left:50%; transform:translateX(-50%); bottom:-3.3mm; }
 .rc-sig img, .rc-seal img { width:100%; height:100%; object-fit:contain; }
 .rc-bfoot { position:absolute; left:0; right:0; bottom:0; height:0; }
+.rc-wm { position:absolute; left:57mm; top:27mm; width:28mm; height:28mm; transform:translate(-50%,-50%); opacity:.07; filter:grayscale(1); mix-blend-mode:multiply; pointer-events:none; z-index:0; }
+.rc-wm img { width:100%; height:100%; object-fit:contain; display:block; }
 .rc-actions { display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.7rem; }
 .rc-actions button { font:inherit; font-size:.85rem; padding:.35rem .8rem; border-radius:6px; border:1px solid var(--rc-gold,#c8b273); background:#fff; color:#0e2c27; cursor:pointer; }
 .rc-actions button:focus-visible { outline:2px solid #0e2c27; outline-offset:2px; }
@@ -4667,15 +4676,20 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
               '<p><strong>Status:</strong> ' + esc(d.status || '') + '</p>';
             return;
           }
-          if (!card.error && card.data && card.data.ok === false && (card.data.state === 'expired' || card.data.state === 'revoked')) {
-            result.innerHTML = '<h2>' + (card.data.state === 'expired' ? 'EXPIRED' : 'REVOKED') + '</h2><p class="empty">This card has ' + (card.data.state === 'expired' ? 'expired' : 'been revoked') + ' and is not valid.</p>' +
+          if (!card.error && card.data && card.data.ok === false && (card.data.state === 'expired' || card.data.state === 'revoked' || card.data.state === 'not_valid')) {
+            result.innerHTML = '<h2>' + (card.data.state === 'expired' ? 'EXPIRED' : (card.data.state === 'revoked' ? 'REVOKED' : 'NOT VALID')) + '</h2><p class="empty">' + (card.data.state === 'expired' ? 'This card has expired and is not valid.' : (card.data.state === 'revoked' ? 'This card has been revoked and is not valid.' : 'This card is not currently valid.')) + '</p>' +
               (card.data.card_number ? '<p><strong>Card number:</strong> ' + esc(card.data.card_number) + '</p>' : '');
             return;
           }
           var mc = await sb.rpc('verify_membership_certificate', { p_code: code });
           if (!mc.error && mc.data && mc.data.kind === 'membership_certificate') {
             var m = mc.data;
-            if (!m.ok) { result.innerHTML = '<h2>NOT VALID</h2><p class="empty">This membership certificate exists but the membership is not currently active.</p>'; return; }
+            if (!m.ok) {
+              var mst = m.state === 'expired' ? 'EXPIRED' : (m.state === 'revoked' ? 'REVOKED' : 'NOT VALID');
+              result.innerHTML = '<h2>' + mst + '</h2><p class="empty">' + (mst === 'EXPIRED' ? 'This membership certificate has expired and is not valid.' : (mst === 'REVOKED' ? 'This membership certificate has been revoked and is not valid.' : 'This membership certificate is not currently valid.')) + '</p>' +
+                (m.certificate_number ? '<p><strong>Certificate number:</strong> ' + esc(m.certificate_number) + '</p>' : '');
+              return;
+            }
             result.innerHTML = '<h2>Membership certificate verified</h2><p><strong>Result:</strong> VALID</p>' +
               (m.organization ? '<p><strong>Issued by:</strong> ' + esc(m.organization) + '</p>' : '') +
               '<p><strong>Certificate number:</strong> ' + esc(m.certificate_number) + '</p>' +
@@ -4752,10 +4766,17 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       '<div class="rc-main"><div class="rc-name">' + esc(o.name || '') + '</div>' + (o.designation ? '<div class="rc-desig">' + esc(o.designation) + '</div>' : '') +
       '<dl class="rc-fields">' + fields.map(function (f) { return '<div><dt>' + esc(f[0]) + '</dt><dd>' + esc(f[1]) + '</dd></div>'; }).join('') + '</dl></div>' +
       '<div class="rc-foot"><span>Card No. <b>' + esc(c.card_number || '') + '</b></span><span>' + (c.issue_date ? 'Issued ' + esc(fmtDate(c.issue_date)) : '') + (c.expiry_date ? ' · Valid to ' + esc(fmtDate(c.expiry_date)) : '') + '</span></div></div>';
-    var back = '<div class="rc-card rc-back"><div class="rc-bhead">' + esc(org) + '</div>' +
+    var BACKTXT = {
+      member: ['Member Roles', ['Represent Ramdani responsibly.', 'Follow organizational rules and code of conduct.', 'Maintain professional and academic integrity.', 'Participate in assigned programs and activities.', 'Protect organizational information and property.']],
+      student: ['Student Instructions', ['Carry this card during official activities.', 'Use it only for authorized purposes.', 'Follow applicable academic and organizational rules.', 'Report loss or damage promptly.']],
+      lawyer: ['Professional Instructions', ['This card is issued for official identification.', 'Use it only for authorized organizational purposes.', 'Maintain professional conduct.', 'Report loss, damage or unauthorized use promptly.']]
+    };
+    var bt = BACKTXT[o.kind] || null;
+    var back = '<div class="rc-card rc-back"><div class="rc-wm"><img src="' + esc(logo) + '" alt="" onerror="this.parentNode.remove()"></div><div class="rc-bhead">' + esc(org) + '</div>' +
       '<div class="rc-qr">' + (c.verify_code ? qrSvg(verifyUrl(c.verify_code)) : '') + '</div>' +
-      '<div class="rc-bmain"><p class="rc-blabel">Verification code</p><p class="rc-code">' + esc(c.verify_code || '') + '</p>' +
-      '<p class="rc-note">Scan the QR code or enter this code on the ' + esc(org) + ' verification page to confirm this card. The code holds no personal data. This card remains the property of ' + esc(org) + '.</p></div>' +
+      '<div class="rc-bcode"><p class="rc-blabel">Verification code</p><p class="rc-code">' + esc(c.verify_code || '') + '</p></div>' +
+      '<div class="rc-bmain">' + (bt ? '<p class="rc-btitle">' + esc(bt[0]) + '</p><ul class="rc-blist">' + bt[1].map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>' : '') +
+      '<p class="rc-btitle rc-bvt">Verification</p><p class="rc-bverif">Scan the QR code or enter the verification code on the official Ramdani verification page.</p></div>' +
       '<div class="rc-sig"><span>Authorised signature</span></div><div class="rc-seal"><span>Official seal</span></div></div>';
     return '<div class="rc-wrap" data-face="front"><div class="rc-stage">' + front + back + '</div>' +
       '<div class="rc-actions"><button type="button" data-rc-flip>Show back</button><button type="button" data-rc-print>Print card</button></div></div>';
@@ -4767,8 +4788,9 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     var c = o.cert || {}, org = o.org || (window.ramdaniSite && ramdaniSite.name) || 'Ramdani Law Firm';
     var okUrl = function (u) { return typeof u === 'string' && /^https:\/\//i.test(u); };
     var fields = (o.fields || []).filter(function (f) { return f && f[1] != null && String(f[1]).trim() !== ''; });
+    var clogo = o.logo || (window.ramdaniSite && ramdaniSite.logo) || '/assets/ramdani-logo.png';
     var html = '<div class="rc-cert"><div class="rc-frame"></div><div class="rc-frame2"></div>' +
-      '<div class="rc-chead">' + (o.logo ? '<img class="rc-clogo" src="' + esc(o.logo) + '" alt="" onerror="this.remove()">' : '') +
+      '<div class="rc-chead">' + (clogo ? '<img class="rc-clogo" src="' + esc(clogo) + '" alt="" onerror="this.remove()">' : '') +
       '<div class="rc-corg">' + esc(org) + '</div><div class="rc-ctitle">' + esc(o.title || 'Certificate of Membership') + '</div></div>' +
       '<div class="rc-cintro">This is to certify that</div><div class="rc-cname">' + esc(o.name || '') + '</div>' +
       (o.statement ? '<div class="rc-cbody">' + esc(o.statement) + '</div>' : '') +
@@ -12862,7 +12884,7 @@ window.ramdaniAuth = {
       sb.from('clients').select('id, client_number, legal_name, status').order('legal_name'),
       sb.from('legal_matters').select('id, matter_number, title, client_id, status, priority, lead_lawyer_id').order('updated_at', { ascending: false }),
       sb.from('practice_areas').select('id, title').order('title'),
-      sb.from('profiles').select('id, full_name, email, role').in('role', ['admin', 'firm_admin', 'lawyer', 'operations_staff'])
+      sb.rpc('ramdani_assignable_lawyers')
     ]);
     legalClients = res[0].data || [];
     legalMatters = res[1].data || [];
@@ -12895,7 +12917,7 @@ window.ramdaniAuth = {
       sb.from('clients').select('id', { count: 'exact', head: true }).eq('status', 'active'),
       sb.from('legal_matters').select('id', { count: 'exact', head: true }).in('status', ['intake', 'open', 'active', 'on_hold', 'pending']),
       sb.from('inquiries').select('id', { count: 'exact', head: true }).in('status', ['new', 'reviewing', 'reviewed', 'contacted', 'in_progress']),
-      sb.from('profiles').select('id', { count: 'exact', head: true }).in('role', ['lawyer', 'firm_admin', 'operations_staff', 'admin']).eq('is_active', true),
+      sb.rpc('ramdani_assignable_lawyers').then(function (r) { return { error: r.error, count: (r.data || []).length }; }),
       sb.from('matter_tasks').select('id, title, due_at, status, matter_id').neq('status', 'completed').neq('status', 'cancelled').order('due_at', { ascending: true }).limit(50),
       sb.from('matter_events').select('id, title, starts_at, event_type, matter_id').gte('starts_at', now.toISOString()).order('starts_at').limit(20),
       sb.from('legal_matters').select('id, matter_number, title, status, priority, updated_at').order('updated_at', { ascending: false }).limit(8)
@@ -14446,16 +14468,19 @@ window.ramdaniAuth = {
 
   var lawyerCardLawyers = {};
   async function loadLawyerCards() {
-    var lw = await sb.from('lawyers').select('*');
-    if (lw.error) { setNote('lawyerCardNote', lw.error.message); return; }
-    var pids = (lw.data || []).map(function (l) { return l.profile_id; }).filter(Boolean);
-    var pr = pids.length ? await sb.from('profiles').select('id, full_name, email, reference_id, photo_path').in('id', pids) : { data: [] };
-    var byProfile = {}; (pr.data || []).forEach(function (p) { byProfile[p.id] = p; });
+    var cand = await sb.rpc('ramdani_lawyer_card_candidates');
+    if (cand.error) { setNote('lawyerCardNote', cand.error.message); return; }
     lawyerCardLawyers = {};
-    (lw.data || []).forEach(function (l) { lawyerCardLawyers[l.id] = { lawyer: l, profile: byProfile[l.profile_id] || {} }; });
+    (cand.data || []).forEach(function (c) {
+      lawyerCardLawyers[c.lawyer_id] = { lawyer: { id: c.lawyer_id, reference_id: c.reference_id, status: c.lawyer_status },
+        profile: { id: c.profile_id, full_name: c.full_name, reference_id: c.reference_id } };
+    });
+    // Bar association is shown only where RLS already lets this user read it (admin); best effort, two columns only.
+    var ba = await sb.from('lawyers').select('id, bar_association');
+    (ba.data || []).forEach(function (l) { if (lawyerCardLawyers[l.id]) lawyerCardLawyers[l.id].lawyer.bar_association = l.bar_association; });
     var form = $id('lawyerCardForm'), sel = form.elements.lawyer_id, cur = sel.value;
-    sel.innerHTML = '<option value="">Select lawyer…</option>' + Object.keys(lawyerCardLawyers).map(function (id) {
-      var x = lawyerCardLawyers[id]; return '<option value="' + escapeHtml(id) + '">' + escapeHtml(x.profile.full_name || x.profile.email || id) + '</option>';
+    sel.innerHTML = '<option value="">Select lawyer…</option>' + Object.keys(lawyerCardLawyers).filter(function (id) { return lawyerCardLawyers[id].lawyer.status === 'active'; }).map(function (id) {
+      var x = lawyerCardLawyers[id]; return '<option value="' + escapeHtml(id) + '">' + escapeHtml((x.profile.full_name || 'Lawyer') + (x.lawyer.reference_id ? ' \u2014 ' + x.lawyer.reference_id : '')) + '</option>';
     }).join('');
     sel.value = cur;
     var res = await sb.from('lawyer_cards').select('*').order('created_at', { ascending: false });
@@ -14502,6 +14527,8 @@ window.ramdaniAuth = {
         } else if (t.hasAttribute('data-lc-preview')) {
           var c = panel._cards && panel._cards[t.getAttribute('data-lc-preview')]; if (!c) return;
           var x = lawyerCardLawyers[c.lawyer_id] || { lawyer: {}, profile: {} }, p = x.profile, L = x.lawyer;
+          var ph = p.id ? await sb.from('profiles').select('photo_path').eq('id', p.id).maybeSingle() : null; // RLS decides who may read it
+          p = Object.assign({}, p, { photo_path: ph && ph.data ? ph.data.photo_path : null });
           $id('lawyerCardPreview').innerHTML = ramdaniOfficial.cardHtml({ kind: 'lawyer', name: p.full_name, photoPath: p.photo_path, card: c,
             fields: [['Lawyer ID', L.reference_id || p.reference_id], ['Bar association', L.status === 'active' ? L.bar_association : null]] });
           ramdaniOfficial.hydratePhotos($id('lawyerCardPreview'));
