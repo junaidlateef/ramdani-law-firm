@@ -12653,14 +12653,22 @@ window.ramdaniAuth = {
       phone: f.elements.phone.value.trim() || null,
       address: f.elements.address.value.trim() || null,
       preferred_contact_method: f.elements.preferred_contact_method.value || null,
-      status: f.elements.status.value,
-      notes: f.elements.notes.value.trim() || null
+      status: f.elements.status.value
     };
+    // Internal notes live in client_internal_notes (staff-only RLS), never on the client-readable clients row.
+    var internalNote = f.elements.notes.value.trim();
     if (!payload.legal_name) return setNote('clientNote', 'Legal name is required.');
     var res = legalEditClientId
-      ? await sb.from('clients').update(payload).eq('id', legalEditClientId)
-      : await sb.from('clients').insert(payload);
+      ? await sb.from('clients').update(payload).eq('id', legalEditClientId).select('id').single()
+      : await sb.from('clients').insert(payload).select('id').single();
     if (res.error) return setNote('clientNote', res.error.message);
+    var savedClientId = res.data && res.data.id;
+    if (savedClientId) {
+      var nr = internalNote
+        ? await sb.from('client_internal_notes').upsert({ client_id: savedClientId, note: internalNote }, { onConflict: 'client_id' })
+        : await sb.from('client_internal_notes').delete().eq('client_id', savedClientId);
+      if (nr.error) return setNote('clientNote', 'Client saved, but internal note failed: ' + nr.error.message);
+    }
     resetClientForm();
     setNote('clientNote', 'Saved.', true);
     await loadClients();
@@ -13215,7 +13223,7 @@ window.ramdaniAuth = {
       if (r.error) return setNote('cwNote', r.error.message); renderClientTab();
     });
     $id('clientBody').addEventListener('click', function (e) { var b = e.target.closest('[data-cl-open]'); if (b) openClientWorkspace(b.getAttribute('data-cl-open')); });
-    $id('clientBody').addEventListener('click', function (e) {
+    $id('clientBody').addEventListener('click', async function (e) {
       var b = e.target.closest('[data-cl-edit]'); if (!b) return;
       var c = legalClients.find(function (x) { return x.id === b.getAttribute('data-cl-edit'); }); if (!c) return;
       var f = $id('clientForm');
@@ -13226,8 +13234,10 @@ window.ramdaniAuth = {
       f.elements.address.value = c.address || '';
       f.elements.preferred_contact_method.value = c.preferred_contact_method || '';
       f.elements.status.value = c.status || 'active';
-      f.elements.notes.value = c.notes || '';
+      f.elements.notes.value = '';
       legalEditClientId = c.id;
+      var inr = await sb.from('client_internal_notes').select('note').eq('client_id', c.id).maybeSingle();
+      f.elements.notes.value = (inr.data && inr.data.note) || '';
       $id('clientSave').textContent = 'Update client';
       $id('clientCancel').hidden = false;
     });
