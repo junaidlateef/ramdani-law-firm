@@ -1979,7 +1979,7 @@ html.dark .official-doc-preview h3 {
 
           <div id="inquiriesPanel" class="admin-panel" hidden><div class="admin-section-head"><div><h2>Inquiries</h2><p class="note">Workflow: New → Reviewing → Contacted → In progress → Closed → Archived. Internal notes never appear publicly.</p></div></div><div class="table-wrap"><table class="data"><thead><tr><th>Kind</th><th>Type</th><th>Name</th><th>Email</th><th>Subject</th><th>Assigned</th><th>Status</th><th>Internal notes</th></tr></thead><tbody id="inqBody"></tbody></table></div></div>
           <div id="applicationsPanel" class="admin-panel" hidden><div class="admin-section-head"><div><h2>Internship applications</h2><p class="note">Public application submissions. Status changes are staff-only.</p></div></div><div class="table-wrap"><table class="data"><thead><tr><th>Listing</th><th>Name</th><th>Email</th><th>Education</th><th>Status</th><th>Internal notes</th></tr></thead><tbody id="internAppBody"></tbody></table></div></div>
-          <div id="joinrequestsPanel" class="admin-panel" hidden><div class="admin-section-head"><div><h2>Society / chapter requests</h2><p class="note">Public join-form inquiries, not memberships.</p></div></div><div class="table-wrap"><table class="data"><thead><tr><th>Kind</th><th>Listing</th><th>Name</th><th>Email</th><th>Message</th></tr></thead><tbody id="joinReqBody"></tbody></table></div></div>
+          <div id="joinrequestsPanel" class="admin-panel" hidden><div class="admin-section-head"><div><h2>Society / chapter requests</h2><p class="note">Public join-form inquiries, not memberships.</p></div></div><div class="table-wrap"><table class="data"><thead><tr><th>Kind</th><th>Listing</th><th>Name</th><th>Email</th><th>Account Type</th><th>Profile</th><th>Message</th><th>Created</th></tr></thead><tbody id="joinReqBody"></tbody></table></div></div>
 
           <div id="brandingLogoPanel" class="admin-panel" hidden>
             <div class="admin-section-head"><div><h2>Branding</h2><p class="note">Everything about how the firm's identity appears on the public site — logo, official seal, homepage hero image, brand colors, and the About / Vision / Founder content — in one place. Publish to make this the live brand shown on the public site.</p></div></div>
@@ -3084,6 +3084,8 @@ html.dark .official-doc-preview h3 {
           <label>Department <input name="department" required /></label>
           <label>University <input name="university" required /></label>
           <label>Session <input name="session" placeholder="e.g. 2023–2027" required /></label>
+          <label>Chapter <span class="note">(optional)</span> <select name="chapter_slug" data-listing="chapter"><option value="">Select Chapter</option></select></label>
+          <label>Society <span class="note">(optional)</span> <select name="society_slug" data-listing="society"><option value="">Select Society</option></select></label>
           <label>CV (optional; PDF preferred, JPG/PNG/WebP also accepted, max 5 MB) <input name="cv" type="file" accept="application/pdf,image/jpeg,image/png,image/webp" /></label>
           <input name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;height:0;width:0;opacity:0" aria-hidden="true" />
           <div data-captcha></div>
@@ -3137,6 +3139,11 @@ html.dark .official-doc-preview h3 {
               <div><dt>Batch</dt><dd id="stuDashBatch">—</dd></div>
             </dl>
           </div>
+        </section>
+
+        <section class="portal-section" id="stuAffiliationSection">
+          <h2>My Chapter &amp; Society</h2>
+          <div id="stuAffiliationBox"><p class="empty">No Chapter or Society requests yet.</p></div>
         </section>
 
         <section class="portal-section">
@@ -3478,6 +3485,8 @@ html.dark .official-doc-preview h3 {
             <option>Punjab</option><option>Sindh</option><option>Khyber Pakhtunkhwa</option><option>Balochistan</option>
             <option>Islamabad Capital Territory</option><option>Gilgit-Baltistan</option><option>Azad Jammu &amp; Kashmir</option>
           </select></label>
+          <label>Chapter <span class="note">(optional)</span> <select name="chapter_slug" data-listing="chapter"><option value="">Select Chapter</option></select></label>
+          <label>Society <span class="note">(optional)</span> <select name="society_slug" data-listing="society"><option value="">Select Society</option></select></label>
           <label>Profile photo (JPG, PNG or WebP) <input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required /></label>
           <img id="lawSignupPhotoPreview" class="portal-photo is-empty" alt="Photo preview" hidden />
           <label>Bar licence card (JPG, PNG, WebP or PDF, max 5 MB) <input name="license_card" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" required /></label>
@@ -3523,6 +3532,11 @@ html.dark .official-doc-preview h3 {
               <div><dt>Active matters</dt><dd id="lawDashMatterCount">—</dd></div>
             </dl>
           </div>
+        </section>
+
+        <section class="portal-section" id="lawAffiliationSection">
+          <h2>My Chapter &amp; Society</h2>
+          <div id="lawAffiliationBox"><p class="empty">No Chapter or Society requests yet.</p></div>
         </section>
 
         <section class="portal-section">
@@ -5164,6 +5178,7 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
     var form = document.getElementById('lawyerSignupForm');
     if (!form || form.dataset.bound) return;
     form.dataset.bound = '1';
+    if (window.ramdaniLoadListingSelects) window.ramdaniLoadListingSelects(form);
     var st = document.getElementById('lawyerSignupStatus');
     function say(msg, ok) { st.className = 'form-status' + (msg ? (ok ? ' ok' : ' err') : ''); st.textContent = msg || ''; }
     var cap = window.mountMathCaptcha ? window.mountMathCaptcha(form.querySelector('[data-captcha]')) : null;
@@ -5198,6 +5213,7 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
             full_name: f.full_name.value.trim(), email: f.email.value.trim(), password: f.password.value,
             phone: f.phone.value.trim(), bar_association: f.bar_association.value.trim(), bar_license_no: f.bar_license_no.value.trim(),
             district: f.district.value.trim(), province: f.province.value, website: f.website.value, photo_base64: photo,
+            chapter_slug: f.chapter_slug ? f.chapter_slug.value : '', society_slug: f.society_slug ? f.society_slug.value : '',
             license_card_base64: cardB64, cv_base64: cvB64, captcha_token: cc.token, captcha_answer: cc.answer
           })
         });
@@ -5338,6 +5354,49 @@ window.RAMDANI_CONFIG = {
     console.error('Ramdani: Supabase client library or config missing');
     return;
   }
+  // Populates any <select data-listing="chapter"|"society"> under `root` from the real,
+  // published Chapters/Societies tables (never hard-coded). If both a society_slug select and a
+  // chapter_slug select are present, choosing a Society filters the Chapter options to that
+  // society (chapters.society_id -> societies.id in the schema); Chapter stays optional and
+  // unfiltered until a Society is chosen. Safe to call on any form; no-ops if neither is present.
+  window.ramdaniLoadListingSelects = async function (root) {
+    if (!root) return;
+    var socSel = root.querySelector('select[data-listing="society"]');
+    var chSel = root.querySelector('select[data-listing="chapter"]');
+    if (!socSel && !chSel) return;
+    var societies = [], chapters = [];
+    try {
+      if (socSel) {
+        var sr = await window.sb.from('societies').select('id, slug, title').eq('status', 'published').order('title');
+        societies = sr.data || [];
+      }
+      if (chSel) {
+        var cr = await window.sb.from('chapters').select('id, slug, title, society_id').eq('status', 'published').order('title');
+        chapters = cr.data || [];
+      }
+    } catch (e) { return; }
+    function esc(v) { return window.ramdaniUi ? window.ramdaniUi.escape(v) : String(v || ''); }
+    function fillSociety() {
+      socSel.innerHTML = '<option value="">Select Society</option>' + societies.map(function (s) {
+        return '<option value="' + esc(s.slug) + '">' + esc(s.title) + '</option>';
+      }).join('');
+    }
+    function fillChapter(societyId) {
+      var list = societyId ? chapters.filter(function (c) { return c.society_id === societyId; }) : chapters;
+      chSel.innerHTML = '<option value="">Select Chapter</option>' + list.map(function (c) {
+        return '<option value="' + esc(c.slug) + '">' + esc(c.title) + '</option>';
+      }).join('');
+    }
+    if (socSel) fillSociety();
+    if (chSel) fillChapter(null);
+    if (socSel && chSel) {
+      socSel.addEventListener('change', function () {
+        var chosen = societies.find(function (s) { return s.slug === socSel.value; });
+        fillChapter(chosen ? chosen.id : null);
+      });
+    }
+  };
+
   window.sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {
     auth: {
       persistSession: true,
@@ -7144,6 +7203,43 @@ window.ramdaniAuth = {
     img.classList.remove('is-empty');
     img.alt = 'Student photo';
   }
+  // Shows the authenticated student's/lawyer's actual Chapter/Society state — an active
+  // relationship if `members` already links them (via members.profile_id), otherwise any
+  // pending join_requests they filed at signup or later. Never fabricates a status: an
+  // approved membership shows only when a real `members` row exists; everything else is
+  // "Pending" or "No request yet". RLS on join_requests/members restricts this to the
+  // caller's own rows regardless of what is queried here.
+  async function loadAffiliationBox(boxId, profileId) {
+    var box = document.getElementById(boxId);
+    if (!box || !profileId) return;
+    box.innerHTML = '<p class="empty">Loading…</p>';
+    try {
+      var mem = await sb.from('members').select('society_id, chapter_id, status').eq('profile_id', profileId).maybeSingle();
+      var parts = [];
+      if (mem.data && (mem.data.society_id || mem.data.chapter_id)) {
+        var m = mem.data;
+        var socName = m.society_id ? (await sb.from('societies').select('title').eq('id', m.society_id).maybeSingle()).data : null;
+        var chName = m.chapter_id ? (await sb.from('chapters').select('title').eq('id', m.chapter_id).maybeSingle()).data : null;
+        var isActive = m.status === 'active' || m.status === 'approved';
+        if (socName) parts.push('<p><strong>Society:</strong> ' + ramdaniUi.escape(socName.title) + ' — <span class="status-badge status-' + ramdaniUi.escape(m.status) + '">' + (isActive ? 'Active' : ramdaniUi.escape(m.status)) + '</span></p>');
+        if (chName) parts.push('<p><strong>Chapter:</strong> ' + ramdaniUi.escape(chName.title) + ' — <span class="status-badge status-' + ramdaniUi.escape(m.status) + '">' + (isActive ? 'Active' : ramdaniUi.escape(m.status)) + '</span></p>');
+      }
+      // Any join_requests not already reflected above as an active relationship: shown as Pending,
+      // since join_requests has no separate status column and approval works by staff creating/
+      // editing the members row directly (see Admin > Members).
+      var reqs = await sb.from('join_requests').select('kind, listing_slug, created_at').eq('profile_id', profileId).order('created_at', { ascending: false });
+      (reqs.data || []).forEach(function (r) {
+        var alreadyActive = mem.data && ((r.kind === 'society' && mem.data.society_id) || (r.kind === 'chapter' && mem.data.chapter_id));
+        if (alreadyActive) return;
+        parts.push('<p>' + (r.kind === 'chapter' ? 'Chapter' : 'Society') + ' request (' + ramdaniUi.escape(r.listing_slug) + ') — <span class="status-badge status-pending">Pending</span></p>');
+      });
+      box.innerHTML = parts.length ? parts.join('') : '<p class="empty">No Chapter or Society requests yet.</p>';
+    } catch (e) {
+      box.innerHTML = '<p class="empty">Unable to load Chapter/Society status.</p>';
+    }
+  }
+  window.ramdaniLoadAffiliationBox = loadAffiliationBox;
+
   function fillDashboard(p) {
     var w = document.getElementById('stuWelcome');
     if (w) w.textContent = 'Welcome, ' + (p.full_name || 'Student');
@@ -7185,6 +7281,8 @@ window.ramdaniAuth = {
       window.ramdaniGo('/student/dashboard');
     });
 
+    if (window.ramdaniLoadListingSelects) window.ramdaniLoadListingSelects(document.getElementById('studentSignupForm'));
+
     var stuCap = window.mountMathCaptcha ? window.mountMathCaptcha(document.querySelector('#studentSignupForm [data-captcha]')) : null;
     document.getElementById('studentSignupForm').addEventListener('submit', async function (e) {
       e.preventDefault();
@@ -7199,7 +7297,9 @@ window.ramdaniAuth = {
         student_id: form.student_id.value.trim(),
         department: form.department.value.trim(),
         university: form.university.value.trim(),
-        session: form.session.value.trim()
+        session: form.session.value.trim(),
+        chapter_slug: form.chapter_slug ? form.chapter_slug.value : '',
+        society_slug: form.society_slug ? form.society_slug.value : ''
       };
       if (!/^\S+@\S+\.\S+$/.test(fields.email)) return setStatus('studentSignupStatus', 'Enter a valid email address.');
       if (fields.password.length < 8) return setStatus('studentSignupStatus', 'Password must be at least 8 characters.');
@@ -7224,6 +7324,7 @@ window.ramdaniAuth = {
           body: JSON.stringify({
             email: fields.email, password: fields.password, full_name: fields.full_name, phone: fields.phone,
             student_id: fields.student_id, department: fields.department, university: fields.university, session: fields.session,
+            chapter_slug: fields.chapter_slug, society_slug: fields.society_slug,
             website: form.website ? form.website.value : '', captcha_token: cc.token, captcha_answer: cc.answer
           })
         });
@@ -7552,6 +7653,7 @@ window.ramdaniAuth = {
         return;
       }
       fillDashboard(profile);
+      loadAffiliationBox('stuAffiliationBox', profile.id);
       showPanel('studentDashboardPanel');
       renderLearning();
       return;
@@ -7799,6 +7901,7 @@ window.ramdaniAuth = {
     setDd('lawDashDistrict', p.district);
     setDd('lawDashProvince', p.province);
     await showLawPhoto(p.photo_path);
+    if (window.ramdaniLoadAffiliationBox) window.ramdaniLoadAffiliationBox('lawAffiliationBox', p.id);
 
     bindOnce('lawyerPhotoForm', 'submit', async function (e) {
       e.preventDefault();
@@ -14712,11 +14815,25 @@ window.ramdaniAuth = {
   async function loadJoinRequests() {
     var body = document.getElementById('joinReqBody');
     if (!body) return;
-    var res = await sb.from('join_requests').select('id, kind, listing_slug, full_name, email, message, created_at').order('created_at', { ascending: false }).limit(50);
+    var res = await sb.from('join_requests').select('id, kind, listing_slug, full_name, email, message, created_at, profile_id').order('created_at', { ascending: false }).limit(50);
     var rows = res.data || [];
+    // Requests filed at signup carry profile_id; resolve the account type (student/lawyer/
+    // other role) for those so staff can tell a linked account from a free-text public inquiry.
+    var profileIds = rows.map(function (r) { return r.profile_id; }).filter(Boolean);
+    var profilesById = {};
+    if (profileIds.length) {
+      var pr = await sb.from('profiles').select('id, role, full_name, email').in('id', profileIds);
+      (pr.data || []).forEach(function (p) { profilesById[p.id] = p; });
+    }
     body.innerHTML = rows.map(function (r) {
-      return '<tr><td>' + ramdaniUi.escape(r.kind) + '</td><td>' + ramdaniUi.escape(r.listing_slug) + '</td><td>' + ramdaniUi.escape(r.full_name) + '</td><td>' + ramdaniUi.escape(r.email) + '</td><td>' + ramdaniUi.escape(r.message) + '</td></tr>';
-    }).join('') || '<tr><td colspan="5">No join inquiries.</td></tr>';
+      var prof = r.profile_id ? profilesById[r.profile_id] : null;
+      var acctType = prof ? ramdaniUi.escape(prof.role) : '<span class="note">—</span>';
+      var profCell = r.profile_id
+        ? '<code title="' + ramdaniUi.escape(r.profile_id) + '">' + ramdaniUi.escape(r.profile_id.slice(0, 8)) + '…</code>'
+        : '<span class="note">unlinked inquiry</span>';
+      var created = r.created_at ? new Date(r.created_at).toLocaleString() : '';
+      return '<tr><td>' + ramdaniUi.escape(r.kind) + '</td><td>' + ramdaniUi.escape(r.listing_slug) + '</td><td>' + ramdaniUi.escape(r.full_name) + '</td><td>' + ramdaniUi.escape(r.email) + '</td><td>' + acctType + '</td><td>' + profCell + '</td><td>' + ramdaniUi.escape(r.message) + '</td><td>' + ramdaniUi.escape(created) + '</td></tr>';
+    }).join('') || '<tr><td colspan="8">No join inquiries.</td></tr>';
   }
 
   document.addEventListener('DOMContentLoaded', boot);
