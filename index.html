@@ -2606,8 +2606,15 @@ html.dark .official-doc-preview h3 {
               <label class="field-full"><span>Internal notes</span><textarea name="notes" rows="3"></textarea></label>
               <div class="form-actions"><button class="btn btn-primary" type="submit" id="clientSave">Save client</button><button class="btn" type="button" id="clientCancel" hidden>Cancel edit</button><p id="clientNote" class="form-status"></p></div>
             </form>
-            <div class="admin-toolbar"><input type="search" id="clientSearch" placeholder="Search name, email, phone or client number" aria-label="Search clients" /></div>
-            <div class="table-wrap"><table class="data"><thead><tr><th>Number</th><th>Name</th><th>Type</th><th>Email</th><th>Status</th><th>Actions</th></tr></thead><tbody id="clientBody"></tbody></table></div>
+            <div class="admin-toolbar">
+              <select id="clientStatusFilter" aria-label="Filter clients by status"><option value="">All statuses</option><option value="active">Active</option><option value="inactive">Inactive</option><option value="archived">Archived</option></select>
+              <select id="clientSort" aria-label="Sort clients"><option value="updated_desc">Recently updated</option><option value="created_desc">Newest first</option><option value="created_asc">Oldest first</option><option value="name_asc">Name A–Z</option><option value="name_desc">Name Z–A</option><option value="number_asc">Client number</option></select>
+              <input type="search" id="clientSearch" placeholder="Search name, email, phone or client number" aria-label="Search clients" />
+              <button type="button" class="btn" id="clientExportCsv">Export CSV (contact list)</button>
+            </div>
+            <p id="clientTableNote" class="note" role="status"></p>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Number</th><th>Name</th><th>Type</th><th>Email</th><th>Phone</th><th>Status</th><th>Created</th><th>Updated</th><th>Actions</th></tr></thead><tbody id="clientBody"></tbody></table></div>
+            <div id="clientPager" class="admin-toolbar" hidden><button type="button" class="btn btn-sm" id="clientPrev">Previous</button><span id="clientPageLabel" class="note"></span><button type="button" class="btn btn-sm" id="clientNext">Next</button></div>
             <div id="clientWorkspace" class="admin-card" style="margin-top:1rem" hidden>
               <div class="admin-section-head"><div><h3 id="cwTitle">Client</h3><p class="note" id="cwSub"></p></div><button type="button" class="btn" id="cwClose">Close</button></div>
               <div class="admin-toolbar" id="cwTabs">
@@ -2820,6 +2827,7 @@ html.dark .official-doc-preview h3 {
               <select id="memberStatusFilter"><option value="">All statuses</option><option value="application">Application</option><option value="review">Review</option><option value="approved">Approved</option><option value="active">Active</option><option value="expired">Expired</option><option value="suspended">Suspended</option><option value="revoked">Revoked</option></select>
               <select id="memberSocietyFilter" aria-label="Filter by society"><option value="">All societies</option></select>
               <select id="memberChapterFilter" aria-label="Filter by chapter"><option value="">All chapters</option></select>
+              <select id="memberSort" aria-label="Sort members"><option value="updated_desc">Recently updated</option><option value="created_desc">Newest first</option><option value="created_asc">Oldest first</option><option value="name_asc">Name A–Z</option><option value="name_desc">Name Z–A</option><option value="number_asc">Member number</option></select>
               <input type="search" id="memberSearch" placeholder="Search name, email, member number or reference" />
               <button type="button" class="btn" id="memberExportCsv">Export CSV</button>
               <button type="button" class="btn" id="memberPrintBtn">Print</button>
@@ -3019,7 +3027,7 @@ html.dark .official-doc-preview h3 {
                 <button class="ra-btn" type="submit">Sign in</button>
               </form>
               <p id="portalLoginStatus" class="ra-status" role="status" aria-live="polite"></p>
-              <p class="ra-foot">Member and client accounts are created by the firm. Staff? <a href="/admin/">Admin sign in</a> · <a href="/">Back to public site</a></p>
+              <p class="ra-foot">New here? <a href="/portal/signup">Create an account</a>. Staff? <a href="/admin/">Admin sign in</a> · <a href="/">Back to public site</a></p>
             </div>
 
             <div id="raPaneSignup" class="ra-pane" role="tabpanel" aria-labelledby="raTabSignup" hidden>
@@ -3029,8 +3037,10 @@ html.dark .official-doc-preview h3 {
                 <div class="ra-roles">
                   <a class="ra-role" href="/portal/signup?role=student"><strong>Student</strong><span>Study modules, quizzes, enrolments and your student card.</span></a>
                   <a class="ra-role" href="/portal/signup?role=lawyer"><strong>Lawyer</strong><span>Requires review and approval by the firm before you can sign in.</span></a>
+                  <a class="ra-role" href="/portal/signup?role=member"><strong>Member</strong><span>Join a society or chapter. Applications are reviewed and approved by the firm.</span></a>
+                  <a class="ra-role" href="/portal/signup?role=client"><strong>Client</strong><span>Access your own matters, appointments and shared documents with the firm.</span></a>
                 </div>
-                <p class="ra-foot">Student and lawyer accounts are self-serve. Member records are created by authorised staff after a chapter/society inquiry — the live backend does not allow public member inserts. <a href="/join">Join options</a> · <a href="/pages/chapters.html">Chapters</a> · <a href="/pages/societies.html">Societies</a>. By creating an account you accept the <a href="/pages/privacy.html">privacy notice</a>.</p>
+                <p class="ra-foot">Client accounts are active immediately. Student, lawyer and member registrations are reviewed and approved by the firm before you can use the portal. <a href="/join">Join options</a> · <a href="/pages/chapters.html">Chapters</a> · <a href="/pages/societies.html">Societies</a>. By creating an account you accept the <a href="/pages/privacy.html">privacy notice</a>.</p>
               </div>
               <a id="raRoleBack" class="ra-back" href="/portal/signup" hidden>← Choose a different account type</a>
               <div id="raSignupHost" class="ra-host"></div>
@@ -3497,6 +3507,49 @@ html.dark .official-doc-preview h3 {
         </form>
         <p id="lawyerSignupStatus" class="form-status"></p>
         <p>Already approved? <a href="/portal/login">Sign in</a></p>
+        <p class="note"><a href="/">Back to public site</a></p>
+      </div>
+
+      <div id="memberSignupPanel" class="auth-box" hidden>
+        <h1>Member registration</h1>
+        <form id="memberSignupForm" class="form">
+          <label>Full name <input name="full_name" required autocomplete="name" /></label>
+          <label>Email <input name="email" type="email" required autocomplete="username" /></label>
+          <label>Password <input name="password" type="password" required minlength="8" autocomplete="new-password" /></label>
+          <label>Confirm password <input name="confirm_password" type="password" required minlength="8" autocomplete="new-password" /></label>
+          <label>Phone number <input name="phone" required autocomplete="tel" /></label>
+          <label>Society <span class="note">(optional)</span> <select name="society_slug" data-listing="society"><option value="">Select Society</option></select></label>
+          <label>Chapter <span class="note">(optional)</span> <select name="chapter_slug" data-listing="chapter"><option value="">Select Chapter</option></select></label>
+          <label>About you <span class="note">(optional)</span> <textarea name="bio" rows="3" maxlength="2000"></textarea></label>
+          <label>Profile photo <span class="note">(optional — JPG, PNG or WebP)</span> <input name="photo" type="file" accept="image/jpeg,image/png,image/webp" /></label>
+          <img id="memSignupPhotoPreview" class="portal-photo is-empty" alt="Photo preview" hidden />
+          <div data-captcha></div>
+          <input name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;height:0;width:0;opacity:0" aria-hidden="true" />
+          <button class="btn btn-primary" type="submit">Submit application</button>
+        </form>
+        <p id="memberSignupStatus" class="form-status" role="status" aria-live="polite"></p>
+        <p>Already approved? <a href="/portal/login">Sign in</a></p>
+        <p class="note"><a href="/">Back to public site</a></p>
+      </div>
+
+      <div id="clientSignupPanel" class="auth-box" hidden>
+        <h1>Client registration</h1>
+        <form id="clientSignupForm" class="form">
+          <label>Full name or organization name <input name="full_name" required autocomplete="name" /></label>
+          <label>I am registering as <select name="client_type"><option value="individual">An individual</option><option value="organization">An organization</option></select></label>
+          <label>Email <input name="email" type="email" required autocomplete="username" /></label>
+          <label>Password <input name="password" type="password" required minlength="8" autocomplete="new-password" /></label>
+          <label>Confirm password <input name="confirm_password" type="password" required minlength="8" autocomplete="new-password" /></label>
+          <label>Phone number <input name="phone" required autocomplete="tel" /></label>
+          <label>Preferred contact method <span class="note">(optional)</span> <select name="preferred_contact_method"><option value="">No preference</option><option value="email">Email</option><option value="phone">Phone</option><option value="in_person">In person</option><option value="other">Other</option></select></label>
+          <label>Address <span class="note">(optional)</span> <textarea name="address" rows="2" maxlength="500" autocomplete="street-address"></textarea></label>
+          <label>Brief inquiry <span class="note">(optional — please do not include confidential case details here)</span> <textarea name="inquiry" rows="3" maxlength="4000"></textarea></label>
+          <div data-captcha></div>
+          <input name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;height:0;width:0;opacity:0" aria-hidden="true" />
+          <button class="btn btn-primary" type="submit">Create client account</button>
+        </form>
+        <p id="clientSignupStatus" class="form-status" role="status" aria-live="polite"></p>
+        <p>Already registered? <a href="/portal/login">Sign in</a></p>
         <p class="note"><a href="/">Back to public site</a></p>
       </div>
 
@@ -4057,10 +4110,10 @@ if (window.ramdaniEducation) ramdaniEducation.bindInternshipApply();
   } },
   '/pages/join.html': { title: 'Join — Ramdani Law Firm', desc: 'Create a student or lawyer account with Ramdani Law Firm.', html: `<section class="section"><div class="wrap"><div class="auth-box">
       <h1>Join Ramdani Law Firm</h1>
-      <p class="note">Create a student or lawyer login here. That creates <code>auth.users</code> → <code>profiles</code> through the existing signup functions. Society and chapter joining is a separate inquiry on those listings — it does not create a member record. There is no public member self-signup: the live backend only lets staff insert <code>members</code>, and new auth users become student or lawyer profiles.</p>
+      <p class="note">Create a student, lawyer, member or client login here. Each creates <code>auth.users</code> → <code>profiles</code> through the existing signup functions, and the database then creates the matching member or client record. Member and lawyer registrations are reviewed and approved by the firm before you can sign in.</p>
       <p class="note"><a href="/portal/signup">Create an account</a> · <a href="/pages/chapters.html">Browse chapters</a> · <a href="/pages/societies.html">Browse societies</a> · <a href="/pages/verify-certificate.html">Verify a card or certificate</a></p>
       <form id="joinForm" class="form">
-        <label>I am a <select id="joinType" required><option value="">Select…</option><option value="student">Student</option><option value="lawyer">Lawyer</option></select></label>
+        <label>I am a <select id="joinType" required><option value="">Select…</option><option value="student">Student</option><option value="lawyer">Lawyer</option><option value="member">Member</option><option value="client">Client</option></select></label>
         <p class="note" id="joinHint"></p>
         <p id="joinStatus" class="form-status"></p>
         <button class="btn btn-primary" type="submit">Continue</button>
@@ -4073,12 +4126,12 @@ if (window.ramdaniEducation) ramdaniEducation.bindInternshipApply();
       st.textContent = ''; st.className = 'form-status';
       hint.textContent = sel.value === 'lawyer'
         ? 'Lawyer registrations need your bar licence card and CV, and are reviewed and approved by the firm admin before you can sign in.'
-        : (sel.value === 'student' ? 'Students register with their roll number, department and university details.' : '');
+        : (sel.value === 'student' ? 'Students register with their roll number, department and university details.' : (sel.value === 'member' ? 'Member applications can name a society and chapter, and are reviewed and approved by the firm before you can sign in.' : (sel.value === 'client' ? 'Client accounts give you access to your own matters, appointments and shared documents only.' : '')));
     });
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-      if (!sel.value) { st.className = 'form-status err'; st.textContent = 'Select Student or Lawyer first.'; return; }
-      window.ramdaniGo(sel.value === 'lawyer' ? '/lawyer/signup' : '/student/signup');
+      if (!sel.value) { st.className = 'form-status err'; st.textContent = 'Select an account type first.'; return; }
+      window.ramdaniGo({ lawyer: '/lawyer/signup', member: '/member/signup', client: '/client/signup' }[sel.value] || '/student/signup');
     });
   } },
   '/pages/internships.html': { title: 'Internships — Ramdani Law Firm', desc: 'Internships — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section academy-hero"><div class="wrap">
@@ -4524,6 +4577,8 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
     if (path === '/profile' || path === '/profile/') path = '/portal/dashboard';
     if (path === '/student/signup') { path = '/portal/signup'; search = '?role=student'; }
     if (path === '/lawyer/signup') { path = '/portal/signup'; search = '?role=lawyer'; }
+    if (path === '/member/signup') { path = '/portal/signup'; search = '?role=member'; }
+    if (path === '/client/signup') { path = '/portal/signup'; search = '?role=client'; }
     if (path === '/student/forgot-password') path = '/portal/forgot';
     // Unified portal: student / member / lawyer login + dashboard routes all land on /portal/*
     if (path === '/portal' || path === '/portal/') path = '/portal/login';
@@ -4650,13 +4705,14 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
         if (res.error) return setSt(res.error.message);
         var p = await ramdaniAuth.profile();
         if (!(await ramdaniAuth.isMember(p))) { await ramdaniAuth.signOut(); return setSt('This account is not a member account.'); }
+        if (!(await ramdaniAuth.isActiveMember(p))) { var bm = portalBlockMessage(p) || 'Your membership is not active yet.'; await ramdaniAuth.signOut(); return setSt(bm); }
         window.ramdaniGo('/member/dashboard');
       });
       document.getElementById('memberSignOutBtn').addEventListener('click', async function () { await ramdaniAuth.signOut(); window.ramdaniGo('/portal/login'); });
     }
     var p = await ramdaniAuth.profile();
     if (path.indexOf('/dashboard') >= 0) {
-      if (!(await ramdaniAuth.isMember(p))) { window.ramdaniGo('/portal/login'); return; }
+      if (!(await ramdaniAuth.isMember(p)) || !(await ramdaniAuth.isActiveMember(p))) { window.ramdaniGo('/portal/login'); return; }
       login.hidden = true; dash.hidden = false;
       document.getElementById('memWelcome').textContent = 'Welcome, ' + (p.full_name || 'Member');
       document.getElementById('memDashMeta').textContent = p.email || '';
@@ -4878,11 +4934,17 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
         ? 'Your account is suspended. Please contact the office.'
         : 'Your registration is awaiting admin approval. You can sign in once it is approved.';
     }
+    if (p.role === 'member' && (!p.is_active || p.status !== 'active')) {
+      return (p.status === 'suspended' || p.status === 'rejected')
+        ? 'Your membership application was not approved or your account is suspended. Please contact the office.'
+        : 'Your membership application is awaiting approval. You can sign in once it is approved.';
+    }
+    if (p.role === 'client' && !p.is_active) return 'Your account is inactive. Please contact the office.';
     return '';
   }
   // ---- Authentication page (portal shell): re-homes the EXISTING student-signup / lawyer-signup / reset panels
   //      inside the unified shell so their existing handlers, validation, captcha and approval flow are reused as-is.
-  var AUTH_HOME_PANELS = ['studentSignupPanel', 'lawyerSignupPanel', 'studentForgotPanel'];
+  var AUTH_HOME_PANELS = ['studentSignupPanel', 'lawyerSignupPanel', 'memberSignupPanel', 'clientSignupPanel', 'studentForgotPanel'];
   var STAFF_ONLY_ROLES = ['admin', 'editor', 'content_manager', 'education_manager', 'student_manager', 'communications_manager', 'firm_admin', 'operations_staff'];
 
   function restoreAuthPanels() {
@@ -5003,7 +5065,7 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
     try {
       var q = new URLSearchParams(String((window.ramdaniRoute && ramdaniRoute.search()) || '').replace(/^\?/, ''));
       var r = q.get('role');
-      return (r === 'student' || r === 'lawyer') ? r : '';
+      return (r === 'student' || r === 'lawyer' || r === 'member' || r === 'client') ? r : '';
     } catch (e) { return ''; }
   }
 
@@ -5030,10 +5092,16 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
     document.getElementById('raRoleBack').hidden = !role;
     if (role === 'student' && window.ramdaniStudentBoot) await window.ramdaniStudentBoot('/student/signup');
     if (role === 'lawyer') bindLawyerSignup();
+    if (role === 'member') bindMemberSignup();
+    if (role === 'client') bindClientSignup();
     var stu = mountAuthPanel('studentSignupPanel', 'raSignupHost');
     var law = mountAuthPanel('lawyerSignupPanel', 'raSignupHost');
+    var memP = mountAuthPanel('memberSignupPanel', 'raSignupHost');
+    var cliP = mountAuthPanel('clientSignupPanel', 'raSignupHost');
     if (stu) stu.hidden = (role !== 'student');
     if (law) law.hidden = (role !== 'lawyer');
+    if (memP) memP.hidden = (role !== 'member');
+    if (cliP) cliP.hidden = (role !== 'client');
     enhancePasswordFields(document.getElementById('raSignupHost'));
   }
 
@@ -5091,7 +5159,8 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
     } catch (e) { p = null; profileErr = e; }
     var canEnter = !!(p && ['student', 'member', 'lawyer'].indexOf(p.role) >= 0
       && !(p.role === 'lawyer' && !p.is_active)
-      && !(p.role === 'student' && (!p.is_active || p.status !== 'active')));
+      && !(p.role === 'student' && (!p.is_active || p.status !== 'active'))
+      && !(p.role === 'member' && (!p.is_active || p.status !== 'active')));
     if (isDash) {
       if (p && p.role === 'client') { window.ramdaniGo('/client/dashboard'); return; }
       if (!canEnter) {
@@ -5221,6 +5290,92 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
         if (!res.ok) { btn.disabled = false; if (cap) cap.refresh(); return say(data.error || ('Registration failed (' + res.status + ')')); }
         form.reset(); document.getElementById('lawSignupPhotoPreview').hidden = true; if (cap) cap.refresh();
         say('Registration submitted. The firm admin will review it; you can sign in once it is approved.' + (data.warning ? ' ' + data.warning : ''), true);
+      } catch (err) { say(err.message || 'Registration failed.'); }
+      btn.disabled = false;
+    });
+  }
+
+  // ---- Member / Client public signup (existing member-signup / client-signup Edge Functions) ----
+  // Same pattern as bindLawyerSignup: server-signed captcha, honeypot ("website"), no role or id ever
+  // sent from the browser. The database trigger creates the members / clients row.
+  function postSignup(fn, payload) {
+    var cfg = window.RAMDANI_CONFIG;
+    return fetch(cfg.supabaseUrl + '/functions/v1/' + fn, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': cfg.supabaseAnonKey, 'Authorization': 'Bearer ' + cfg.supabaseAnonKey },
+      body: JSON.stringify(payload)
+    });
+  }
+  function bindMemberSignup() {
+    var form = document.getElementById('memberSignupForm');
+    if (!form || form.dataset.bound) return;
+    form.dataset.bound = '1';
+    if (window.ramdaniLoadListingSelects) window.ramdaniLoadListingSelects(form);
+    var st = document.getElementById('memberSignupStatus');
+    function say(msg, ok) { st.className = 'form-status' + (msg ? (ok ? ' ok' : ' err') : ''); st.textContent = msg || ''; }
+    var cap = window.mountMathCaptcha ? window.mountMathCaptcha(form.querySelector('[data-captcha]')) : null;
+    form.elements.photo.addEventListener('change', function () {
+      var f = this.files[0], pv = document.getElementById('memSignupPhotoPreview');
+      if (f && /^image\//.test(f.type)) { pv.src = URL.createObjectURL(f); pv.hidden = false; pv.classList.remove('is-empty'); } else { pv.hidden = true; }
+    });
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault(); say('');
+      var f = form.elements;
+      if (!f.full_name.value.trim()) return say('Full name is required.');
+      if (!f.phone.value.trim()) return say('Phone number is required.');
+      if (f.password.value.length < 8) return say('Password must be at least 8 characters.');
+      if (f.password.value !== f.confirm_password.value) return say('Passwords do not match.');
+      var file = f.photo.files[0];
+      if (file && !/^image\/(jpeg|png|webp)$/i.test(file.type)) return say('Choose a JPG, PNG or WebP photo.');
+      var cc = cap ? cap.check() : null;
+      if (!cc || !cc.ok) { if (cap) cap.refresh(); return say('Answer the security check (wait for the question to load).'); }
+      var btn = form.querySelector('button[type="submit"]'); btn.disabled = true; say('Submitting…');
+      try {
+        var payload = {
+          full_name: f.full_name.value.trim(), email: f.email.value.trim(), password: f.password.value,
+          phone: f.phone.value.trim(), bio: f.bio.value.trim(), website: f.website.value,
+          chapter_slug: f.chapter_slug ? f.chapter_slug.value : '', society_slug: f.society_slug ? f.society_slug.value : '',
+          captcha_token: cc.token, captcha_answer: cc.answer
+        };
+        if (file) payload.photo_base64 = await lawyerPhotoToDataUrl(file);
+        var res = await postSignup('member-signup', payload);
+        var data = {}; try { data = await res.json(); } catch (x) {}
+        if (!res.ok) { btn.disabled = false; if (cap) cap.refresh(); return say(data.error || ('Registration failed (' + res.status + ')')); }
+        form.reset(); document.getElementById('memSignupPhotoPreview').hidden = true; if (cap) cap.refresh();
+        say('Application submitted. The firm will review it; you can sign in once it is approved.' + (data.warning ? ' ' + data.warning : ''), true);
+      } catch (err) { say(err.message || 'Registration failed.'); }
+      btn.disabled = false;
+    });
+  }
+  function bindClientSignup() {
+    var form = document.getElementById('clientSignupForm');
+    if (!form || form.dataset.bound) return;
+    form.dataset.bound = '1';
+    var st = document.getElementById('clientSignupStatus');
+    function say(msg, ok) { st.className = 'form-status' + (msg ? (ok ? ' ok' : ' err') : ''); st.textContent = msg || ''; }
+    var cap = window.mountMathCaptcha ? window.mountMathCaptcha(form.querySelector('[data-captcha]')) : null;
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault(); say('');
+      var f = form.elements;
+      if (!f.full_name.value.trim()) return say('Full name is required.');
+      if (!f.phone.value.trim()) return say('Phone number is required.');
+      if (f.password.value.length < 8) return say('Password must be at least 8 characters.');
+      if (f.password.value !== f.confirm_password.value) return say('Passwords do not match.');
+      var cc = cap ? cap.check() : null;
+      if (!cc || !cc.ok) { if (cap) cap.refresh(); return say('Answer the security check (wait for the question to load).'); }
+      var btn = form.querySelector('button[type="submit"]'); btn.disabled = true; say('Submitting…');
+      try {
+        var res = await postSignup('client-signup', {
+          full_name: f.full_name.value.trim(), email: f.email.value.trim(), password: f.password.value,
+          phone: f.phone.value.trim(), client_type: f.client_type.value,
+          preferred_contact_method: f.preferred_contact_method.value, address: f.address.value.trim(),
+          inquiry: f.inquiry.value.trim(), website: f.website.value,
+          captcha_token: cc.token, captcha_answer: cc.answer
+        });
+        var data = {}; try { data = await res.json(); } catch (x) {}
+        if (!res.ok) { btn.disabled = false; if (cap) cap.refresh(); return say(data.error || ('Registration failed (' + res.status + ')')); }
+        form.reset(); if (cap) cap.refresh();
+        say('Your client account has been created. You can sign in now.' + (data.warning ? ' ' + data.warning : ''), true);
       } catch (err) { say(err.message || 'Registration failed.'); }
       btn.disabled = false;
     });
@@ -6729,6 +6884,9 @@ window.ramdaniAuth = {
     try { var r = await sb.rpc(fn); return !r.error && r.data === true; } catch (e) { return false; }
   },
   async isMember(p) { return !!(p && (p.role === 'member' || await this._domainActive('ramdani_is_member'))); },
+  // Active-member gate for the portal UI: profile active AND the same server predicate RLS uses
+  // (profile active + members.status='active'). Fails closed. UI gate only - RLS stays the boundary.
+  async isActiveMember(p) { return !!(p && p.is_active === true && p.status === 'active' && await this._domainActive('ramdani_is_member')); },
   async isClient(p) { return !!(p && (p.role === 'client' || await this._domainActive('ramdani_is_client'))); },
   async isLawyer(p) { return !!(p && (p.role === 'lawyer' || await this._domainActive('ramdani_is_lawyer'))); },
   async requireStudent() {
@@ -12418,16 +12576,65 @@ window.ramdaniAuth = {
     legalClients = res.data || [];
     renderClients();
   }
-  function renderClients() {
+  var clientPage = 1;
+  var CLIENT_PAGE_SIZE = 25;
+  function fmtDay(v) { return v ? String(v).slice(0, 10) : ''; }
+  function filteredClients() {
     var q = ($id('clientSearch').value || '').trim().toLowerCase();
+    var st = $id('clientStatusFilter') ? $id('clientStatusFilter').value : '';
+    var sort = $id('clientSort') ? $id('clientSort').value : 'updated_desc';
     var rows = legalClients.filter(function (c) {
+      if (st && c.status !== st) return false;
       if (!q) return true;
-      return [c.legal_name, c.email, c.phone, c.client_number].join(' ').toLowerCase().indexOf(q) !== -1;
+      return [c.legal_name, c.email, c.phone, c.client_number, c.reference_id].join(' ').toLowerCase().indexOf(q) !== -1;
     });
-    $id('clientBody').innerHTML = rows.map(function (c) {
-      return '<tr><td>' + escapeHtml(c.client_number) + '</td><td>' + escapeHtml(c.legal_name) + '</td><td>' + escapeHtml(c.client_type) + '</td><td>' + escapeHtml(c.email || '') + '</td><td>' + escapeHtml(c.status) + '</td><td>' +
+    function cmpStr(x, y) { return String(x || '').localeCompare(String(y || ''), undefined, { sensitivity: 'base' }); }
+    rows.sort(function (a, b) {
+      if (sort === 'created_desc') return cmpStr(b.created_at, a.created_at);
+      if (sort === 'created_asc') return cmpStr(a.created_at, b.created_at);
+      if (sort === 'name_asc') return cmpStr(a.legal_name, b.legal_name);
+      if (sort === 'name_desc') return cmpStr(b.legal_name, a.legal_name);
+      if (sort === 'number_asc') return cmpStr(a.client_number, b.client_number);
+      return cmpStr(b.updated_at, a.updated_at);
+    });
+    return rows;
+  }
+  function renderClients() {
+    var rows = filteredClients();
+    var total = rows.length;
+    var pages = Math.max(1, Math.ceil(total / CLIENT_PAGE_SIZE));
+    if (clientPage > pages) clientPage = pages;
+    if (clientPage < 1) clientPage = 1;
+    var slice = rows.slice((clientPage - 1) * CLIENT_PAGE_SIZE, clientPage * CLIENT_PAGE_SIZE);
+    var note = $id('clientTableNote');
+    if (note) note.textContent = total ? (total + ' client' + (total === 1 ? '' : 's')) : 'No clients match these filters.';
+    var pager = $id('clientPager');
+    if (pager) { pager.hidden = total <= CLIENT_PAGE_SIZE; var lab = $id('clientPageLabel'); if (lab) lab.textContent = 'Page ' + clientPage + ' of ' + pages; }
+    $id('clientBody').innerHTML = slice.map(function (c) {
+      return '<tr><td>' + escapeHtml(c.client_number) + '</td><td>' + escapeHtml(c.legal_name) + '</td><td>' + escapeHtml(c.client_type) + '</td><td>' + escapeHtml(c.email || '') + '</td><td>' + escapeHtml(c.phone || '') + '</td><td>' + escapeHtml(c.status) + '</td><td>' + escapeHtml(fmtDay(c.created_at)) + '</td><td>' + escapeHtml(fmtDay(c.updated_at)) + '</td><td>' +
         '<button type="button" class="btn btn-sm" data-cl-open="' + c.id + '">Open</button> <button type="button" class="btn btn-sm" data-cl-edit="' + c.id + '">Edit</button></td></tr>';
-    }).join('') || '<tr><td colspan="6">No clients yet.</td></tr>';
+    }).join('') || '<tr><td colspan="9">No clients yet.</td></tr>';
+  }
+  // Contact-list export only: deliberately excludes notes, address and any matter/legal data.
+  // Rows come from the same RLS-scoped query as the table, so staff can only export what they can already see.
+  function exportClientsCsv() {
+    var rows = filteredClients();
+    var header = ['client_number', 'reference_id', 'legal_name', 'client_type', 'email', 'phone', 'status', 'created', 'updated'];
+    function csvCell(v) {
+      var t = String(v == null ? '' : v);
+      if (/^[=+\-@\t\r]/.test(t)) t = "'" + t;
+      return '"' + t.replace(/"/g, '""') + '"';
+    }
+    var lines = [header.join(',')];
+    rows.forEach(function (c) {
+      lines.push([c.client_number, c.reference_id, c.legal_name, c.client_type, c.email, c.phone, c.status, fmtDay(c.created_at), fmtDay(c.updated_at)].map(csvCell).join(','));
+    });
+    var blob = new Blob(['\ufeff' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'ramdani-clients.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
   }
   function resetClientForm() {
     legalEditClientId = null;
@@ -12994,7 +13201,12 @@ window.ramdaniAuth = {
   function bindLegalOps() {
     $id('clientForm').addEventListener('submit', saveClient);
     $id('clientCancel').addEventListener('click', resetClientForm);
-    $id('clientSearch').addEventListener('input', renderClients);
+    $id('clientSearch').addEventListener('input', function () { clientPage = 1; renderClients(); });
+    $id('clientStatusFilter').addEventListener('change', function () { clientPage = 1; renderClients(); });
+    $id('clientSort').addEventListener('change', function () { clientPage = 1; renderClients(); });
+    $id('clientPrev').addEventListener('click', function () { clientPage -= 1; renderClients(); });
+    $id('clientNext').addEventListener('click', function () { clientPage += 1; renderClients(); });
+    $id('clientExportCsv').addEventListener('click', exportClientsCsv);
     $id('cwClose').addEventListener('click', function () { $id('clientWorkspace').hidden = true; cwClient = null; });
     $id('cwTabs').addEventListener('click', function (e) { var b = e.target.closest('[data-cw-tab]'); if (!b) return; cwTab = b.getAttribute('data-cw-tab'); renderClientTab(); });
     $id('cwBody').addEventListener('click', async function (e) {
@@ -13541,6 +13753,32 @@ window.ramdaniAuth = {
     }
     $id('mpPersonal').innerHTML = linkedHtml + '<p><strong>Email:</strong> ' + escapeHtml(m.email || '—') + '</p><p><strong>Phone:</strong> ' + escapeHtml(m.phone || '—') + '</p><p><strong>Bio:</strong> ' + escapeHtml(m.bio || '—') + '</p><p><strong>Joined:</strong> ' + escapeHtml(m.joined_at || '—') + '</p><p><strong>Valid until:</strong> ' + escapeHtml(m.valid_until || '—') + '</p>';
 
+    (function () {
+      var host = $id('mpPersonal'); if (!host) return;
+      host.dataset.memberId = m.id;
+      if (host.dataset.acctBound) return;
+      host.dataset.acctBound = '1';
+      host.addEventListener('click', async function (e) {
+        var b = e.target.closest('[data-mp-acct]'); if (!b) return;
+        var on = b.getAttribute('data-mp-acct') === 'activate';
+        if (!window.confirm((on ? 'Approve and activate' : 'Deactivate') + ' portal access for this member?')) return;
+        b.disabled = true;
+        var r = await ramdaniAuth.callAdminApi('set_account_active', { user_id: b.getAttribute('data-uid'), is_active: on });
+        var nEl = host.querySelector('[data-acct-note]');
+        if (r.error) { b.disabled = false; if (nEl) nEl.textContent = r.error.message; return; }
+        await loadMembers();
+        openMemberProfile(host.dataset.memberId);
+      });
+    })();
+    if (m.profile_id) {
+      // profiles are readable only by the owner or an admin (RLS), so non-admin staff simply get no controls;
+      // admin-api re-checks admin server-side regardless.
+      var acct = await sb.from('profiles').select('id, role, is_active, status').eq('id', m.profile_id).maybeSingle();
+      var ad = acct && acct.data;
+      if (ad && ad.role === 'member') {
+        $id('mpPersonal').insertAdjacentHTML('beforeend', '<p><strong>Portal access:</strong> ' + (ad.is_active ? 'Active' : 'Not active (' + escapeHtml(ad.status || 'pending') + ')') + ' <button type="button" class="btn btn-sm" data-mp-acct="' + (ad.is_active ? 'deactivate' : 'activate') + '" data-uid="' + escapeHtml(ad.id) + '">' + (ad.is_active ? 'Deactivate' : 'Approve &amp; activate') + '</button> <span class="note" data-acct-note></span></p>');
+      }
+    }
     if (!platMemberships.length) { var mr = await sb.from('memberships').select('*'); if (mr.error && window.console) console.error('memberships lookup failed', mr.error); platMemberships = mr.data || []; }
     var memberships = platMemberships.filter(function (x) { return x.member_id === memberId; });
     $id('mpMembership').innerHTML = memberships.length ? memberships.map(function (ms) {
@@ -13638,8 +13876,20 @@ window.ramdaniAuth = {
     fill('memberSocietyFilter', platSocieties, function (r) { return r.title || r.short_name || r.id; });
     fill('memberChapterFilter', platChapters, function (r) { return r.title || r.city || r.id; });
   }
+  function sortMembers(rows) {
+    var sort = $id('memberSort') ? $id('memberSort').value : 'updated_desc';
+    function cmp(x, y) { return String(x || '').localeCompare(String(y || ''), undefined, { sensitivity: 'base' }); }
+    return rows.slice().sort(function (a, b) {
+      if (sort === 'created_desc') return cmp(b.created_at, a.created_at);
+      if (sort === 'created_asc') return cmp(a.created_at, b.created_at);
+      if (sort === 'name_asc') return cmp(a.full_name, b.full_name);
+      if (sort === 'name_desc') return cmp(b.full_name, a.full_name);
+      if (sort === 'number_asc') return cmp(a.member_number, b.member_number);
+      return cmp(b.updated_at, a.updated_at);
+    });
+  }
   function renderMembers() {
-    var rows = filteredMembers();
+    var rows = sortMembers(filteredMembers());
     var total = rows.length;
     var pages = Math.max(1, Math.ceil(total / MEMBER_PAGE_SIZE));
     if (memberPage > pages) memberPage = pages;
@@ -14073,6 +14323,7 @@ window.ramdaniAuth = {
     $id('memberCancel').addEventListener('click', resetMemberForm);
     $id('memberStatusFilter').addEventListener('change', function () { memberPage = 1; renderMembers(); });
     $id('memberSearch').addEventListener('input', function () { memberPage = 1; renderMembers(); });
+    $id('memberSort').addEventListener('change', function () { memberPage = 1; renderMembers(); });
     var socF = $id('memberSocietyFilter');
     if (socF) socF.addEventListener('change', function () { memberPage = 1; renderMembers(); });
     var chpF = $id('memberChapterFilter');
