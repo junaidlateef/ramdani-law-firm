@@ -5584,7 +5584,7 @@ window.ramdaniSite = Object.freeze({
       ['/pages/people.html', 'Associates'],
       ['/pages/societies.html', 'Societies'],
       ['/pages/chapters.html', 'Chapters'],
-      ['/portal/login', 'Members'],
+      ['/member/login', 'Member Sign In'],
       ['/pages/faq.html', 'FAQ']
     ]) +
     dropdown('Publications', [
@@ -5594,8 +5594,9 @@ window.ramdaniSite = Object.freeze({
       ['/pages/verify-certificate.html', 'Verify a certificate']
     ]) +
     dropdown('Portal', [
-      ['/portal/login', 'Student Portal'],
-      ['/portal/login', 'Lawyer Portal'],
+      ['/student/login', 'Student Portal'],
+      ['/lawyer/login', 'Lawyer Portal'],
+      ['/member/login', 'Member Portal'],
       ['/client/login', 'Client Portal']
     ]);
   var brand = '<a class="brand" href="/" aria-label="Ramdani Law Firm — Home"><img src="' + site.logo + '" width="56" height="56" alt="" /><span>' + site.name + '</span></a>';
