@@ -382,9 +382,10 @@ table.data tbody tr:hover { background:color-mix(in srgb,var(--accent) 5%,transp
 .table-actions { display:flex; gap:.35rem; flex-wrap:wrap; }
 .btn-sm { padding:.34rem .58rem; border-radius:8px; font-size:.78rem; }
 .status-badge { display:inline-flex; align-items:center; border-radius:999px; padding:.2rem .55rem; font-size:.7rem; font-weight:600; border:1px solid var(--line); }
-.status-published,.status-active { color:var(--ok); }
+.status-published,.status-active,.status-approved,.status-issued,.status-valid,.status-present { color:var(--success); border-color:var(--success); background:color-mix(in srgb, var(--success) 12%, transparent); }
 .status-draft,.status-inactive { color:var(--muted); }
-.status-archived,.status-closed { color:var(--danger); }
+.status-archived,.status-closed,.status-suspended,.status-revoked,.status-expired,.status-rejected,.status-absent { color:var(--danger); border-color:var(--danger); background:color-mix(in srgb, var(--danger) 12%, transparent); }
+.status-pending,.status-review,.status-application { color:var(--warning); border-color:var(--warning); background:color-mix(in srgb, var(--warning) 12%, transparent); }
 .staff-preview-banner { background:#8a6a2a; color:#fff; padding:.7rem 1rem; font-size:.88rem; font-weight:600; text-align:center; margin:0 0 1rem; border-radius:8px; letter-spacing:.01em; }
 .matter-tabs { display:flex; flex-wrap:wrap; gap:.35rem; margin:0 0 1rem; }
 .matter-tabs button[aria-selected="true"] { background:var(--deep-navy,var(--forest)); color:#fff; }
@@ -413,6 +414,80 @@ table.data tbody tr:hover { background:color-mix(in srgb,var(--accent) 5%,transp
   .admin-topbar{padding:.8rem 1rem;} .admin-content{padding:1rem;} .form.admin-form{grid-template-columns:1fr;} .form.admin-form .field-full,.form-actions{grid-column:1;}
 }
 @media (max-width:520px){ .dashboard-grid{grid-template-columns:1fr 1fr;gap:.7rem;} .stat-card{padding:.8rem;} .stat-card .value{font-size:1.55rem;} .admin-page-title{font-size:1.35rem;} }
+
+/* ===== Global toast notification system (Phase 27A) =====
+   Single shared viewport, created lazily on first use by ramdaniUi.toast().
+   Respects the project-wide reduced-motion rule at the top of this file. */
+.ramdani-toast-viewport {
+  position: fixed;
+  z-index: 900;
+  top: max(1rem, env(safe-area-inset-top, 0px));
+  right: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+  width: min(360px, calc(100vw - 2rem));
+  pointer-events: none;
+}
+html[dir="rtl"] .ramdani-toast-viewport { right: auto; left: 1rem; }
+.ramdani-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: .6rem;
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius-md, 5px);
+  box-shadow: var(--shadow-premium, var(--shadow));
+  padding: .75rem .85rem;
+  font-size: .88rem;
+  line-height: 1.4;
+  transform: translateY(-8px);
+  opacity: 0;
+  transition: transform var(--transition-base, .22s ease), opacity var(--transition-base, .22s ease);
+}
+html[dir="rtl"] .ramdani-toast { border-left: none; border-right: 4px solid var(--accent); }
+.ramdani-toast.is-visible { transform: translateY(0); opacity: 1; }
+.ramdani-toast.is-leaving { transform: translateY(-8px); opacity: 0; }
+.ramdani-toast[data-type="success"] { border-left-color: var(--success); }
+.ramdani-toast[data-type="error"] { border-left-color: var(--danger); }
+.ramdani-toast[data-type="warning"] { border-left-color: var(--warning); }
+.ramdani-toast[data-type="info"] { border-left-color: var(--accent); }
+html[dir="rtl"] .ramdani-toast[data-type="success"] { border-right-color: var(--success); }
+html[dir="rtl"] .ramdani-toast[data-type="error"] { border-right-color: var(--danger); }
+html[dir="rtl"] .ramdani-toast[data-type="warning"] { border-right-color: var(--warning); }
+html[dir="rtl"] .ramdani-toast[data-type="info"] { border-right-color: var(--accent); }
+.ramdani-toast-icon { flex: none; width: 1.1rem; height: 1.1rem; margin-top: .05rem; }
+.ramdani-toast-body { flex: 1 1 auto; min-width: 0; word-break: break-word; }
+.ramdani-toast-close {
+  flex: none; background: transparent; border: 0; cursor: pointer;
+  color: var(--muted); font-size: 1rem; line-height: 1; padding: .15rem .25rem;
+  border-radius: var(--radius-sm, 3px);
+}
+.ramdani-toast-close:hover, .ramdani-toast-close:focus-visible { color: var(--ink); background: var(--line); }
+@media (max-width:520px) {
+  .ramdani-toast-viewport { left: .6rem; right: .6rem; width: auto; top: max(.6rem, env(safe-area-inset-top, 0px)); }
+  html[dir="rtl"] .ramdani-toast-viewport { left: .6rem; right: .6rem; }
+}
+
+/* ===== Global skeleton / loading placeholders (Phase 27A) =====
+   Applied only where a specific view opts in via ramdaniUi.showSkeleton(). */
+.ramdani-skel { position: relative; overflow: hidden; background: var(--line); border-radius: var(--radius-sm, 3px); }
+.ramdani-skel::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
+  animation: ramdani-skel-shimmer 1.4s ease-in-out infinite;
+}
+html[data-theme="dark"] .ramdani-skel::after { background: linear-gradient(90deg, transparent, rgba(255,255,255,.08), transparent); }
+@keyframes ramdani-skel-shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+.ramdani-skel-line { height: .85em; margin: .3em 0; }
+.ramdani-skel-card { border-radius: var(--radius-md, 5px); }
+.ramdani-skel-stat-value { height: 1.6rem; width: 3.2rem; border-radius: var(--radius-sm, 3px); }
+.ramdani-skel-row td { padding: .6rem .75rem; }
+.ramdani-skel-row .ramdani-skel-line { width: 70%; }
 /* Compact primary nav + semester grid + leak-free quiz ticks */
 .hero-stats {
   display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 1.75rem;
@@ -472,12 +547,15 @@ table.data tbody tr:hover { background:color-mix(in srgb,var(--accent) 5%,transp
 .mcq-opt:hover { border-color: var(--accent); }
 .mcq-opt.selected { border-color: var(--accent); }
 .opt-label { font-weight: 700; color: var(--muted); }
+.opt-text { overflow-wrap: anywhere; }
 .opt-tick { opacity: 0; font-weight: 700; color: var(--ok); }
 .mcq-opt.selected .opt-tick { opacity: 1; }
 .mcq.revealed .mcq-opt { cursor: default; }
 .mcq.revealed .mcq-opt.correct-answer { border-color: var(--ok); }
 .mcq.revealed .mcq-opt.correct-answer .opt-tick { opacity: 1; color: var(--ok); }
 .mcq.revealed .mcq-opt.wrong-answer { border-color: var(--danger); }
+.mcq.missing { border: 1px solid var(--danger); border-radius: 10px; }
+.quiz-progress { margin: 0 0 0.8rem; }
 .mcq-explanation { display: none; margin-top: 0.6rem; color: var(--muted); font-size: 0.92rem; }
 .mcq.revealed .mcq-explanation { display: block; }
 .quiz-footer { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-top: 1rem; }
@@ -1972,15 +2050,27 @@ html.dark .rc-actions button { background:#fff; color:#0e2c27; }
 
           <div id="studentsPanel" class="admin-panel" hidden>
             <div class="admin-section-head"><div><h2>Students <span id="studentTotal" class="note"></span></h2><p class="note">Search, review and manage registered student accounts.</p></div></div>
-            <div class="admin-toolbar"><input type="search" id="studentSearch" placeholder="Search name, email or student ID" aria-label="Search students" /></div>
-            <div class="table-wrap"><table class="data"><thead><tr><th>Name</th><th>Email</th><th>Student ID</th><th>Department</th><th>University</th><th>Session</th><th>Status</th><th>Actions</th></tr></thead><tbody id="studentsBody"></tbody></table></div><p id="studentsNote" class="form-status"></p>
+            <div class="admin-toolbar">
+              <input type="search" id="studentSearch" placeholder="Search name, email or student ID" aria-label="Search students" />
+              <select id="studentStatusFilter" aria-label="Filter students by status">
+                <option value="">All statuses</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+              <button type="button" class="btn" id="studentFilterReset">Reset</button>
+            </div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Name</th><th>Email</th><th>Student ID</th><th>Department</th><th>University</th><th>Session</th><th>Status</th><th>Actions</th></tr></thead><tbody id="studentsBody"></tbody></table></div><p id="studentsNote" class="form-status" role="status"></p>
           </div>
 
           <div id="lawyerAppsPanel" class="admin-panel" hidden>
-            <div class="admin-section-head"><div><h2>Lawyer applications</h2><p class="note">Lawyers who registered themselves. They cannot sign in or see any data until you approve them. Check the bar licence before approving.</p></div>
-              <select id="lawAppFilter" aria-label="Filter"><option value="pending">Awaiting approval</option><option value="active">Approved</option><option value="suspended">Rejected / suspended</option><option value="all">All</option></select></div>
+            <div class="admin-section-head"><div><h2>Lawyer applications <span id="lawAppTotal" class="note"></span></h2><p class="note">Lawyers who registered themselves. They cannot sign in or see any data until you approve them. Check the bar licence before approving.</p></div></div>
+            <div class="admin-toolbar">
+              <input type="search" id="lawAppSearch" placeholder="Search name, email, phone or bar licence" aria-label="Search lawyer applications" />
+              <select id="lawAppFilter" aria-label="Filter by status"><option value="pending">Awaiting approval</option><option value="active">Approved</option><option value="suspended">Rejected / suspended</option><option value="all">All</option></select>
+              <button type="button" class="btn" id="lawAppReset">Reset</button>
+            </div>
             <div class="table-wrap"><table class="data"><thead><tr><th>Photo</th><th>Lawyer</th><th>Bar / licence</th><th>District, province</th><th>Contact</th><th>Status</th><th>Actions</th></tr></thead><tbody id="lawAppBody"></tbody></table></div>
-            <p id="lawAppNote" class="form-status"></p>
+            <p id="lawAppNote" class="form-status" role="status"></p>
           </div>
 
           <div id="staffAccountsPanel" class="admin-panel" hidden>
@@ -2092,6 +2182,7 @@ html.dark .rc-actions button { background:#fff; color:#0e2c27; }
                 <option value="draft">Draft</option>
                 <option value="archived">Archived</option>
               </select>
+              <button type="button" class="btn" id="contentResetBtn">Reset</button>
               <button type="button" class="btn" id="contentRefreshBtn">Refresh</button>
             </div>
             <p id="contentTableNote" class="note" role="status" aria-live="polite"></p>
@@ -2537,7 +2628,7 @@ html.dark .rc-actions button { background:#fff; color:#0e2c27; }
               <div class="form-actions"><button class="btn btn-primary" type="submit">Issue certificate</button><p id="certIssuanceNote" class="form-status"></p></div>
             </form>
             <div style="height:1rem"></div>
-            <div class="admin-toolbar"><input type="search" id="certIssuanceSearch" placeholder="Search by student, certificate number or module" aria-label="Search issuances" /></div>
+            <div class="admin-toolbar"><input type="search" id="certIssuanceSearch" placeholder="Search by student, certificate number or module" aria-label="Search issuances" /><select id="certIssuanceStatus" aria-label="Filter by status"><option value="">All statuses</option><option value="issued">Issued</option><option value="revoked">Revoked</option></select><button type="button" class="btn btn-sm" id="certIssuanceResetBtn">Reset</button><span id="certIssuanceCount" class="note"></span></div>
             <div class="table-wrap"><table class="data"><thead><tr><th>Cert #</th><th>Student</th><th>Module</th><th>Template</th><th>Issue date</th><th>Status</th><th>Verify code</th><th>Actions</th></tr></thead><tbody id="certIssuancesBody"></tbody></table></div>
           </div>
 
@@ -2556,7 +2647,7 @@ html.dark .rc-actions button { background:#fff; color:#0e2c27; }
               </div>
               <div style="height:1rem"></div>
               <div class="admin-card">
-                <h3 id="cbSectionHeading">Sections</h3>
+                <h3 id="cbSectionHeading">Sections <span id="cbSectionCount" class="note"></span></h3>
                 <form id="cbSectionForm" class="form admin-form">
                   <label><span>Section title</span><input name="title" required /></label>
                   <label><span>Description</span><input name="description" /></label>
@@ -2567,7 +2658,8 @@ html.dark .rc-actions button { background:#fff; color:#0e2c27; }
               </div>
               <div style="height:1rem"></div>
               <div class="admin-card">
-                <h3 id="cbLessonHeading">Lessons</h3>
+                <h3 id="cbLessonHeading">Lessons <span id="cbLessonCount" class="note"></span></h3>
+                <div class="admin-toolbar"><input type="search" id="cbLessonSearch" placeholder="Search lessons by title" aria-label="Search lessons" /></div>
                 <form id="cbLessonForm" class="form admin-form">
                   <label><span>Section</span><select name="section_id" required></select></label>
                   <label><span>Lesson title</span><input name="title" required /></label>
@@ -2600,6 +2692,17 @@ html.dark .rc-actions button { background:#fff; color:#0e2c27; }
 
           <div id="quizBuilderPanel" class="admin-panel" hidden>
             <div class="admin-section-head"><div><h2>Quiz builder</h2><p class="note">Create quizzes, configure attempts, and build/reorder questions. Students only see questions on a <strong>published</strong> quiz. Use ↑ ↓ to set the order.</p></div></div>
+            <div class="admin-card">
+              <h3>All quizzes <span id="qbListTotal" class="note"></span></h3>
+              <div class="admin-toolbar">
+                <label style="display:flex;gap:.5rem;align-items:center;flex:1;min-width:180px"><span class="sr-only">Search quizzes</span><input type="search" id="qbListSearch" placeholder="Search by title, slug, summary or course…" aria-label="Search quizzes" style="width:100%" /></label>
+                <label style="display:flex;gap:.5rem;align-items:center"><span class="sr-only">Filter by course/module</span><select id="qbListModule" aria-label="Filter by course/module"><option value="">All courses</option></select></label>
+                <label style="display:flex;gap:.5rem;align-items:center"><span class="sr-only">Filter by status</span><select id="qbListStatus" aria-label="Filter by status"><option value="">All statuses</option><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></label>
+                <button type="button" class="btn" id="qbListReset">Reset</button>
+              </div>
+              <div class="table-wrap"><table class="data"><thead><tr><th>Title</th><th>Course/module</th><th>Status</th><th>Questions</th><th>Pass mark</th><th>Actions</th></tr></thead><tbody id="qbListBody"></tbody></table></div>
+            </div>
+            <div style="height:1rem"></div>
             <div class="admin-toolbar">
               <label style="display:flex;gap:.5rem;align-items:center"><span>Quiz</span><select id="qbQuiz"><option value="">New quiz…</option></select></label>
               <button type="button" class="btn" id="qbNewQuiz">+ New quiz</button>
@@ -2645,9 +2748,10 @@ html.dark .rc-actions button { background:#fff; color:#0e2c27; }
               <select id="qrQuiz" aria-label="Filter by quiz"><option value="">All quizzes</option></select>
               <select id="qrOutcome" aria-label="Filter by outcome"><option value="">Pass &amp; fail</option><option value="pass">Pass only</option><option value="fail">Fail only</option></select>
               <input type="search" id="qrSearch" placeholder="Search student name, email or ID" aria-label="Search results" />
+              <button type="button" class="btn" id="qrReset">Reset</button>
             </div>
             <div class="table-wrap"><table class="data"><thead><tr><th>Student</th><th>Quiz</th><th>Module</th><th>Score</th><th>%</th><th>Result</th><th>Attempt</th><th>Date</th></tr></thead><tbody id="qrBody"></tbody></table></div>
-            <p id="qrNote" class="form-status"></p>
+            <p id="qrNote" class="form-status" role="status" aria-live="polite"></p>
           </div>
 
           <div id="eduSearchPanel" class="admin-panel" hidden>
@@ -2676,9 +2780,23 @@ html.dark .rc-actions button { background:#fff; color:#0e2c27; }
               <select id="enModule" aria-label="Filter by module"><option value="">All modules</option></select>
               <select id="enStatus" aria-label="Filter by status"><option value="">All statuses</option><option value="pending">Pending</option><option value="active">Active</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select>
               <input type="search" id="enSearch" placeholder="Search student name, email or ID" aria-label="Search enrollments" />
+              <button type="button" class="btn" id="enFilterReset">Reset</button>
             </div>
             <div class="table-wrap"><table class="data"><thead><tr><th>Student</th><th>Module</th><th>Status</th><th>Enrolled</th><th>Lessons</th><th>Best quiz</th><th>Certificate</th><th>Actions</th></tr></thead><tbody id="enBody"></tbody></table></div>
             <p id="enNote" class="form-status"></p>
+            <div style="height:1.5rem"></div>
+            <div class="admin-card">
+              <h3>Attendance records <span id="attTotal" class="note"></span></h3>
+              <p class="note">Course attendance recorded from the Enrollments table above.</p>
+              <div class="admin-toolbar">
+                <select id="attModule" aria-label="Filter attendance by module"><option value="">All modules</option></select>
+                <select id="attStatus" aria-label="Filter attendance by status"><option value="">All statuses</option><option value="present">Present</option><option value="absent">Absent</option></select>
+                <input type="search" id="attSearch" placeholder="Search student name, email or ID" aria-label="Search attendance" />
+                <button type="button" class="btn" id="attFilterReset">Reset</button>
+              </div>
+              <div class="table-wrap"><table class="data"><thead><tr><th>Student</th><th>Module</th><th>Date</th><th>Status</th></tr></thead><tbody id="attBody"></tbody></table></div>
+              <p id="attNote" class="form-status"></p>
+            </div>
           </div>
 
           <div id="seoOverridesPanel" class="admin-panel" hidden>
@@ -2741,6 +2859,7 @@ html.dark .rc-actions button { background:#fff; color:#0e2c27; }
               <select id="clientStatusFilter" aria-label="Filter clients by status"><option value="">All statuses</option><option value="active">Active</option><option value="inactive">Inactive</option><option value="archived">Archived</option></select>
               <select id="clientSort" aria-label="Sort clients"><option value="updated_desc">Recently updated</option><option value="created_desc">Newest first</option><option value="created_asc">Oldest first</option><option value="name_asc">Name A–Z</option><option value="name_desc">Name Z–A</option><option value="number_asc">Client number</option></select>
               <input type="search" id="clientSearch" placeholder="Search name, email, phone or client number" aria-label="Search clients" />
+              <button type="button" class="btn" id="clientFilterReset">Reset</button>
               <button type="button" class="btn" id="clientExportCsv">Export CSV (contact list)</button>
             </div>
             <p id="clientTableNote" class="note" role="status"></p>
@@ -2791,7 +2910,9 @@ html.dark .rc-actions button { background:#fff; color:#0e2c27; }
               <label class="note"><input type="checkbox" id="lmOverdue" /> Overdue tasks</label>
               <label class="note"><input type="checkbox" id="lmUpcoming" /> Upcoming hearings</label>
               <input type="search" id="lmSearch" placeholder="Search number, title or client" aria-label="Search matters" />
+              <button type="button" class="btn" id="lmReset">Reset</button>
             </div>
+            <p id="legalMatterTableNote" class="note" role="status"></p>
             <div class="table-wrap"><table class="data"><thead><tr><th>Number</th><th>Title</th><th>Client</th><th>Lead</th><th>Status</th><th>Priority</th><th>Actions</th></tr></thead><tbody id="legalMatterBody"></tbody></table></div>
             <div id="matterWorkspace" class="ops-workspace admin-card" style="margin-top:1rem">
               <div class="admin-section-head"><div><h3 id="mwTitle">Matter</h3><p class="ops-header-meta" id="mwMeta"></p></div><button type="button" class="btn" id="mwClose">Close workspace</button></div>
@@ -3306,7 +3427,7 @@ html.dark .rc-actions button { background:#fff; color:#0e2c27; }
         </section>
 
         <section class="portal-section">
-          <h2>Certificates</h2>
+          <h2>Certificates <span id="myCertificatesCount" class="note"></span></h2>
           <p class="note">Only certificates issued by staff after you are active and enrolled.</p>
           <div id="myCertificates" class="learning-grid"></div>
         </section>
@@ -3317,17 +3438,18 @@ html.dark .rc-actions button { background:#fff; color:#0e2c27; }
         </section>
 
         <section class="portal-section">
-          <h2>Courses</h2>
+          <h2>Courses <span id="myCoursesCount" class="note"></span></h2>
           <div id="myCourses" class="learning-grid"></div>
         </section>
 
         <section class="portal-section">
           <h2>Attendance</h2>
+          <p id="myAttendanceSummary" class="note"></p>
           <div id="myCourseAttendance"></div>
         </section>
 
         <section class="portal-section">
-          <h2>Quizzes</h2>
+          <h2>Quizzes <span id="myQuizResultsCount" class="note"></span></h2>
           <div id="myQuizResults"></div>
         </section>
 
@@ -4496,7 +4618,7 @@ if (window.ramdaniEducation) ramdaniEducation.renderPracticeAreas();
     </div></section>
     <section class="section academy-band"><div class="wrap">
       <form id="quizForm" class="form"></form>
-      <div id="quizResult" class="card" hidden></div>
+      <div id="quizResult" class="card" role="status" aria-live="polite" hidden></div>
     </div></section>`, init: async function () {
 if (window.ramdaniEducation) ramdaniEducation.renderQuiz();
   } },
@@ -7129,8 +7251,104 @@ window.ramdaniUi = {
     el.innerHTML = rows.map(function (row) {
       return window.ramdaniUi.card(row, hrefFn ? hrefFn(row) : null);
     }).join('');
+  },
+
+  // ===== Global toast system (Phase 27A) =====
+  // Single lazily-created viewport shared by the whole app (public site +
+  // admin/portal areas), so repeated calls never create duplicate containers.
+  _toastViewport: function () {
+    var el = document.getElementById('ramdaniToastViewport');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'ramdaniToastViewport';
+      el.className = 'ramdani-toast-viewport';
+      el.setAttribute('role', 'region');
+      el.setAttribute('aria-label', 'Notifications');
+      document.body.appendChild(el);
+    }
+    return el;
+  },
+  toast: function (message, type, options) {
+    if (!message) return null;
+    type = ['success', 'error', 'warning', 'info'].indexOf(type) !== -1 ? type : 'info';
+    options = options || {};
+    var persistent = !!options.persistent;
+    var duration = typeof options.duration === 'number' ? options.duration : (type === 'error' ? 6000 : 4200);
+    var icons = { success: '✓', error: '✕', warning: '!', info: 'i' };
+
+    var viewport = this._toastViewport();
+    var el = document.createElement('div');
+    el.className = 'ramdani-toast';
+    el.dataset.type = type;
+    // Errors/warnings are assertive so screen readers announce them promptly;
+    // routine success/info toasts use polite so they don't interrupt.
+    el.setAttribute('role', (type === 'error' || type === 'warning') ? 'alert' : 'status');
+    el.setAttribute('aria-live', (type === 'error' || type === 'warning') ? 'assertive' : 'polite');
+    el.innerHTML =
+      '<span class="ramdani-toast-icon" aria-hidden="true">' + icons[type] + '</span>' +
+      '<div class="ramdani-toast-body"></div>' +
+      '<button type="button" class="ramdani-toast-close" aria-label="Dismiss notification">&times;</button>';
+    el.querySelector('.ramdani-toast-body').textContent = message;
+
+    var timer = null;
+    function remove() {
+      if (timer) clearTimeout(timer);
+      el.classList.remove('is-visible');
+      el.classList.add('is-leaving');
+      window.setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 240);
+    }
+    el.querySelector('.ramdani-toast-close').addEventListener('click', remove);
+    viewport.appendChild(el);
+    // rAF so the transition actually runs instead of the element appearing pre-shown.
+    window.requestAnimationFrame(function () { el.classList.add('is-visible'); });
+    if (!persistent) timer = window.setTimeout(remove, duration);
+    return { dismiss: remove };
+  },
+
+  // ===== Global skeleton / loading placeholders (Phase 27A) =====
+  // showSkeleton(container, type) replaces a container's content with
+  // placeholder blocks and remembers the original markup so hideSkeleton()
+  // (or the caller's own re-render) can restore/replace it cleanly.
+  showSkeleton: function (container, type, options) {
+    if (!container) return;
+    if (container.dataset.ramdaniSkeleton === '1') return; // already showing
+    container.dataset.ramdaniSkeleton = '1';
+    container.dataset.ramdaniPrevHtml = container.innerHTML;
+    options = options || {};
+    var count = options.count || (type === 'row' ? 4 : 3);
+    var html = '';
+    if (type === 'stat') {
+      html = '<div class="ramdani-skel ramdani-skel-stat-value"></div>';
+    } else if (type === 'row') {
+      // container must be a <tbody>; caller passes column count via options.cols
+      var cols = options.cols || 4;
+      var tds = '';
+      for (var c = 0; c < cols; c++) tds += '<td><div class="ramdani-skel ramdani-skel-line"></div></td>';
+      var rows = '';
+      for (var i = 0; i < count; i++) rows += '<tr class="ramdani-skel-row">' + tds + '</tr>';
+      html = rows;
+    } else if (type === 'card') {
+      html = '<div class="ramdani-skel ramdani-skel-card" style="height:' + (options.height || '90px') + '"></div>';
+    } else {
+      // generic list of lines
+      for (var j = 0; j < count; j++) html += '<div class="ramdani-skel ramdani-skel-line"></div>';
+    }
+    container.innerHTML = html;
+    container.setAttribute('aria-busy', 'true');
+  },
+  hideSkeleton: function (container) {
+    if (!container) return;
+    delete container.dataset.ramdaniSkeleton;
+    delete container.dataset.ramdaniPrevHtml;
+    container.removeAttribute('aria-busy');
+    // Intentionally does not restore dataset.ramdaniPrevHtml: callers always
+    // write real (or empty-state) content immediately after data resolves or
+    // fails, so the skeleton is only ever visible during the fetch itself.
   }
 };
+
+// Convenience global matching the requested showToast(message, type, options) API.
+window.showToast = function (message, type, options) { return window.ramdaniUi.toast(message, type, options); };
 
 </script>
 <!-- APPLICATION LOGIC: js/auth.js -->
@@ -7960,25 +8178,33 @@ window.ramdaniAuth = {
 
     var coursesEl = document.getElementById('myCourses');
     if (coursesEl) {
+      if (window.ramdaniUi) ramdaniUi.showSkeleton(coursesEl, 'card', { count: 3, height: '140px' });
       var enrRes = await sb.from('enrollments').select('*, modules(title, slug)').eq('student_id', uid).order('enrolled_at', { ascending: false });
       var enrollments = enrRes.data || [];
       var compRes = await sb.from('course_completions').select('*').eq('student_id', uid);
       var completions = {};
       (compRes.data || []).forEach(function (c) { completions[c.module_id] = c; });
+      if (window.ramdaniUi) ramdaniUi.hideSkeleton(coursesEl);
+      var coursesCountEl = document.getElementById('myCoursesCount');
       if (enrRes.error) {
-        coursesEl.innerHTML = '<p class="empty">Could not load your courses.</p>';
+        if (window.console) console.error('renderLearning: load courses failed', enrRes.error);
+        coursesEl.innerHTML = '<p class="empty">Unable to load your courses.<br />Please try again.</p>';
+        if (coursesCountEl) coursesCountEl.textContent = '';
+        if (window.showToast) showToast('Unable to load your courses.', 'error');
       } else if (!enrollments.length) {
         coursesEl.innerHTML = '<p class="empty">You are not enrolled in any course yet. Browse <a href="/pages/modules.html">study modules</a> to get started.</p>';
+        if (coursesCountEl) coursesCountEl.textContent = '';
       } else {
+        if (coursesCountEl) coursesCountEl.textContent = '(' + enrollments.length + ')';
         coursesEl.innerHTML = enrollments.map(function (e) {
           var m = e.modules || {};
           var comp = completions[e.module_id];
-          var pct = comp ? Math.round(comp.lesson_percent || 0) : 0;
+          var pct = comp ? Math.max(0, Math.min(100, Math.round(comp.lesson_percent || 0))) : 0;
           var badge = e.status === 'completed' ? 'Completed' : (e.status === 'active' ? 'In progress' : e.status);
           return '<article class="card"><p class="kicker">' + esc(badge) + '</p><h3>' + esc(m.title || 'Course') + '</h3>' +
-            '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
+            '<div class="progress-bar" role="progressbar" aria-valuenow="' + pct + '" aria-valuemin="0" aria-valuemax="100" aria-label="' + esc(m.title || 'Course') + ' progress"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
             '<p class="note">' + pct + '% of published lessons completed' +
-            (comp && comp.is_eligible_for_certificate ? ' · Eligible for certificate' : '') + '</p>' +
+            (comp && comp.is_eligible_for_certificate ? ' · Eligible for certificate' : (!comp ? ' · No learning progress recorded yet' : '')) + '</p>' +
             '<a class="btn btn-primary" href="/pages/module.html?slug=' + encodeURIComponent(m.slug || '') + '">Continue</a></article>';
         }).join('');
       }
@@ -7986,25 +8212,39 @@ window.ramdaniAuth = {
 
     var attEl = document.getElementById('myCourseAttendance');
     if (attEl) {
+      if (window.ramdaniUi) ramdaniUi.showSkeleton(attEl, 'row', { cols: 3, count: 4 });
       var attRes = await sb.from('course_attendance').select('session_date, present, modules(title)').eq('student_id', uid).order('session_date', { ascending: false }).limit(30);
+      if (window.ramdaniUi) ramdaniUi.hideSkeleton(attEl);
+      var attSummaryEl = document.getElementById('myAttendanceSummary');
       if (attRes.error) {
-        attEl.innerHTML = '<p class="empty">Could not load attendance.</p>';
+        if (window.console) console.error('renderLearning: load attendance failed', attRes.error);
+        attEl.innerHTML = '<p class="empty">Unable to load attendance.<br />Please try again.</p>';
+        if (attSummaryEl) attSummaryEl.textContent = '';
+        if (window.showToast) showToast('Unable to load attendance.', 'error');
       } else if (!attRes.data || !attRes.data.length) {
         attEl.innerHTML = '<p class="empty">No attendance recorded yet.</p>';
+        if (attSummaryEl) attSummaryEl.textContent = '';
       } else {
+        var presentCount = attRes.data.filter(function (a) { return a.present; }).length;
+        var absentCount = attRes.data.length - presentCount;
+        if (attSummaryEl) attSummaryEl.textContent = 'Most recent ' + attRes.data.length + ' session(s): ' + presentCount + ' present, ' + absentCount + ' absent.';
         attEl.innerHTML = '<div class="table-wrap"><table class="learning-table"><thead><tr><th>Course</th><th>Date</th><th>Status</th></tr></thead><tbody>' +
           attRes.data.map(function (a) {
             var mod = a.modules || {};
-            return '<tr><td>' + esc(mod.title || '') + '</td><td>' + esc(a.session_date || '') + '</td><td>' + (a.present ? 'Present' : 'Absent') + '</td></tr>';
+            return '<tr><td>' + esc(mod.title || '') + '</td><td>' + esc(a.session_date || '') + '</td><td><span class="status-badge status-' + (a.present ? 'present' : 'absent') + '">' + (a.present ? 'Present' : 'Absent') + '</span></td></tr>';
           }).join('') + '</tbody></table></div>';
       }
     }
 
     var notifEl = document.getElementById('myNotifications');
     if (notifEl) {
+      if (window.ramdaniUi) ramdaniUi.showSkeleton(notifEl, 'line', { count: 3 });
       var notifRes = await sb.from('notifications').select('*').eq('user_id', uid).order('created_at', { ascending: false }).limit(20);
+      if (window.ramdaniUi) ramdaniUi.hideSkeleton(notifEl);
       if (notifRes.error) {
-        notifEl.innerHTML = '<p class="empty">Could not load notifications.</p>';
+        if (window.console) console.error('renderLearning: load notifications failed', notifRes.error);
+        notifEl.innerHTML = '<p class="empty">Unable to load notifications.<br />Please try again.</p>';
+        if (window.showToast) showToast('Unable to load notifications.', 'error');
       } else if (!notifRes.data || !notifRes.data.length) {
         notifEl.innerHTML = '<p class="empty">No notifications yet.</p>';
       } else {
@@ -8022,13 +8262,21 @@ window.ramdaniAuth = {
 
     var quizEl = document.getElementById('myQuizResults');
     if (quizEl) {
+      if (window.ramdaniUi) ramdaniUi.showSkeleton(quizEl, 'row', { cols: 3, count: 4 });
       var qaRes = await sb.from('quiz_attempts').select('score, total, created_at, quizzes(title)').eq('student_id', uid).order('created_at', { ascending: false }).limit(20);
       var attempts = qaRes.data || [];
+      if (window.ramdaniUi) ramdaniUi.hideSkeleton(quizEl);
+      var quizCountEl = document.getElementById('myQuizResultsCount');
       if (qaRes.error) {
-        quizEl.innerHTML = '<p class="empty">Could not load quiz results.</p>';
+        if (window.console) console.error('renderLearning: load quiz results failed', qaRes.error);
+        quizEl.innerHTML = '<p class="empty">Unable to load quiz results.<br />Please try again.</p>';
+        if (quizCountEl) quizCountEl.textContent = '';
+        if (window.showToast) showToast('Unable to load quiz results.', 'error');
       } else if (!attempts.length) {
         quizEl.innerHTML = '<p class="empty">No quiz attempts yet.</p>';
+        if (quizCountEl) quizCountEl.textContent = '';
       } else {
+        if (quizCountEl) quizCountEl.textContent = '(' + attempts.length + ')';
         quizEl.innerHTML = '<div class="table-wrap"><table class="learning-table"><thead><tr><th>Quiz</th><th>Score</th><th>Date</th></tr></thead><tbody>' +
           attempts.map(function (a) {
             var d = new Date(a.created_at);
@@ -8039,12 +8287,20 @@ window.ramdaniAuth = {
 
     var certEl = document.getElementById('myCertificates');
     if (certEl) {
+      if (window.ramdaniUi) ramdaniUi.showSkeleton(certEl, 'card', { count: 2, height: '110px' });
       var certRes = await sb.from('certificate_issuances').select('*').or('student_id.eq.' + uid + ',profile_id.eq.' + uid).eq('status', 'issued').order('created_at', { ascending: false });
       var certs = certRes.data || [];
+      var certCountEl = document.getElementById('myCertificatesCount');
       if (certRes.error) {
-        certEl.innerHTML = '<p class="empty">Could not load certificates.</p>';
+        if (window.ramdaniUi) ramdaniUi.hideSkeleton(certEl);
+        if (window.console) console.error('renderLearning: load certificates failed', certRes.error);
+        certEl.innerHTML = '<p class="empty">Unable to load certificates.<br />Please try again.</p>';
+        if (certCountEl) certCountEl.textContent = '';
+        if (window.showToast) showToast('Unable to load certificates.', 'error');
       } else if (!certs.length) {
+        if (window.ramdaniUi) ramdaniUi.hideSkeleton(certEl);
         certEl.innerHTML = '<p class="empty">No certificates issued yet. Complete a course\'s required lessons and quiz to become eligible; staff then issue the certificate.</p>';
+        if (certCountEl) certCountEl.textContent = '';
       } else {
         var ids = certs.map(function (c) { return c.module_id; }).filter(Boolean);
         var titles = {};
@@ -8067,7 +8323,9 @@ window.ramdaniAuth = {
             '<p class="note">Verification code: ' + esc(c.verification_code) + '</p>' +
             '<p class="note"><a href="/pages/verify-certificate.html?code=' + encodeURIComponent(c.verification_code || '') + '">Verify</a></p></article>';
         }).join('');
+        if (window.ramdaniUi) ramdaniUi.hideSkeleton(certEl);
         certEl.innerHTML = certHtml;
+        if (certCountEl) certCountEl.textContent = '(' + certs.length + ')';
       }
     }
     var cardEl = document.getElementById('myStudentCard');
@@ -8761,15 +9019,17 @@ window.ramdaniAuth = {
 
   async function renderQuizzes() {
     var el = document.getElementById('list');
-    var rows = await listPublished('quizzes');
     if (!el) return;
+    if (window.ramdaniUi) ramdaniUi.showSkeleton(el, 'card', { count: 3, height: '140px' });
+    var rows = await listPublished('quizzes');
+    if (window.ramdaniUi) ramdaniUi.hideSkeleton(el);
     if (!rows.length) return empty(el, 'quizzes_empty');
     el.innerHTML = rows.map(function (r) {
       return '<article class="card academy-card">' +
         chips([(r.category || 'practice').toUpperCase()]) +
         '<h3>' + escape(r.title) + '</h3>' +
         '<p class="academy-summary">' + escape(r.summary || '') + '</p>' +
-        '<a class="btn btn-primary" href="' + withPreview('/pages/quiz.html?slug=' + encodeURIComponent(r.slug), qs('preview') === '1') + '">Start</a></article>';
+        '<a class="btn btn-primary" href="' + withPreview('/pages/quiz.html?slug=' + encodeURIComponent(r.slug), qs('preview') === '1') + '" aria-label="Start ' + escape(r.title) + '">Start</a></article>';
     }).join('');
   }
 
@@ -8777,15 +9037,26 @@ window.ramdaniAuth = {
     var slug = qs('slug');
     var form = document.getElementById('quizForm');
     if (!form || !slug || !window.sb) return;
+    if (window.ramdaniUi) ramdaniUi.showSkeleton(form, 'card', { count: 3, height: '90px' });
     var preview = await staffPreview();
     var quizQ = sb.from('quizzes').select('*').eq('slug', slug);
     if (!preview) quizQ = quizQ.eq('status', 'published');
     var quizRes = await quizQ.maybeSingle();
     var quiz = quizRes.data;
     var quizCrumb = document.getElementById('quizCrumb');
-    if (!quiz) {
-      document.getElementById('quizTitle').textContent = 'Quiz not available';
-      if (quizCrumb) quizCrumb.textContent = 'Quiz not available';
+    if (quizRes.error || !quiz) {
+      if (window.ramdaniUi) ramdaniUi.hideSkeleton(form);
+      if (quizRes.error) {
+        if (window.console) console.error('load quiz failed', quizRes.error);
+        document.getElementById('quizTitle').textContent = 'Unable to load quiz';
+        if (quizCrumb) quizCrumb.textContent = 'Unable to load quiz';
+        form.innerHTML = '<p class="empty">We couldn\'t load this quiz right now. Please try again.</p>';
+        if (window.showToast) showToast('Unable to load this quiz. Please try again.', 'error');
+      } else {
+        document.getElementById('quizTitle').textContent = 'Quiz not available';
+        if (quizCrumb) quizCrumb.textContent = 'Quiz not available';
+        form.innerHTML = '<p class="empty">This quiz is not available.</p>';
+      }
       return;
     }
     document.getElementById('quizTitle').textContent = quiz.title;
@@ -8805,37 +9076,56 @@ window.ramdaniAuth = {
     var qRes = preview
       ? await sb.from('quiz_questions').select('id, prompt, choices, sort_order, question_type').eq('quiz_id', quiz.id).order('sort_order')
       : await sb.from('quiz_questions_public').select('id, prompt, choices, sort_order, question_type').eq('quiz_id', quiz.id).order('sort_order');
+    if (qRes.error) {
+      if (window.console) console.error('load quiz questions failed', qRes.error);
+      if (window.ramdaniUi) ramdaniUi.hideSkeleton(form);
+      form.innerHTML = '<p class="empty">We couldn\'t load this quiz right now. Please try again.</p>';
+      if (window.showToast) showToast('Unable to load this quiz. Please try again.', 'error');
+      return;
+    }
     var questions = qRes.data || [];
+    if (window.ramdaniUi) ramdaniUi.hideSkeleton(form);
     if (!questions.length) {
       form.innerHTML = '<p class="empty">No questions published yet.</p>';
       return;
     }
     var letters = ['A', 'B', 'C', 'D'];
     form.classList.add('quiz-compact');
-    form.innerHTML = questions.map(function (q, i) {
+    var progressLabel = questions.length + (questions.length === 1 ? ' question' : ' questions');
+    form.innerHTML = '<p class="note quiz-progress" id="quizProgress">' + escape(progressLabel) + '</p>' + questions.map(function (q, i) {
       var qtype = q.question_type || 'multiple_choice';
-      var head = '<legend class="mcq-head"><span class="mcq-num">' + (i + 1) + '</span><span class="mcq-q">' + escape(q.prompt) + '</span></legend>';
+      var head = '<legend class="mcq-head"><span class="mcq-num">' + (i + 1) + '</span><span class="mcq-q">' + escape(q.prompt) + '</span><span class="sr-only"> — question ' + (i + 1) + ' of ' + questions.length + '</span></legend>';
       if (qtype === 'short_answer') {
-        return '<fieldset class="card mcq" data-id="' + q.id + '" data-kind="short_answer">' + head +
-          '<input type="text" class="short-answer-input" data-q="' + q.id + '" autocomplete="off" maxlength="300" />' +
-          '<div class="mcq-explanation"></div></fieldset>';
+        return '<fieldset class="card mcq" data-id="' + q.id + '" data-kind="short_answer" tabindex="-1">' + head +
+          '<label class="sr-only" for="qsa-' + q.id + '">Your answer to question ' + (i + 1) + '</label>' +
+          '<input type="text" id="qsa-' + q.id + '" class="short-answer-input" data-q="' + q.id + '" autocomplete="off" maxlength="300" />' +
+          '<div class="mcq-explanation" role="status" aria-live="polite"></div></fieldset>';
       }
       var choices = Array.isArray(q.choices) ? q.choices : [];
       if (qtype === 'true_false' && choices.length < 2) choices = ['True', 'False'];
       var opts = choices.map(function (c, idx) {
-        return '<button type="button" class="mcq-opt" data-q="' + q.id + '" data-idx="' + idx + '">' +
+        return '<button type="button" class="mcq-opt" role="radio" aria-checked="false" data-q="' + q.id + '" data-idx="' + idx + '" aria-label="Option ' + (letters[idx] || (idx + 1)) + ': ' + escape(c) + '">' +
           '<span class="opt-label">' + (letters[idx] || (idx + 1)) + '</span>' +
           '<span class="opt-text">' + escape(c) + '</span>' +
           '<span class="opt-tick" aria-hidden="true">✓</span></button>';
       }).join('');
-      return '<fieldset class="card mcq" data-id="' + q.id + '" data-kind="' + escape(qtype) + '">' + head + '<div class="mcq-options">' + opts + '</div><div class="mcq-explanation"></div></fieldset>';
-    }).join('') + '<label>Email (optional, for staff follow-up)<input type="email" name="email" /></label><div class="quiz-footer"><p class="form-status" id="quizScore">' + escape(window.ramdaniT ? ramdaniT('quiz_not_submitted') : 'Not submitted') + '</p><button class="btn btn-primary" type="submit">' + escape(window.ramdaniT ? ramdaniT('quiz_submit') : 'Submit') + '</button></div>';
+      return '<fieldset class="card mcq" data-id="' + q.id + '" data-kind="' + escape(qtype) + '" tabindex="-1">' + head + '<div class="mcq-options" role="radiogroup" aria-label="Answer options for question ' + (i + 1) + '">' + opts + '</div><div class="mcq-explanation" role="status" aria-live="polite"></div></fieldset>';
+    }).join('') + '<label>Email (optional, for staff follow-up)<input type="email" name="email" /></label><div class="quiz-footer"><p class="form-status" id="quizScore" role="status" aria-live="polite">' + escape(window.ramdaniT ? ramdaniT('quiz_not_submitted') : 'Not submitted') + '</p><button class="btn btn-primary" type="submit">' + escape(window.ramdaniT ? ramdaniT('quiz_submit') : 'Submit') + '</button></div>';
     form.querySelectorAll('.mcq-opt').forEach(function (btn) {
       btn.addEventListener('click', function () {
         if (form.dataset.submitted === '1') return;
         var qid = btn.getAttribute('data-q');
-        form.querySelectorAll('.mcq-opt[data-q="' + qid + '"]').forEach(function (b) { b.classList.remove('selected'); });
+        form.querySelectorAll('.mcq-opt[data-q="' + qid + '"]').forEach(function (b) { b.classList.remove('selected'); b.setAttribute('aria-checked', 'false'); });
         btn.classList.add('selected');
+        btn.setAttribute('aria-checked', 'true');
+        var field = btn.closest('.mcq');
+        if (field) field.classList.remove('missing');
+      });
+    });
+    form.querySelectorAll('.short-answer-input').forEach(function (inp) {
+      inp.addEventListener('input', function () {
+        var field = inp.closest('.mcq');
+        if (field) field.classList.remove('missing');
       });
     });
     if (preview) {
@@ -8849,16 +9139,18 @@ window.ramdaniAuth = {
       if (form.dataset.submitted === '1') return;
       var answers = {};
       var missing = false;
+      var firstMissingField = null;
       questions.forEach(function (q) {
         var qtype = q.question_type || 'multiple_choice';
+        var field = form.querySelector('.mcq[data-id="' + q.id + '"]');
         if (qtype === 'short_answer') {
           var inp = form.querySelector('.short-answer-input[data-q="' + q.id + '"]');
           var val = inp ? String(inp.value || '').trim() : '';
-          if (!val) missing = true;
+          if (!val) { missing = true; if (field) { field.classList.add('missing'); if (!firstMissingField) firstMissingField = inp || field; } }
           else answers[q.id] = val;
         } else {
           var sel = form.querySelector('.mcq-opt.selected[data-q="' + q.id + '"]');
-          if (!sel) missing = true;
+          if (!sel) { missing = true; if (field) { field.classList.add('missing'); if (!firstMissingField) firstMissingField = field; } }
           else answers[q.id] = Number(sel.getAttribute('data-idx'));
         }
       });
@@ -8866,17 +9158,30 @@ window.ramdaniAuth = {
       if (missing) {
         status.className = 'form-status err';
         status.textContent = 'Answer every question before submitting.';
+        if (firstMissingField) {
+          firstMissingField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          if (typeof firstMissingField.focus === 'function') firstMissingField.focus();
+        }
         return;
       }
       var email = (form.querySelector('[name="email"]') || {}).value || null;
+      var btn = form.querySelector('[type="submit"]');
+      var btnLabel = btn ? btn.textContent : '';
+      if (btn) { btn.disabled = true; btn.textContent = 'Submitting…'; }
+      status.className = 'form-status';
+      status.textContent = '';
       var res = await sb.rpc('submit_ramdani_quiz', { p_quiz_id: quiz.id, p_answers: answers, p_email: email });
       var box = document.getElementById('quizResult');
       if (res.error) {
-        if (box) { box.hidden = false; box.textContent = res.error.message; }
+        if (window.console) console.error('submit_ramdani_quiz failed', res.error);
+        if (box) { box.hidden = false; box.textContent = 'Unable to submit your quiz. Please try again.'; }
         status.className = 'form-status err';
-        status.textContent = res.error.message;
+        status.textContent = 'Unable to submit your quiz. Please try again.';
+        if (window.showToast) showToast('Unable to submit the quiz. Please try again.', 'error');
+        if (btn) { btn.disabled = false; btn.textContent = btnLabel; }
         return;
       }
+      if (window.showToast) showToast('Quiz submitted successfully.', 'success');
       var data = res.data || {};
       form.dataset.submitted = '1';
       var byId = {};
@@ -8886,6 +9191,7 @@ window.ramdaniAuth = {
         var field = form.querySelector('.mcq[data-id="' + q.id + '"]');
         if (!field) return;
         field.classList.add('revealed');
+        field.classList.remove('missing');
         var expl = field.querySelector('.mcq-explanation');
         if ((ex.kind || q.question_type) === 'short_answer') {
           var inp = field.querySelector('.short-answer-input');
@@ -8905,11 +9211,24 @@ window.ramdaniAuth = {
         });
         if (expl && ex.explanation) expl.textContent = ex.explanation;
       });
+      var hasScore = typeof data.score === 'number' && typeof data.total === 'number' && data.total > 0;
+      var pct = hasScore ? Math.round((data.score / data.total) * 100) : null;
+      var passLine = '';
+      if (hasScore && quiz.pass_percent != null) {
+        var passed = pct >= quiz.pass_percent;
+        passLine = ' — ' + (passed ? 'Passed' : 'Not passed') + ' (pass mark ' + escape(quiz.pass_percent) + '%)';
+      }
       status.className = 'form-status ok';
-      status.innerHTML = 'Score: <strong>' + escape(data.score) + '</strong> / ' + escape(data.total);
+      if (hasScore) {
+        status.innerHTML = 'Score: <strong>' + escape(data.score) + '</strong> / ' + escape(data.total) + ' (' + pct + '%)' + escape(passLine);
+      } else {
+        status.textContent = 'Quiz submitted.';
+      }
       if (box) {
         box.hidden = false;
-        box.innerHTML = '<h2>Score: ' + escape(data.score) + ' / ' + escape(data.total) + '</h2>';
+        box.innerHTML = hasScore
+          ? '<h2>Score: ' + escape(data.score) + ' / ' + escape(data.total) + ' (' + pct + '%)</h2>' + (passLine ? '<p>' + escape(passLine.replace(/^ — /, '')) + '</p>' : '')
+          : '<h2>Quiz submitted</h2>';
       }
       var submitBtn = form.querySelector('[type="submit"]');
       if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Submitted'; }
@@ -10046,8 +10365,24 @@ window.ramdaniAuth = {
     document.getElementById('studentSearch').addEventListener('input', function () {
       renderStudentRows(allStudents, this.value.trim().toLowerCase());
     });
+    var stuStatusSel = document.getElementById('studentStatusFilter');
+    if (stuStatusSel) stuStatusSel.addEventListener('change', function () {
+      renderStudentRows(allStudents, document.getElementById('studentSearch').value.trim().toLowerCase());
+    });
+    var stuResetBtn = document.getElementById('studentFilterReset');
+    if (stuResetBtn) stuResetBtn.addEventListener('click', function () {
+      document.getElementById('studentSearch').value = '';
+      if (stuStatusSel) stuStatusSel.value = '';
+      renderStudentRows(allStudents, '');
+    });
 
     document.getElementById('lawAppFilter').addEventListener('change', loadLawyerApps);
+    document.getElementById('lawAppSearch').addEventListener('input', paintLawyerApps);
+    document.getElementById('lawAppReset').addEventListener('click', function () {
+      document.getElementById('lawAppSearch').value = '';
+      document.getElementById('lawAppFilter').value = 'pending';
+      loadLawyerApps();
+    });
     document.getElementById('lawAppBody').addEventListener('click', async function (e) {
       var b = e.target.closest('[data-law-act]'); if (!b) return;
       var id = b.getAttribute('data-id'), act = b.getAttribute('data-law-act'), payload;
@@ -10057,8 +10392,14 @@ window.ramdaniAuth = {
       else { if (!window.confirm('Suspend this lawyer? They will lose access immediately.')) return; payload = { status: 'suspended' }; }
       b.disabled = true;
       var r = await sb.from('profiles').update(payload).eq('id', id);
-      if (r.error) { note.className = 'form-status err'; note.textContent = r.error.message; b.disabled = false; return; }
+      if (r.error) {
+        if (window.console) console.error('lawyer status update failed', r.error);
+        note.className = 'form-status err'; note.textContent = 'Unable to complete this action. Please try again.';
+        if (window.showToast) showToast('Unable to complete this action.', 'error');
+        b.disabled = false; return;
+      }
       note.className = 'form-status ok'; note.textContent = act === 'approve' ? 'Lawyer approved. They can now sign in.' : 'Updated.';
+      if (window.showToast) showToast(act === 'approve' ? 'Lawyer approved.' : 'Lawyer updated successfully.', 'success');
       loadLawyerApps();
     });
 
@@ -10141,6 +10482,13 @@ window.ramdaniAuth = {
       var name = document.getElementById('createForm').dataset.table;
       if (name) loadTable(name);
     });
+    var resetBtn = document.getElementById('contentResetBtn');
+    if (resetBtn) resetBtn.addEventListener('click', function () {
+      document.getElementById('contentSearch').value = '';
+      var stf = document.getElementById('contentStatusFilter'); if (stf) stf.value = '';
+      contentPage = 1;
+      renderContentRows();
+    });
     var prev = document.getElementById('contentPrev');
     var next = document.getElementById('contentNext');
     if (prev) prev.addEventListener('click', function () { contentPage -= 1; renderContentRows(); });
@@ -10218,6 +10566,7 @@ window.ramdaniAuth = {
     });
     bindCourseBuilder();
     bindQuizBuilder();
+    bindQuizList();
     bindQuizResults();
     bindEduSearch();
     bindLegalOps();
@@ -10225,6 +10574,12 @@ window.ramdaniAuth = {
     bindRemainingOps();
     document.getElementById('certIssuanceForm').addEventListener('submit', saveCertIssuance);
     document.getElementById('certIssuanceSearch').addEventListener('input', renderCertIssuances);
+    document.getElementById('certIssuanceStatus').addEventListener('change', renderCertIssuances);
+    document.getElementById('certIssuanceResetBtn').addEventListener('click', function () {
+      document.getElementById('certIssuanceSearch').value = '';
+      document.getElementById('certIssuanceStatus').value = '';
+      renderCertIssuances();
+    });
     document.getElementById('certIssuancesBody').addEventListener('click', function (e) {
       var revokeBtn = e.target.closest('[data-revoke-cert]');
       if (revokeBtn) { revokeCertIssuance(revokeBtn.getAttribute('data-revoke-cert')); return; }
@@ -10257,22 +10612,60 @@ window.ramdaniAuth = {
 
   function escapeHtml(v) { return (window.ramdaniUi ? ramdaniUi.escape(v) : String(v == null ? '' : v)); }
 
+  // Shared status-badge renderer (Phase 27B) — reuses the existing
+  // .status-badge/.status-<value> CSS classes already used by Memberships
+  // and join-request rows, so this is one convention, not a new one.
+  function statusBadge(status, label) {
+    var s = status == null ? '' : String(status);
+    var cls = s.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    return '<span class="status-badge status-' + escapeHtml(cls) + '">' + escapeHtml(label || s || '—') + '</span>';
+  }
+
+
+  function studentInitials(name) {
+    var parts = (name || '').trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return '?';
+    return (parts[0][0] + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
+  }
+
   function renderStudentRows(rows, filter) {
     var body = document.getElementById('studentsBody');
-    var shown = !filter ? rows : rows.filter(function (r) {
+    var note = document.getElementById('studentsNote');
+    var statusSel = document.getElementById('studentStatusFilter');
+    var statusFilter = statusSel ? statusSel.value : '';
+    var filtered = !filter ? rows : rows.filter(function (r) {
       return [r.full_name, r.email, r.student_id].some(function (v) {
         return (v || '').toLowerCase().indexOf(filter) !== -1;
       });
     });
-    document.getElementById('studentTotal').textContent = '(' + rows.length + ' total' + (filter ? ', ' + shown.length + ' shown' : '') + ')';
+    var shown = !statusFilter ? filtered : filtered.filter(function (r) {
+      return (r.is_active ? 'active' : 'inactive') === statusFilter;
+    });
+    var totalLabel = document.getElementById('studentTotal');
+    if (totalLabel) totalLabel.textContent = shown.length === rows.length
+      ? (rows.length + (rows.length === 1 ? ' student' : ' students'))
+      : ('Showing ' + shown.length + ' of ' + rows.length + ' students');
+    if (note) note.textContent = '';
+
+    if (!rows.length) {
+      body.innerHTML = '<tr><td colspan="8" class="empty">No students have been registered yet.</td></tr>';
+      return;
+    }
+    if (!shown.length) {
+      body.innerHTML = '<tr><td colspan="8" class="empty">No students found.<br />Try changing your search or filters.</td></tr>';
+      return;
+    }
+
     body.innerHTML = shown.map(function (r) {
-      return '<tr><td>' + escapeHtml(r.full_name) + '</td><td>' + escapeHtml(r.email) + '</td><td>' +
+      var initials = studentInitials(r.full_name);
+      return '<tr><td><span class="member-thumb is-empty" aria-hidden="true" style="display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:600">' +
+        escapeHtml(initials) + '</span> ' + escapeHtml(r.full_name) + '</td><td>' + escapeHtml(r.email) + '</td><td>' +
         escapeHtml(r.student_id) + '</td><td>' + escapeHtml(r.department) + '</td><td>' + escapeHtml(r.university) +
-        '</td><td>' + escapeHtml(r.session) + '</td><td>' + (r.is_active ? 'Active' : 'Inactive') + '</td>' +
-        '<td><button type="button" class="btn" data-toggle="' + r.id + '" data-active="' + r.is_active + '">' +
+        '</td><td>' + escapeHtml(r.session) + '</td><td>' + statusBadge(r.is_active ? 'active' : 'inactive', r.is_active ? 'Active' : 'Inactive') + '</td>' +
+        '<td><button type="button" class="btn btn-sm" data-toggle="' + r.id + '" data-active="' + r.is_active + '" aria-label="' + (r.is_active ? 'Deactivate ' : 'Activate ') + escapeHtml(r.full_name) + '">' +
         (r.is_active ? 'Deactivate' : 'Activate') + '</button> ' +
-        '<button type="button" class="btn" data-delstu="' + r.id + '">Delete</button></td></tr>';
-    }).join('') || '<tr><td colspan="8">No students yet.</td></tr>';
+        '<button type="button" class="btn btn-sm" data-delstu="' + r.id + '" aria-label="Delete ' + escapeHtml(r.full_name) + '">Delete</button></td></tr>';
+    }).join('');
 
     body.querySelectorAll('[data-toggle]').forEach(function (btn) {
       btn.addEventListener('click', async function () {
@@ -10299,39 +10692,87 @@ window.ramdaniAuth = {
   }
 
   async function loadStudents() {
+    var body = document.getElementById('studentsBody');
+    if (window.ramdaniUi && body) ramdaniUi.showSkeleton(body, 'row', { cols: 8, count: 5 });
     var res = await sb.from('profiles').select('id, full_name, email, student_id, department, university, session, is_active')
       .eq('role', 'student').order('created_at', { ascending: false });
+    if (window.ramdaniUi && body) ramdaniUi.hideSkeleton(body);
+    if (res.error) {
+      if (window.console) console.error('loadStudents failed', res.error);
+      if (body) body.innerHTML = '<tr><td colspan="8" class="empty">Unable to load students.<br />Please try again.</td></tr>';
+      var totalLabel = document.getElementById('studentTotal');
+      if (totalLabel) totalLabel.textContent = '';
+      if (window.showToast) showToast('Unable to load students.', 'error');
+      return;
+    }
     allStudents = res.data || [];
     renderStudentRows(allStudents, document.getElementById('studentSearch').value.trim().toLowerCase());
   }
 
   var STAFF_ROLE_LABELS = { lawyer: 'Lawyer', firm_admin: 'Firm admin', operations_staff: 'Operations staff', member: 'Member', client: 'Client', society_admin: 'Society admin', education_manager: 'Education manager', student_manager: 'Student manager', content_manager: 'Content manager', communications_manager: 'Communications manager', editor: 'Editor' };
 
-  async function loadLawyerApps() {
+  var allLawyerApps = [];
+  function lawyerInitials(name) {
+    var parts = (name || '').trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return '?';
+    return (parts[0][0] + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
+  }
+  function paintLawyerApps() {
     var body = document.getElementById('lawAppBody'), note = document.getElementById('lawAppNote');
+    var q = (document.getElementById('lawAppSearch').value || '').trim().toLowerCase();
+    var rows = !q ? allLawyerApps : allLawyerApps.filter(function (r) {
+      return [r.full_name, r.email, r.phone, r.bar_association, r.bar_license_no].join(' ').toLowerCase().indexOf(q) !== -1;
+    });
+    var totalLabel = document.getElementById('lawAppTotal');
+    if (totalLabel) totalLabel.textContent = rows.length === allLawyerApps.length
+      ? (allLawyerApps.length ? (allLawyerApps.length + (allLawyerApps.length === 1 ? ' lawyer' : ' lawyers')) : '')
+      : ('Showing ' + rows.length + ' of ' + allLawyerApps.length + ' lawyers');
     note.textContent = '';
-    var f = document.getElementById('lawAppFilter').value;
-    var q = sb.from('profiles').select('id, full_name, email, phone, reference_id, status, is_active, photo_path, bar_association, bar_license_no, district, province, rejection_reason, created_at').eq('role', 'lawyer').order('created_at', { ascending: false });
-    if (f !== 'all') q = q.eq('status', f);
-    var res = await q;
-    if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; return; }
-    var rows = res.data || [];
+    if (!allLawyerApps.length) {
+      body.innerHTML = '<tr><td colspan="7" class="empty">No lawyers have been registered yet.</td></tr>';
+      return;
+    }
+    if (!rows.length) {
+      body.innerHTML = '<tr><td colspan="7" class="empty">No lawyers match your current filters.</td></tr>';
+      return;
+    }
     body.innerHTML = rows.map(function (r) {
       var act = r.status === 'active'
-        ? '<button type="button" class="btn btn-sm" data-law-act="suspend" data-id="' + r.id + '">Suspend</button>'
-        : '<button type="button" class="btn btn-sm btn-primary" data-law-act="approve" data-id="' + r.id + '">Approve</button>' + (r.status === 'pending' ? ' <button type="button" class="btn btn-sm" data-law-act="reject" data-id="' + r.id + '">Reject</button>' : '');
-      return '<tr><td><img data-law-photo="' + escapeHtml(r.photo_path || '') + '" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:8px" hidden /></td>' +
+        ? '<button type="button" class="btn btn-sm" data-law-act="suspend" data-id="' + r.id + '" aria-label="Suspend ' + escapeHtml(r.full_name) + '">Suspend</button>'
+        : '<button type="button" class="btn btn-sm btn-primary" data-law-act="approve" data-id="' + r.id + '" aria-label="Approve ' + escapeHtml(r.full_name) + '">Approve</button>' + (r.status === 'pending' ? ' <button type="button" class="btn btn-sm" data-law-act="reject" data-id="' + r.id + '" aria-label="Reject ' + escapeHtml(r.full_name) + '">Reject</button>' : '');
+      return '<tr><td><img data-law-photo="' + escapeHtml(r.photo_path || '') + '" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:8px" hidden />' +
+        (r.photo_path ? '' : '<span class="member-thumb is-empty" aria-hidden="true" style="display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:600;width:56px;height:56px">' + escapeHtml(lawyerInitials(r.full_name)) + '</span>') + '</td>' +
         '<td>' + escapeHtml(r.full_name) + '<br><span class="note">' + escapeHtml(r.reference_id || '') + '</span></td>' +
         '<td>' + escapeHtml(r.bar_association || '—') + '<br><span class="note">' + escapeHtml(r.bar_license_no || '—') + '</span></td>' +
         '<td>' + escapeHtml((r.district || '—') + ', ' + (r.province || '—')) + '</td>' +
         '<td>' + escapeHtml(r.email || '') + '<br><span class="note">' + escapeHtml(r.phone || '') + '</span></td>' +
-        '<td>' + escapeHtml(r.status) + (r.rejection_reason ? '<br><span class="note">' + escapeHtml(r.rejection_reason) + '</span>' : '') + '</td><td>' + act + '</td></tr>';
-    }).join('') || '<tr><td colspan="7">No lawyer applications in this view.</td></tr>';
+        '<td>' + statusBadge(r.status) + (r.rejection_reason ? '<br><span class="note">' + escapeHtml(r.rejection_reason) + '</span>' : '') + '</td><td>' + act + '</td></tr>';
+    }).join('');
     body.querySelectorAll('img[data-law-photo]').forEach(async function (img) {
       var path = img.getAttribute('data-law-photo'); if (!path) return;
       var s = await sb.storage.from('private-docs').createSignedUrl(path, 600);
       if (s.data && s.data.signedUrl) { img.src = s.data.signedUrl; img.hidden = false; }
     });
+  }
+  async function loadLawyerApps() {
+    var body = document.getElementById('lawAppBody'), note = document.getElementById('lawAppNote');
+    note.textContent = '';
+    var f = document.getElementById('lawAppFilter').value;
+    if (window.ramdaniUi && body) ramdaniUi.showSkeleton(body, 'row', { cols: 7, count: 5 });
+    var q = sb.from('profiles').select('id, full_name, email, phone, reference_id, status, is_active, photo_path, bar_association, bar_license_no, district, province, rejection_reason, created_at').eq('role', 'lawyer').order('created_at', { ascending: false });
+    if (f !== 'all') q = q.eq('status', f);
+    var res = await q;
+    if (window.ramdaniUi && body) ramdaniUi.hideSkeleton(body);
+    if (res.error) {
+      if (window.console) console.error('loadLawyerApps failed', res.error);
+      body.innerHTML = '<tr><td colspan="7" class="empty">Unable to load lawyers.<br />Please try again.</td></tr>';
+      var totalLabel = document.getElementById('lawAppTotal');
+      if (totalLabel) totalLabel.textContent = '';
+      if (window.showToast) showToast('Unable to load lawyers.', 'error');
+      return;
+    }
+    allLawyerApps = res.data || [];
+    paintLawyerApps();
   }
 
   async function loadStaffAccounts() {
@@ -11852,14 +12293,19 @@ window.ramdaniAuth = {
   async function loadCertIssuances() {
     var note = document.getElementById('certIssuanceNote');
     note.className = 'form-status';
+    var body = document.getElementById('certIssuancesBody');
+    if (window.ramdaniUi && body) ramdaniUi.showSkeleton(body, 'row', { cols: 8, count: 6 });
     if (!certTemplatesCache.length) { var tRes = await sb.from('certificate_templates').select('*'); certTemplatesCache = tRes.data || []; }
     await loadCertIssuanceLookups();
     var res = await sb.from('certificate_issuances').select('*').order('created_at', { ascending: false });
-    var body = document.getElementById('certIssuancesBody');
+    if (window.ramdaniUi && body) ramdaniUi.hideSkeleton(body);
     if (res.error) {
+      if (window.console) console.error('loadCertIssuances failed', res.error);
       note.className = 'form-status err';
-      note.textContent = 'Could not load issuances — has the certificate_issuances table been created yet? (' + res.error.message + ')';
-      body.innerHTML = '';
+      note.textContent = 'Unable to load certificate issuances. Please try again.';
+      body.innerHTML = '<tr><td colspan="8" class="empty">Unable to load certificate issuances.<br />Please try again.</td></tr>';
+      var cCount = document.getElementById('certIssuanceCount'); if (cCount) cCount.textContent = '';
+      if (window.showToast) showToast('Unable to load certificate issuances.', 'error');
       return;
     }
     certIssuancesCache = res.data || [];
@@ -11877,13 +12323,21 @@ window.ramdaniAuth = {
   function renderCertIssuances() {
     var body = document.getElementById('certIssuancesBody');
     var q = (document.getElementById('certIssuanceSearch').value || '').toLowerCase();
+    var sf = document.getElementById('certIssuanceStatus').value;
     var rows = certIssuancesCache.filter(function (r) {
+      if (sf && r.status !== sf) return false;
       if (!q) return true;
       var student = certIssuanceStudentsCache.find(function (s) { return s.id === r.student_id; });
       var mod = certIssuanceModulesCache.find(function (m) { return m.id === r.module_id; });
       var hay = [r.certificate_number, student && student.full_name, student && student.email, mod && mod.title].filter(Boolean).join(' ').toLowerCase();
       return hay.indexOf(q) !== -1;
     });
+    var countEl = document.getElementById('certIssuanceCount');
+    if (countEl) {
+      countEl.textContent = rows.length === certIssuancesCache.length
+        ? (certIssuancesCache.length ? ('(' + certIssuancesCache.length + ')') : '')
+        : ('(Showing ' + rows.length + ' of ' + certIssuancesCache.length + ')');
+    }
     body.innerHTML = rows.map(function (r) {
       var student = certIssuanceStudentsCache.find(function (s) { return s.id === r.student_id; });
       var mod = certIssuanceModulesCache.find(function (m) { return m.id === r.module_id; });
@@ -11892,19 +12346,25 @@ window.ramdaniAuth = {
       var contextLabel = r.recipient_type === 'event_attendee' ? 'Event certificate' : (mod ? mod.title : '');
       return '<tr><td>' + escapeHtml(r.certificate_number) + '</td><td>' + escapeHtml(recipientLabel) +
         '</td><td>' + escapeHtml(contextLabel) + '</td><td>' + escapeHtml(tpl ? tpl.name : 'Default') + '</td><td>' +
-        escapeHtml(r.issue_date || '') + '</td><td>' + escapeHtml(r.status || '') + '</td><td>' + escapeHtml(r.verification_code || '') + '</td><td>' +
+        escapeHtml(r.issue_date || '') + '</td><td>' + statusBadge(r.status) + '</td><td>' + escapeHtml(r.verification_code || '') + '</td><td>' +
         (r.status === 'issued'
-          ? '<button type="button" class="btn" data-revoke-cert="' + r.id + '">Revoke</button>'
-          : '<button type="button" class="btn" data-reissue-cert="' + r.id + '">Reissue</button>') +
-        ' <button type="button" class="btn" data-delete-cert-issuance="' + r.id + '">Delete</button></td></tr>';
-    }).join('') || '<tr><td colspan="8">No certificates issued yet.</td></tr>';
+          ? '<button type="button" class="btn" data-revoke-cert="' + r.id + '" aria-label="Revoke certificate ' + escapeHtml(r.certificate_number || '') + '">Revoke</button>'
+          : '<button type="button" class="btn" data-reissue-cert="' + r.id + '" aria-label="Reissue certificate ' + escapeHtml(r.certificate_number || '') + '">Reissue</button>') +
+        ' <button type="button" class="btn" data-delete-cert-issuance="' + r.id + '" aria-label="Delete certificate ' + escapeHtml(r.certificate_number || '') + '">Delete</button></td></tr>';
+    }).join('') || ('<tr><td colspan="8" class="empty">' + (certIssuancesCache.length ? 'No certificates match your current filters.' : 'No certificates have been issued yet.') + '</td></tr>');
   }
 
   async function revokeCertIssuance(id) {
     if (!confirm('Revoke this certificate? It will no longer verify as valid on the public site.')) return;
     var res = await sb.from('certificate_issuances').update({ status: 'revoked' }).eq('id', id);
     var note = document.getElementById('certIssuanceNote');
-    if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; return; }
+    if (res.error) {
+      if (window.console) console.error('revokeCertIssuance failed', res.error);
+      note.className = 'form-status err'; note.textContent = 'Unable to revoke this certificate. Please try again.';
+      if (window.showToast) showToast('Unable to revoke this certificate.', 'error');
+      return;
+    }
+    if (window.showToast) showToast('Certificate revoked.', 'success');
     loadCertIssuances();
   }
 
@@ -11912,7 +12372,13 @@ window.ramdaniAuth = {
     if (!confirm('Reissue this certificate? It will verify as valid again.')) return;
     var res = await sb.from('certificate_issuances').update({ status: 'issued' }).eq('id', id);
     var note = document.getElementById('certIssuanceNote');
-    if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; return; }
+    if (res.error) {
+      if (window.console) console.error('reissueCertIssuance failed', res.error);
+      note.className = 'form-status err'; note.textContent = 'Unable to reissue this certificate. Please try again.';
+      if (window.showToast) showToast('Unable to reissue this certificate.', 'error');
+      return;
+    }
+    if (window.showToast) showToast('Certificate reissued.', 'success');
     loadCertIssuances();
   }
 
@@ -11920,7 +12386,13 @@ window.ramdaniAuth = {
     if (!confirm('Permanently delete this certificate record? This cannot be undone.')) return;
     var res = await sb.from('certificate_issuances').delete().eq('id', id);
     var note = document.getElementById('certIssuanceNote');
-    if (res.error) { note.className = 'form-status err'; note.textContent = res.error.message; return; }
+    if (res.error) {
+      if (window.console) console.error('deleteCertIssuance failed', res.error);
+      note.className = 'form-status err'; note.textContent = 'Unable to delete this certificate record. Please try again.';
+      if (window.showToast) showToast('Unable to delete this certificate record.', 'error');
+      return;
+    }
+    if (window.showToast) showToast('Certificate record deleted.', 'success');
     loadCertIssuances();
   }
 
@@ -12157,6 +12629,7 @@ window.ramdaniAuth = {
   var certPrefill = null;
   var cbModuleId = '', cbSections = [], cbLessons = [], cbEditSectionId = null, cbEditLessonId = null, cbRulesLoaded = false, cbInstructors = [];
   var qbQuizId = '', qbQuizzes = [], qbModules = [], qbQuestions = [], qbEditQuestionId = null, qbChoiceCount = 0;
+  var qbQuestionCounts = {};
   var enRows = [], enProfiles = {}, enModules = {}, enCompletions = {}, enIssued = {};
 
   function $id(id) { return document.getElementById(id); }
@@ -12167,6 +12640,12 @@ window.ramdaniAuth = {
 
   async function loadCourseBuilder() {
     var res = await sb.from('modules').select('id, title, code, slug').order('title');
+    if (res.error) {
+      if (window.console) console.error('loadCourseBuilder module list failed', res.error);
+      setNote('cbNote', 'Unable to load courses. Please try again.');
+      if (window.showToast) showToast('Unable to load courses.', 'error');
+      return;
+    }
     var mods = res.data || [];
     var sel = $id('cbModule');
     sel.innerHTML = '<option value="">Select module…</option>' + mods.map(function (m) {
@@ -12190,9 +12669,18 @@ window.ramdaniAuth = {
     var area = $id('cbArea');
     if (!cbModuleId) { area.hidden = true; var p0=$id('cbPreviewBtn'); if(p0) p0.hidden=true; setNote('cbNote', 'Choose a module to build its sections and lessons.'); return; }
     setNote('cbNote', '');
+    var secBody = $id('cbSectionsBody'), lesBody = $id('cbLessonsBody');
+    if (window.ramdaniUi) { if (secBody) ramdaniUi.showSkeleton(secBody, 'row', { cols: 5, count: 4 }); if (lesBody) ramdaniUi.showSkeleton(lesBody, 'row', { cols: 6, count: 4 }); }
     var s = await sb.from('course_sections').select('*').eq('module_id', cbModuleId).order('sort_order').order('created_at');
     var l = await sb.from('lessons').select('*').eq('module_id', cbModuleId).order('sort_order').order('created_at');
-    if (s.error || l.error) { area.hidden = true; setNote('cbNote', 'Could not load course content: ' + ((s.error || l.error).message)); return; }
+    if (window.ramdaniUi) { if (secBody) ramdaniUi.hideSkeleton(secBody); if (lesBody) ramdaniUi.hideSkeleton(lesBody); }
+    if (s.error || l.error) {
+      if (window.console) console.error('loadCourseBuilderData failed', s.error || l.error);
+      area.hidden = true;
+      setNote('cbNote', 'Unable to load course content. Please try again.');
+      if (window.showToast) showToast('Unable to load course content.', 'error');
+      return;
+    }
     cbSections = s.data || [];
     cbLessons = l.data || [];
     area.hidden = false;
@@ -12217,14 +12705,15 @@ window.ramdaniAuth = {
 
   function renderCbSections() {
     var body = $id('cbSectionsBody');
+    var cnt = $id('cbSectionCount'); if (cnt) cnt.textContent = cbSections.length ? ('(' + cbSections.length + ')') : '';
     body.innerHTML = cbSections.map(function (sec, i) {
       var n = cbLessons.filter(function (x) { return x.section_id === sec.id; }).length;
-      return '<tr><td>' + (i + 1) + '</td><td>' + escapeHtml(sec.title) + '</td><td>' + n + '</td><td>' + escapeHtml(sec.status) + '</td><td>' +
-        '<button type="button" class="btn" data-sec-up="' + sec.id + '"' + (i === 0 ? ' disabled' : '') + ' aria-label="Move up">↑</button> ' +
-        '<button type="button" class="btn" data-sec-down="' + sec.id + '"' + (i === cbSections.length - 1 ? ' disabled' : '') + ' aria-label="Move down">↓</button> ' +
-        '<button type="button" class="btn" data-sec-edit="' + sec.id + '">Edit</button> ' +
-        '<button type="button" class="btn" data-sec-del="' + sec.id + '">Delete</button></td></tr>';
-    }).join('') || '<tr><td colspan="5">No sections yet. Add the first section above.</td></tr>';
+      return '<tr><td>' + (i + 1) + '</td><td>' + escapeHtml(sec.title) + '</td><td>' + n + '</td><td>' + statusBadge(sec.status) + '</td><td>' +
+        '<button type="button" class="btn" data-sec-up="' + sec.id + '"' + (i === 0 ? ' disabled' : '') + ' aria-label="Move ' + escapeHtml(sec.title) + ' up">↑</button> ' +
+        '<button type="button" class="btn" data-sec-down="' + sec.id + '"' + (i === cbSections.length - 1 ? ' disabled' : '') + ' aria-label="Move ' + escapeHtml(sec.title) + ' down">↓</button> ' +
+        '<button type="button" class="btn" data-sec-edit="' + sec.id + '" aria-label="Edit ' + escapeHtml(sec.title) + '">Edit</button> ' +
+        '<button type="button" class="btn" data-sec-del="' + sec.id + '" aria-label="Delete ' + escapeHtml(sec.title) + '">Delete</button></td></tr>';
+    }).join('') || '<tr><td colspan="5" class="empty">No sections yet. Add the first section above.</td></tr>';
     var lsel = $id('cbLessonForm').querySelector('[name="section_id"]');
     var cur = lsel.value;
     lsel.innerHTML = cbSections.map(function (sec) { return '<option value="' + sec.id + '">' + escapeHtml(sec.title) + '</option>'; }).join('');
@@ -12233,18 +12722,25 @@ window.ramdaniAuth = {
 
   function renderCbLessons() {
     var body = $id('cbLessonsBody');
+    var qEl = $id('cbLessonSearch');
+    var q = qEl ? (qEl.value || '').trim().toLowerCase() : '';
     var rows = [];
+    var shown = 0;
     cbSections.forEach(function (sec) {
       var list = cbLessons.filter(function (x) { return x.section_id === sec.id; });
       list.forEach(function (les, i) {
-        rows.push('<tr><td>' + escapeHtml(sec.title) + '</td><td>' + (i + 1) + '</td><td>' + escapeHtml(les.title) + '</td><td>' + escapeHtml(les.estimated_minutes == null ? '' : les.estimated_minutes) + '</td><td>' + escapeHtml(les.status) + '</td><td>' +
-          '<button type="button" class="btn" data-les-up="' + les.id + '"' + (i === 0 ? ' disabled' : '') + ' aria-label="Move up">↑</button> ' +
-          '<button type="button" class="btn" data-les-down="' + les.id + '"' + (i === list.length - 1 ? ' disabled' : '') + ' aria-label="Move down">↓</button> ' +
-          '<button type="button" class="btn" data-les-edit="' + les.id + '">Edit</button> ' +
-          '<button type="button" class="btn" data-les-del="' + les.id + '">Delete</button></td></tr>');
+        if (q && (les.title || '').toLowerCase().indexOf(q) === -1) return;
+        shown++;
+        rows.push('<tr><td>' + escapeHtml(sec.title) + '</td><td>' + (i + 1) + '</td><td>' + escapeHtml(les.title) + '</td><td>' + escapeHtml(les.estimated_minutes == null ? '' : les.estimated_minutes) + '</td><td>' + statusBadge(les.status) + '</td><td>' +
+          '<button type="button" class="btn" data-les-up="' + les.id + '"' + (i === 0 ? ' disabled' : '') + ' aria-label="Move ' + escapeHtml(les.title) + ' up">↑</button> ' +
+          '<button type="button" class="btn" data-les-down="' + les.id + '"' + (i === list.length - 1 ? ' disabled' : '') + ' aria-label="Move ' + escapeHtml(les.title) + ' down">↓</button> ' +
+          '<button type="button" class="btn" data-les-edit="' + les.id + '" aria-label="Edit ' + escapeHtml(les.title) + '">Edit</button> ' +
+          '<button type="button" class="btn" data-les-del="' + les.id + '" aria-label="Delete ' + escapeHtml(les.title) + '">Delete</button></td></tr>');
       });
     });
-    body.innerHTML = rows.join('') || '<tr><td colspan="6">' + (cbSections.length ? 'No lessons yet. Add the first lesson above.' : 'Add a section first, then add lessons to it.') + '</td></tr>';
+    var cnt = $id('cbLessonCount');
+    if (cnt) cnt.textContent = cbLessons.length ? (shown === cbLessons.length ? ('(' + cbLessons.length + ')') : ('(Showing ' + shown + ' of ' + cbLessons.length + ')')) : '';
+    body.innerHTML = rows.join('') || ('<tr><td colspan="6" class="empty">' + (!cbSections.length ? 'Add a section first, then add lessons to it.' : (cbLessons.length ? 'No lessons match your search.' : 'No lessons yet. Add the first lesson above.')) + '</td></tr>');
   }
 
   // Re-number a list 0..n-1 after moving one item; only changed rows are written.
@@ -12259,7 +12755,12 @@ window.ramdaniAuth = {
     arr.forEach(function (x, idx) { if (x.sort_order !== idx) jobs.push(sb.from(table).update({ sort_order: idx }).eq('id', x.id)); });
     var results = await Promise.all(jobs);
     var bad = results.find(function (r) { return r.error; });
-    if (bad) { setNote('cbNote', 'Could not reorder: ' + bad.error.message); return; }
+    if (bad) {
+      if (window.console) console.error('cbMove reorder failed', bad.error);
+      setNote('cbNote', 'Unable to reorder. Please try again.');
+      if (window.showToast) showToast('Unable to reorder.', 'error');
+      return;
+    }
     setNote('cbNote', '');
     await loadCourseBuilderData();
   }
@@ -12291,9 +12792,15 @@ window.ramdaniAuth = {
       if (payload.status === 'published') payload.published_at = new Date().toISOString();
       res = await sb.from('course_sections').insert(payload);
     }
-    if (res.error) return setNote('cbSectionNote', res.error.message);
+    if (res.error) {
+      if (window.console) console.error('saveCbSection failed', res.error);
+      setNote('cbSectionNote', 'Unable to save this section. Please try again.');
+      if (window.showToast) showToast('Unable to save this section.', 'error');
+      return;
+    }
     resetSectionForm();
     setNote('cbSectionNote', 'Saved.', true);
+    if (window.showToast) showToast('Section saved successfully.', 'success');
     await loadCourseBuilderData();
   }
 
@@ -12332,9 +12839,15 @@ window.ramdaniAuth = {
       if (payload.status === 'published') payload.published_at = new Date().toISOString();
       res = await sb.from('lessons').insert(payload);
     }
-    if (res.error) return setNote('cbLessonNote', res.error.message);
+    if (res.error) {
+      if (window.console) console.error('saveCbLesson failed', res.error);
+      setNote('cbLessonNote', 'Unable to save this lesson. Please try again.');
+      if (window.showToast) showToast('Unable to save this lesson.', 'error');
+      return;
+    }
     resetLessonForm();
     setNote('cbLessonNote', 'Saved.', true);
+    if (window.showToast) showToast('Lesson saved successfully.', 'success');
     await loadCourseBuilderData();
   }
 
@@ -12352,7 +12865,9 @@ window.ramdaniAuth = {
       updated_at: new Date().toISOString()
     };
     var res = await sb.from('course_completion_rules').upsert(payload, { onConflict: 'module_id' });
-    setNote('cbRulesNote', res.error ? res.error.message : 'Rules saved.', !res.error);
+    if (res.error) { if (window.console) console.error('saveCbRules failed', res.error); if (window.showToast) showToast('Unable to save completion rules.', 'error'); }
+    else if (window.showToast) showToast('Completion rules saved.', 'success');
+    setNote('cbRulesNote', res.error ? 'Unable to save completion rules. Please try again.' : 'Rules saved.', !res.error);
   }
 
   async function saveCbModuleMeta(e) {
@@ -12360,11 +12875,15 @@ window.ramdaniAuth = {
     if (!cbModuleId) return;
     var f = e.target;
     var res = await sb.from('modules').update({ instructor_id: f.elements.instructor_id.value || null, updated_at: new Date().toISOString() }).eq('id', cbModuleId);
-    setNote('cbModuleMetaNote', res.error ? res.error.message : 'Instructor saved.', !res.error);
+    if (res.error) { if (window.console) console.error('saveCbModuleMeta failed', res.error); if (window.showToast) showToast('Unable to save instructor.', 'error'); }
+    else if (window.showToast) showToast('Instructor saved.', 'success');
+    setNote('cbModuleMetaNote', res.error ? 'Unable to save instructor. Please try again.' : 'Instructor saved.', !res.error);
   }
 
   function bindCourseBuilder() {
     $id('cbModule').addEventListener('change', function () { cbModuleId = this.value; resetSectionForm(); resetLessonForm(); loadCourseBuilderData(); });
+    var lsSearch = $id('cbLessonSearch');
+    if (lsSearch) lsSearch.addEventListener('input', renderCbLessons);
     $id('cbPreviewBtn').addEventListener('click', function () { openContentPreview('modules', this.dataset.slug || ''); });
     $id('cbModuleMetaForm').addEventListener('submit', saveCbModuleMeta);
     $id('cbSectionForm').addEventListener('submit', saveCbSection);
@@ -12390,7 +12909,13 @@ window.ramdaniAuth = {
         var n = cbLessons.filter(function (x) { return x.section_id === del; }).length;
         if (!confirm('Delete section "' + (s2 ? s2.title : '') + '"? Its ' + n + ' lesson(s) and all students\' progress on them will also be deleted. This cannot be undone.')) return;
         var r = await sb.from('course_sections').delete().eq('id', del);
-        if (r.error) return setNote('cbNote', r.error.message);
+        if (r.error) {
+          if (window.console) console.error('delete section failed', r.error);
+          setNote('cbNote', 'Unable to delete this section. Please try again.');
+          if (window.showToast) showToast('Unable to delete this section.', 'error');
+          return;
+        }
+        if (window.showToast) showToast('Section deleted successfully.', 'success');
         if (cbEditSectionId === del) resetSectionForm();
         await loadCourseBuilderData();
       }
@@ -12421,7 +12946,13 @@ window.ramdaniAuth = {
         var l2 = cbLessons.find(function (x) { return x.id === del; });
         if (!confirm('Delete lesson "' + (l2 ? l2.title : '') + '"? Students\' progress on it will also be deleted. This cannot be undone.')) return;
         var r = await sb.from('lessons').delete().eq('id', del);
-        if (r.error) return setNote('cbNote', r.error.message);
+        if (r.error) {
+          if (window.console) console.error('delete lesson failed', r.error);
+          setNote('cbNote', 'Unable to delete this lesson. Please try again.');
+          if (window.showToast) showToast('Unable to delete this lesson.', 'error');
+          return;
+        }
+        if (window.showToast) showToast('Lesson deleted successfully.', 'success');
         if (cbEditLessonId === del) resetLessonForm();
         await loadCourseBuilderData();
       }
@@ -12431,14 +12962,35 @@ window.ramdaniAuth = {
     $id('enModule').addEventListener('change', renderEnrollments);
     $id('enStatus').addEventListener('change', renderEnrollments);
     $id('enSearch').addEventListener('input', renderEnrollments);
+    var enResetBtn = $id('enFilterReset');
+    if (enResetBtn) enResetBtn.addEventListener('click', function () {
+      $id('enModule').value = ''; $id('enStatus').value = ''; $id('enSearch').value = '';
+      renderEnrollments();
+    });
+    // Attendance records (within the Enrollments panel)
+    var attMod = $id('attModule'), attStat = $id('attStatus'), attSearch = $id('attSearch'), attReset = $id('attFilterReset');
+    if (attMod) attMod.addEventListener('change', renderAttendanceRecords);
+    if (attStat) attStat.addEventListener('change', renderAttendanceRecords);
+    if (attSearch) attSearch.addEventListener('input', renderAttendanceRecords);
+    if (attReset) attReset.addEventListener('click', function () {
+      $id('attModule').value = ''; $id('attStatus').value = ''; $id('attSearch').value = '';
+      renderAttendanceRecords();
+    });
     $id('enBody').addEventListener('change', async function (e) {
       var sel = e.target.closest('select[data-en-status]'); if (!sel) return;
       var id = sel.getAttribute('data-en-status');
       var patch = { status: sel.value, completed_at: sel.value === 'completed' ? new Date().toISOString() : null };
       var r = await sb.from('enrollments').update(patch).eq('id', id);
-      if (r.error) { setNote('enNote', r.error.message); loadEnrollments(); return; }
+      if (r.error) {
+        if (window.console) console.error('enrollment status update failed', r.error);
+        setNote('enNote', 'Unable to update enrollment status. Please try again.');
+        if (window.showToast) showToast('Unable to update enrollment status.', 'error');
+        loadEnrollments();
+        return;
+      }
       var row = enRows.find(function (x) { return x.id === id; }); if (row) { row.status = sel.value; row.completed_at = patch.completed_at; }
       setNote('enNote', 'Status updated.', true);
+      if (window.showToast) showToast('Enrollment status updated successfully.', 'success');
     });
     $id('enBody').addEventListener('click', async function (e) {
       var b = e.target.closest('button'); if (!b) return;
@@ -12457,20 +13009,42 @@ window.ramdaniAuth = {
       if (del) {
         if (!confirm('Remove this enrollment? The student can enroll again. Their lesson progress is kept.')) return;
         var r = await sb.from('enrollments').delete().eq('id', del);
-        if (r.error) return setNote('enNote', r.error.message);
+        if (r.error) {
+          if (window.console) console.error('enrollment delete failed', r.error);
+          setNote('enNote', 'Unable to remove this enrollment. Please try again.');
+          if (window.showToast) showToast('Unable to remove this enrollment.', 'error');
+          return;
+        }
+        if (window.showToast) showToast('Enrollment removed successfully.', 'success');
         await loadEnrollments();
       }
     });
   }
 
   async function loadQuizBuilder() {
+    var listBody = $id('qbListBody');
+    if (window.ramdaniUi && listBody) ramdaniUi.showSkeleton(listBody, 'row', { cols: 6, count: 5 });
     var res = await Promise.all([
       sb.from('quizzes').select('*').order('title'),
-      sb.from('modules').select('id, title, code').order('title')
+      sb.from('modules').select('id, title, code').order('title'),
+      sb.from('quiz_questions').select('quiz_id')
     ]);
-    if (res[0].error) { setNote('qbMetaNote', 'Could not load quizzes: ' + res[0].error.message); return; }
+    if (window.ramdaniUi && listBody) ramdaniUi.hideSkeleton(listBody);
+    if (res[0].error) {
+      if (window.console) console.error('loadQuizBuilder failed', res[0].error);
+      setNote('qbMetaNote', 'Unable to load quiz data. Please try again.');
+      if (window.showToast) showToast('Unable to load quiz data.', 'error');
+      if (listBody) listBody.innerHTML = '<tr><td colspan="6" class="empty">Unable to load quizzes.<br />Please try again.</td></tr>';
+      var qbListTotalErr = $id('qbListTotal'); if (qbListTotalErr) qbListTotalErr.textContent = '';
+      return;
+    }
     qbQuizzes = res[0].data || [];
     qbModules = res[1].data || [];
+    qbQuestionCounts = {};
+    (res[2].data || []).forEach(function (row) {
+      if (!row.quiz_id) return;
+      qbQuestionCounts[row.quiz_id] = (qbQuestionCounts[row.quiz_id] || 0) + 1;
+    });
     var sel = $id('qbQuiz');
     sel.innerHTML = '<option value="">New quiz…</option>' + qbQuizzes.map(function (q) {
       return '<option value="' + q.id + '">' + escapeHtml(q.title) + '</option>';
@@ -12479,6 +13053,15 @@ window.ramdaniAuth = {
     msel.innerHTML = '<option value="">No module</option>' + qbModules.map(function (m) {
       return '<option value="' + m.id + '">' + escapeHtml(m.title || m.code) + '</option>';
     }).join('');
+    var qbListModuleSel = $id('qbListModule');
+    if (qbListModuleSel) {
+      var curModFilter = qbListModuleSel.value;
+      qbListModuleSel.innerHTML = '<option value="">All courses</option>' + qbModules.map(function (m) {
+        return '<option value="' + m.id + '">' + escapeHtml(m.title || m.code) + '</option>';
+      }).join('');
+      qbListModuleSel.value = curModFilter;
+    }
+    renderQbList();
     if (qbQuizId && qbQuizzes.some(function (q) { return q.id === qbQuizId; })) {
       sel.value = qbQuizId;
       loadQuizMeta(qbQuizId);
@@ -12486,6 +13069,73 @@ window.ramdaniAuth = {
       sel.value = '';
       resetQuizMetaForm();
     }
+    renderQbList();
+  }
+
+  function renderQbList() {
+    var body = $id('qbListBody');
+    var totalLabel = $id('qbListTotal');
+    if (!body) return;
+    var q = ($id('qbListSearch').value || '').trim().toLowerCase();
+    var modFilter = ($id('qbListModule') || {}).value || '';
+    var statusFilter = ($id('qbListStatus') || {}).value || '';
+    var modulesById = {};
+    qbModules.forEach(function (m) { modulesById[m.id] = m; });
+    var rows = qbQuizzes.filter(function (r) {
+      if (modFilter && r.module_id !== modFilter) return false;
+      if (statusFilter && r.status !== statusFilter) return false;
+      if (q) {
+        var mod = modulesById[r.module_id] || {};
+        var hay = [r.title, r.slug, r.summary, mod.title, mod.code].filter(Boolean).join(' ').toLowerCase();
+        if (hay.indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+    if (totalLabel) {
+      totalLabel.textContent = !qbQuizzes.length ? '' : (rows.length === qbQuizzes.length
+        ? ('(' + qbQuizzes.length + (qbQuizzes.length === 1 ? ' quiz' : ' quizzes') + ')')
+        : ('(Showing ' + rows.length + ' of ' + qbQuizzes.length + ')'));
+    }
+    if (!qbQuizzes.length) {
+      body.innerHTML = '<tr><td colspan="6" class="empty">No quizzes have been created yet.</td></tr>';
+      return;
+    }
+    if (!rows.length) {
+      body.innerHTML = '<tr><td colspan="6" class="empty">No quizzes match your current filters.</td></tr>';
+      return;
+    }
+    body.innerHTML = rows.map(function (r) {
+      var mod = modulesById[r.module_id] || {};
+      var count = qbQuestionCounts[r.id] || 0;
+      var isCurrent = r.id === qbQuizId;
+      return '<tr' + (isCurrent ? ' aria-current="true"' : '') + '><td>' + escapeHtml(r.title) + (r.slug ? '<br><span class="note">' + escapeHtml(r.slug) + '</span>' : '') + '</td>' +
+        '<td>' + escapeHtml(mod.title || mod.code || '—') + '</td>' +
+        '<td>' + statusBadge(r.status || 'draft') + '</td>' +
+        '<td>' + count + (count === 1 ? ' question' : ' questions') + '</td>' +
+        '<td>' + escapeHtml(r.pass_percent == null ? '—' : r.pass_percent + '%') + '</td>' +
+        '<td><button type="button" class="btn btn-sm" data-qb-select="' + r.id + '" aria-label="Edit ' + escapeHtml(r.title) + '">Edit</button></td></tr>';
+    }).join('');
+  }
+
+  function bindQuizList() {
+    var search = $id('qbListSearch'), modSel = $id('qbListModule'), statusSel = $id('qbListStatus'), reset = $id('qbListReset'), body = $id('qbListBody');
+    if (search) search.addEventListener('input', renderQbList);
+    if (modSel) modSel.addEventListener('change', renderQbList);
+    if (statusSel) statusSel.addEventListener('change', renderQbList);
+    if (reset) reset.addEventListener('click', function () {
+      if (search) search.value = '';
+      if (modSel) modSel.value = '';
+      if (statusSel) statusSel.value = '';
+      renderQbList();
+    });
+    if (body) body.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-qb-select]'); if (!b) return;
+      var id = b.getAttribute('data-qb-select');
+      $id('qbQuiz').value = id;
+      loadQuizMeta(id);
+      renderQbList();
+      $id('qbMetaForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
   }
 
   function resetQuizMetaForm() {
@@ -12527,10 +13177,21 @@ window.ramdaniAuth = {
 
   async function loadQuizQuestions() {
     if (!qbQuizId) { qbQuestions = []; renderQbQuestions(); return; }
+    var body = $id('qbQuestionsBody');
+    if (window.ramdaniUi && body) ramdaniUi.showSkeleton(body, 'row', { cols: 6, count: 3 });
     var r = await sb.from('quiz_questions').select('*').eq('quiz_id', qbQuizId).order('sort_order').order('created_at');
-    if (r.error) { setNote('qbQuestionNote', 'Could not load questions: ' + r.error.message); return; }
+    if (window.ramdaniUi && body) ramdaniUi.hideSkeleton(body);
+    if (r.error) {
+      if (window.console) console.error('loadQuizQuestions failed', r.error);
+      setNote('qbQuestionNote', 'Unable to load questions. Please try again.');
+      if (window.showToast) showToast('Unable to load questions.', 'error');
+      if (body) body.innerHTML = '<tr><td colspan="6" class="empty">Unable to load questions.<br />Please try again.</td></tr>';
+      return;
+    }
     qbQuestions = r.data || [];
+    qbQuestionCounts[qbQuizId] = qbQuestions.length;
     renderQbQuestions();
+    renderQbList();
   }
 
   function renderQbQuestions() {
@@ -12545,8 +13206,8 @@ window.ramdaniAuth = {
       return '<tr><td>' + (i + 1) + '</td><td>' + escapeHtml(q.prompt) + '</td><td>' + escapeHtml(typeLabel) + '</td><td>' + nChoices + '</td><td>' + escapeHtml(correctText) + '</td><td>' +
         '<button type="button" class="btn" data-q-up="' + q.id + '"' + (i === 0 ? ' disabled' : '') + ' aria-label="Move up">↑</button> ' +
         '<button type="button" class="btn" data-q-down="' + q.id + '"' + (i === qbQuestions.length - 1 ? ' disabled' : '') + ' aria-label="Move down">↓</button> ' +
-        '<button type="button" class="btn" data-q-edit="' + q.id + '">Edit</button> ' +
-        '<button type="button" class="btn" data-q-del="' + q.id + '">Delete</button></td></tr>';
+        '<button type="button" class="btn" data-q-edit="' + q.id + '" aria-label="Edit question ' + (i + 1) + '">Edit</button> ' +
+        '<button type="button" class="btn" data-q-del="' + q.id + '" aria-label="Delete question ' + (i + 1) + '">Delete</button></td></tr>';
     }).join('') || '<tr><td colspan="6">No questions yet. Add the first question above.</td></tr>';
   }
 
@@ -12640,9 +13301,15 @@ window.ramdaniAuth = {
       if (payload.status === 'published') payload.published_at = new Date().toISOString();
       res = await sb.from('quizzes').insert(payload).select().single();
     }
-    if (res.error) return setNote('qbMetaNote', res.error.message);
+    if (res.error) {
+      if (window.console) console.error('saveQuizMeta failed', res.error);
+      setNote('qbMetaNote', 'Unable to save this quiz. Please try again.');
+      if (window.showToast) showToast('Unable to save this quiz.', 'error');
+      return;
+    }
     if (!qbQuizId && res.data) qbQuizId = res.data.id;
     setNote('qbMetaNote', 'Saved.', true);
+    if (window.showToast) showToast('Quiz saved successfully.', 'success');
     await loadQuizBuilder();
     $id('qbQuiz').value = qbQuizId;
     loadQuizMeta(qbQuizId);
@@ -12653,7 +13320,13 @@ window.ramdaniAuth = {
     var q = qbQuizzes.find(function (x) { return x.id === qbQuizId; });
     if (!confirm('Delete quiz "' + (q ? q.title : '') + '"? Its questions and all students\' attempt records will also be deleted. This cannot be undone.')) return;
     var r = await sb.from('quizzes').delete().eq('id', qbQuizId);
-    if (r.error) return setNote('qbMetaNote', r.error.message);
+    if (r.error) {
+      if (window.console) console.error('deleteQuiz failed', r.error);
+      setNote('qbMetaNote', 'Unable to delete this quiz. Please try again.');
+      if (window.showToast) showToast('Unable to delete this quiz.', 'error');
+      return;
+    }
+    if (window.showToast) showToast('Quiz deleted.', 'success');
     await loadQuizBuilder();
   }
 
@@ -12701,9 +13374,15 @@ window.ramdaniAuth = {
       payload.sort_order = qbQuestions.length ? Math.max.apply(null, qbQuestions.map(function (x) { return x.sort_order; })) + 1 : 0;
       res = await sb.from('quiz_questions').insert(payload);
     }
-    if (res.error) return setNote('qbQuestionNote', res.error.message);
+    if (res.error) {
+      if (window.console) console.error('saveQuestion failed', res.error);
+      setNote('qbQuestionNote', 'Unable to save this question. Please try again.');
+      if (window.showToast) showToast('Unable to save this question.', 'error');
+      return;
+    }
     resetQuestionForm();
     setNote('qbQuestionNote', 'Saved.', true);
+    if (window.showToast) showToast('Question saved successfully.', 'success');
     await loadQuizQuestions();
   }
 
@@ -12718,14 +13397,19 @@ window.ramdaniAuth = {
     arr.forEach(function (x, idx) { if (x.sort_order !== idx) jobs.push(sb.from('quiz_questions').update({ sort_order: idx }).eq('id', x.id)); });
     var results = await Promise.all(jobs);
     var bad = results.find(function (r) { return r.error; });
-    if (bad) { setNote('qbQuestionNote', 'Could not reorder: ' + bad.error.message); return; }
+    if (bad) {
+      if (window.console) console.error('qbMove reorder failed', bad.error);
+      setNote('qbQuestionNote', 'Unable to reorder questions. Please try again.');
+      if (window.showToast) showToast('Unable to reorder questions.', 'error');
+      return;
+    }
     setNote('qbQuestionNote', '');
     await loadQuizQuestions();
   }
 
   function bindQuizBuilder() {
-    $id('qbQuiz').addEventListener('change', function () { if (this.value) loadQuizMeta(this.value); else resetQuizMetaForm(); });
-    $id('qbNewQuiz').addEventListener('click', function () { $id('qbQuiz').value = ''; resetQuizMetaForm(); $id('qbMetaForm').scrollIntoView({ behavior: 'smooth', block: 'center' }); });
+    $id('qbQuiz').addEventListener('change', function () { if (this.value) loadQuizMeta(this.value); else resetQuizMetaForm(); renderQbList(); });
+    $id('qbNewQuiz').addEventListener('click', function () { $id('qbQuiz').value = ''; resetQuizMetaForm(); renderQbList(); $id('qbMetaForm').scrollIntoView({ behavior: 'smooth', block: 'center' }); });
     $id('qbPreviewBtn').addEventListener('click', function () {
       var slugEl = $id('qbMetaForm').elements.slug;
       openContentPreview('quizzes', slugEl ? slugEl.value : '');
@@ -12773,7 +13457,13 @@ window.ramdaniAuth = {
       if (del) {
         if (!confirm('Delete this question? This cannot be undone.')) return;
         var r = await sb.from('quiz_questions').delete().eq('id', del);
-        if (r.error) return setNote('qbQuestionNote', r.error.message);
+        if (r.error) {
+          if (window.console) console.error('question delete failed', r.error);
+          setNote('qbQuestionNote', 'Unable to delete this question. Please try again.');
+          if (window.showToast) showToast('Unable to delete this question.', 'error');
+          return;
+        }
+        if (window.showToast) showToast('Question deleted.', 'success');
         if (qbEditQuestionId === del) resetQuestionForm();
         await loadQuizQuestions();
       }
@@ -12783,14 +13473,23 @@ window.ramdaniAuth = {
   var qrRows = [], qrProfiles = {}, qrQuizzes = {}, qrModules = {};
 
   async function loadQuizResults() {
-    setNote('qrNote', 'Loading…', true);
+    var body = $id('qrBody');
+    if (window.ramdaniUi && body) ramdaniUi.showSkeleton(body, 'row', { cols: 8, count: 5 });
     var res = await Promise.all([
       sb.from('quiz_attempts').select('*').order('created_at', { ascending: true }),
       sb.from('profiles').select('id, full_name, email, student_id, stu:students!students_profile_id_fkey!inner(status)'),
       sb.from('quizzes').select('id, title, pass_percent, module_id'),
       sb.from('modules').select('id, title, code')
     ]);
-    if (res[0].error) { setNote('qrNote', 'Could not load results: ' + res[0].error.message); $id('qrBody').innerHTML = ''; return; }
+    if (window.ramdaniUi && body) ramdaniUi.hideSkeleton(body);
+    if (res[0].error) {
+      if (window.console) console.error('loadQuizResults failed', res[0].error);
+      setNote('qrNote', 'Unable to load quiz results. Please try again.');
+      if (window.showToast) showToast('Unable to load quiz results.', 'error');
+      if (body) body.innerHTML = '<tr><td colspan="8">Unable to load quiz results.</td></tr>';
+      var qrTotalErr = $id('qrTotal'); if (qrTotalErr) qrTotalErr.textContent = '';
+      return;
+    }
     qrProfiles = {}; (res[1].data || []).forEach(function (p) { qrProfiles[p.id] = p; });
     qrQuizzes = {}; (res[2].data || []).forEach(function (q) { qrQuizzes[q.id] = q; });
     qrModules = {}; (res[3].data || []).forEach(function (m) { qrModules[m.id] = m; });
@@ -12826,7 +13525,9 @@ window.ramdaniAuth = {
       }
       return true;
     });
-    $id('qrTotal').textContent = '(' + rows.length + ')';
+    $id('qrTotal').textContent = !qrRows.length ? '' : (rows.length === qrRows.length
+      ? ('(' + qrRows.length + (qrRows.length === 1 ? ' attempt' : ' attempts') + ')')
+      : ('(Showing ' + rows.length + ' of ' + qrRows.length + ')'));
     $id('qrBody').innerHTML = rows.map(function (a) {
       var p = qrProfiles[a.student_id] || {};
       var quiz = qrQuizzes[a.quiz_id] || {};
@@ -12840,13 +13541,20 @@ window.ramdaniAuth = {
         '<td>' + escapeHtml(a.score == null ? '' : a.score) + ' / ' + escapeHtml(a.total == null ? '' : a.total) + '</td>' +
         '<td>' + pct + '%</td><td><span class="status-badge status-' + (pass ? 'published' : 'draft') + '">' + (pass ? 'Pass' : 'Fail') + '</span></td>' +
         '<td>' + a.attempt_no + '</td><td>' + escapeHtml(isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-PK')) + '</td></tr>';
-    }).join('') || '<tr><td colspan="8">No attempts match.</td></tr>';
+    }).join('') || (qrRows.length ? '<tr><td colspan="8">No attempts match your current filters.</td></tr>' : '<tr><td colspan="8">No quiz attempts have been recorded yet.</td></tr>');
   }
 
   function bindQuizResults() {
     $id('qrQuiz').addEventListener('change', renderQuizResults);
     $id('qrOutcome').addEventListener('change', renderQuizResults);
     $id('qrSearch').addEventListener('input', renderQuizResults);
+    var reset = $id('qrReset');
+    if (reset) reset.addEventListener('click', function () {
+      $id('qrQuiz').value = '';
+      $id('qrOutcome').value = '';
+      $id('qrSearch').value = '';
+      renderQuizResults();
+    });
   }
 
   var esEditId = null, esEditTable = null;
@@ -12978,8 +13686,18 @@ window.ramdaniAuth = {
 
   async function loadClients() {
     await loadLegalLookups();
+    var cBody = $id('clientBody');
+    if (window.ramdaniUi && cBody) ramdaniUi.showSkeleton(cBody, 'row', { cols: 9, count: 6 });
     var res = await sb.from('clients').select('*').order('updated_at', { ascending: false });
-    if (res.error) { setNote('clientNote', res.error.message); return; }
+    if (window.ramdaniUi && cBody) ramdaniUi.hideSkeleton(cBody);
+    if (res.error) {
+      if (window.console) console.error('loadClients failed', res.error);
+      setNote('clientNote', 'Unable to load clients. Please try again.');
+      if (cBody) cBody.innerHTML = '<tr><td colspan="9" class="empty">Unable to load clients.<br />Please try again.</td></tr>';
+      var noteEl = $id('clientTableNote'); if (noteEl) noteEl.textContent = '';
+      if (window.showToast) showToast('Unable to load clients.', 'error');
+      return;
+    }
     legalClients = res.data || [];
     renderClients();
   }
@@ -13014,13 +13732,15 @@ window.ramdaniAuth = {
     if (clientPage < 1) clientPage = 1;
     var slice = rows.slice((clientPage - 1) * CLIENT_PAGE_SIZE, clientPage * CLIENT_PAGE_SIZE);
     var note = $id('clientTableNote');
-    if (note) note.textContent = total ? (total + ' client' + (total === 1 ? '' : 's')) : 'No clients match these filters.';
+    if (note) note.textContent = total
+      ? (total === legalClients.length ? (total + ' client' + (total === 1 ? '' : 's')) : ('Showing ' + total + ' of ' + legalClients.length + ' clients'))
+      : (legalClients.length ? 'No clients match these filters.' : '');
     var pager = $id('clientPager');
     if (pager) { pager.hidden = total <= CLIENT_PAGE_SIZE; var lab = $id('clientPageLabel'); if (lab) lab.textContent = 'Page ' + clientPage + ' of ' + pages; }
     $id('clientBody').innerHTML = slice.map(function (c) {
-      return '<tr><td>' + escapeHtml(c.client_number) + '</td><td>' + escapeHtml(c.legal_name) + '</td><td>' + escapeHtml(c.client_type) + '</td><td>' + escapeHtml(c.email || '') + '</td><td>' + escapeHtml(c.phone || '') + '</td><td>' + escapeHtml(c.status) + '</td><td>' + escapeHtml(fmtDay(c.created_at)) + '</td><td>' + escapeHtml(fmtDay(c.updated_at)) + '</td><td>' +
-        '<button type="button" class="btn btn-sm" data-cl-open="' + c.id + '">Open</button> <button type="button" class="btn btn-sm" data-cl-edit="' + c.id + '">Edit</button></td></tr>';
-    }).join('') || '<tr><td colspan="9">No clients yet.</td></tr>';
+      return '<tr><td>' + escapeHtml(c.client_number) + '</td><td>' + escapeHtml(c.legal_name) + '</td><td>' + escapeHtml(c.client_type) + '</td><td>' + escapeHtml(c.email || '') + '</td><td>' + escapeHtml(c.phone || '') + '</td><td>' + statusBadge(c.status) + '</td><td>' + escapeHtml(fmtDay(c.created_at)) + '</td><td>' + escapeHtml(fmtDay(c.updated_at)) + '</td><td>' +
+        '<button type="button" class="btn btn-sm" data-cl-open="' + c.id + '" aria-label="Open ' + escapeHtml(c.legal_name) + '">Open</button> <button type="button" class="btn btn-sm" data-cl-edit="' + c.id + '" aria-label="Edit ' + escapeHtml(c.legal_name) + '">Edit</button></td></tr>';
+    }).join('') || ('<tr><td colspan="9" class="empty">' + (legalClients.length ? 'No clients match your current filters.' : 'No clients have been registered yet.') + '</td></tr>');
   }
   // Contact-list export only: deliberately excludes notes, address and any matter/legal data.
   // Rows come from the same RLS-scoped query as the table, so staff can only export what they can already see.
@@ -13068,16 +13788,27 @@ window.ramdaniAuth = {
     var res = legalEditClientId
       ? await sb.from('clients').update(payload).eq('id', legalEditClientId).select('id').single()
       : await sb.from('clients').insert(payload).select('id').single();
-    if (res.error) return setNote('clientNote', res.error.message);
+    if (res.error) {
+      if (window.console) console.error('saveClient failed', res.error);
+      setNote('clientNote', 'Unable to save this client. Please try again.');
+      if (window.showToast) showToast('Unable to save client.', 'error');
+      return;
+    }
     var savedClientId = res.data && res.data.id;
     if (savedClientId) {
       var nr = internalNote
         ? await sb.from('client_internal_notes').upsert({ client_id: savedClientId, note: internalNote }, { onConflict: 'client_id' })
         : await sb.from('client_internal_notes').delete().eq('client_id', savedClientId);
-      if (nr.error) return setNote('clientNote', 'Client saved, but internal note failed: ' + nr.error.message);
+      if (nr.error) {
+        if (window.console) console.error('client internal note save failed', nr.error);
+        setNote('clientNote', 'Client saved, but the internal note could not be saved.');
+        if (window.showToast) showToast('Client saved, but the note failed to save.', 'error');
+        return;
+      }
     }
     resetClientForm();
     setNote('clientNote', 'Saved.', true);
+    if (window.showToast) showToast('Client saved successfully.', 'success');
     await loadClients();
   }
 
@@ -13166,8 +13897,18 @@ window.ramdaniAuth = {
 
   async function loadLegalMatters() {
     await loadLegalLookups();
+    var lmBody = $id('legalMatterBody');
+    if (window.ramdaniUi && lmBody) ramdaniUi.showSkeleton(lmBody, 'row', { cols: 7, count: 6 });
     var res = await sb.from('legal_matters').select('*').order('updated_at', { ascending: false });
-    if (res.error) { setNote('legalMatterNote', res.error.message); return; }
+    if (window.ramdaniUi && lmBody) ramdaniUi.hideSkeleton(lmBody);
+    if (res.error) {
+      if (window.console) console.error('loadLegalMatters failed', res.error);
+      setNote('legalMatterNote', 'Unable to load legal matters. Please try again.');
+      if (lmBody) lmBody.innerHTML = '<tr><td colspan="7" class="empty">Unable to load legal matters.<br />Please try again.</td></tr>';
+      var lmNote = $id('legalMatterTableNote'); if (lmNote) lmNote.textContent = '';
+      if (window.showToast) showToast('Unable to load legal matters.', 'error');
+      return;
+    }
     legalMatters = res.data || [];
     var cf = $id('legalMatterForm');
     cf.elements.client_id.innerHTML = '<option value="">Select client…</option>' + legalClients.map(function (c) {
@@ -13222,11 +13963,28 @@ window.ramdaniAuth = {
       if (q && [m.matter_number, m.title, clientName(m.client_id)].join(' ').toLowerCase().indexOf(q) === -1) return false;
       return true;
     });
+    var lmNote = $id('legalMatterTableNote');
+    if (lmNote) lmNote.textContent = rows.length
+      ? (rows.length === legalMatters.length ? (rows.length + (rows.length === 1 ? ' matter' : ' matters')) : ('Showing ' + rows.length + ' of ' + legalMatters.length + ' matters'))
+      : (legalMatters.length ? 'No matters match your current filters.' : '');
     $id('legalMatterBody').innerHTML = rows.map(function (m) {
-      return '<tr><td>' + escapeHtml(m.matter_number) + '</td><td>' + escapeHtml(m.title) + '</td><td>' + escapeHtml(clientName(m.client_id)) + '</td><td>' + escapeHtml(staffName(m.lead_lawyer_id)) + '</td><td>' + escapeHtml(m.status) + '</td><td>' + escapeHtml(m.priority) + '</td><td>' +
-        '<button type="button" class="btn btn-sm" data-lm-open="' + m.id + '">Open</button> ' +
-        '<button type="button" class="btn btn-sm" data-lm-edit="' + m.id + '">Edit</button></td></tr>';
-    }).join('') || '<tr><td colspan="7">No private matters yet.</td></tr>';
+      return '<tr><td>' + escapeHtml(m.matter_number) + '</td><td>' + escapeHtml(m.title) + '</td><td>' + escapeHtml(clientName(m.client_id)) + '</td><td>' + escapeHtml(staffName(m.lead_lawyer_id)) + '</td><td>' + statusBadge(m.status) + '</td><td>' + statusBadge(m.priority) + '</td><td>' +
+        '<button type="button" class="btn btn-sm" data-lm-open="' + m.id + '" aria-label="Open matter ' + escapeHtml(m.title) + '">Open</button> ' +
+        '<button type="button" class="btn btn-sm" data-lm-edit="' + m.id + '" aria-label="Edit matter ' + escapeHtml(m.title) + '">Edit</button></td></tr>';
+    }).join('') || ('<tr><td colspan="7" class="empty">' + (legalMatters.length ? 'No matters match your current filters.' : 'No legal matters have been created yet.') + '</td></tr>');
+  }
+  function resetLegalMatterFilters() {
+    $id('lmStatus').value = ''; $id('lmType').value = ''; $id('lmPriority').value = '';
+    if ($id('lmLead')) $id('lmLead').value = '';
+    if ($id('lmPractice')) $id('lmPractice').value = '';
+    if ($id('lmOpenedFrom')) $id('lmOpenedFrom').value = '';
+    if ($id('lmOpenedTo')) $id('lmOpenedTo').value = '';
+    if ($id('lmCloseFrom')) $id('lmCloseFrom').value = '';
+    if ($id('lmCloseTo')) $id('lmCloseTo').value = '';
+    if ($id('lmOverdue')) $id('lmOverdue').checked = false;
+    if ($id('lmUpcoming')) $id('lmUpcoming').checked = false;
+    $id('lmSearch').value = '';
+    renderLegalMatters();
   }
   function resetMatterForm() {
     legalEditMatterId = null;
@@ -13257,9 +14015,15 @@ window.ramdaniAuth = {
     var res = legalEditMatterId
       ? await sb.from('legal_matters').update(payload).eq('id', legalEditMatterId)
       : await sb.from('legal_matters').insert(payload);
-    if (res.error) return setNote('legalMatterNote', res.error.message);
+    if (res.error) {
+      if (window.console) console.error('saveLegalMatter failed', res.error);
+      setNote('legalMatterNote', 'Unable to save this matter. Please try again.');
+      if (window.showToast) showToast('Unable to update the matter.', 'error');
+      return;
+    }
     resetMatterForm();
     setNote('legalMatterNote', 'Saved.', true);
+    if (window.showToast) showToast('Matter updated successfully.', 'success');
     await loadLegalMatters();
   }
 
@@ -13276,7 +14040,7 @@ window.ramdaniAuth = {
     var m = mRes.data;
     if (!m) { $id('mwPane').innerHTML = '<p class="empty">Matter not available.</p>'; return; }
     $id('mwTitle').textContent = m.matter_number + ' — ' + m.title;
-    $id('mwMeta').innerHTML = ['<span class="status-badge">' + escapeHtml(m.status) + '</span>',
+    $id('mwMeta').innerHTML = [statusBadge(m.status),
       '<span>' + escapeHtml(clientName(m.client_id) || '') + '</span>',
       '<span>Lead: ' + escapeHtml(staffName(m.lead_lawyer_id) || 'unassigned') + '</span>',
       '<span>' + escapeHtml(m.priority) + '</span>'].join('');
@@ -13305,8 +14069,14 @@ window.ramdaniAuth = {
         e.preventDefault();
         var payload = { matter_id: m.id, profile_id: this.elements.profile_id.value, team_role: this.elements.team_role.value };
         var r = await sb.from('matter_team').insert(payload);
-        if (r.error) return setNote('legalMatterNote', r.error.message);
+        if (r.error) {
+          if (window.console) console.error('add matter team member failed', r.error);
+          setNote('legalMatterNote', 'Unable to add this team member. Please try again.');
+          if (window.showToast) showToast('Unable to complete this action.', 'error');
+          return;
+        }
         if (payload.team_role === 'lead') await sb.from('legal_matters').update({ lead_lawyer_id: payload.profile_id }).eq('id', m.id);
+        if (window.showToast) showToast('Team member added successfully.', 'success');
         await renderMatterWorkspace();
       });
       pane.querySelectorAll('[data-team-del]').forEach(function (b) {
@@ -13352,7 +14122,13 @@ window.ramdaniAuth = {
       $id('mwNoteForm').addEventListener('submit', async function (e) {
         e.preventDefault();
         var r = await sb.from('matter_notes').insert({ matter_id: m.id, content: this.elements.content.value.trim() });
-        if (r.error) return setNote('legalMatterNote', r.error.message);
+        if (r.error) {
+          if (window.console) console.error('save matter note failed', r.error);
+          setNote('legalMatterNote', 'Unable to save this note. Please try again.');
+          if (window.showToast) showToast('Unable to complete this action.', 'error');
+          return;
+        }
+        if (window.showToast) showToast('Note added successfully.', 'success');
         await renderMatterWorkspace();
       });
       return;
@@ -13390,13 +14166,23 @@ window.ramdaniAuth = {
 
   async function loadTasks() {
     await loadLegalLookups();
+    var tBody = $id('taskBody');
+    if (window.ramdaniUi && tBody) ramdaniUi.showSkeleton(tBody, 'row', { cols: 6, count: 5 });
     var res = await sb.from('matter_tasks').select('*').order('due_at', { ascending: true });
-    if (res.error) { setNote('taskNote', res.error.message); return; }
+    if (window.ramdaniUi && tBody) ramdaniUi.hideSkeleton(tBody);
+    if (res.error) {
+      if (window.console) console.error('loadTasks failed', res.error);
+      setNote('taskNote', 'Unable to load matter tasks. Please try again.');
+      if (tBody) tBody.innerHTML = '<tr><td colspan="6" class="empty">Unable to load matter tasks.<br />Please try again.</td></tr>';
+      if (window.showToast) showToast('Unable to load matter tasks.', 'error');
+      return;
+    }
     window._legalTasks = res.data || [];
     renderTasks();
   }
   function renderTasks() {
-    var rows = window._legalTasks || [];
+    var all = window._legalTasks || [];
+    var rows = all;
     var f = $id('taskFilter').value;
     var now = new Date();
     var start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -13410,9 +14196,9 @@ window.ramdaniAuth = {
       return true;
     });
     $id('taskBody').innerHTML = rows.map(function (t) {
-      return '<tr><td>' + escapeHtml(t.title) + '</td><td>' + escapeHtml(matterLabel(t.matter_id)) + '</td><td>' + escapeHtml(staffName(t.assigned_to)) + '</td><td>' + escapeHtml(fmtWhen(t.due_at)) + '</td><td>' + escapeHtml(t.status) + '</td><td>' +
-        (t.status === 'completed' ? '' : '<button type="button" class="btn btn-sm" data-task-done="' + t.id + '">Complete</button>') + '</td></tr>';
-    }).join('') || '<tr><td colspan="6">No tasks in this view.</td></tr>';
+      return '<tr><td>' + escapeHtml(t.title) + '</td><td>' + escapeHtml(matterLabel(t.matter_id)) + '</td><td>' + escapeHtml(staffName(t.assigned_to)) + '</td><td>' + escapeHtml(fmtWhen(t.due_at)) + '</td><td>' + statusBadge(t.status) + '</td><td>' +
+        (t.status === 'completed' ? '' : '<button type="button" class="btn btn-sm" data-task-done="' + t.id + '" aria-label="Complete task ' + escapeHtml(t.title) + '">Complete</button>') + '</td></tr>';
+    }).join('') || ('<tr><td colspan="6" class="empty">' + (all.length ? 'No tasks match your current filters.' : 'No matter tasks have been created yet.') + '</td></tr>');
   }
   async function saveTask(e) {
     e.preventDefault();
@@ -13428,21 +14214,37 @@ window.ramdaniAuth = {
     };
     if (!payload.title || !payload.matter_id) return setNote('taskNote', 'Title and matter are required.');
     var res = await sb.from('matter_tasks').insert(payload);
-    if (res.error) return setNote('taskNote', res.error.message);
+    if (res.error) {
+      if (window.console) console.error('saveTask failed', res.error);
+      setNote('taskNote', 'Unable to save this task. Please try again.');
+      if (window.showToast) showToast('Unable to complete this action.', 'error');
+      return;
+    }
     f.reset();
     setNote('taskNote', 'Saved.', true);
+    if (window.showToast) showToast('Task updated successfully.', 'success');
     await loadTasks();
   }
 
   async function loadEvents() {
     await loadLegalLookups();
+    var eBody = $id('eventBody');
+    if (window.ramdaniUi && eBody) ramdaniUi.showSkeleton(eBody, 'row', { cols: 5, count: 5 });
     var res = await sb.from('matter_events').select('*').order('starts_at');
-    if (res.error) { setNote('eventNote', res.error.message); return; }
+    if (window.ramdaniUi && eBody) ramdaniUi.hideSkeleton(eBody);
+    if (res.error) {
+      if (window.console) console.error('loadEvents failed', res.error);
+      setNote('eventNote', 'Unable to load matter events. Please try again.');
+      if (eBody) eBody.innerHTML = '<tr><td colspan="5" class="empty">Unable to load matter events.<br />Please try again.</td></tr>';
+      if (window.showToast) showToast('Unable to load matter events.', 'error');
+      return;
+    }
     window._legalEvents = res.data || [];
     renderEvents();
   }
   function renderEvents() {
-    var rows = window._legalEvents || [];
+    var all = window._legalEvents || [];
+    var rows = all;
     var f = $id('eventFilter').value;
     var now = new Date();
     var week = new Date(now.getTime() + 7 * 86400000);
@@ -13455,7 +14257,7 @@ window.ramdaniAuth = {
     });
     $id('eventBody').innerHTML = rows.map(function (ev) {
       return '<tr><td>' + escapeHtml(fmtWhen(ev.starts_at)) + '</td><td>' + escapeHtml(ev.title) + '</td><td>' + escapeHtml(ev.event_type) + '</td><td>' + escapeHtml(matterLabel(ev.matter_id)) + '</td><td>' + escapeHtml(ev.location || ev.venue || '') + '</td></tr>';
-    }).join('') || '<tr><td colspan="5">No dates in this view.</td></tr>';
+    }).join('') || ('<tr><td colspan="5" class="empty">' + (all.length ? 'No dates match your current filters.' : 'No matter events have been recorded yet.') + '</td></tr>');
   }
   async function saveEvent(e) {
     e.preventDefault();
@@ -13473,22 +14275,37 @@ window.ramdaniAuth = {
     };
     if (!payload.title || !payload.matter_id || !payload.starts_at) return setNote('eventNote', 'Title, matter and start time are required.');
     var res = await sb.from('matter_events').insert(payload);
-    if (res.error) return setNote('eventNote', res.error.message);
+    if (res.error) {
+      if (window.console) console.error('saveEvent failed', res.error);
+      setNote('eventNote', 'Unable to save this date. Please try again.');
+      if (window.showToast) showToast('Unable to complete this action.', 'error');
+      return;
+    }
     f.reset();
     setNote('eventNote', 'Saved.', true);
+    if (window.showToast) showToast('Event saved successfully.', 'success');
     await loadEvents();
   }
 
   async function loadDocuments() {
     await loadLegalLookups();
+    var dBody = $id('docBody');
+    if (window.ramdaniUi && dBody) ramdaniUi.showSkeleton(dBody, 'row', { cols: 6, count: 5 });
     var res = await sb.from('matter_documents').select('*').eq('is_current', true).order('uploaded_at', { ascending: false });
-    if (res.error) { setNote('docNote', res.error.message); return; }
+    if (window.ramdaniUi && dBody) ramdaniUi.hideSkeleton(dBody);
+    if (res.error) {
+      if (window.console) console.error('loadDocuments failed', res.error);
+      setNote('docNote', 'Unable to load matter documents. Please try again.');
+      if (dBody) dBody.innerHTML = '<tr><td colspan="6" class="empty">Unable to load matter documents.<br />Please try again.</td></tr>';
+      if (window.showToast) showToast('Unable to load matter documents.', 'error');
+      return;
+    }
     window._legalDocs = res.data || [];
     $id('docBody').innerHTML = (window._legalDocs).map(function (d) {
       return '<tr><td>' + escapeHtml(d.file_name) + '</td><td>' + escapeHtml(matterLabel(d.matter_id)) + '</td><td>' + escapeHtml(d.category) + '</td><td>' + escapeHtml(d.access_level) + '</td><td>v' + (d.version || 1) + '</td><td>' +
-        '<button type="button" class="btn btn-sm" data-doc-open="' + escapeHtml(d.storage_path) + '">Open</button> ' +
-        '<button type="button" class="btn btn-sm" data-doc-hist="' + d.id + '|' + escapeHtml(d.file_name) + '|' + d.matter_id + '">History</button></td></tr>';
-    }).join('') || '<tr><td colspan="6">No documents yet.</td></tr>';
+        '<button type="button" class="btn btn-sm" data-doc-open="' + escapeHtml(d.storage_path) + '" aria-label="Open ' + escapeHtml(d.file_name) + '">Open</button> ' +
+        '<button type="button" class="btn btn-sm" data-doc-hist="' + d.id + '|' + escapeHtml(d.file_name) + '|' + d.matter_id + '" aria-label="View history for ' + escapeHtml(d.file_name) + '">History</button></td></tr>';
+    }).join('') || ('<tr><td colspan="6" class="empty">No matter documents have been uploaded yet.</td></tr>');
   }
   async function saveDocument(e) {
     e.preventDefault();
@@ -13519,13 +14336,25 @@ window.ramdaniAuth = {
       is_current: true
     };
     var res = await sb.from('matter_documents').insert(payload);
-    if (res.error) return setNote('docNote', res.error.message);
+    if (res.error) {
+      if (window.console) console.error('saveDocument failed', res.error);
+      setNote('docNote', 'Unable to upload this document. Please try again.');
+      if (window.showToast) showToast('Unable to complete this action.', 'error');
+      return;
+    }
     if (prev) {
       var demote = await sb.from('matter_documents').update({ is_current: false }).eq('id', prev.id);
-      if (demote.error) return setNote('docNote', 'Uploaded, but previous version could not be archived: ' + demote.error.message);
+      if (demote.error) {
+        if (window.console) console.error('demote previous document failed', demote.error);
+        setNote('docNote', 'Uploaded, but the previous version could not be archived.');
+        if (window.showToast) showToast('Uploaded, but the previous version could not be archived.', 'error');
+        await loadDocuments();
+        return;
+      }
     }
     f.reset();
     setNote('docNote', prev ? 'New version saved. Previous file kept in history.' : 'Uploaded to private storage.', true);
+    if (window.showToast) showToast('Document uploaded successfully.', 'success');
     await loadDocuments();
   }
 
@@ -13553,9 +14382,15 @@ window.ramdaniAuth = {
     };
     if (!payload.matter_id || !payload.summary) return setNote('commNote', 'Matter and summary are required.');
     var res = await sb.from('matter_communications').insert(payload);
-    if (res.error) return setNote('commNote', res.error.message);
+    if (res.error) {
+      if (window.console) console.error('saveComm failed', res.error);
+      setNote('commNote', 'Unable to save this record. Please try again.');
+      if (window.showToast) showToast('Unable to complete this action.', 'error');
+      return;
+    }
     f.reset();
     setNote('commNote', 'Manual record saved. Nothing was sent.', true);
+    if (window.showToast) showToast('Communication record saved successfully.', 'success');
     await loadComms();
   }
 
@@ -13618,6 +14453,13 @@ window.ramdaniAuth = {
     $id('clientCancel').addEventListener('click', resetClientForm);
     $id('clientSearch').addEventListener('input', function () { clientPage = 1; renderClients(); });
     $id('clientStatusFilter').addEventListener('change', function () { clientPage = 1; renderClients(); });
+    var clFilterReset = $id('clientFilterReset');
+    if (clFilterReset) clFilterReset.addEventListener('click', function () {
+      $id('clientSearch').value = '';
+      $id('clientStatusFilter').value = '';
+      if ($id('clientSort')) $id('clientSort').value = 'updated_desc';
+      clientPage = 1; renderClients();
+    });
     $id('clientSort').addEventListener('change', function () { clientPage = 1; renderClients(); });
     $id('clientPrev').addEventListener('click', function () { clientPage -= 1; renderClients(); });
     $id('clientNext').addEventListener('click', function () { clientPage += 1; renderClients(); });
@@ -13651,6 +14493,8 @@ window.ramdaniAuth = {
     $id('legalMatterForm').addEventListener('submit', saveLegalMatter);
     $id('legalMatterCancel').addEventListener('click', resetMatterForm);
     ['lmStatus', 'lmType', 'lmPriority', 'lmSearch', 'lmLead', 'lmPractice', 'lmOpenedFrom', 'lmOpenedTo', 'lmCloseFrom', 'lmCloseTo', 'lmOverdue', 'lmUpcoming'].forEach(function (id) { var el = $id(id); if (!el) return; el.addEventListener('input', renderLegalMatters); el.addEventListener('change', renderLegalMatters); });
+    var lmResetBtn = $id('lmReset');
+    if (lmResetBtn) lmResetBtn.addEventListener('click', resetLegalMatterFilters);
     $id('legalMatterBody').addEventListener('click', function (e) {
       var open = e.target.closest('[data-lm-open]');
       var ed = e.target.closest('[data-lm-edit]');
@@ -14106,8 +14950,17 @@ window.ramdaniAuth = {
 
   async function loadMembers() {
     await loadPlatLookups();
+    var mBody = $id('memberBody');
+    if (window.ramdaniUi && mBody) ramdaniUi.showSkeleton(mBody, 'row', { cols: 10, count: 6 });
     var res = await sb.from('members').select('*').order('updated_at', { ascending: false });
-    if (res.error) { setNote('memberNote', res.error.message); return; }
+    if (window.ramdaniUi && mBody) ramdaniUi.hideSkeleton(mBody);
+    if (res.error) {
+      if (window.console) console.error('loadMembers failed', res.error);
+      setNote('memberNote', 'Unable to load members. Please try again.');
+      if (mBody) mBody.innerHTML = '<tr><td colspan="10" class="empty">Unable to load members.<br />Please try again.</td></tr>';
+      if (window.showToast) showToast('Unable to load members.', 'error');
+      return;
+    }
     platMembers = res.data || [];
     platMemberCardStatus = {};
     platMemberCertStatus = {};
@@ -14313,7 +15166,9 @@ window.ramdaniAuth = {
     if (memberPage < 1) memberPage = 1;
     var slice = rows.slice((memberPage - 1) * MEMBER_PAGE_SIZE, memberPage * MEMBER_PAGE_SIZE);
     var note = $id('memberTableNote');
-    if (note) note.textContent = total ? (total + ' member' + (total === 1 ? '' : 's')) : 'No members match these filters.';
+    if (note) note.textContent = total
+      ? (total === platMembers.length ? (total + ' member' + (total === 1 ? '' : 's')) : ('Showing ' + total + ' of ' + platMembers.length + ' members'))
+      : (platMembers.length ? 'No members match these filters.' : '');
     var pager = $id('memberPager');
     if (pager) {
       pager.hidden = total <= MEMBER_PAGE_SIZE;
@@ -14328,8 +15183,8 @@ window.ramdaniAuth = {
       var photo = memberPhotoUrls[m.id]
         ? '<img class="member-thumb" alt="" src="' + escapeHtml(memberPhotoUrls[m.id]) + '" />'
         : '<span class="member-thumb is-empty" data-mem-photo="' + escapeHtml(m.id) + '"></span>';
-      return '<tr><td>' + photo + '</td><td>' + escapeHtml(m.member_number || m.reference_id || '') + '</td><td>' + escapeHtml(m.full_name) + '</td><td>' + escapeHtml(m.email || '') + '</td><td>' + escapeHtml(soc ? soc.title : '') + '</td><td>' + escapeHtml(chp ? chp.title : '') + '</td><td>' + escapeHtml(m.status) + '</td><td>' + escapeHtml(cardSt) + '</td><td>' + escapeHtml(certSt) + '</td><td><button type="button" class="btn btn-sm" data-mem-profile="' + m.id + '">Profile</button> <button type="button" class="btn btn-sm" data-mem-edit="' + m.id + '">Edit</button></td></tr>';
-    }).join('') || '<tr><td colspan="10">No members yet.</td></tr>';
+      return '<tr><td>' + photo + '</td><td>' + escapeHtml(m.member_number || m.reference_id || '') + '</td><td>' + escapeHtml(m.full_name) + '</td><td>' + escapeHtml(m.email || '') + '</td><td>' + escapeHtml(soc ? soc.title : '') + '</td><td>' + escapeHtml(chp ? chp.title : '') + '</td><td>' + statusBadge(m.status) + '</td><td>' + escapeHtml(cardSt) + '</td><td>' + escapeHtml(certSt) + '</td><td><button type="button" class="btn btn-sm" data-mem-profile="' + m.id + '" aria-label="View profile for ' + escapeHtml(m.full_name) + '">Profile</button> <button type="button" class="btn btn-sm" data-mem-edit="' + m.id + '" aria-label="Edit ' + escapeHtml(m.full_name) + '">Edit</button></td></tr>';
+    }).join('') || ('<tr><td colspan="10" class="empty">' + (platMembers.length ? 'No members found.<br />Try changing your search or filters.' : 'No members have been registered yet.') + '</td></tr>');
     slice.forEach(function (m) {
       if (!m.photo_path || memberPhotoUrls[m.id]) return;
       sb.storage.from('private-docs').createSignedUrl(m.photo_path, 300).then(function (signed) {
@@ -15131,7 +15986,9 @@ window.ramdaniAuth = {
   }
 
   async function loadEnrollments() {
-    setNote('enNote', 'Loading…', true);
+    var enBody = $id('enBody');
+    if (window.ramdaniUi && enBody) ramdaniUi.showSkeleton(enBody, 'row', { cols: 8, count: 6 });
+    else setNote('enNote', 'Loading…', true);
     var res = await Promise.all([
       sb.from('enrollments').select('*').order('enrolled_at', { ascending: false }),
       sb.from('profiles').select('id, full_name, email, student_id, stu:students!students_profile_id_fkey!inner(status)'),
@@ -15139,7 +15996,15 @@ window.ramdaniAuth = {
       sb.from('course_completions').select('student_id, module_id, lesson_percent, best_quiz_percent, is_eligible_for_certificate'),
       sb.from('certificate_issuances').select('student_id, module_id, status')
     ]);
-    if (res[0].error) { setNote('enNote', 'Could not load enrollments: ' + res[0].error.message); $id('enBody').innerHTML = ''; return; }
+    if (window.ramdaniUi && enBody) ramdaniUi.hideSkeleton(enBody);
+    if (res[0].error) {
+      if (window.console) console.error('loadEnrollments failed', res[0].error);
+      setNote('enNote', 'Unable to load enrollments. Please try again.');
+      if (enBody) enBody.innerHTML = '<tr><td colspan="8" class="empty">Unable to load enrollments.<br />Please try again.</td></tr>';
+      if ($id('enTotal')) $id('enTotal').textContent = '';
+      if (window.showToast) showToast('Unable to load enrollments.', 'error');
+      return;
+    }
     enRows = res[0].data || [];
     enProfiles = {}; (res[1].data || []).forEach(function (p) { enProfiles[p.id] = p; });
     var mods = res[2].data || [];
@@ -15149,8 +16014,57 @@ window.ramdaniAuth = {
     var sel = $id('enModule'); var cur = sel.value;
     sel.innerHTML = '<option value="">All modules</option>' + mods.map(function (m) { return '<option value="' + m.id + '">' + escapeHtml(m.title || m.code) + '</option>'; }).join('');
     sel.value = cur;
+    var attSel = $id('attModule');
+    if (attSel) {
+      var attCur = attSel.value;
+      attSel.innerHTML = '<option value="">All modules</option>' + mods.map(function (m) { return '<option value="' + m.id + '">' + escapeHtml(m.title || m.code) + '</option>'; }).join('');
+      attSel.value = attCur;
+    }
     setNote('enNote', '');
     renderEnrollments();
+    await loadAttendanceRecords();
+  }
+
+  var attRows = [];
+  async function loadAttendanceRecords() {
+    var attBody = $id('attBody');
+    if (!attBody) return;
+    if (window.ramdaniUi) ramdaniUi.showSkeleton(attBody, 'row', { cols: 4, count: 6 });
+    var res = await sb.from('course_attendance').select('*').order('session_date', { ascending: false }).limit(500);
+    if (window.ramdaniUi) ramdaniUi.hideSkeleton(attBody);
+    if (res.error) {
+      if (window.console) console.error('loadAttendanceRecords failed', res.error);
+      setNote('attNote', 'Unable to load attendance records. Please try again.');
+      attBody.innerHTML = '<tr><td colspan="4" class="empty">Unable to load attendance records.<br />Please try again.</td></tr>';
+      if ($id('attTotal')) $id('attTotal').textContent = '';
+      if (window.showToast) showToast('Unable to load attendance records.', 'error');
+      return;
+    }
+    attRows = res.data || [];
+    setNote('attNote', '');
+    renderAttendanceRecords();
+  }
+
+  function renderAttendanceRecords() {
+    var attBody = $id('attBody'); if (!attBody) return;
+    var mf = $id('attModule').value, sf = $id('attStatus').value, q = ($id('attSearch').value || '').trim().toLowerCase();
+    var rows = attRows.filter(function (r) {
+      if (mf && r.module_id !== mf) return false;
+      if (sf && (sf === 'present') !== !!r.present) return false;
+      if (q) {
+        var p = enProfiles[r.student_id] || {};
+        var hay = [p.full_name, p.email, p.student_id].filter(Boolean).join(' ').toLowerCase();
+        if (hay.indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+    $id('attTotal').textContent = rows.length === attRows.length
+      ? (attRows.length ? ('(' + attRows.length + ')') : '')
+      : ('(Showing ' + rows.length + ' of ' + attRows.length + ')');
+    attBody.innerHTML = rows.map(function (r) {
+      var p = enProfiles[r.student_id] || {}, m = enModules[r.module_id] || {};
+      return '<tr><td>' + escapeHtml(p.full_name || p.email || 'Unknown') + '</td><td>' + escapeHtml(m.title || m.code || '') + '</td><td>' + escapeHtml(r.session_date || '') + '</td><td>' + statusBadge(r.present ? 'present' : 'absent', r.present ? 'Present' : 'Absent') + '</td></tr>';
+    }).join('') || ('<tr><td colspan="4" class="empty">' + (attRows.length ? 'No attendance records match your current filters.' : 'No attendance records have been created yet.') + '</td></tr>');
   }
 
   function renderEnrollments() {
@@ -15165,22 +16079,25 @@ window.ramdaniAuth = {
       }
       return true;
     });
-    $id('enTotal').textContent = '(' + rows.length + ')';
+    $id('enTotal').textContent = rows.length === enRows.length
+      ? (enRows.length ? ('(' + enRows.length + ')') : '')
+      : ('(Showing ' + rows.length + ' of ' + enRows.length + ')');
     $id('enBody').innerHTML = rows.map(function (r) {
       var p = enProfiles[r.student_id] || {}, m = enModules[r.module_id] || {};
       var key = r.student_id + '|' + r.module_id, c = enCompletions[key];
-      var lp = c && c.lesson_percent != null ? Math.round(c.lesson_percent) + '%' : '0%';
+      var lessonPct = c && c.lesson_percent != null ? Math.max(0, Math.min(100, Math.round(c.lesson_percent))) : 0;
+      var lp = '<div class="progress-bar" role="progressbar" aria-valuenow="' + lessonPct + '" aria-valuemin="0" aria-valuemax="100" aria-label="Lesson progress"><div class="progress-fill" style="width:' + lessonPct + '%"></div></div><span class="note">' + lessonPct + '%</span>';
       var qp = c && c.best_quiz_percent != null ? Math.round(c.best_quiz_percent) + '%' : '—';
-      var cert = enIssued[key] ? 'Issued' : (c && c.is_eligible_for_certificate ? 'Eligible <button type="button" class="btn" data-en-issue="' + key + '">Issue</button>' : '—');
+      var cert = enIssued[key] ? statusBadge('issued', 'Issued') : (c && c.is_eligible_for_certificate ? statusBadge('eligible', 'Eligible') + ' <button type="button" class="btn btn-sm" data-en-issue="' + key + '" aria-label="Issue certificate to ' + escapeHtml(p.full_name || 'student') + '">Issue</button>' : '—');
       var d = new Date(r.enrolled_at);
       var opts = ['pending', 'active', 'completed', 'cancelled'].map(function (s) { return '<option value="' + s + '"' + (s === r.status ? ' selected' : '') + '>' + s + '</option>'; }).join('');
       return '<tr><td>' + escapeHtml(p.full_name || p.email || 'Unknown') + (p.student_id ? '<br><small>' + escapeHtml(p.student_id) + '</small>' : '') + '</td>' +
         '<td>' + escapeHtml(m.title || m.code || '') + '</td>' +
-        '<td><select data-en-status="' + r.id + '" aria-label="Enrollment status">' + opts + '</select></td>' +
+        '<td><select data-en-status="' + r.id + '" aria-label="Enrollment status for ' + escapeHtml(p.full_name || 'student') + '">' + opts + '</select></td>' +
         '<td>' + escapeHtml(isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-PK')) + '</td>' +
         '<td>' + lp + '</td><td>' + qp + '</td><td>' + cert + '</td>' +
-        '<td><button type="button" class="btn" data-en-attend="' + r.student_id + '|' + r.module_id + '">Mark today present</button> <button type="button" class="btn" data-en-del="' + r.id + '">Remove</button></td></tr>';
-    }).join('') || '<tr><td colspan="8">No enrollments match.</td></tr>';
+        '<td><button type="button" class="btn btn-sm" data-en-attend="' + r.student_id + '|' + r.module_id + '" aria-label="Mark today present for ' + escapeHtml(p.full_name || 'student') + '">Mark today present</button> <button type="button" class="btn btn-sm" data-en-del="' + r.id + '" aria-label="Remove enrollment for ' + escapeHtml(p.full_name || 'student') + '">Remove</button></td></tr>';
+    }).join('') || ('<tr><td colspan="8" class="empty">' + (enRows.length ? 'No enrollments match your current filters.' : 'No enrollments have been created yet.') + '</td></tr>');
   }
   async function markCourseAttendance(studentId, moduleId) {
     var uid = (await ramdaniAuth.profile() || {}).id || null;
@@ -15188,8 +16105,15 @@ window.ramdaniAuth = {
       student_id: studentId, module_id: moduleId, session_date: new Date().toISOString().slice(0, 10),
       present: true, marked_by: uid
     }, { onConflict: 'student_id,module_id,session_date' });
-    if (res.error) { setNote('enNote', res.error.message); return; }
+    if (res.error) {
+      if (window.console) console.error('markCourseAttendance failed', res.error);
+      setNote('enNote', 'Unable to mark attendance. Please try again.');
+      if (window.showToast) showToast('Unable to complete this action.', 'error');
+      return;
+    }
     setNote('enNote', 'Attendance marked for today.', true);
+    if (window.showToast) showToast('Attendance marked successfully.', 'success');
+    await loadAttendanceRecords();
   }
 
   async function loadEducationStats() {
@@ -15355,6 +16279,20 @@ window.ramdaniAuth = {
   }
 
   async function loadDashboard() {
+    // Skeleton placeholders while the real counts/lists are in flight —
+    // replaces the previous bare "—" / "Loading…" text with the shared
+    // shimmer placeholders (ramdaniUi.showSkeleton). Each element's own
+    // update below overwrites this content directly, so there is no
+    // separate "data arrived" branch to wire up per stat.
+    ['statStudents','statInquiries','statApplications','statMembers','statLawyers','statClients','statEvents','statArticles','statDocs','statPublished'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el && window.ramdaniUi) ramdaniUi.showSkeleton(el, 'stat');
+    });
+    var upBodyEl = document.getElementById('dashUpcomingBody');
+    var pendBodyEl = document.getElementById('dashPendingBody');
+    if (upBodyEl && window.ramdaniUi) ramdaniUi.showSkeleton(upBodyEl, 'row', { cols: 4, count: 3 });
+    if (pendBodyEl && window.ramdaniUi) ramdaniUi.showSkeleton(pendBodyEl, 'row', { cols: 4, count: 3 });
+
     var nowIso = new Date().toISOString();
     var queries = await Promise.all([
       sb.from('profiles').select('id',{count:'exact',head:true}).eq('role','student'),
@@ -15371,19 +16309,39 @@ window.ramdaniAuth = {
       sb.from('internship_applications').select('id, full_name, email, status, created_at, internships(title)').in('status',['new','reviewed','shortlisted']).order('created_at', { ascending: false }).limit(8)
     ]);
     function countOf(r) { return r && typeof r.count === 'number' ? r.count : '—'; }
-    document.getElementById('statStudents').textContent=countOf(queries[0]);
-    document.getElementById('statInquiries').textContent=countOf(queries[1]);
-    document.getElementById('statApplications').textContent=countOf(queries[2]);
-    var sm = document.getElementById('statMembers'); if (sm) sm.textContent = countOf(queries[3]);
-    var sl = document.getElementById('statLawyers'); if (sl) sl.textContent = countOf(queries[4]);
-    var sc = document.getElementById('statClients'); if (sc) sc.textContent = countOf(queries[5]);
-    var se = document.getElementById('statEvents'); if (se) se.textContent = countOf(queries[6]);
-    var sa = document.getElementById('statArticles'); if (sa) sa.textContent = countOf(queries[7]);
-    var sd = document.getElementById('statDocs'); if (sd) sd.textContent = countOf(queries[8]);
+    function setStat(id, value) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      if (window.ramdaniUi) ramdaniUi.hideSkeleton(el);
+      el.textContent = value;
+    }
+    setStat('statStudents', countOf(queries[0]));
+    setStat('statInquiries', countOf(queries[1]));
+    setStat('statApplications', countOf(queries[2]));
+    setStat('statMembers', countOf(queries[3]));
+    setStat('statLawyers', countOf(queries[4]));
+    setStat('statClients', countOf(queries[5]));
+    setStat('statEvents', countOf(queries[6]));
+    setStat('statArticles', countOf(queries[7]));
+    setStat('statDocs', countOf(queries[8]));
+
+    // A single toast for the whole batch of stat/count queries, not one per
+    // failed card — avoids stacking near-identical toasts if several counts
+    // fail together (e.g. a transient network blip).
+    var statErrors = [queries[0],queries[1],queries[2],queries[3],queries[4],queries[5],queries[6],queries[7],queries[8]]
+      .filter(function (r) { return r && r.error; });
+    if (statErrors.length && window.ramdaniUi) {
+      console.warn('Dashboard stat queries failed', statErrors.map(function (r) { return r.error && r.error.message; }));
+      ramdaniUi.toast('Some dashboard statistics could not be loaded.', 'warning');
+    }
+
     var upBody = document.getElementById('dashUpcomingBody');
     if (upBody) {
-      if (queries[9] && queries[9].error) upBody.innerHTML = '<tr><td colspan="4">Unable to load upcoming events.</td></tr>';
-      else {
+      if (window.ramdaniUi) ramdaniUi.hideSkeleton(upBody);
+      if (queries[9] && queries[9].error) {
+        upBody.innerHTML = '<tr><td colspan="4">Unable to load upcoming events.</td></tr>';
+        if (window.ramdaniUi) ramdaniUi.toast('Unable to load upcoming events.', 'error');
+      } else {
         var evs = (queries[9] && queries[9].data) || [];
         upBody.innerHTML = evs.length ? evs.map(function (ev) {
           var when = (window.ramdaniUi && ramdaniUi.formatWhen) ? ramdaniUi.formatWhen(ev.starts_at) : (ev.starts_at || '');
@@ -15393,6 +16351,7 @@ window.ramdaniAuth = {
     }
     var pendBody = document.getElementById('dashPendingBody');
     if (pendBody) {
+      if (window.ramdaniUi) ramdaniUi.hideSkeleton(pendBody);
       var pendingRows = [];
       if (queries[10] && !queries[10].error) (queries[10].data || []).forEach(function (inq) {
         pendingRows.push('<tr><td>Inquiry</td><td>' + ramdaniUi.escape(inq.full_name || '') + '</td><td>' + ramdaniUi.escape(inq.subject || '') + '</td><td>' + ramdaniUi.escape(inq.status || '') + '</td></tr>');
@@ -15401,15 +16360,20 @@ window.ramdaniAuth = {
         var intern = app.internships || {};
         pendingRows.push('<tr><td>Internship application</td><td>' + ramdaniUi.escape(app.full_name || app.email || '') + '</td><td>' + ramdaniUi.escape(intern.title || '') + '</td><td>' + ramdaniUi.escape(app.status || '') + '</td></tr>');
       });
-      if ((queries[10] && queries[10].error) && (queries[11] && queries[11].error)) pendBody.innerHTML = '<tr><td colspan="4">Unable to load pending actions.</td></tr>';
-      else pendBody.innerHTML = pendingRows.length ? pendingRows.join('') : '<tr><td colspan="4">Nothing waiting for review.</td></tr>';
+      if ((queries[10] && queries[10].error) && (queries[11] && queries[11].error)) {
+        pendBody.innerHTML = '<tr><td colspan="4">Unable to load pending actions.</td></tr>';
+        if (window.ramdaniUi) ramdaniUi.toast('Unable to load pending actions.', 'error');
+      } else {
+        pendBody.innerHTML = pendingRows.length ? pendingRows.join('') : '<tr><td colspan="4">Nothing waiting for review.</td></tr>';
+      }
     }
-    var published=0;
+    var published=0, publishedFailed=false;
     for(var i=0;i<TABLES.length;i++){
       var r=await sb.from(TABLES[i].id).select('id',{count:'exact',head:true}).eq('status','published');
-      if(typeof r.count==='number') published+=r.count;
+      if(typeof r.count==='number') published+=r.count; else if (r.error) publishedFailed = true;
     }
-    document.getElementById('statPublished').textContent=published;
+    setStat('statPublished', publishedFailed ? '—' : published);
+    if (publishedFailed && window.ramdaniUi) ramdaniUi.toast('Unable to load published-content total.', 'warning');
     await loadEducationStats();
   }
 
@@ -15421,7 +16385,18 @@ window.ramdaniAuth = {
       if (!platOrganizations.length) { var or = await sb.from('organizations').select('*').order('name'); platOrganizations = or.data || []; }
       await fillOrganizationSelects();
     }
+    var dataBody = document.getElementById('dataBody');
+    if (window.ramdaniUi && dataBody) ramdaniUi.showSkeleton(dataBody, 'row', { cols: meta.fields.length + 1, count: 6 });
     var res=await sb.from(name).select('*').order('updated_at',{ascending:false});
+    if (window.ramdaniUi && dataBody) ramdaniUi.hideSkeleton(dataBody);
+    if (res.error) {
+      if (window.console) console.error('loadTable failed', name, res.error);
+      currentRows = [];
+      var note0 = document.getElementById('contentTableNote'); if (note0) note0.textContent = 'Unable to load records. Please try again.';
+      document.getElementById('dataBody').innerHTML = '<tr><td colspan="' + (meta.fields.length + 1) + '" class="empty">Unable to load records.<br />Please try again.</td></tr>';
+      if (window.showToast) showToast('Unable to load records.', 'error');
+      return;
+    }
     currentRows=res.data||[];
     contentPage = 1;
     renderContentRows();
@@ -15448,7 +16423,7 @@ window.ramdaniAuth = {
     if (contentPage < 1) contentPage = 1;
     var slice = rows.slice((contentPage - 1) * CONTENT_PAGE_SIZE, contentPage * CONTENT_PAGE_SIZE);
     var note = document.getElementById('contentTableNote');
-    if (note) note.textContent = total ? (total + ' record' + (total === 1 ? '' : 's')) : 'No records found.';
+    if (note) note.textContent = total ? (total + ' record' + (total === 1 ? '' : 's')) : (currentRows.length ? 'No records match your current filters.' : 'No records have been created yet.');
     var pager = document.getElementById('contentPager');
     if (pager) {
       pager.hidden = total <= CONTENT_PAGE_SIZE;
@@ -15459,13 +16434,13 @@ window.ramdaniAuth = {
     document.getElementById('dataBody').innerHTML=slice.map(function(row){
       var status=row.status?'<span class="status-badge status-'+ramdaniUi.escape(String(row.status))+'">'+ramdaniUi.escape(row.status)+'</span>':'';
       return '<tr>'+meta.fields.map(function(f){return '<td>'+((f==='status')?status:ramdaniUi.escape(row[f]))+'</td>';}).join('')+'<td><div class="table-actions"><button type="button" class="btn btn-sm" data-edit="'+ramdaniUi.escape(row.id)+'">Edit</button>'+(contentPreviewHref(name, row.slug)?'<button type="button" class="btn btn-sm" data-preview="'+ramdaniUi.escape(row.id)+'">Preview</button>':'')+'<button type="button" class="btn btn-sm" data-del="'+ramdaniUi.escape(row.id)+'">Delete</button></div></td></tr>';
-    }).join('')||'<tr><td colspan="'+(meta.fields.length+1)+'">No records found.</td></tr>';
+    }).join('')||'<tr><td colspan="'+(meta.fields.length+1)+'" class="empty">'+(currentRows.length?'No records match your current filters.':'No records have been created yet.')+'</td></tr>';
     var seatsBox = document.getElementById('cabinetSeatsBox');
     if (seatsBox) seatsBox.hidden = name !== 'cabinets';
     if (name === 'cabinets') loadCabinetSeatsInspector();
     document.querySelectorAll('[data-edit]').forEach(function(btn){btn.addEventListener('click',function(){var row=currentRows.find(function(r){return String(r.id)===String(btn.getAttribute('data-edit'));});if(row)fillForm(row);});});
     document.querySelectorAll('[data-preview]').forEach(function(btn){btn.addEventListener('click',function(){var row=currentRows.find(function(r){return String(r.id)===String(btn.getAttribute('data-preview'));});if(row)openContentPreview(name, row.slug);});});
-    document.querySelectorAll('[data-del]').forEach(function(btn){btn.addEventListener('click',async function(){if(!confirm('Permanently delete this record? This cannot be undone.'))return;var res=await sb.from(name).delete().eq('id',btn.getAttribute('data-del'));var note=document.getElementById('saveNote');note.className='form-status '+(res.error?'err':'ok');note.textContent=res.error?res.error.message:'Record deleted.';if(!res.error)loadTable(name);});});
+    document.querySelectorAll('[data-del]').forEach(function(btn){btn.addEventListener('click',async function(){if(!confirm('Permanently delete this record? This cannot be undone.'))return;var res=await sb.from(name).delete().eq('id',btn.getAttribute('data-del'));var note=document.getElementById('saveNote');if(res.error){if(window.console)console.error('content delete failed',name,res.error);note.className='form-status err';note.textContent='Unable to delete this record. Please try again.';if(window.showToast)showToast('Unable to delete this record.','error');}else{note.className='form-status ok';note.textContent='Record deleted.';if(window.showToast)showToast('Record deleted successfully.','success');loadTable(name);}});});
   }
 
   async function saveRow(e) {
@@ -15501,8 +16476,18 @@ window.ramdaniAuth = {
       delete payload.photo_file;
     }
     var res=editingId?await sb.from(table).update(payload).eq('id',editingId):await sb.from(table).insert(payload);
-    var note=document.getElementById('saveNote'); note.className='form-status '+(res.error?'err':'ok'); note.textContent=res.error?res.error.message:(editingId?'Updated successfully.':'Saved successfully.');
-    if(!res.error){resetEditor();loadTable(table);}
+    var note=document.getElementById('saveNote');
+    if (res.error) {
+      if (window.console) console.error('saveRow failed', table, res.error);
+      note.className='form-status err';
+      note.textContent='Unable to save this record. Please try again.';
+      if (window.showToast) showToast('Unable to save this record.', 'error');
+    } else {
+      note.className='form-status ok';
+      note.textContent=editingId?'Updated successfully.':'Saved successfully.';
+      if (window.showToast) showToast(editingId?'Record updated successfully.':'Record saved successfully.', 'success');
+      resetEditor();loadTable(table);
+    }
   }
 
   async function loadInquiries() {
