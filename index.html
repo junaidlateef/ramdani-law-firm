@@ -8039,7 +8039,7 @@ window.ramdaniAuth = {
 
     var certEl = document.getElementById('myCertificates');
     if (certEl) {
-      var certRes = await sb.from('certificate_issuances').select('*').eq('student_id', uid).eq('status', 'issued').order('created_at', { ascending: false });
+      var certRes = await sb.from('certificate_issuances').select('*').or('student_id.eq.' + uid + ',profile_id.eq.' + uid).eq('status', 'issued').order('created_at', { ascending: false });
       var certs = certRes.data || [];
       if (certRes.error) {
         certEl.innerHTML = '<p class="empty">Could not load certificates.</p>';
@@ -8052,8 +8052,17 @@ window.ramdaniAuth = {
           var mr = await sb.from('modules').select('id, title').in('id', ids);
           (mr.data || []).forEach(function (m) { titles[m.id] = m.title; });
         }
+        var eventIds = certs.map(function (c) { return c.event_id; }).filter(Boolean);
+        var eventTitles = {};
+        if (eventIds.length) {
+          var evr = await sb.from('events').select('id, title').in('id', eventIds);
+          (evr.data || []).forEach(function (ev) { eventTitles[ev.id] = ev.title; });
+        }
         var certHtml = certs.map(function (c) {
-          return '<article class="card"><h3>' + esc(titles[c.module_id] || 'Certificate') + '</h3>' +
+          var label = c.recipient_type === 'event_attendee'
+            ? (eventTitles[c.event_id] || 'Event Certificate')
+            : (titles[c.module_id] || 'Certificate');
+          return '<article class="card"><h3>' + esc(label) + '</h3>' +
             '<p class="note">No. ' + esc(c.certificate_number) + ' · Issued ' + esc(c.issue_date || '') + '</p>' +
             '<p class="note">Verification code: ' + esc(c.verification_code) + '</p>' +
             '<p class="note"><a href="/pages/verify-certificate.html?code=' + encodeURIComponent(c.verification_code || '') + '">Verify</a></p></article>';
@@ -8078,12 +8087,22 @@ window.ramdaniAuth = {
     }
     var docsEl = document.getElementById('myStudentDocs');
     if (docsEl) {
-      var docs = await sb.from('issued_documents').select('id, category, status, issued_at, recipient_name, document_number, verify_code').eq('student_id', uid).eq('status', 'issued').order('issued_at', { ascending: false });
+      var docs = await sb.from('issued_documents').select('id, category, status, issued_at, recipient_name, document_number, verify_code, storage_path, file_name').eq('student_id', uid).eq('status', 'issued').order('issued_at', { ascending: false });
       if (docs.error) docsEl.innerHTML = '<p class="empty">Could not load documents.</p>';
       else if (!docs.data || !docs.data.length) docsEl.innerHTML = '<p class="empty">No documents issued to you yet.</p>';
       else docsEl.innerHTML = docs.data.map(function (d) {
-        return '<article class="card"><h3>' + esc(d.category) + '</h3><p class="note">' + esc(d.document_number || '') + (d.issued_at ? ' · ' + esc(d.issued_at) : '') + (d.verify_code ? ' · verify ' + esc(d.verify_code) : '') + '</p></article>';
+        return '<article class="card"><h3>' + esc(d.category) + '</h3><p class="note">' + esc(d.document_number || '') + (d.issued_at ? ' · ' + esc(d.issued_at) : '') + (d.verify_code ? ' · verify ' + esc(d.verify_code) : '') + '</p>' + (d.storage_path ? '<button type="button" class="btn btn-sm" data-open-issued-doc="' + esc(d.storage_path) + '">Open</button>' : '') + '</article>';
       }).join('');
+      if (!docsEl.dataset.bound) {
+        docsEl.dataset.bound = '1';
+        docsEl.addEventListener('click', async function (e) {
+          var openDoc = e.target.closest('[data-open-issued-doc]');
+          if (!openDoc) return;
+          var path = openDoc.getAttribute('data-open-issued-doc');
+          var signed = await sb.storage.from('private-docs').createSignedUrl(path, 120);
+          if (signed.data && signed.data.signedUrl) window.open(signed.data.signedUrl, '_blank');
+        });
+      }
     }
     var evEl = document.getElementById('myStudentEvents');
     var upEl = document.getElementById('myStudentUpcomingEvents');
@@ -8255,11 +8274,21 @@ window.ramdaniAuth = {
 
   async function loadDocuments(p) {
     var box = document.getElementById('lawDocuments');
-    var res = await sb.from('issued_documents').select('document_number, category, issued_at, status').eq('student_id', p.id).eq('status', 'issued');
+    var res = await sb.from('issued_documents').select('document_number, category, issued_at, status, storage_path, file_name').eq('student_id', p.id).eq('status', 'issued');
     if (res.error) { if (window.console) console.error('loadDocuments failed', res.error); box.innerHTML = '<p class="empty">Could not load this section. Please try again later.</p>'; return; }
     box.innerHTML = (res.data || []).map(function (d) {
-      return '<article class="card"><h3>' + esc(d.category) + '</h3><p class="note">' + esc(d.document_number || '') + (d.issued_at ? ' · ' + esc(d.issued_at) : '') + '</p></article>';
+      return '<article class="card"><h3>' + esc(d.category) + '</h3><p class="note">' + esc(d.document_number || '') + (d.issued_at ? ' · ' + esc(d.issued_at) : '') + '</p>' + (d.storage_path ? '<button type="button" class="btn btn-sm" data-open-issued-doc="' + esc(d.storage_path) + '">Open</button>' : '') + '</article>';
     }).join('') || '<p class="empty">No documents have been issued to lawyer accounts.</p>';
+    if (!box.dataset.boundOpen) {
+      box.dataset.boundOpen = '1';
+      box.addEventListener('click', async function (e) {
+        var openDoc = e.target.closest('[data-open-issued-doc]');
+        if (!openDoc) return;
+        var path = openDoc.getAttribute('data-open-issued-doc');
+        var signed = await sb.storage.from('private-docs').createSignedUrl(path, 120);
+        if (signed.data && signed.data.signedUrl) window.open(signed.data.signedUrl, '_blank');
+      });
+    }
   }
 
   async function loadCourses(p) {
