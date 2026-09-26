@@ -2181,7 +2181,7 @@ html.dark .rc-actions button { background:#fff; color:#0e2c27; }
               <label data-field="qualifications"><span>Qualifications</span><input name="qualifications" /></label>
               <label data-field="languages"><span>Languages</span><input name="languages" /></label>
               <label data-field="short_name"><span>Short name</span><input name="short_name" /></label>
-              <div class="form-section-legend" data-legend-for="societies" hidden>Organization Placement</div>
+              <div class="form-section-legend" data-legend-for="societies" hidden>Organization &amp; Chapter</div>
               <label data-field="organization_id"><span>Organization</span><select name="organization_id"><option value="">None</option></select></label>
               <label data-field="chapter_id"><span>Chapter</span><select name="chapter_id"><option value="">None</option></select></label>
               <label data-field="caption" class="field-full"><span>Caption</span><textarea name="caption" rows="3"></textarea></label>
@@ -2194,7 +2194,7 @@ html.dark .rc-actions button { background:#fff; color:#0e2c27; }
               <label data-field="instagram_url"><span>Instagram post URL</span><input name="instagram_url" placeholder="https://instagram.com/…" /></label>
               <label data-field="x_url"><span>X (Twitter) post URL</span><input name="x_url" placeholder="https://x.com/…" /></label>
               <label data-field="head_name"><span>Cabinet head</span><input name="head_name" /></label>
-              <div class="form-section-legend" data-legend-for="societies" hidden>Publishing</div>
+              <div class="form-section-legend" data-legend-for="societies" hidden>Status</div>
               <label data-field="status"><span>Publishing status</span><select name="status"><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></label>
               <div class="form-actions"><button class="btn btn-primary" id="saveBtn" type="submit">Save</button><button class="btn" id="cancelEditBtn" type="button" hidden>Cancel edit</button><button class="btn" id="previewContentBtn" type="button" hidden>Preview</button><p id="saveNote" class="form-status"></p></div>
             </form>
@@ -16637,7 +16637,7 @@ window.ramdaniAuth = {
 
   // Extra columns edited in the generic form but not shown as list columns.
   var EXTRA_FORM_FIELDS = {
-    societies: ['logo_url', 'cover_url', 'chapter_id'],
+    societies: ['chapter_id'],
     chapters: ['logo_url', 'cover_url'],
     cabinets: ['logo_url', 'cover_url'],
     social_posts: ['image_url', 'facebook_url', 'linkedin_url', 'instagram_url', 'x_url', 'youtube_url']
