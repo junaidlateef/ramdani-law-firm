@@ -1343,8 +1343,18 @@ html[dir="rtl"] .academy-media-play { transform: scaleX(-1); }
 }
 .academy-section { margin-bottom: 1.25rem; }
 .academy-section > h3 { margin-bottom: .6rem; font-size: 1.1rem; }
+.section-head { margin: 0; }
+.section-toggle {
+  display: flex; align-items: center; gap: .5rem; width: 100%; text-align: start;
+  background: none; border: none; padding: .5rem 0; font: inherit; font-weight: 700;
+  color: var(--ink, inherit); cursor: pointer; min-height: 44px;
+}
+.section-caret { display: inline-block; width: 1em; }
+.section-body { padding-top: .25rem; }
 .lesson-list li { padding: 0; }
 .lesson-list li + li { border-top: 1px solid var(--line); }
+.lesson-row { display: flex; align-items: center; flex-wrap: wrap; gap: .6rem; padding: .45rem .25rem; }
+.lesson-row .btn-sm { margin-inline-start: auto; }
 .lesson-list label {
   display: flex;
   align-items: center;
@@ -1354,9 +1364,17 @@ html[dir="rtl"] .academy-media-play { transform: scaleX(-1); }
   cursor: pointer;
   font-size: .92rem;
 }
+.lesson-row label { padding: 0; min-height: auto; flex: 1 1 auto; min-width: 0; }
+.lesson-row label span { overflow-wrap: anywhere; }
 .lesson-list input[type="checkbox"] { width: 1.1rem; height: 1.1rem; accent-color: var(--gold); flex: 0 0 auto; }
 .lesson-list label:hover { color: var(--accent-dark); }
 .lesson-list li:has(input:checked) label { color: var(--muted); }
+.lesson-detail-card { margin-top: 1rem; }
+.lesson-content p { margin: 0 0 .75rem; }
+.lesson-complete { display: flex; align-items: center; gap: .5rem; margin: .75rem 0; cursor: pointer; }
+.lesson-complete input { width: 1.1rem; height: 1.1rem; accent-color: var(--gold); }
+.lesson-nav { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1rem; }
+.lesson-nav .btn[disabled] { opacity: .5; cursor: not-allowed; }
 
 /* quiz page */
 .quiz-compact .mcq { background: var(--card); }
@@ -2817,7 +2835,7 @@ html.dark .rc-actions button { background:#fff; color:#0e2c27; }
 
           <div id="notificationsPanel" class="admin-panel" hidden>
             <div class="admin-section-head"><div><h2>Notifications</h2><p class="note">System-generated staff notifications (new inquiries, new students, applications, pending requests, warnings).</p></div></div>
-            <div class="admin-toolbar"><button type="button" class="btn" id="markAllNotificationsReadBtn">Mark all as read</button></div>
+            <div class="admin-toolbar"><input type="search" id="notificationsSearch" placeholder="Search title or body" aria-label="Search notifications" /><select id="notificationsFilter" aria-label="Filter by read state"><option value="">All</option><option value="unread">Unread</option><option value="read">Read</option></select><button type="button" class="btn" id="markAllNotificationsReadBtn">Mark all as read</button><span id="notificationsCount" class="note" role="status" aria-live="polite"></span></div>
             <div class="table-wrap"><table class="data"><thead><tr><th>Event</th><th>Title</th><th>Body</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody id="notificationsBody"></tbody></table></div>
           </div>
 
@@ -3020,7 +3038,7 @@ html.dark .rc-actions button { background:#fff; color:#0e2c27; }
               <label><span>Status</span><select name="status"><option value="active">Active</option><option value="inactive">Inactive</option><option value="archived">Archived</option></select></label>
               <div class="form-actions"><button class="btn btn-primary" type="submit" id="organizationSave">Save organization</button><button class="btn" type="button" id="organizationCancel" hidden>Cancel</button><p id="organizationNote" class="form-status"></p></div>
             </form>
-            <div class="admin-toolbar"><input type="search" id="organizationSearch" placeholder="Search organizations" /></div>
+            <div class="admin-toolbar"><input type="search" id="organizationSearch" placeholder="Search organizations" aria-label="Search organizations" /></div>
             <div class="table-wrap"><table class="data"><thead><tr><th>Reference</th><th>Name</th><th>Status</th><th></th></tr></thead><tbody id="organizationBody"></tbody></table></div>
           </div>
 
@@ -3041,7 +3059,7 @@ html.dark .rc-actions button { background:#fff; color:#0e2c27; }
               <div class="form-actions"><button class="btn btn-primary" type="submit" id="membershipSave">Save membership</button><button class="btn" type="button" id="membershipCancel" hidden>Cancel</button><p id="membershipNote" class="form-status"></p></div>
             </form>
             <div class="admin-toolbar">
-              <select id="membershipStatusFilter">
+              <select id="membershipStatusFilter" aria-label="Filter by membership status">
                 <option value="">All memberships</option>
                 <option value="application">Applications</option>
                 <option value="under_review">Under review</option>
@@ -3052,7 +3070,7 @@ html.dark .rc-actions button { background:#fff; color:#0e2c27; }
                 <option value="suspended">Suspended</option>
                 <option value="revoked">Revoked</option>
               </select>
-              <input type="search" id="membershipSearch" placeholder="Search member, number, society" />
+              <input type="search" id="membershipSearch" placeholder="Search member, number, society" aria-label="Search memberships" />
             </div>
             <div class="table-wrap"><table class="data"><thead><tr><th>Reference</th><th>Member</th><th>Society</th><th>Type</th><th>Expiry</th><th>Status</th><th>Actions</th></tr></thead><tbody id="membershipBody"></tbody></table></div>
           </div>
@@ -3080,7 +3098,7 @@ html.dark .rc-actions button { background:#fff; color:#0e2c27; }
               <select id="memberSocietyFilter" aria-label="Filter by society"><option value="">All societies</option></select>
               <select id="memberChapterFilter" aria-label="Filter by chapter"><option value="">All chapters</option></select>
               <select id="memberSort" aria-label="Sort members"><option value="updated_desc">Recently updated</option><option value="created_desc">Newest first</option><option value="created_asc">Oldest first</option><option value="name_asc">Name A–Z</option><option value="name_desc">Name Z–A</option><option value="number_asc">Member number</option></select>
-              <input type="search" id="memberSearch" placeholder="Search name, email, member number or reference" />
+              <input type="search" id="memberSearch" placeholder="Search name, email, member number or reference" aria-label="Search members" />
               <button type="button" class="btn" id="memberExportCsv">Export CSV</button>
               <button type="button" class="btn" id="memberPrintBtn">Print</button>
             </div>
@@ -3175,12 +3193,13 @@ html.dark .rc-actions button { background:#fff; color:#0e2c27; }
               <label class="field-full"><span>Description</span><textarea name="description" rows="3"></textarea></label>
               <div class="form-actions"><button class="btn btn-primary" type="submit" id="platEventSave">Save event</button><button class="btn" type="button" id="platEventCancel" hidden>Cancel</button><p id="platEventNote" class="form-status"></p></div>
             </form>
-            <div class="table-wrap"><table class="data"><thead><tr><th>Event #</th><th>Title</th><th>When</th><th>Type</th><th>Status</th><th></th></tr></thead><tbody id="platEventBody"></tbody></table></div>
+            <div class="admin-toolbar"><input type="search" id="platEventSearch" placeholder="Search by title or venue" aria-label="Search events" /></div>
+            <div class="table-wrap"><table class="data"><thead><tr><th>Event #</th><th>Title</th><th>When</th><th>Type</th><th>Status</th><th>Registration</th><th>Capacity</th><th></th></tr></thead><tbody id="platEventBody"></tbody></table></div>
           </div>
 
           <div id="eventRegsPanel" class="admin-panel" hidden>
             <div class="admin-section-head"><div><h2>Event registrations & attendance</h2><p class="note">Mark attendance from real registrations only.</p></div></div>
-            <div class="admin-toolbar"><select id="regEventFilter"><option value="">All events</option></select></div>
+            <div class="admin-toolbar"><select id="regEventFilter"><option value="">All events</option></select><input type="search" id="eventRegSearch" placeholder="Search by participant name or email" aria-label="Search registrations" /></div>
             <div class="table-wrap"><table class="data"><thead><tr><th>Event</th><th>Name</th><th>Email</th><th>Status</th><th></th></tr></thead><tbody id="eventRegBody"></tbody></table></div>
             <p id="eventRegNote" class="form-status"></p>
           </div>
@@ -3209,6 +3228,7 @@ html.dark .rc-actions button { background:#fff; color:#0e2c27; }
               <label class="field-full"><span>Attach signed file (optional PDF/scan)</span><input name="file" type="file" accept=".pdf,image/*" /></label>
               <div class="form-actions"><button class="btn btn-primary" type="submit">Save</button><p id="issueDocNote" class="form-status"></p></div>
             </form>
+            <div class="admin-toolbar"><input type="search" id="docCenterSearch" placeholder="Search documents" aria-label="Search documents" /></div>
             <div class="table-wrap"><table class="data"><thead><tr><th>Doc #</th><th>Recipient</th><th>Category</th><th>Status</th><th>Verify</th><th></th></tr></thead><tbody id="issuedDocBody"></tbody></table></div>
           </div>
           <div id="identityVerifyPanel" class="admin-panel" hidden>
@@ -3416,41 +3436,48 @@ html.dark .rc-actions button { background:#fff; color:#0e2c27; }
           </div>
         </section>
 
+        <section class="portal-section" id="academyOverviewSection">
+          <p class="kicker">Academy overview</p>
+          <p class="note">Your enrolled courses, progress, attendance, quizzes, certificates and notifications, in one place.</p>
+        </section>
+
+        <section class="portal-section" aria-labelledby="myCoursesHeading">
+          <h2 id="myCoursesHeading">My courses <span id="myCoursesCount" class="note" role="status" aria-live="polite"></span></h2>
+          <div id="myCourses" class="learning-grid"></div>
+        </section>
+
+        <section class="portal-section" aria-labelledby="myAttendanceHeading">
+          <h2 id="myAttendanceHeading">Attendance</h2>
+          <p id="myAttendanceSummary" class="note" role="status" aria-live="polite"></p>
+          <div id="myCourseAttendance"></div>
+        </section>
+
+        <section class="portal-section" aria-labelledby="myQuizzesHeading">
+          <h2 id="myQuizzesHeading">Quizzes <span id="myQuizResultsCount" class="note" role="status" aria-live="polite"></span></h2>
+          <p class="note"><a href="/pages/quizzes.html">Browse available practice quizzes</a></p>
+          <div id="myQuizResults"></div>
+        </section>
+
+        <section class="portal-section" aria-labelledby="myCertificatesHeading">
+          <h2 id="myCertificatesHeading">Certificates <span id="myCertificatesCount" class="note" role="status" aria-live="polite"></span></h2>
+          <p class="note">Only certificates issued by staff after you are active and enrolled.</p>
+          <div id="myCertificates" class="learning-grid"></div>
+        </section>
+
+        <section class="portal-section" aria-labelledby="myNotificationsHeading">
+          <h2 id="myNotificationsHeading">Notifications</h2>
+          <p id="myNotificationsSummary" class="note" role="status" aria-live="polite"></p>
+          <div id="myNotifications"></div>
+        </section>
+
         <section class="portal-section" id="stuAffiliationSection">
           <h2>My Chapter &amp; Society</h2>
           <div id="stuAffiliationBox"><p class="empty">No Chapter or Society requests yet.</p></div>
         </section>
 
         <section class="portal-section">
-          <h2>Notifications</h2>
-          <div id="myNotifications"></div>
-        </section>
-
-        <section class="portal-section">
-          <h2>Certificates <span id="myCertificatesCount" class="note"></span></h2>
-          <p class="note">Only certificates issued by staff after you are active and enrolled.</p>
-          <div id="myCertificates" class="learning-grid"></div>
-        </section>
-
-        <section class="portal-section">
           <h2>Documents</h2>
           <div id="myStudentDocs"></div>
-        </section>
-
-        <section class="portal-section">
-          <h2>Courses <span id="myCoursesCount" class="note"></span></h2>
-          <div id="myCourses" class="learning-grid"></div>
-        </section>
-
-        <section class="portal-section">
-          <h2>Attendance</h2>
-          <p id="myAttendanceSummary" class="note"></p>
-          <div id="myCourseAttendance"></div>
-        </section>
-
-        <section class="portal-section">
-          <h2>Quizzes <span id="myQuizResultsCount" class="note"></span></h2>
-          <div id="myQuizResults"></div>
         </section>
 
         <section class="portal-section">
@@ -3991,6 +4018,16 @@ window.RAMDANI_PAGES = {
         <div id="homePractice" class="grid"></div>
       </div>
     </section>
+    <section class="section insights-band">
+      <div class="wrap">
+        <p class="kicker" data-i18n="insights_kicker"></p>
+        <h2 data-i18n="insights_title"></h2>
+        <p class="lead" data-i18n="insights_lead"></p>
+        <div id="homeInsights" class="grid insights-grid"></div>
+        <p id="homeInsightsStatus" class="note" role="status" aria-live="polite"></p>
+        <div class="hero-actions"><a class="btn" href="/pages/insights.html" data-i18n="insights_view_all"></a></div>
+      </div>
+    </section>
     <section class="section home-final-cta">
       <div class="wrap">
         <h2 data-i18n="cta_consult"></h2>
@@ -4004,6 +4041,23 @@ window.RAMDANI_PAGES = {
 if (window.ramdaniEducation) ramdaniEducation.renderHome();
       var rows = await ramdaniApi.listPublished('practice_areas', 'sort_order');
       ramdaniUi.renderList(document.getElementById('homePractice'), rows, 'practice_empty', function (r) { return '/pages/practice-areas.html'; });
+      (function () {
+        var homeInsightsEl = document.getElementById('homeInsights');
+        var homeInsightsStatus = document.getElementById('homeInsightsStatus');
+        if (!homeInsightsEl) return;
+        if (window.ramdaniUi) ramdaniUi.showSkeleton(homeInsightsEl, 'card', { count: 3, height: '140px' });
+        ramdaniApi.listPublished('articles', null).then(function (articleRows) {
+          if (window.ramdaniUi) ramdaniUi.hideSkeleton(homeInsightsEl);
+          var latest = (articleRows || []).slice(0, 3);
+          if (!latest.length) {
+            homeInsightsEl.innerHTML = '';
+            homeInsightsStatus.textContent = ramdaniUi.t('insights_empty', 'Published articles will appear here.');
+            return;
+          }
+          homeInsightsStatus.textContent = '';
+          ramdaniUi.renderArticles(homeInsightsEl, latest, 'insights_empty');
+        });
+      })();
       try {
         if (window.sb) {
           var heroRes = await sb.from('homepage_sections').select('image_url').eq('section_key', 'hero').eq('is_enabled', true).maybeSingle();
@@ -4253,6 +4307,16 @@ bodyEl.innerHTML = row.body ? ramdaniUi.nl2p(row.body) : ramdaniUi.empty('insigh
 if (window.ramdaniSeo) {
   ramdaniSeo.setTitle((row.title || 'Article') + ' \u2014 Ramdani Law Firm');
   ramdaniSeo.setDescription((row.summary || 'Published article. Not legal advice.').slice(0, 160));
+  ramdaniSeo.setCanonical(ramdaniSeo.origin + '/pages/article.html?slug=' + encodeURIComponent(slug));
+  ramdaniSeo.injectJSONLD('schema-article', {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: row.title || 'Article',
+    description: (row.summary || '').slice(0, 300),
+    datePublished: row.published_at || row.created_at,
+    inLanguage: 'en',
+    isPartOf: { '@id': ramdaniSeo.origin + '/#organization' }
+  });
 }
   } },
   '/pages/events.html': { title: 'Events & Programs — Ramdani Law Firm', desc: 'Events & Programs — Ramdani Law Firm. Public information, Dera Ghazi Khan, Pakistan.', html: `<section class="section events-hero"><div class="wrap">
@@ -4757,7 +4821,7 @@ if (window.ramdaniEducation) ramdaniEducation.renderStatutes();
         <button class="btn btn-primary" type="submit">Verify</button>
         <p class="form-status" id="verifyCertStatus"></p>
       </form>
-      <div id="verifyCertResult" class="card" hidden></div>
+      <div id="verifyCertResult" class="card" role="status" aria-live="polite" hidden></div>
     </div></section>`, init: async function () {
       var form = document.getElementById('verifyCertForm');
       var status = document.getElementById('verifyCertStatus');
@@ -5285,7 +5349,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
               var evId = b.getAttribute('data-mem-register');
               var noteEl = document.getElementById('memEventNote');
               var res = await sb.rpc('register_for_event', { p_event_id: evId, p_profile_id: p.id, p_full_name: m.full_name || '', p_email: p.email || '' });
-              if (res.error) { if (noteEl) noteEl.textContent = res.error.message; return; }
+              if (res.error) { if (window.console) console.error('register_for_event failed', res.error); if (noteEl) noteEl.textContent = 'We couldn\'t complete your registration. Please try again.'; return; }
               if (noteEl) noteEl.textContent = res.data && res.data.status === 'waitlisted' ? 'Event is full — you have been waitlisted.' : 'Registered.';
               await bootMemberPortal(path);
             });
@@ -5977,8 +6041,10 @@ window.RAMDANI_CONFIG = {
   // Populates any <select data-listing="chapter"|"society"> under `root` from the real,
   // published Chapters/Societies tables (never hard-coded). If both a society_slug select and a
   // chapter_slug select are present, choosing a Society filters the Chapter options to that
-  // society (chapters.society_id -> societies.id in the schema); Chapter stays optional and
-  // unfiltered until a Society is chosen. Safe to call on any form; no-ops if neither is present.
+  // society (societies.chapter_id -> chapters.id in the schema, authoritative as of 27F-3A —
+  // a Chapter may have several Societies, so the relationship is read off the Society, never
+  // off the Chapter). Chapter stays optional and unfiltered until a Society with an assigned
+  // Chapter is chosen. Safe to call on any form; no-ops if neither is present.
   window.ramdaniLoadListingSelects = async function (root) {
     if (!root) return;
     var socSel = root.querySelector('select[data-listing="society"]');
@@ -5987,11 +6053,11 @@ window.RAMDANI_CONFIG = {
     var societies = [], chapters = [];
     try {
       if (socSel) {
-        var sr = await window.sb.from('societies').select('id, slug, title').eq('status', 'published').order('title');
+        var sr = await window.sb.from('societies').select('id, slug, title, chapter_id').eq('status', 'published').order('title');
         societies = sr.data || [];
       }
       if (chSel) {
-        var cr = await window.sb.from('chapters').select('id, slug, title, society_id').eq('status', 'published').order('title');
+        var cr = await window.sb.from('chapters').select('id, slug, title').eq('status', 'published').order('title');
         chapters = cr.data || [];
       }
     } catch (e) { return; }
@@ -6001,18 +6067,29 @@ window.RAMDANI_CONFIG = {
         return '<option value="' + esc(s.slug) + '">' + esc(s.title) + '</option>';
       }).join('');
     }
-    function fillChapter(societyId) {
-      var list = societyId ? chapters.filter(function (c) { return c.society_id === societyId; }) : chapters;
-      chSel.innerHTML = '<option value="">Select Chapter</option>' + list.map(function (c) {
+    // The Chapter list is always the full published set (Chapter selection remains
+    // independently optional); a Society's own chapter_id is used only to pre-select the
+    // Chapter it authoritatively belongs to, never to filter the list down or fabricate a value.
+    function fillChapter() {
+      chSel.innerHTML = '<option value="">Select Chapter</option>' + chapters.map(function (c) {
         return '<option value="' + esc(c.slug) + '">' + esc(c.title) + '</option>';
       }).join('');
     }
+    function applySocietyChapter(society) {
+      if (!chSel) return;
+      if (society && society.chapter_id) {
+        var match = chapters.find(function (c) { return c.id === society.chapter_id; });
+        chSel.value = match ? match.slug : '';
+      }
+      // society.chapter_id is null/absent: leave the existing Chapter selection untouched
+      // rather than clearing or inventing one.
+    }
     if (socSel) fillSociety();
-    if (chSel) fillChapter(null);
+    if (chSel) fillChapter();
     if (socSel && chSel) {
       socSel.addEventListener('change', function () {
         var chosen = societies.find(function (s) { return s.slug === socSel.value; });
-        fillChapter(chosen ? chosen.id : null);
+        applySocietyChapter(chosen);
       });
     }
   };
@@ -6470,6 +6547,7 @@ window.ramdaniSite = Object.freeze({
       insights_lead: 'Articles published by authorised staff. Not legal advice.',
       insights_note: 'Only staff-published articles appear here. Unpublished drafts stay hidden.',
       insights_read: 'Read article',
+      insights_view_all: 'View all articles',
       article_missing: 'This article is not published.',
       gallery_title: 'Gallery',
       gallery_kicker: 'The chamber',
@@ -6654,6 +6732,7 @@ window.ramdaniSite = Object.freeze({
       insights_lead: '\u0645\u062c\u0627\u0632 \u0639\u0645\u0644\u06c1 \u06a9\u06cc \u0634\u0627\u0626\u0639 \u06a9\u0631\u062f\u06c1 \u062a\u062d\u0631\u06cc\u0631\u06cc\u06ba\u06d4 \u0642\u0627\u0646\u0648\u0646\u06cc \u0645\u0634\u0648\u0631\u06c1 \u0646\u06c1\u06cc\u06ba\u06d4',
       insights_note: '\u06cc\u06c1\u0627\u06ba \u0635\u0631\u0641 \u0634\u0627\u0626\u0639 \u0634\u062f\u06c1 \u0645\u0636\u0627\u0645\u06cc\u0646 \u0646\u0638\u0631 \u0622\u062a\u06d2 \u06c1\u06cc\u06ba\u06d4 \u063a\u06cc\u0631 \u0634\u0627\u0626\u0639 \u0645\u0633\u0648\u062f\u06d2 \u067e\u0648\u0634\u06cc\u062f\u06c1 \u0631\u06c1\u062a\u06d2 \u06c1\u06cc\u06ba\u06d4',
       insights_read: '\u0645\u0636\u0645\u0648\u0646 \u067e\u0691\u06be\u06cc\u06ba',
+      insights_view_all: '\u062a\u0645\u0627\u0645 \u0645\u0636\u0627\u0645\u06cc\u0646 \u062f\u06cc\u06a9\u06be\u06cc\u06ba',
       article_missing: '\u06cc\u06c1 \u0645\u0636\u0645\u0648\u0646 \u0634\u0627\u0626\u0639 \u0646\u06c1\u06cc\u06ba\u06d4',
       gallery_title: '\u06af\u06cc\u0644\u0631\u06cc',
       gallery_kicker: '\u0686\u06cc\u0645\u0628\u0631',
@@ -8143,6 +8222,7 @@ window.ramdaniAuth = {
 
   // ---- Phase 3: enrollment, lesson progress, learning dashboard ----
   function esc(v) { var d = document.createElement('div'); d.textContent = v == null ? '' : String(v); return d.innerHTML; }
+  function fmtLearningDate(v) { if (!v) return ''; var d = new Date(v); return isNaN(d.getTime()) ? String(v) : d.toLocaleDateString('en-PK'); }
   async function learnSession() { return window.ramdaniAuth ? ramdaniAuth.session() : null; }
 
   window.ramdaniStudent = {
@@ -8222,16 +8302,17 @@ window.ramdaniAuth = {
         if (attSummaryEl) attSummaryEl.textContent = '';
         if (window.showToast) showToast('Unable to load attendance.', 'error');
       } else if (!attRes.data || !attRes.data.length) {
-        attEl.innerHTML = '<p class="empty">No attendance recorded yet.</p>';
+        attEl.innerHTML = '<p class="empty">No attendance records yet.</p>';
         if (attSummaryEl) attSummaryEl.textContent = '';
       } else {
         var presentCount = attRes.data.filter(function (a) { return a.present; }).length;
         var absentCount = attRes.data.length - presentCount;
-        if (attSummaryEl) attSummaryEl.textContent = 'Most recent ' + attRes.data.length + ' session(s): ' + presentCount + ' present, ' + absentCount + ' absent.';
+        if (attSummaryEl) attSummaryEl.textContent = 'Total records: ' + attRes.data.length + ' · Present: ' + presentCount + ' · Absent: ' + absentCount + ' (most recent ' + attRes.data.length + ' session(s) shown).';
         attEl.innerHTML = '<div class="table-wrap"><table class="learning-table"><thead><tr><th>Course</th><th>Date</th><th>Status</th></tr></thead><tbody>' +
           attRes.data.map(function (a) {
             var mod = a.modules || {};
-            return '<tr><td>' + esc(mod.title || '') + '</td><td>' + esc(a.session_date || '') + '</td><td><span class="status-badge status-' + (a.present ? 'present' : 'absent') + '">' + (a.present ? 'Present' : 'Absent') + '</span></td></tr>';
+            var dateLabel = fmtLearningDate(a.session_date) || '—';
+            return '<tr><td>' + esc(mod.title || '—') + '</td><td>' + esc(dateLabel) + '</td><td><span class="status-badge status-' + (a.present ? 'present' : 'absent') + '">' + (a.present ? 'Present' : 'Absent') + '</span></td></tr>';
           }).join('') + '</tbody></table></div>';
       }
     }
@@ -8241,17 +8322,25 @@ window.ramdaniAuth = {
       if (window.ramdaniUi) ramdaniUi.showSkeleton(notifEl, 'line', { count: 3 });
       var notifRes = await sb.from('notifications').select('*').eq('user_id', uid).order('created_at', { ascending: false }).limit(20);
       if (window.ramdaniUi) ramdaniUi.hideSkeleton(notifEl);
+      var notifSummaryEl = document.getElementById('myNotificationsSummary');
       if (notifRes.error) {
         if (window.console) console.error('renderLearning: load notifications failed', notifRes.error);
         notifEl.innerHTML = '<p class="empty">Unable to load notifications.<br />Please try again.</p>';
+        if (notifSummaryEl) notifSummaryEl.textContent = '';
         if (window.showToast) showToast('Unable to load notifications.', 'error');
       } else if (!notifRes.data || !notifRes.data.length) {
         notifEl.innerHTML = '<p class="empty">No notifications yet.</p>';
+        if (notifSummaryEl) notifSummaryEl.textContent = '';
       } else {
+        var unreadCountForSummary = notifRes.data.filter(function (n) { return !n.read_at; }).length;
+        if (notifSummaryEl) notifSummaryEl.textContent = unreadCountForSummary + (unreadCountForSummary === 1 ? ' unread notification' : ' unread notifications') + ' (' + notifRes.data.length + ' total shown).';
         notifEl.innerHTML = notifRes.data.map(function (n) {
-          return '<article class="card"' + (n.read_at ? '' : ' style="border-left:3px solid var(--brass)"') + '><h3>' + esc(n.title) + '</h3>' +
+          var unread = !n.read_at;
+          var dateLabel = fmtLearningDate(n.created_at) || '—';
+          return '<article class="card"' + (unread ? ' style="border-left:3px solid var(--brass)"' : '') + '>' +
+            '<h3>' + (unread ? '<span class="status-badge status-draft" aria-hidden="true">New</span> ' : '') + esc(n.title) + (unread ? '<span class="sr-only"> (unread)</span>' : '<span class="sr-only"> (read)</span>') + '</h3>' +
             (n.message ? '<p class="note">' + esc(n.message) + '</p>' : '') +
-            '<p class="note">' + esc(n.created_at || '') + '</p></article>';
+            '<p class="note">' + esc(dateLabel) + '</p></article>';
         }).join('');
         var unreadIds = notifRes.data.filter(function (n) { return !n.read_at; }).map(function (n) { return n.id; });
         if (unreadIds.length) {
@@ -8297,10 +8386,6 @@ window.ramdaniAuth = {
         certEl.innerHTML = '<p class="empty">Unable to load certificates.<br />Please try again.</p>';
         if (certCountEl) certCountEl.textContent = '';
         if (window.showToast) showToast('Unable to load certificates.', 'error');
-      } else if (!certs.length) {
-        if (window.ramdaniUi) ramdaniUi.hideSkeleton(certEl);
-        certEl.innerHTML = '<p class="empty">No certificates issued yet. Complete a course\'s required lessons and quiz to become eligible; staff then issue the certificate.</p>';
-        if (certCountEl) certCountEl.textContent = '';
       } else {
         var ids = certs.map(function (c) { return c.module_id; }).filter(Boolean);
         var titles = {};
@@ -8318,14 +8403,41 @@ window.ramdaniAuth = {
           var label = c.recipient_type === 'event_attendee'
             ? (eventTitles[c.event_id] || 'Event Certificate')
             : (titles[c.module_id] || 'Certificate');
-          return '<article class="card"><h3>' + esc(label) + '</h3>' +
-            '<p class="note">No. ' + esc(c.certificate_number) + ' · Issued ' + esc(c.issue_date || '') + '</p>' +
-            '<p class="note">Verification code: ' + esc(c.verification_code) + '</p>' +
-            '<p class="note"><a href="/pages/verify-certificate.html?code=' + encodeURIComponent(c.verification_code || '') + '">Verify</a></p></article>';
+          var issuedLabel = fmtLearningDate(c.issue_date) || '—';
+          return '<article class="card"><p class="kicker">Certificate issued</p><h3>' + esc(label) + '</h3>' +
+            '<p class="note">No. ' + esc(c.certificate_number) + ' · Issued ' + esc(issuedLabel) + '</p>' +
+            (c.verification_code ? '<p class="note">Verification code: ' + esc(c.verification_code) + '</p>' +
+              '<p class="note"><a href="/pages/verify-certificate.html?code=' + encodeURIComponent(c.verification_code) + '">Verify certificate</a></p>' : '') +
+            '</article>';
         }).join('');
+
+        // A course a student is enrolled in but for which no certificate has
+        // been issued yet is shown as a distinct, honest state below the
+        // issued ones — reusing the enrollment/completion data already
+        // fetched above rather than issuing another query.
+        var certifiedModuleIds = {};
+        certs.forEach(function (c) { if (c.module_id) certifiedModuleIds[c.module_id] = true; });
+        var pendingHtml = '';
+        if (typeof enrollments !== 'undefined' && enrollments.length) {
+          pendingHtml = enrollments.filter(function (e) { return e.module_id && !certifiedModuleIds[e.module_id]; }).map(function (e) {
+            var title = (e.modules || {}).title || 'Course';
+            var comp = (typeof completions !== 'undefined' ? completions[e.module_id] : null);
+            var statusText = comp && comp.is_eligible_for_certificate
+              ? 'Course completed. Your certificate has not been issued yet.'
+              : 'Complete the course to become eligible for a certificate.';
+            return '<article class="card"><p class="kicker">Certificate pending</p><h3>' + esc(title) + '</h3><p class="note">' + esc(statusText) + '</p></article>';
+          }).join('');
+        }
+
         if (window.ramdaniUi) ramdaniUi.hideSkeleton(certEl);
-        certEl.innerHTML = certHtml;
-        if (certCountEl) certCountEl.textContent = '(' + certs.length + ')';
+        var combinedHtml = certHtml + pendingHtml;
+        if (!combinedHtml) {
+          certEl.innerHTML = '<p class="empty">No certificates yet. Complete a course\'s required lessons and quiz to become eligible; staff then issue the certificate.</p>';
+          if (certCountEl) certCountEl.textContent = '';
+        } else {
+          certEl.innerHTML = combinedHtml;
+          if (certCountEl) certCountEl.textContent = certs.length ? '(' + certs.length + ')' : '';
+        }
       }
     }
     var cardEl = document.getElementById('myStudentCard');
@@ -8382,7 +8494,7 @@ window.ramdaniAuth = {
           var evId = b.getAttribute('data-student-register');
           var noteEl = document.getElementById('myStudentEventNote');
           var res = await sb.rpc('register_for_event', { p_event_id: evId, p_profile_id: uid, p_full_name: profile.full_name || '', p_email: profile.email || '' });
-          if (res.error) { if (noteEl) noteEl.textContent = res.error.message; return; }
+          if (res.error) { if (window.console) console.error('register_for_event failed', res.error); if (noteEl) noteEl.textContent = 'We couldn\'t complete your registration. Please try again.'; return; }
           if (noteEl) noteEl.textContent = res.data && res.data.status === 'waitlisted' ? 'Event is full — you have been waitlisted.' : 'Registered.';
           await window.ramdaniStudentBoot('/student/dashboard');
         });
@@ -9599,8 +9711,10 @@ window.ramdaniAuth = {
   async function renderEnrollmentAndLessons(m, preview) {
     var box = document.getElementById('modLearning');
     if (!box || !window.ramdaniStudent) return;
+    if (window.ramdaniUi) ramdaniUi.showSkeleton(box, 'card', { count: 2, height: '90px' });
     var session = await ramdaniStudent.session();
     if (!session) {
+      if (window.ramdaniUi) ramdaniUi.hideSkeleton(box);
       box.innerHTML = '<div class="card academy-card"><p>Sign in as a student to enroll in this course and track your progress.</p>' +
         '<a class="btn btn-primary" href="/portal/login">Sign in</a></div>';
       return;
@@ -9609,46 +9723,150 @@ window.ramdaniAuth = {
     var secQ = sb.from('course_sections').select('*').eq('module_id', m.id);
     if (!preview) secQ = secQ.eq('status', 'published');
     var secRes = await secQ.order('sort_order');
-    var sections = secRes.data || [];
     var lesQ = sb.from('lessons').select('*').eq('module_id', m.id);
     if (!preview) lesQ = lesQ.eq('status', 'published');
     var lesRes = await lesQ.order('sort_order');
+    if (secRes.error || lesRes.error) {
+      if (window.ramdaniUi) ramdaniUi.hideSkeleton(box);
+      if (window.console) console.error('renderEnrollmentAndLessons: load course content failed', secRes.error || lesRes.error);
+      box.innerHTML = '<p class="empty">We couldn\'t load this course\'s content right now. Please try again.</p>';
+      if (window.showToast) showToast('Unable to load course content.', 'error');
+      return;
+    }
+    var sections = secRes.data || [];
     var lessons = lesRes.data || [];
     var progRes = await sb.from('lesson_progress').select('lesson_id, is_completed').eq('student_id', session.user.id).eq('module_id', m.id);
+    if (window.ramdaniUi) ramdaniUi.hideSkeleton(box);
+    if (progRes.error && window.console) console.error('renderEnrollmentAndLessons: load progress failed', progRes.error);
     var doneMap = {};
     (progRes.data || []).forEach(function (r) { doneMap[r.lesson_id] = r.is_completed; });
+
+    // Flat, ordered lesson sequence (section order, then lesson order within
+    // each section) used for Previous/Next lesson navigation.
+    var flat = [];
+    sections.forEach(function (sec) {
+      lessons.filter(function (l) { return l.section_id === sec.id; }).forEach(function (l) { flat.push({ lesson: l, section: sec }); });
+    });
 
     var html = '';
     if (!enr) {
       html += '<div class="card academy-card"><p>You are not enrolled in this course yet.</p><button type="button" class="btn btn-primary" id="enrollBtn">Enroll now</button></div>';
     } else {
-      html += '<p class="academy-status">Enrollment status: <span class="academy-badge">' + escape(enr.status) + '</span></p>';
+      html += '<p class="academy-status">Enrollment status: <span class="academy-badge">' + escape(enr.status) + '</span> · <a href="/student/dashboard">← Back to Academy</a></p>';
       if (!sections.length) {
-        html += '<p class="empty">No lessons published yet for this course.</p>';
+        html += '<p class="empty">No course sections are available yet.</p>';
       } else {
-        sections.forEach(function (sec) {
+        html += sections.map(function (sec, si) {
           var secLessons = lessons.filter(function (l) { return l.section_id === sec.id; });
-          html += '<section class="academy-section"><h3>' + escape(sec.title) + '</h3><ul class="lesson-list">' + secLessons.map(function (l) {
-            var done = !!doneMap[l.id];
-            return '<li><label><input type="checkbox" data-lesson="' + l.id + '"' + (done ? ' checked' : '') + ' /><span>' + escape(l.title) + '</span></label></li>';
-          }).join('') + '</ul></section>';
-        });
+          var secBodyId = 'secBody-' + sec.id;
+          return '<section class="academy-section card"><h3 class="section-head">' +
+            '<button type="button" class="section-toggle" data-sec-toggle="' + sec.id + '" aria-expanded="' + (si === 0 ? 'true' : 'false') + '" aria-controls="' + secBodyId + '">' +
+            '<span aria-hidden="true" class="section-caret">' + (si === 0 ? '▾' : '▸') + '</span> ' + escape(sec.title) + '</button></h3>' +
+            '<div id="' + secBodyId + '" class="section-body"' + (si === 0 ? '' : ' hidden') + '>' +
+            (secLessons.length
+              ? '<ul class="lesson-list">' + secLessons.map(function (l) {
+                var done = !!doneMap[l.id];
+                return '<li class="lesson-row">' +
+                  '<label><input type="checkbox" class="lesson-check" data-lesson="' + l.id + '"' + (done ? ' checked' : '') + ' aria-label="Mark \'' + escape(l.title) + '\' complete" /><span>' + escape(l.title) + '</span></label>' +
+                  (l.estimated_minutes ? '<span class="note">' + escape(l.estimated_minutes) + ' min</span>' : '') +
+                  '<button type="button" class="btn btn-sm" data-lesson-open="' + l.id + '">Open lesson</button></li>';
+              }).join('') + '</ul>'
+              : '<p class="empty">No lessons are available in this section yet.</p>') +
+            '</div></section>';
+        }).join('');
       }
     }
+    html += '<div id="lessonDetail" role="region" aria-label="Lesson content" aria-live="polite" hidden></div>';
     box.innerHTML = html;
+
     var enrollBtn = document.getElementById('enrollBtn');
     if (enrollBtn) {
       enrollBtn.addEventListener('click', async function () {
         enrollBtn.disabled = true;
         var res = await ramdaniStudent.enroll(m.id);
-        if (res.error) { alert(res.error.message); enrollBtn.disabled = false; return; }
-        renderEnrollmentAndLessons(m);
+        if (res.error) {
+          if (window.console) console.error('enroll failed', res.error);
+          if (window.showToast) showToast('Unable to enroll in this course. Please try again.', 'error');
+          enrollBtn.disabled = false;
+          return;
+        }
+        if (window.showToast) showToast('Enrolled successfully.', 'success');
+        renderEnrollmentAndLessons(m, preview);
       });
     }
-    box.querySelectorAll('[data-lesson]').forEach(function (cb) {
+
+    box.querySelectorAll('[data-sec-toggle]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var body = document.getElementById('secBody-' + btn.getAttribute('data-sec-toggle'));
+        var expanded = btn.getAttribute('aria-expanded') === 'true';
+        btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+        var caret = btn.querySelector('.section-caret');
+        if (caret) caret.textContent = expanded ? '▸' : '▾';
+        if (body) body.hidden = expanded;
+      });
+    });
+
+    function bindLessonCheckbox(cb) {
       cb.addEventListener('change', async function () {
-        var res = await ramdaniStudent.toggleLessonComplete(cb.getAttribute('data-lesson'), m.id, cb.checked);
-        if (res && res.error) { alert(res.error.message); cb.checked = !cb.checked; }
+        var id = cb.getAttribute('data-lesson');
+        var checked = cb.checked;
+        var res = await ramdaniStudent.toggleLessonComplete(id, m.id, checked);
+        if (res && res.error) {
+          if (window.console) console.error('toggleLessonComplete failed', res.error);
+          if (window.showToast) showToast('Unable to update lesson progress. Please try again.', 'error');
+          cb.checked = !checked;
+          return;
+        }
+        doneMap[id] = checked;
+        // Keep every checkbox for this lesson (list + open detail view) in sync.
+        box.querySelectorAll('[data-lesson="' + id + '"]').forEach(function (other) { other.checked = checked; });
+      });
+    }
+    box.querySelectorAll('.lesson-check').forEach(bindLessonCheckbox);
+
+    function renderLessonDetail(idx) {
+      var entry = flat[idx];
+      var detailEl = document.getElementById('lessonDetail');
+      if (!detailEl || !entry) return;
+      var l = entry.lesson, sec = entry.section;
+      var done = !!doneMap[l.id];
+      var body = '';
+      if (l.description) body += '<p>' + escape(l.description) + '</p>';
+      if (l.content) body += '<div class="lesson-content">' + escape(l.content).split(/\n{2,}/).map(function (p) { return '<p>' + p.replace(/\n/g, '<br>') + '</p>'; }).join('') + '</div>';
+      if (Array.isArray(l.learning_objectives) && l.learning_objectives.length) {
+        body += '<h4>Learning objectives</h4><ul>' + l.learning_objectives.map(function (o) { return '<li>' + escape(o) + '</li>'; }).join('') + '</ul>';
+      }
+      var links = '';
+      if (l.video_url) links += '<p><a href="' + escape(l.video_url) + '" target="_blank" rel="noopener noreferrer">Watch video <span class="sr-only">(opens in a new tab)</span></a></p>';
+      if (l.resource_url) links += '<p><a href="' + escape(l.resource_url) + '" target="_blank" rel="noopener noreferrer">Download resource <span class="sr-only">(opens in a new tab)</span></a></p>';
+      if (l.external_url) links += '<p><a href="' + escape(l.external_url) + '" target="_blank" rel="noopener noreferrer">Open external link <span class="sr-only">(opens in a new tab)</span></a></p>';
+      if (!body && !links) body = '<p class="empty">No learning content is available for this lesson yet.</p>';
+      var prevEntry = flat[idx - 1], nextEntry = flat[idx + 1];
+      detailEl.innerHTML = '<div class="card academy-card lesson-detail-card">' +
+        '<p class="kicker">' + escape(sec.title) + '</p>' +
+        '<h3 tabindex="-1" id="lessonDetailTitle">' + escape(l.title) + '</h3>' +
+        (l.estimated_minutes ? '<p class="note">' + escape(l.estimated_minutes) + ' min</p>' : '') +
+        body + links +
+        '<label class="lesson-complete"><input type="checkbox" class="lesson-check" data-lesson="' + l.id + '"' + (done ? ' checked' : '') + ' /> Mark this lesson complete</label>' +
+        '<div class="lesson-nav">' +
+        (prevEntry ? '<button type="button" class="btn" data-lesson-nav="' + (idx - 1) + '" aria-label="Previous lesson: ' + escape(prevEntry.lesson.title) + '">← Previous lesson</button>' : '<button type="button" class="btn" disabled aria-label="No previous lesson">← Previous lesson</button>') +
+        (nextEntry ? '<button type="button" class="btn" data-lesson-nav="' + (idx + 1) + '" aria-label="Next lesson: ' + escape(nextEntry.lesson.title) + '">Next lesson →</button>' : '<button type="button" class="btn" disabled aria-label="No next lesson">Next lesson →</button>') +
+        '</div></div>';
+      detailEl.hidden = false;
+      detailEl.querySelectorAll('.lesson-check').forEach(bindLessonCheckbox);
+      detailEl.querySelectorAll('[data-lesson-nav]').forEach(function (btn) {
+        btn.addEventListener('click', function () { renderLessonDetail(Number(btn.getAttribute('data-lesson-nav'))); });
+      });
+      detailEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      var titleEl = document.getElementById('lessonDetailTitle');
+      if (titleEl) titleEl.focus();
+    }
+
+    box.querySelectorAll('[data-lesson-open]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.getAttribute('data-lesson-open');
+        var idx = flat.findIndex(function (x) { return x.lesson.id === id; });
+        if (idx !== -1) renderLessonDetail(idx);
       });
     });
   }
@@ -10589,6 +10807,8 @@ window.ramdaniAuth = {
       if (delBtn) { deleteCertIssuance(delBtn.getAttribute('data-delete-cert-issuance')); }
     });
     document.getElementById('markAllNotificationsReadBtn').addEventListener('click', markAllNotificationsRead);
+    document.getElementById('notificationsSearch').addEventListener('input', renderNotifications);
+    document.getElementById('notificationsFilter').addEventListener('change', renderNotifications);
     document.getElementById('auditLogSearch').addEventListener('input', renderAuditLog);
     document.getElementById('seoOverrideEntitySelect').addEventListener('change', function () { loadSeoOverrideRecords().then(loadSeoOverrideForRecord); });
     document.getElementById('seoOverrideRecordSelect').addEventListener('change', loadSeoOverrideForRecord);
@@ -10797,7 +11017,7 @@ window.ramdaniAuth = {
     });
     body.innerHTML = rows.map(function (r) {
       return '<tr><td>' + escapeHtml(r.full_name) + '</td><td>' + escapeHtml(r.email) + '</td><td>' + escapeHtml(STAFF_ROLE_LABELS[r.role] || r.role) + '</td><td>' + (r.is_active ? 'Active' : 'Inactive') + '</td><td><button type="button" class="btn" data-staff-toggle="' + escapeHtml(r.id) + '" data-active="' + (r.is_active ? '1' : '0') + '">' + (r.is_active ? 'Deactivate' : 'Activate') + '</button></td></tr>';
-    }).join('') || '<tr><td colspan="5">No staff or portal accounts yet.</td></tr>';
+    }).join('') || '<tr><td colspan="5">' + (allStaffAccounts.length ? 'No staff or portal accounts match your search.' : 'No staff or portal accounts yet.') + '</td></tr>';
   }
 
   async function loadRolesView() {
@@ -12559,14 +12779,38 @@ window.ramdaniAuth = {
     loadSeoOverridesList();
   }
 
+  var notificationsCache = [];
+
   async function loadNotifications() {
     var body = document.getElementById('notificationsBody');
     var res = await sb.from('admin_notifications').select('*').order('created_at', { ascending: false }).limit(100);
     if (res.error) {
       body.innerHTML = '<tr><td colspan="6">Could not load notifications — has the admin_notifications table been created yet? (' + escapeHtml(res.error.message) + ')</td></tr>';
+      var cnt = document.getElementById('notificationsCount'); if (cnt) cnt.textContent = '';
       return;
     }
-    var rows = res.data || [];
+    notificationsCache = res.data || [];
+    renderNotifications();
+  }
+
+  function renderNotifications() {
+    var body = document.getElementById('notificationsBody');
+    var searchEl = document.getElementById('notificationsSearch');
+    var filterEl = document.getElementById('notificationsFilter');
+    var q = (searchEl && searchEl.value || '').trim().toLowerCase();
+    var filt = filterEl ? filterEl.value : '';
+    var rows = notificationsCache.filter(function (r) {
+      if (filt === 'unread' && r.is_read) return false;
+      if (filt === 'read' && !r.is_read) return false;
+      if (q) {
+        var hay = [r.title, r.body, r.event_type].filter(Boolean).join(' ').toLowerCase();
+        if (hay.indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+    var unreadTotal = notificationsCache.filter(function (r) { return !r.is_read; }).length;
+    var cnt = document.getElementById('notificationsCount');
+    if (cnt) cnt.textContent = notificationsCache.length ? (unreadTotal + ' unread of ' + notificationsCache.length + ' shown') : '';
     body.innerHTML = rows.map(function (r) {
       var date = r.created_at ? new Date(r.created_at).toLocaleString() : '';
       return '<tr' + (r.is_read ? '' : ' style="font-weight:600"') + '><td>' + escapeHtml(r.event_type) + '</td><td>' +
@@ -12574,7 +12818,7 @@ window.ramdaniAuth = {
         (r.is_read ? 'Read' : 'Unread') + '</td><td>' +
         (r.is_read ? '' : '<button type="button" class="btn" data-mark-read="' + r.id + '">Mark read</button> ') +
         '<button type="button" class="btn" data-delete-notification="' + r.id + '">Delete</button></td></tr>';
-    }).join('') || '<tr><td colspan="6">No notifications.</td></tr>';
+    }).join('') || '<tr><td colspan="6">' + (notificationsCache.length ? 'No notifications match your search or filter.' : 'No notifications.') + '</td></tr>';
   }
 
   async function markNotificationRead(id) {
@@ -12619,7 +12863,7 @@ window.ramdaniAuth = {
       var staff = r.profiles ? (r.profiles.full_name || r.profiles.email || '') : '(unknown)';
       return '<tr><td>' + escapeHtml(when) + '</td><td>' + escapeHtml(staff) + '</td><td>' + escapeHtml(r.action) +
         '</td><td>' + escapeHtml(r.entity || '') + '</td><td>' + escapeHtml(r.entity_id || '') + '</td></tr>';
-    }).join('') || '<tr><td colspan="5">No audit events yet.</td></tr>';
+    }).join('') || '<tr><td colspan="5">' + (auditLogCache.length ? 'No audit events match your search.' : 'No audit events yet.') + '</td></tr>';
   }
 
   var currentRows = [];
@@ -14556,8 +14800,8 @@ window.ramdaniAuth = {
 
   async function loadPlatLookups() {
     var res = await Promise.all([
-      sb.from('societies').select('id, title').order('title'),
-      sb.from('chapters').select('id, title, society_id').order('title'),
+      sb.from('societies').select('id, title, chapter_id').order('title'),
+      sb.from('chapters').select('id, title').order('title'),
       sb.from('cabinets').select('id, title').order('title'),
       sb.from('members').select('id, member_number, full_name, status').order('full_name'),
       sb.from('events').select('id, title, starts_at, status').order('starts_at', { ascending: false }),
@@ -14816,7 +15060,7 @@ window.ramdaniAuth = {
       }
       var expiring = membershipIsExpiringSoon(m);
       return '<tr><td>' + escapeHtml(m.reference_id || '') + '</td><td>' + escapeHtml(mem ? mem.full_name : '') + '</td><td>' + escapeHtml(soc ? soc.title : '') + '</td><td>' + escapeHtml(m.membership_type || '') + '</td><td>' + escapeHtml(m.expiry_date || '') + (expiring ? ' <span class="status-badge status-draft">expiring</span>' : '') + '</td><td><span class="status-badge status-' + escapeHtml(m.status) + '">' + escapeHtml(m.status) + '</span></td><td><div class="table-actions">' + actions + '</div></td></tr>';
-    }).join('') || '<tr><td colspan="7">No memberships found.</td></tr>';
+    }).join('') || '<tr><td colspan="7">' + (platMemberships.length ? 'No memberships match your search or filter.' : 'No memberships found.') + '</td></tr>';
 
     document.querySelectorAll('[data-mship-edit]').forEach(function (btn) {
       btn.addEventListener('click', function () {
@@ -14934,6 +15178,14 @@ window.ramdaniAuth = {
       expiry_date: f.elements.expiry_date.value || null
     };
     if (!payload.member_id) return setNote('membershipNote', 'Member is required.');
+    // Chapter-only and Society-only remain valid; only reject when both are set AND the
+    // Society's own authoritative chapter_id disagrees with the selected Chapter.
+    if (payload.society_id && payload.chapter_id) {
+      var socRow = (platSocieties || []).find(function (s) { return s.id === payload.society_id; });
+      if (socRow && socRow.chapter_id && socRow.chapter_id !== payload.chapter_id) {
+        return setNote('membershipNote', 'This Society belongs to a different Chapter — please select the matching Chapter, or leave Chapter blank.');
+      }
+    }
     if (!platEditMembershipId) {
       // New memberships always start as an application — status/approval fields are never
       // set directly from this form; use the lifecycle action buttons instead.
@@ -15237,6 +15489,14 @@ window.ramdaniAuth = {
       bio: f.elements.bio.value.trim() || null
     };
     if (!payload.full_name) return setNote('memberNote', 'Name is required.');
+    // Chapter-only and Society-only remain valid; only reject when both are set AND the
+    // Society's own authoritative chapter_id disagrees with the selected Chapter.
+    if (payload.society_id && payload.chapter_id) {
+      var socRow2 = (platSocieties || []).find(function (s) { return s.id === payload.society_id; });
+      if (socRow2 && socRow2.chapter_id && socRow2.chapter_id !== payload.chapter_id) {
+        return setNote('memberNote', 'This Society belongs to a different Chapter — please select the matching Chapter, or leave Chapter blank.');
+      }
+    }
     if (payload.profile_id) {
       var dupQ = sb.from('members').select('id').eq('profile_id', payload.profile_id);
       var dup = await dupQ;
@@ -15455,9 +15715,34 @@ window.ramdaniAuth = {
     var res = await sb.from('events').select('*').order('starts_at', { ascending: false });
     if (res.error) { setNote('platEventNote', res.error.message); return; }
     platEvents = res.data || [];
-    $id('platEventBody').innerHTML = platEvents.map(function (ev) {
-      return '<tr><td>' + escapeHtml(ev.event_number || '') + '</td><td>' + escapeHtml(ev.title) + '</td><td>' + escapeHtml(fmtWhenPlat(ev.starts_at)) + '</td><td>' + escapeHtml(ev.event_type) + '</td><td>' + escapeHtml(ev.status) + '</td><td><button type="button" class="btn btn-sm" data-ev-edit="' + ev.id + '">Edit</button></td></tr>';
-    }).join('') || '<tr><td colspan="6">No events yet.</td></tr>';
+    // One batch query for registration counts across every loaded event,
+    // instead of one query per event row (avoids N+1).
+    var regCounts = {};
+    if (platEvents.length) {
+      var regCountRes = await sb.from('event_registrations').select('event_id');
+      (regCountRes.data || []).forEach(function (r) { regCounts[r.event_id] = (regCounts[r.event_id] || 0) + 1; });
+    }
+    paintPlatEvents(platEvents, regCounts);
+    var filterEl = $id('platEventSearch');
+    if (filterEl && !filterEl.dataset.bound) {
+      filterEl.dataset.bound = '1';
+      filterEl.addEventListener('input', function () {
+        var q = filterEl.value.trim().toLowerCase();
+        var shown = !q ? platEvents : platEvents.filter(function (ev) {
+          return String(ev.title || '').toLowerCase().indexOf(q) !== -1 || String(ev.venue || '').toLowerCase().indexOf(q) !== -1;
+        });
+        paintPlatEvents(shown, regCounts);
+      });
+    }
+  }
+  function paintPlatEvents(rows, regCounts) {
+    regCounts = regCounts || {};
+    $id('platEventBody').innerHTML = rows.map(function (ev) {
+      var registered = regCounts[ev.id] || 0;
+      var capacityLabel = ev.capacity ? (registered + ' / ' + ev.capacity + ' registered') : (registered ? (registered + ' registered') : '—');
+      var regState = ev.registration_open ? 'Open' : 'Closed';
+      return '<tr><td>' + escapeHtml(ev.event_number || '') + '</td><td>' + escapeHtml(ev.title) + '</td><td>' + escapeHtml(fmtWhenPlat(ev.starts_at)) + '</td><td>' + escapeHtml(ev.event_type) + '</td><td>' + escapeHtml(ev.status) + '</td><td>' + escapeHtml(regState) + '</td><td>' + escapeHtml(capacityLabel) + '</td><td><button type="button" class="btn btn-sm" data-ev-edit="' + ev.id + '">Edit</button></td></tr>';
+    }).join('') || '<tr><td colspan="8">No events found.</td></tr>';
   }
   function resetPlatEventForm() {
     platEditEventId = null;
@@ -15497,6 +15782,7 @@ window.ramdaniAuth = {
     await loadPlatEvents();
   }
 
+  var eventRegsCache = [];
   async function loadEventRegs() {
     await loadPlatLookups();
     var q = sb.from('event_registrations').select('*, events(title)').order('created_at', { ascending: false }).limit(200);
@@ -15504,11 +15790,26 @@ window.ramdaniAuth = {
     if (evId) q = q.eq('event_id', evId);
     var res = await q;
     if (res.error) { setNote('eventRegNote', res.error.message); return; }
-    $id('eventRegBody').innerHTML = (res.data || []).map(function (r) {
+    eventRegsCache = res.data || [];
+    paintEventRegs(eventRegsCache);
+    setNote('eventRegNote', '');
+    var searchEl = $id('eventRegSearch');
+    if (searchEl && !searchEl.dataset.bound) {
+      searchEl.dataset.bound = '1';
+      searchEl.addEventListener('input', function () {
+        var q2 = searchEl.value.trim().toLowerCase();
+        var shown = !q2 ? eventRegsCache : eventRegsCache.filter(function (r) {
+          return String(r.full_name || '').toLowerCase().indexOf(q2) !== -1 || String(r.email || '').toLowerCase().indexOf(q2) !== -1;
+        });
+        paintEventRegs(shown);
+      });
+    }
+  }
+  function paintEventRegs(rows) {
+    $id('eventRegBody').innerHTML = rows.map(function (r) {
       return '<tr><td>' + escapeHtml((r.events && r.events.title) || '') + '</td><td>' + escapeHtml(r.full_name) + '</td><td>' + escapeHtml(r.email) + '</td><td>' + escapeHtml(r.status) + '</td><td>' +
         (r.status === 'attended' ? '' : '<button type="button" class="btn btn-sm" data-reg-attend="' + r.id + '" data-event="' + r.event_id + '" data-profile="' + (r.profile_id || '') + '" data-name="' + escapeHtml(r.full_name) + '">Mark present</button>') + '</td></tr>';
-    }).join('') || '<tr><td colspan="5">No registrations.</td></tr>';
-    setNote('eventRegNote', '');
+    }).join('') || '<tr><td colspan="5">No registrations found.</td></tr>';
   }
 
   async function loadDocCenter() {
@@ -15527,16 +15828,40 @@ window.ramdaniAuth = {
     }).join('');
     sel.value = cur;
     var d = await sb.from('issued_documents').select('*').order('created_at', { ascending: false }).limit(50);
-    $id('issuedDocBody').innerHTML = (d.data || []).map(function (x) {
+    if (d.error) {
+      if (window.console) console.error('load issued documents failed', d.error);
+      $id('issuedDocBody').innerHTML = '<tr><td colspan="6">Unable to load documents. Please try again.</td></tr>';
+      docCenterCache = [];
+      return;
+    }
+    docCenterCache = d.data || [];
+    paintIssuedDocs(docCenterCache);
+    var docSearchEl = $id('docCenterSearch');
+    if (docSearchEl && !docSearchEl.dataset.bound) {
+      docSearchEl.dataset.bound = '1';
+      docSearchEl.addEventListener('input', function () {
+        var q3 = docSearchEl.value.trim().toLowerCase();
+        var shown = !q3 ? docCenterCache : docCenterCache.filter(function (x) {
+          return String(x.document_number || '').toLowerCase().indexOf(q3) !== -1 ||
+            String(x.recipient_name || '').toLowerCase().indexOf(q3) !== -1 ||
+            String(x.category || '').toLowerCase().indexOf(q3) !== -1 ||
+            String(x.verify_code || '').toLowerCase().indexOf(q3) !== -1;
+        });
+        paintIssuedDocs(shown);
+      });
+    }
+  }
+  function paintIssuedDocs(rows) {
+    $id('issuedDocBody').innerHTML = rows.map(function (x) {
       var actions = '';
       if (x.status === 'draft') actions += '<button type="button" class="btn btn-sm" data-doc-approve="' + x.id + '">Approve</button> ';
       if (x.status === 'approved') actions += '<button type="button" class="btn btn-sm" data-doc-issue="' + x.id + '">Issue</button> ';
       if (x.status === 'issued') actions += '<button type="button" class="btn btn-sm" data-doc-revoke="' + x.id + '">Revoke</button> ';
       if (x.body_rendered) actions += '<button type="button" class="btn btn-sm" data-doc-preview="' + x.id + '">Preview</button> ';
       if (x.storage_path) actions += '<button type="button" class="btn btn-sm" data-doc-file="' + x.id + '">Download</button> ';
-      return '<tr><td>' + escapeHtml(x.document_number || '') + '</td><td>' + escapeHtml(x.recipient_name) + '</td><td>' + escapeHtml(x.category) + '</td><td><span class="status-badge status-' + escapeHtml(x.status) + '">' + escapeHtml(x.status) + '</span></td><td><code>' + escapeHtml(x.verify_code || '') + '</code></td><td><div class="table-actions">' + actions + '</div></td></tr>';
-    }).join('') || '<tr><td colspan="6">No issued documents.</td></tr>';
-    docCenterCache = d.data || [];
+      var verifyState = x.verify_code ? ('<code>' + escapeHtml(x.verify_code) + '</code>') : '<span class="note">Not available</span>';
+      return '<tr><td>' + escapeHtml(x.document_number || '') + '</td><td>' + escapeHtml(x.recipient_name) + '</td><td>' + escapeHtml(x.category) + '</td><td><span class="status-badge status-' + escapeHtml(x.status) + '">' + escapeHtml(x.status) + '</span></td><td>' + verifyState + '</td><td><div class="table-actions">' + actions + '</div></td></tr>';
+    }).join('') || '<tr><td colspan="6">' + (docCenterCache.length ? 'No documents match your search.' : 'No documents have been issued yet.') + '</td></tr>';
   }
   var docCenterCache = [];
   async function previewIssuedDocument(id) {
@@ -15773,14 +16098,22 @@ window.ramdaniAuth = {
     $id('eventRegBody').addEventListener('click', async function (e) {
       var b = e.target.closest('[data-reg-attend]'); if (!b) return;
       var id = b.getAttribute('data-reg-attend');
-      await sb.from('event_registrations').update({ status: 'attended' }).eq('id', id);
-      await sb.from('event_attendance').insert({
+      b.disabled = true;
+      var upd = await sb.from('event_registrations').update({ status: 'attended' }).eq('id', id);
+      var att = upd.error ? upd : await sb.from('event_attendance').insert({
         event_id: b.getAttribute('data-event'),
         registration_id: id,
         profile_id: b.getAttribute('data-profile') || null,
         full_name: b.getAttribute('data-name') || null,
         present: true
       });
+      if (upd.error || att.error) {
+        if (window.console) console.error('mark attendance failed', upd.error || att.error);
+        setNote('eventRegNote', 'Could not update attendance. Please try again.');
+        b.disabled = false;
+        return;
+      }
+      setNote('eventRegNote', 'Attendance updated.', true);
       await loadEventRegs();
     });
     $id('docTplForm').addEventListener('submit', saveDocTpl);
