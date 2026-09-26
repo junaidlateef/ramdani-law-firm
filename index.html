@@ -10728,7 +10728,11 @@ window.ramdaniAuth = {
     if (staffSearch) staffSearch.addEventListener('input', function () { paintStaffAccounts(this.value); });
     var rolesRefresh = document.getElementById('rolesRefreshBtn');
     if (rolesRefresh) rolesRefresh.addEventListener('click', loadRolesView);
-    document.getElementById('cancelEditBtn').addEventListener('click', resetEditor);
+    document.getElementById('cancelEditBtn').addEventListener('click', function () {
+      var t = document.getElementById('createForm').dataset.table;
+      if (t) delete tableDrafts[t];
+      resetEditor();
+    });
     document.getElementById('previewContentBtn').addEventListener('click', function(){
       var form=document.getElementById('createForm');
       var slugEl=form.querySelector('[name="slug"]');
@@ -12881,6 +12885,39 @@ window.ramdaniAuth = {
 
   var currentRows = [];
   var editingId = null;
+  // In-memory per-table drafts for the shared #createForm (generic TABLES engine).
+  // Switching the admin sidebar view (Organization -> Chapter -> Society, or a plain
+  // Refresh click) re-invokes loadTable(), which previously called resetEditor()
+  // unconditionally and wiped whatever the admin was mid-typing. These drafts let
+  // navigation preserve unsaved values; only explicit Cancel or a successful Save
+  // clears a table's draft. Nothing here is persisted to Supabase — a draft only
+  // becomes a real row when the user clicks Save.
+  var tableDrafts = {};
+  var currentFormTable = null;
+  function snapshotFormDraft(table) {
+    if (!table) return;
+    var form = document.getElementById('createForm');
+    var values = {};
+    Array.prototype.forEach.call(form.elements, function (el) {
+      if (!el.name || el.type === 'submit' || el.type === 'file') return;
+      values[el.name] = el.value;
+    });
+    tableDrafts[table] = { editingId: editingId, values: values };
+  }
+  function restoreFormDraft(table) {
+    var draft = tableDrafts[table];
+    if (!draft) return false;
+    var form = document.getElementById('createForm');
+    Object.keys(draft.values).forEach(function (k) {
+      var el = form.elements[k];
+      if (el && !el.hidden && el.closest('label') && !el.closest('label').hidden) el.value = draft.values[k];
+    });
+    editingId = draft.editingId;
+    document.getElementById('saveBtn').textContent = editingId ? 'Update' : 'Save';
+    document.getElementById('cancelEditBtn').hidden = false;
+    document.getElementById('saveNote').textContent = editingId ? 'Editing selected record (restored).' : 'Unsaved draft restored.';
+    return true;
+  }
 
   // ---- Phase 3: Course builder, enrollments & progress, education stats ----
   var certPrefill = null;
@@ -16751,8 +16788,11 @@ window.ramdaniAuth = {
 
   async function loadTable(name) {
     var meta = TABLES.find(function(t){return t.id===name;}); if(!meta) return;
+    var switchingTable = currentFormTable !== name;
+    if (switchingTable && currentFormTable) snapshotFormDraft(currentFormTable);
     var form=document.getElementById('createForm'); form.dataset.table=name; configureForm(name);
-    resetEditor();
+    if (switchingTable) { if (!restoreFormDraft(name)) resetEditor(); }
+    currentFormTable = name;
     if (name === 'societies') {
       if (!platOrganizations.length) { var or = await sb.from('organizations').select('*').order('name'); platOrganizations = or.data || []; }
       if (!platChapters.length) { var chr = await sb.from('chapters').select('id, title').order('title'); platChapters = chr.data || []; }
@@ -16888,7 +16928,7 @@ window.ramdaniAuth = {
       note.className='form-status ok';
       note.textContent=editingId?'Updated successfully.':'Saved successfully.';
       if (window.showToast) showToast(editingId?'Record updated successfully.':'Record saved successfully.', 'success');
-      resetEditor();loadTable(table);
+      resetEditor();delete tableDrafts[table];loadTable(table);
     }
   }
 
