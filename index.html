@@ -2178,6 +2178,7 @@ html.dark .rc-actions button { background:#fff; color:#0e2c27; }
               <label data-field="languages"><span>Languages</span><input name="languages" /></label>
               <label data-field="short_name"><span>Short name</span><input name="short_name" /></label>
               <label data-field="organization_id"><span>Organization</span><select name="organization_id"><option value="">None</option></select></label>
+              <label data-field="chapter_id"><span>Chapter</span><select name="chapter_id"><option value="">None</option></select></label>
               <label data-field="caption" class="field-full"><span>Caption</span><textarea name="caption" rows="3"></textarea></label>
               <label data-field="thumbnail_url"><span>Thumbnail URL</span><input name="thumbnail_url" /></label>
               <label data-field="logo_url"><span>Logo URL <small>(or link from Media library)</small></span><input name="logo_url" placeholder="https://…" /></label>
@@ -14920,6 +14921,17 @@ window.ramdaniAuth = {
     }).join('');
     sel.value = cur;
   }
+  // Society -> Chapter admin selector (societies.chapter_id -> chapters.id, authoritative
+  // as of 27F-3A/27F-4). Mirrors fillOrganizationSelects; never reads chapters.society_id.
+  async function fillChapterSelects() {
+    var sel = document.querySelector('#createForm [name="chapter_id"]');
+    if (!sel) return;
+    var cur = sel.value;
+    sel.innerHTML = '<option value="">None</option>' + platChapters.map(function (c) {
+      return '<option value="' + c.id + '">' + escapeHtml(c.title) + '</option>';
+    }).join('');
+    sel.value = cur;
+  }
 
   var platMemberships = [], platEditMembershipId = null;
 
@@ -16567,7 +16579,7 @@ window.ramdaniAuth = {
 
   // Extra columns edited in the generic form but not shown as list columns.
   var EXTRA_FORM_FIELDS = {
-    societies: ['logo_url', 'cover_url'],
+    societies: ['logo_url', 'cover_url', 'chapter_id'],
     chapters: ['logo_url', 'cover_url'],
     cabinets: ['logo_url', 'cover_url'],
     social_posts: ['image_url', 'facebook_url', 'linkedin_url', 'instagram_url', 'x_url', 'youtube_url']
@@ -16716,7 +16728,9 @@ window.ramdaniAuth = {
     resetEditor();
     if (name === 'societies') {
       if (!platOrganizations.length) { var or = await sb.from('organizations').select('*').order('name'); platOrganizations = or.data || []; }
+      if (!platChapters.length) { var chr = await sb.from('chapters').select('id, title').order('title'); platChapters = chr.data || []; }
       await fillOrganizationSelects();
+      await fillChapterSelects();
     }
     var dataBody = document.getElementById('dataBody');
     if (window.ramdaniUi && dataBody) ramdaniUi.showSkeleton(dataBody, 'row', { cols: meta.fields.length + 1, count: 6 });
@@ -16790,6 +16804,12 @@ window.ramdaniAuth = {
     }
     if(table==='certificates'){
       var code=((form.querySelector('[name="module_code"]')||{}).value||'').trim(); if(code){var mr=await sb.from('modules').select('id').eq('code',code).maybeSingle();if(mr.data)payload.module_id=mr.data.id;} delete payload.module_code;
+    }
+    if(table==='societies'&&payload.chapter_id){
+      // societies.chapter_id -> chapters.id is authoritative; verify existence by primary
+      // key only. Never resolved via the retired chapters.society_id relationship.
+      var chCheck=await sb.from('chapters').select('id').eq('id',payload.chapter_id).maybeSingle();
+      if(chCheck.error||!chCheck.data){document.getElementById('saveNote').textContent='Selected Chapter does not exist. Please choose a valid Chapter.';return;}
     }
     if(table==='people'&&!payload.full_name){document.getElementById('saveNote').textContent='Full name is required.';return;}
     if(table!=='people'&&!payload.title){document.getElementById('saveNote').textContent='Title is required.';return;}
