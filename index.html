@@ -361,6 +361,9 @@ details.admin-nav-group > summary.admin-nav-group-title:hover { background:rgba(
 .form.admin-form { max-width:none; background:var(--card); border:1px solid var(--line); border-radius:8px; padding:1.2rem; box-shadow:var(--shadow); grid-template-columns:repeat(2,minmax(0,1fr)); }
 .form.admin-form .field-full { grid-column:1/-1; }
 .form.admin-form label { display:grid; gap:.35rem; align-content:start; }
+    .form.admin-form label[hidden] { display:none; }
+    .form-section-legend { grid-column:1/-1; font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); border-top:1px solid var(--line); padding-top:.85rem; margin-top:.15rem; }
+    .form-section-legend:first-child { border-top:none; padding-top:0; margin-top:0; }
 .form.admin-form label > span { font-size:.75rem; font-weight:600; color:var(--muted); }
 .form.admin-form input,.form.admin-form textarea,.form.admin-form select { margin:0; min-height:44px; border-radius:9px; }
 .form.admin-form textarea { min-height:110px; }
@@ -2136,6 +2139,7 @@ html.dark .rc-actions button { background:#fff; color:#0e2c27; }
           <div id="contentPanel" class="admin-panel" hidden>
             <div class="admin-section-head"><div><h2 id="contentHeading">Manage content</h2><p class="note" id="contentDescription">Create and manage website records.</p></div></div>
             <form id="createForm" class="form admin-form" data-table="people">
+              <div class="form-section-legend" data-legend-for="societies" hidden>Society Information</div>
               <label data-field="title"><span>Title / name</span><input name="title" /></label>
               <label data-field="full_name"><span>Full name</span><input name="full_name" /></label>
               <label data-field="slug"><span>Slug</span><input name="slug" required /></label>
@@ -2177,6 +2181,7 @@ html.dark .rc-actions button { background:#fff; color:#0e2c27; }
               <label data-field="qualifications"><span>Qualifications</span><input name="qualifications" /></label>
               <label data-field="languages"><span>Languages</span><input name="languages" /></label>
               <label data-field="short_name"><span>Short name</span><input name="short_name" /></label>
+              <div class="form-section-legend" data-legend-for="societies" hidden>Organization Placement</div>
               <label data-field="organization_id"><span>Organization</span><select name="organization_id"><option value="">None</option></select></label>
               <label data-field="chapter_id"><span>Chapter</span><select name="chapter_id"><option value="">None</option></select></label>
               <label data-field="caption" class="field-full"><span>Caption</span><textarea name="caption" rows="3"></textarea></label>
@@ -2189,6 +2194,7 @@ html.dark .rc-actions button { background:#fff; color:#0e2c27; }
               <label data-field="instagram_url"><span>Instagram post URL</span><input name="instagram_url" placeholder="https://instagram.com/…" /></label>
               <label data-field="x_url"><span>X (Twitter) post URL</span><input name="x_url" placeholder="https://x.com/…" /></label>
               <label data-field="head_name"><span>Cabinet head</span><input name="head_name" /></label>
+              <div class="form-section-legend" data-legend-for="societies" hidden>Publishing</div>
               <label data-field="status"><span>Publishing status</span><select name="status"><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></label>
               <div class="form-actions"><button class="btn btn-primary" id="saveBtn" type="submit">Save</button><button class="btn" id="cancelEditBtn" type="button" hidden>Cancel edit</button><button class="btn" id="previewContentBtn" type="button" hidden>Preview</button><p id="saveNote" class="form-status"></p></div>
             </form>
@@ -2200,6 +2206,9 @@ html.dark .rc-actions button { background:#fff; color:#0e2c27; }
                 <option value="published">Published</option>
                 <option value="draft">Draft</option>
                 <option value="archived">Archived</option>
+              </select>
+              <select id="societyChapterFilter" aria-label="Filter by chapter" hidden>
+                <option value="">All chapters</option>
               </select>
               <button type="button" class="btn" id="contentResetBtn">Reset</button>
               <button type="button" class="btn" id="contentRefreshBtn">Refresh</button>
@@ -10696,6 +10705,8 @@ window.ramdaniAuth = {
     document.getElementById('contentSearch').addEventListener('input', function () { contentPage = 1; renderContentRows(); });
     var stFilter = document.getElementById('contentStatusFilter');
     if (stFilter) stFilter.addEventListener('change', function () { contentPage = 1; renderContentRows(); });
+    var chFilterEl = document.getElementById('societyChapterFilter');
+    if (chFilterEl) chFilterEl.addEventListener('change', function () { contentPage = 1; renderContentRows(); });
     var refreshBtn = document.getElementById('contentRefreshBtn');
     if (refreshBtn) refreshBtn.addEventListener('click', function () {
       var name = document.getElementById('createForm').dataset.table;
@@ -10705,6 +10716,7 @@ window.ramdaniAuth = {
     if (resetBtn) resetBtn.addEventListener('click', function () {
       document.getElementById('contentSearch').value = '';
       var stf = document.getElementById('contentStatusFilter'); if (stf) stf.value = '';
+      var chf = document.getElementById('societyChapterFilter'); if (chf) chf.value = '';
       contentPage = 1;
       renderContentRows();
     });
@@ -14925,12 +14937,21 @@ window.ramdaniAuth = {
   // as of 27F-3A/27F-4). Mirrors fillOrganizationSelects; never reads chapters.society_id.
   async function fillChapterSelects() {
     var sel = document.querySelector('#createForm [name="chapter_id"]');
-    if (!sel) return;
-    var cur = sel.value;
-    sel.innerHTML = '<option value="">None</option>' + platChapters.map(function (c) {
-      return '<option value="' + c.id + '">' + escapeHtml(c.title) + '</option>';
-    }).join('');
-    sel.value = cur;
+    if (sel) {
+      var cur = sel.value;
+      sel.innerHTML = '<option value="">None</option>' + platChapters.map(function (c) {
+        return '<option value="' + c.id + '">' + escapeHtml(c.title) + '</option>';
+      }).join('');
+      sel.value = cur;
+    }
+    var filt = document.getElementById('societyChapterFilter');
+    if (filt) {
+      var curF = filt.value;
+      filt.innerHTML = '<option value="">All chapters</option>' + platChapters.map(function (c) {
+        return '<option value="' + c.id + '">' + escapeHtml(c.title) + '</option>';
+      }).join('');
+      filt.value = curF;
+    }
   }
 
   var platMemberships = [], platEditMembershipId = null;
@@ -16603,6 +16624,12 @@ window.ramdaniAuth = {
     });
     form.querySelector('[name="title"]').required = name!=='people';
     form.querySelector('[name="full_name"]').required = name==='people';
+    form.querySelectorAll('[data-legend-for]').forEach(function(lg){
+      var forTables=(lg.getAttribute('data-legend-for')||'').split(',');
+      lg.hidden = forTables.indexOf(name)<0;
+    });
+    var chFilter=document.getElementById('societyChapterFilter');
+    if(chFilter){ chFilter.hidden = name!=='societies'; if(name!=='societies') chFilter.value=''; }
     document.getElementById('contentHeading').textContent='Manage '+meta.label;
     document.getElementById('contentDescription').textContent='Create, edit, publish and remove '+meta.label.toLowerCase()+'.';
   }
@@ -16764,6 +16791,11 @@ window.ramdaniAuth = {
     var st=stEl?stEl.value:'';
     var rows=!filter?currentRows:currentRows.filter(function(row){return meta.fields.some(function(f){return String(row[f]==null?'':row[f]).toLowerCase().indexOf(filter)!==-1;});});
     if (st) rows = rows.filter(function (row) { return String(row.status || '') === st; });
+    if (name === 'societies') {
+      var chfEl = document.getElementById('societyChapterFilter');
+      var chf = chfEl ? chfEl.value : '';
+      if (chf) rows = rows.filter(function (row) { return row.chapter_id === chf; });
+    }
     var total = rows.length;
     var pages = Math.max(1, Math.ceil(total / CONTENT_PAGE_SIZE));
     if (contentPage > pages) contentPage = pages;
@@ -16777,11 +16809,28 @@ window.ramdaniAuth = {
       var lab = document.getElementById('contentPageLabel');
       if (lab) lab.textContent = 'Page ' + contentPage + ' of ' + pages;
     }
-    document.getElementById('dataHead').innerHTML='<tr>'+meta.fields.map(function(f){return '<th>'+ramdaniUi.escape(f)+'</th>';}).join('')+'<th>Actions</th></tr>';
-    document.getElementById('dataBody').innerHTML=slice.map(function(row){
-      var status=row.status?'<span class="status-badge status-'+ramdaniUi.escape(String(row.status))+'">'+ramdaniUi.escape(row.status)+'</span>':'';
-      return '<tr>'+meta.fields.map(function(f){return '<td>'+((f==='status')?status:ramdaniUi.escape(row[f]))+'</td>';}).join('')+'<td><div class="table-actions"><button type="button" class="btn btn-sm" data-edit="'+ramdaniUi.escape(row.id)+'">Edit</button>'+(contentPreviewHref(name, row.slug)?'<button type="button" class="btn btn-sm" data-preview="'+ramdaniUi.escape(row.id)+'">Preview</button>':'')+'<button type="button" class="btn btn-sm" data-del="'+ramdaniUi.escape(row.id)+'">Delete</button></div></td></tr>';
-    }).join('')||'<tr><td colspan="'+(meta.fields.length+1)+'" class="empty">'+(currentRows.length?'No records match your current filters.':'No records have been created yet.')+'</td></tr>';
+    // Societies get a dedicated column set that resolves organization_id/chapter_id to
+    // human-readable names via the already-loaded platOrganizations/platChapters lookup
+    // lists (built once as O(n) maps below) — no per-row database query.
+    if (name === 'societies') {
+      var orgMap = {}, chMap = {};
+      (platOrganizations || []).forEach(function (o) { orgMap[o.id] = o.name; });
+      (platChapters || []).forEach(function (c) { chMap[c.id] = c.title; });
+      var socCols = ['Society', 'Short Name', 'Category', 'Organization', 'Chapter', 'Status'];
+      document.getElementById('dataHead').innerHTML = '<tr>' + socCols.map(function (c) { return '<th>' + ramdaniUi.escape(c) + '</th>'; }).join('') + '<th>Actions</th></tr>';
+      document.getElementById('dataBody').innerHTML = slice.map(function (row) {
+        var status = row.status ? '<span class="status-badge status-' + ramdaniUi.escape(String(row.status)) + '">' + ramdaniUi.escape(row.status) + '</span>' : '';
+        var orgName = row.organization_id ? (orgMap[row.organization_id] || '—') : '—';
+        var chName = row.chapter_id ? (chMap[row.chapter_id] || '—') : '—';
+        return '<tr><td>' + ramdaniUi.escape(row.title) + '</td><td>' + ramdaniUi.escape(row.short_name) + '</td><td>' + ramdaniUi.escape(row.category) + '</td><td>' + ramdaniUi.escape(orgName) + '</td><td>' + ramdaniUi.escape(chName) + '</td><td>' + status + '</td><td><div class="table-actions"><button type="button" class="btn btn-sm" data-edit="' + ramdaniUi.escape(row.id) + '">Edit</button>' + (contentPreviewHref(name, row.slug) ? '<button type="button" class="btn btn-sm" data-preview="' + ramdaniUi.escape(row.id) + '">Preview</button>' : '') + '<button type="button" class="btn btn-sm" data-del="' + ramdaniUi.escape(row.id) + '">Delete</button></div></td></tr>';
+      }).join('') || '<tr><td colspan="' + (socCols.length + 1) + '" class="empty">' + (currentRows.length ? 'No records match your current filters.' : 'No records have been created yet.') + '</td></tr>';
+    } else {
+      document.getElementById('dataHead').innerHTML='<tr>'+meta.fields.map(function(f){return '<th>'+ramdaniUi.escape(f)+'</th>';}).join('')+'<th>Actions</th></tr>';
+      document.getElementById('dataBody').innerHTML=slice.map(function(row){
+        var status=row.status?'<span class="status-badge status-'+ramdaniUi.escape(String(row.status))+'">'+ramdaniUi.escape(row.status)+'</span>':'';
+        return '<tr>'+meta.fields.map(function(f){return '<td>'+((f==='status')?status:ramdaniUi.escape(row[f]))+'</td>';}).join('')+'<td><div class="table-actions"><button type="button" class="btn btn-sm" data-edit="'+ramdaniUi.escape(row.id)+'">Edit</button>'+(contentPreviewHref(name, row.slug)?'<button type="button" class="btn btn-sm" data-preview="'+ramdaniUi.escape(row.id)+'">Preview</button>':'')+'<button type="button" class="btn btn-sm" data-del="'+ramdaniUi.escape(row.id)+'">Delete</button></div></td></tr>';
+      }).join('')||'<tr><td colspan="'+(meta.fields.length+1)+'" class="empty">'+(currentRows.length?'No records match your current filters.':'No records have been created yet.')+'</td></tr>';
+    }
     var seatsBox = document.getElementById('cabinetSeatsBox');
     if (seatsBox) seatsBox.hidden = name !== 'cabinets';
     if (name === 'cabinets') loadCabinetSeatsInspector();
